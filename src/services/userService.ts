@@ -3,6 +3,7 @@ import { db } from "../config/db-connect";
 import { CreateUserType } from "../routes/users/schema";
 import { users } from "../schema/schema";
 import { ilike } from "drizzle-orm";
+import { off } from "process";
 
 export async function createUser(user: CreateUserType) {
     return  await db.insert(users).values(user)
@@ -25,10 +26,16 @@ export async function getUsers(search:string, limit =10, page=1) {
         .offset(offset || 0);
 }
 
-export async function getUsersPaginate(search:string, limit =10, page=1) {
-    const offset = (page - 1) * limit + 1
+export async function getUsersPaginate(search:string, limit=10, page=1) {
+    //let offset = (page - 1) * limit + 1
+    let offset = (page - 1) * limit 
+    //console.log("offset=",offset, "limit=", limit, "page=", page)
+    // if(page == 1) {
+    //   offset = 0;
+    // }
     const condition = or(
         ilike(users.firstName, '%' + search + '%' ),
+        ilike(users.lastName, '%' + search + '%' ),
         ilike(users.email, '%' + search + '%' )
       );
   
@@ -40,20 +47,20 @@ export async function getUsersPaginate(search:string, limit =10, page=1) {
         .where(condition);
   
         const usersList = await db.select(
-            {id:users.id, name: users.firstName, email: users.email, createdAt: users.createdAt, updatedAt: users.updatedAt}
+            {id:users.id, firstName: users.firstName, lastName: users.lastName, email: users.email, createdAt: users.createdAt, updatedAt: users.updatedAt}
             ).
             from(users)
             .where(
               or(
                 ilike(users.firstName, '%' + search + '%' ),
+                ilike(users.lastName, '%' + search + '%' ),
                 ilike(users.email, '%' + search + '%' )
               )
             )
             .orderBy(desc(users.id))
             .limit(limit || 10)
             .offset(offset || 0);
-  
-  const totalPage = Math.ceil((totalItems.count - 1) / offset) + 1//Math.ceil((totalItems?.count ?? 0) / offset);
+  const totalPage = Math.ceil(totalItems.count/limit)
   
   return {
     totalItems: totalItems.count,

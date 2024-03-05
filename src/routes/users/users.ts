@@ -10,14 +10,28 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       },
     },
     async (request, reply) => {
-      const {search, limit, currentPage} = request.query;
-      const result = await getUsersPaginate(search || '', limit, currentPage);
+      let {search, limit, page=1} = request.query;
+      const result = await getUsersPaginate(search || '', limit, page);
       let message = 'No users found!'
       if(result.data.length > 0) {
         message = result.data.length + ' users found'
       }
+      let nextUrl: string | null = request.protocol + '://' + request.hostname + request.url;
+      let previousUrl: string | null = request.protocol + '://' + request.hostname + request.url;
+      if(result.totalPage > page  && result.totalPage > 1) {
+        const nextPage = page + 1
+        nextUrl = nextUrl.replace(/(page=)[^\&]+/, '$1' + nextPage);
+      } else {
+        nextUrl = null;
+      }
+      if(page != 1 && result.totalPage > 1) {
+        const previousPage = page - 1
+        previousUrl = previousUrl.replace(/(page=)[^\&]+/, '$1' + previousPage);
+      } else {
+        previousUrl = null;
+      }
 
-      return { message: message, totalItems:  result.totalItems, totalPage: result.totalPage, currentPage: currentPage, limit: limit, result: result.data }
+      return { message: message, totalItems:  result.totalItems, nextUrl:nextUrl, previousUrl: previousUrl, totalPage: result.totalPage, page: page, limit: limit, result: result.data }
   })
   fastify.post<{ Body: CreateUserType, Reply: CreateUserReplyType }>(
     '/',

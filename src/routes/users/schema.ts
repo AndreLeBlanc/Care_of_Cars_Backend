@@ -21,7 +21,7 @@ export const CreateUserReply = Type.Object({
 export const ListUserQueryParam = Type.Object({
     search: Type.Optional(Type.String()),
     limit: Type.Optional(Type.Integer( {minimum:1, default: 10} )),
-    currentPage: Type.Optional(Type.Integer( {minimum:1, default:1} ))
+    page: Type.Optional(Type.Integer( {minimum:1, default:1} ))
 })
 export type ListUserQueryParamType = Static<typeof ListUserQueryParam>
 export type CreateUserType = Static<typeof CreateUser>
