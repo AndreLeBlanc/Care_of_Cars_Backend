@@ -10,13 +10,10 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       },
     },
     async (request, reply) => {
-      let {search, limit=10, page=1} = request.query;
+      let {search='', limit=10, page=1} = request.query;
       const offset = fastify.findOffset(limit, page)
-      const result = await getUsersPaginate(search || '', limit, page, offset);
-      let message = 'No users found!'
-      if(result.data.length > 0) {
-        message = result.data.length + ' users found'
-      }
+      const result = await getUsersPaginate(search, limit, page, offset);
+      let message: string = fastify.responseMessage("users", result.data.length)
       let nextUrl: string | null = request.protocol + '://' + request.hostname + request.url;
       let previousUrl: string | null = request.protocol + '://' + request.hostname + request.url;
       if(result.totalPage > page  && result.totalPage > 1) {
