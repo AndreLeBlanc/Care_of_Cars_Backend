@@ -14,22 +14,20 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       const offset = fastify.findOffset(limit, page)
       const result = await getUsersPaginate(search, limit, page, offset);
       let message: string = fastify.responseMessage("users", result.data.length)
-      let nextUrl: string | null = request.protocol + '://' + request.hostname + request.url;
-      let previousUrl: string | null = request.protocol + '://' + request.hostname + request.url;
-      if(result.totalPage > page  && result.totalPage > 1) {
-        const nextPage = page + 1
-        nextUrl = nextUrl.replace(/(page=)[^\&]+/, '$1' + nextPage);
-      } else {
-        nextUrl = null;
-      }
-      if(page != 1 && result.totalPage > 1) {
-        const previousPage = page - 1
-        previousUrl = previousUrl.replace(/(page=)[^\&]+/, '$1' + previousPage);
-      } else {
-        previousUrl = null;
-      }
+      let requestUrl: string | null = request.protocol + '://' + request.hostname + request.url;
+      const nextUrl: string | null = fastify.findNextPageUrl(requestUrl, result.totalPage, page);
+      const previousUrl: string | null = fastify.findPreviousPageUrl(requestUrl, result.totalPage, page);
 
-      return { message: message, totalItems:  result.totalItems, nextUrl:nextUrl, previousUrl: previousUrl, totalPage: result.totalPage, page: page, limit: limit, result: result.data }
+      return { 
+        message: message, 
+        totalItems:  result.totalItems, 
+        nextUrl:nextUrl, 
+        previousUrl: previousUrl, 
+        totalPage: result.totalPage, 
+        page: page, 
+        limit: limit, 
+        result: result.data 
+      }
   })
   fastify.post<{ Body: CreateUserType, Reply: CreateUserReplyType }>(
     '/',
