@@ -1,6 +1,4 @@
 import fp from 'fastify-plugin'
-import { Url } from 'url'
-
 export interface SupportPluginOptions {
   // Specify Support plugin options here
 }
