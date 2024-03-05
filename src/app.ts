@@ -21,7 +21,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
       routePrefix: '/docs',
     }
   )
-  //fastify.addHook('onRequest', (request) => request.jwtVerify())
+  // fastify.addHook('onRequest', (request) => request.jwtVerify())
 
   // Do not touch the following lines
 

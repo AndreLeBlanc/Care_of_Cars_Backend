@@ -20,11 +20,13 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/autoload": "^5.0.0",
+    "@fastify/env": "^4.3.0",
     "@fastify/jwt": "^8.0.0",
     "@fastify/sensible": "^5.0.0",
     "@fastify/swagger": "^8.14.0",
     "@fastify/swagger-ui": "^3.0.0",
     "@sinclair/typebox": "^0.32.15",
+    "bcrypt": "^5.1.1",
     "drizzle-orm": "^0.29.4",
     "fastify": "^4.26.1",
     "fastify-cli": "^6.1.1",

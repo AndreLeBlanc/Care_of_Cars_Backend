@@ -1,19 +1,3 @@
-// const fp = require("fastify-plugin")
-
-// module.exports = fp(async function(fastify, opts) {
-//   fastify.register(require("@fastify/jwt"), {
-//     secret: "supersecret"
-//   })
-
-//   fastify.decorate("authenticate", async function(request, reply) {
-//     try {
-//       await request.jwtVerify()
-//     } catch (err) {
-//       reply.send(err)
-//     }
-//   })
-// })
-
 import { FastifyJwtNamespace } from '@fastify/jwt'
 import fp from 'fastify-plugin'
 import { FastifyReply } from 'fastify/types/reply'
@@ -26,7 +10,7 @@ export interface SupportPluginOptions {
 // to export the decorators to the outer scope
 export default fp<SupportPluginOptions>(async (fastify, opts) => {
     fastify.register(require("@fastify/jwt"), {
-        secret: "supersecret"
+        secret: fastify?.config?.JWT_SECRET//"supersecret"
     })
     fastify.decorate("authenticate", async function(request: FastifyRequest, reply: FastifyReply): Promise<void> {
         try {
