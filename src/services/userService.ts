@@ -3,7 +3,6 @@ import { db } from "../config/db-connect";
 import { CreateUserType } from "../routes/users/schema";
 import { users } from "../schema/schema";
 import { ilike } from "drizzle-orm";
-import { off } from "process";
 
 export async function createUser(user: CreateUserType) {
     return  await db.insert(users).values(user)
