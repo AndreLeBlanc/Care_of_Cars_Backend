@@ -23,6 +23,14 @@ export const ListUserQueryParam = Type.Object({
     limit: Type.Optional(Type.Integer( {minimum:1, default: 10} )),
     page: Type.Optional(Type.Integer( {minimum:1, default:1} ))
 })
+
+export const LoginUser = Type.Object({
+  email: Type.String({ format: 'email' }),
+  password: Type.String(),
+  
+})
+export type LoginUserType = Static<typeof LoginUser>
+
 export type ListUserQueryParamType = Static<typeof ListUserQueryParam>
 export type CreateUserType = Static<typeof CreateUser>
 export type CreateUserReplyType = Static<typeof CreateUserReply>

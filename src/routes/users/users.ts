@@ -1,6 +1,9 @@
 import { FastifyPluginAsync } from "fastify"
-import { CreateUser, CreateUserReply, CreateUserReplyType, CreateUserType, ListUserQueryParam, ListUserQueryParamType } from "./schema"
-import { createUser, getUsersPaginate } from "../../services/userService"
+import bcrypt from "bcrypt";
+
+
+import { CreateUser, CreateUserReply, CreateUserReplyType, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType } from "./schema"
+import { createUser, getUsersPaginate, verifyUser } from "../../services/userService"
 
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Querystring: ListUserQueryParamType}>('/',
@@ -41,9 +44,32 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       }
     },
      async (request, reply) => {
-      //const { firstName, lastName, email, role } = request.body;
-      await createUser(request.body)
+      const { firstName, lastName, email, password } = request.body;
+      const salt = bcrypt.genSaltSync(10);
+      const passwordHash = bcrypt.hashSync(password, salt);
+      await createUser(firstName, lastName, email, passwordHash)
       reply.status(201).send(request.body);
+  })
+
+  fastify.post<{ Body: LoginUserType, Reply: object }>(
+    '/login',
+    {
+      schema: {
+      body: LoginUser,
+      }
+    },
+     async (request, reply) => {
+      const { email, password } = request.body;
+      const user = await verifyUser(email);
+      if(user == null) {
+        return reply.status(403).send({message: "Login failed, incorrect email"});
+      }
+      const match = await bcrypt.compare(password, user.password);
+      if(match) {
+        const token = fastify.jwt.sign({ user });
+        return reply.status(200).send({message: "Login success", token: token});
+      }
+      reply.status(403).send({message: "Login failed, incorrect password"});
   })
  
 }

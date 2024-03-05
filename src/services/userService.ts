@@ -1,11 +1,10 @@
-import { desc, or, sql } from "drizzle-orm";
+import { desc, or, sql, and, eq } from "drizzle-orm";
 import { db } from "../config/db-connect";
-import { CreateUserType } from "../routes/users/schema";
 import { users } from "../schema/schema";
 import { ilike } from "drizzle-orm";
 
-export async function createUser(user: CreateUserType) {
-    return  await db.insert(users).values(user)
+export async function createUser(firstName: string, lastName: string, email: string, passwordHash: string) {
+    return  await db.insert(users).values({firstName: firstName, lastName: lastName, email: email, password: passwordHash})
 }
 
 export async function getUsersPaginate(search:string, limit=10, page=1, offset=0) {
@@ -45,4 +44,14 @@ export async function getUsersPaginate(search:string, limit=10, page=1, offset=0
     data: usersList,
   };
     
+}
+
+export async function verifyUser(email:string): Promise<any> {
+    const results = await db.select().from(users).where(
+      and(
+        eq(users.email, email),
+        //eq(users.password, password)
+      )
+    );
+  return results[0] ? results[0] : null;
 }
