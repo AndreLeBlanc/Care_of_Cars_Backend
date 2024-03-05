@@ -16,9 +16,21 @@ const app: FastifyPluginAsync<AppOptions> = async (
 ): Promise<void> => {
   // Place here your custom code!
   initDrizzle()
-  fastify.register(require('@fastify/swagger'), {})
+  fastify.register(require('@fastify/swagger'), {
+    swagger: {
+      // properties...
+      securityDefinitions: {
+         Authorization: {
+           type: 'apiKey',
+           name: 'Authorization',
+           in: 'header'
+         }
+       }
+     }
+  })
   fastify.register(require('@fastify/swagger-ui'), {
       routePrefix: '/docs',
+      
     }
   )
   // fastify.addHook('onRequest', (request) => request.jwtVerify())
