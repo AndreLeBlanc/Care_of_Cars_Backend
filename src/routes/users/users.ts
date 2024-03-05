@@ -5,6 +5,7 @@ import { createUser, getUsersPaginate } from "../../services/userService"
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Querystring: ListUserQueryParamType}>('/',
   {
+    onRequest: [fastify.authenticate],
     schema: {
       querystring: ListUserQueryParam
       },
