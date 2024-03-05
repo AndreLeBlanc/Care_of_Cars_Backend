@@ -55,3 +55,12 @@ export async function verifyUser(email:string): Promise<any> {
     );
   return results[0] ? results[0] : null;
 }
+
+export async function getUserById(id:number): Promise<any> {
+  const results = await db.select().from(users).where(
+    
+      eq(users.id, id),
+    
+  );
+  return results[0] ? results[0] : null;
+}

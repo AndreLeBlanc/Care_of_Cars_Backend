@@ -31,6 +31,14 @@ export const LoginUser = Type.Object({
 })
 export type LoginUserType = Static<typeof LoginUser>
 
+
+export const getUserByIdSchema = Type.Object({
+  id: Type.Number(),
+  
+})
+export type getUserByIdType = Static<typeof getUserByIdSchema>
+
+
 export type ListUserQueryParamType = Static<typeof ListUserQueryParam>
 export type CreateUserType = Static<typeof CreateUser>
 export type CreateUserReplyType = Static<typeof CreateUserReply>

@@ -2,8 +2,8 @@ import { FastifyPluginAsync } from "fastify"
 import bcrypt from "bcrypt";
 
 
-import { CreateUser, CreateUserReply, CreateUserReplyType, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType } from "./schema"
-import { createUser, getUsersPaginate, verifyUser } from "../../services/userService"
+import { CreateUser, CreateUserReply, CreateUserReplyType, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType, getUserByIdSchema, getUserByIdType } from "./schema"
+import { createUser, getUsersPaginate, verifyUser, getUserById } from "../../services/userService"
 
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Querystring: ListUserQueryParamType}>('/',
@@ -70,6 +70,21 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         return reply.status(200).send({message: "Login success", token: token});
       }
       reply.status(403).send({message: "Login failed, incorrect password"});
+  })
+  fastify.get<{Params: getUserByIdType }>(
+    '/:id',
+    {
+      schema: {
+        params: getUserByIdSchema
+      }
+    },
+     async (request, reply) => {
+      const id  = request.params.id;
+      const user = await getUserById(id);
+      if(user == null) {
+        return reply.status(404).send({message: "user not found"});
+      }
+      reply.status(200).send(user);
   })
  
 }
