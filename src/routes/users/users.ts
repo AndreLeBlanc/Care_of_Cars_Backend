@@ -8,11 +8,11 @@ import { createUser, getUsersPaginate, verifyUser, getUserById, updateUserById, 
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Querystring: ListUserQueryParamType}>('/',
   {
-   // onRequest: [fastify.authenticate],
+    onRequest: [fastify.authenticate],
     schema: {
-      querystring: ListUserQueryParam
+      querystring: ListUserQueryParam,
       },
-    },
+  },
     async (request, reply) => {
       let {search='', limit=10, page=1} = request.query;
       const offset = fastify.findOffset(limit, page)
@@ -36,6 +36,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.post<{ Body: CreateUserType, Reply: object }>(
     '/',
     {
+      onRequest: [fastify.authenticate],
       schema: {
       body: CreateUser,
         response: {
@@ -77,6 +78,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Params: getUserByIdType }>(
     '/:id',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         params: getUserByIdSchema
       }
@@ -92,6 +94,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.patch<{ Body: PatchUserSchemaType, Reply: object, Params: getUserByIdType }>(
     '/:id',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         body: PatchUserSchema,
         params: getUserByIdSchema
@@ -119,6 +122,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.delete<{Params: getUserByIdType }>(
     '/:id',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         params: getUserByIdSchema
       }

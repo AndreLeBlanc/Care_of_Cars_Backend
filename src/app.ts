@@ -17,6 +17,23 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // Place here your custom code!
   initDrizzle()
   fastify.register(require('@fastify/swagger'), {
+    // https://community.smartbear.com/discussions/swaggerostools/how-to-show-authorize-button-on-oas-3-swagger-in-javascript/234650
+    openapi: {
+      security: [
+        {
+          bearerAuth: [],
+        },
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "apiKey",
+            name: "Authorization",
+            in: "header",
+          },
+        },
+      },
+    },
     swagger: {
       // properties...
       securityDefinitions: {
@@ -25,16 +42,20 @@ const app: FastifyPluginAsync<AppOptions> = async (
            name: 'Authorization',
            in: 'header'
          }
-       }
-     }
+       },
+        // security: [
+      //   {
+      //     authorization: []
+      //   }
+      // ]
+     },
+    
   })
   fastify.register(require('@fastify/swagger-ui'), {
       routePrefix: '/docs',
       
     }
   )
-  // fastify.addHook('onRequest', (request) => request.jwtVerify())
-
   // Do not touch the following lines
 
   // This loads all plugins defined in plugins
