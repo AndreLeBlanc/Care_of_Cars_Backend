@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import { db } from "../config/db-connect";
 import { users } from "../schema/schema";
 import { ilike } from "drizzle-orm";
-import { PatchUserSchemaType } from "../routes/users/schema"
+import { PatchUserSchemaType } from "../routes/users/userSchema"
 
 export async function createUser(firstName: string, lastName: string, email: string, passwordHash: string, roleId: number) {
     return await db.insert(users).values({firstName: firstName, lastName: lastName, email: email, password: passwordHash, roleId: roleId})
