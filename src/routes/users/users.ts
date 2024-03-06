@@ -45,13 +45,13 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       }
     },
      async (request, reply) => {
-      const { firstName, lastName, email, password } = request.body;
+      const { firstName, lastName, email, password, roleId } = request.body;
       const isStrongPass = await isStrongPassword(password);
       if(!isStrongPass) {
         return reply.status(422).send({message: "Provide a strong password"});
       }
       const passwordHash = await generatePasswordHash(password);
-      const createdUser = await createUser(firstName, lastName, email, passwordHash)
+      const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId);
       reply.status(201).send({message: "User created", data: createdUser});
   })
 

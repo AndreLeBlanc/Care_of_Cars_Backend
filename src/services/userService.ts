@@ -7,9 +7,9 @@ import { users } from "../schema/schema";
 import { ilike } from "drizzle-orm";
 import { PatchUserSchemaType } from "../routes/users/schema"
 
-export async function createUser(firstName: string, lastName: string, email: string, passwordHash: string) {
-    return await db.insert(users).values({firstName: firstName, lastName: lastName, email: email, password: passwordHash})
-    .returning({ id: users.id, firstName: users.firstName, lastName: users.lastName, email: users.email, createdAt: users.createdAt, updatedAt: users.updatedAt });
+export async function createUser(firstName: string, lastName: string, email: string, passwordHash: string, roleId: number) {
+    return await db.insert(users).values({firstName: firstName, lastName: lastName, email: email, password: passwordHash, roleId: roleId})
+    .returning({ id: users.id, firstName: users.firstName, lastName: users.lastName, email: users.email, createdAt: users.createdAt, updatedAt: users.updatedAt, roleId: users.roleId });
 
 }
 

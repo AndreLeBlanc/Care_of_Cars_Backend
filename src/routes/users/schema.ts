@@ -9,6 +9,7 @@ export const CreateUser = Type.Object({
   lastName: Type.String(),
   email: Type.String({ format: 'email' }),
   password: Type.String(),
+  roleId: Type.Integer(),
   
 })
 export const CreateUserReply = Type.Object({

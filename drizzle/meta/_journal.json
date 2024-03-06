@@ -50,6 +50,13 @@
       "when": 1709721578564,
       "tag": "0006_free_blonde_phantom",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1709723261501,
+      "tag": "0007_shallow_starjammers",
+      "breakpoints": true
     }
   ]
 }
