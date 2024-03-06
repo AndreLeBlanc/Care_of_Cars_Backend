@@ -8,6 +8,34 @@
       "when": 1709549603600,
       "tag": "0000_old_chameleon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1709719393477,
+      "tag": "0001_giant_dormammu",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1709719745173,
+      "tag": "0002_quick_mimic",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1709720080106,
+      "tag": "0003_blue_roland_deschain",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1709720151049,
+      "tag": "0004_needy_reaper",
+      "breakpoints": true
     }
   ]
 }
