@@ -12,3 +12,8 @@ export const CreateRoleSchema = Type.Object({
     description: Type.Optional(Type.String()),
 })
 export type CreateRoleSchemaType = Static<typeof CreateRoleSchema>
+
+export const getRoleByIdSchema = Type.Object({
+    id: Type.Number(),
+})
+export type getRoleByIdType = Static<typeof getRoleByIdSchema>
