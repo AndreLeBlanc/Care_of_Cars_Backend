@@ -31,13 +31,24 @@ export const LoginUser = Type.Object({
 })
 export type LoginUserType = Static<typeof LoginUser>
 
-
+/**
+ * This is a common schema used by get(/:id) also patch(/:id)
+ * If this is modified both will be affected
+ */
 export const getUserByIdSchema = Type.Object({
   id: Type.Number(),
-  
 })
 export type getUserByIdType = Static<typeof getUserByIdSchema>
 
+
+export const PatchUserSchema = Type.Object({
+  firstName: Type.Optional(Type.String()),
+  lastName: Type.Optional(Type.String()),
+  email: Type.Optional(Type.String({ format: 'email' })),
+  password: Type.Optional(Type.String()),
+  
+})
+export type PatchUserSchemaType = Static<typeof PatchUserSchema>
 
 export type ListUserQueryParamType = Static<typeof ListUserQueryParam>
 export type CreateUserType = Static<typeof CreateUser>

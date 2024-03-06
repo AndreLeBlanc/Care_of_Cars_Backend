@@ -2,13 +2,13 @@ import { FastifyPluginAsync } from "fastify"
 import bcrypt from "bcrypt";
 
 
-import { CreateUser, CreateUserReply, CreateUserReplyType, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType, getUserByIdSchema, getUserByIdType } from "./schema"
-import { createUser, getUsersPaginate, verifyUser, getUserById } from "../../services/userService"
+import { CreateUser, CreateUserReply, CreateUserReplyType, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType, PatchUserSchema, PatchUserSchemaType, getUserByIdSchema, getUserByIdType } from "./schema"
+import { createUser, getUsersPaginate, verifyUser, getUserById, updateUserById, generatePasswordHash } from "../../services/userService"
 
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Querystring: ListUserQueryParamType}>('/',
   {
-    onRequest: [fastify.authenticate],
+   // onRequest: [fastify.authenticate],
     schema: {
       querystring: ListUserQueryParam
       },
@@ -30,7 +30,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         totalPage: result.totalPage, 
         page: page, 
         limit: limit, 
-        result: result.data 
+        data: result.data 
       }
   })
   fastify.post<{ Body: CreateUserType, Reply: CreateUserReplyType }>(
@@ -85,6 +85,29 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         return reply.status(404).send({message: "user not found"});
       }
       reply.status(200).send(user);
+  })
+  fastify.patch<{ Body: PatchUserSchemaType, Reply: object, Params: getUserByIdType }>(
+    '/:id',
+    {
+      schema: {
+        body: PatchUserSchema,
+        params: getUserByIdSchema
+      }
+    },
+     async (request, reply) => {
+      const userData = request.body;
+      if(Object.keys(userData).length == 0){
+        return reply.status(422).send({message: "Provide at least one column to update."});
+      }
+      const id  = request.params.id;
+      if(userData?.password) {
+        userData.password = await generatePasswordHash(userData.password);
+      }
+      const user = await updateUserById(id, userData);
+      if(user.length == 0) {
+        return reply.status(404).send({message: "user not found"});
+      }
+      reply.status(201).send({message: "User Updated", data: user});
   })
  
 }
