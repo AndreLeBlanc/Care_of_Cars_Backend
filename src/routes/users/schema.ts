@@ -32,7 +32,7 @@ export const LoginUser = Type.Object({
 export type LoginUserType = Static<typeof LoginUser>
 
 /**
- * This is a common schema used by get(/:id) also patch(/:id)
+ * This is a common schema used by get(/:id), patch(/:id), delete(/:id)
  * If this is modified both will be affected
  */
 export const getUserByIdSchema = Type.Object({

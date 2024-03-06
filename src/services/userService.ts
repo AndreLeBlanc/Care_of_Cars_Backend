@@ -92,3 +92,10 @@ export async function isStrongPassword(password:string): Promise<boolean> {
   }
   return true;
 }
+export async function deleteUser(id:number): Promise<any> {
+  const deletedUser = await db.delete(users).where(
+      eq(users.id, id),
+  )
+  .returning();
+  return deletedUser[0] ? deletedUser[0] : null;
+}

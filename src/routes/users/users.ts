@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 
 import { CreateUser, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType, PatchUserSchema, PatchUserSchemaType, getUserByIdSchema, getUserByIdType } from "./schema"
-import { createUser, getUsersPaginate, verifyUser, getUserById, updateUserById, generatePasswordHash, isStrongPassword } from "../../services/userService"
+import { createUser, getUsersPaginate, verifyUser, getUserById, updateUserById, generatePasswordHash, isStrongPassword, deleteUser } from "../../services/userService"
 
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Querystring: ListUserQueryParamType}>('/',
@@ -115,6 +115,22 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         return reply.status(404).send({message: "user not found"});
       }
       reply.status(201).send({message: "User Updated", data: user});
+  })
+  fastify.delete<{Params: getUserByIdType }>(
+    '/:id',
+    {
+      schema: {
+        params: getUserByIdSchema
+      }
+    },
+     async (request, reply) => {
+      const id  = request.params.id;
+      const deletedUser = await deleteUser(id);
+      if(deletedUser == null) {
+        return reply.status(404).send({message: "User doesn't exist!"})
+      }
+      return reply.status(200).send({message: "user deleted"});
+      
   })
  
 }
