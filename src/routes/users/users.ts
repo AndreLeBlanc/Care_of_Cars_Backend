@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from "fastify"
 import bcrypt from "bcrypt";
 
 
-import { CreateUser, CreateUserReply, CreateUserReplyType, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType, PatchUserSchema, PatchUserSchemaType, getUserByIdSchema, getUserByIdType } from "./schema"
+import { CreateUser, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType, PatchUserSchema, PatchUserSchemaType, getUserByIdSchema, getUserByIdType } from "./schema"
 import { createUser, getUsersPaginate, verifyUser, getUserById, updateUserById, generatePasswordHash, isStrongPassword } from "../../services/userService"
 
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
