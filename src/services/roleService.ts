@@ -37,3 +37,8 @@ export async function getRolesPaginate(search:string, limit=10, page=1, offset=0
   };
     
 }
+
+export async function createRole(roleName: string, description: string) {
+  return await db.insert(roles).values({roleName: roleName, description: description,})
+  .returning({ id: roles.id, roleName: roles.roleName, description: roles.description });
+}

@@ -1,13 +1,14 @@
 import { FastifyPluginAsync } from "fastify"
-import { getRolesPaginate } from "../../services/roleService";
-import { ListRoleQueryParam, ListRoleQueryParamType } from "./roleSchema";
+import { createRole, getRolesPaginate } from "../../services/roleService";
+import { CreateRoleSchema, CreateRoleSchemaType, ListRoleQueryParamSchema, ListRoleQueryParamSchemaType } from "./roleSchema";
 
 const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
-  fastify.get<{Querystring: ListRoleQueryParamType}>('/', 
+  fastify.get<{Querystring: ListRoleQueryParamSchemaType}>('/', 
   {
+    onRequest: [fastify.authenticate],
     schema: {
-        querystring: ListRoleQueryParam,
-        },
+        querystring: ListRoleQueryParamSchema,
+    },
   },
   async function (request, reply) {
     let {search='', limit=10, page=1} = request.query;
@@ -28,6 +29,21 @@ const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         limit: limit, 
         data: result.data 
     }
+  })
+  fastify.post<{ Body: CreateRoleSchemaType, Reply: object }>(
+    '/',
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+      body: CreateRoleSchema,
+        response: {
+        },
+      }
+    },
+     async (request, reply) => {
+      const { roleName, description='' } = request.body;
+      const role = await createRole(roleName, description);
+      reply.status(201).send({message: "Role created", data: role});
   })
 }
 
