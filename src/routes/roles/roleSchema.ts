@@ -17,3 +17,10 @@ export const getRoleByIdSchema = Type.Object({
     id: Type.Number(),
 })
 export type getRoleByIdType = Static<typeof getRoleByIdSchema>
+
+export const PatchRoleSchema = Type.Object({
+    roleName: Type.Optional(Type.String()),
+    description: Type.Optional(Type.String()),
+    
+  })
+  export type PatchRoleSchemaType = Static<typeof PatchRoleSchema>

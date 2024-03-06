@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
-import { createRole, getRolesPaginate, getRoleById } from "../../services/roleService";
-import { CreateRoleSchema, CreateRoleSchemaType, ListRoleQueryParamSchema, ListRoleQueryParamSchemaType, getRoleByIdSchema, getRoleByIdType } from "./roleSchema";
+import { createRole, getRolesPaginate, getRoleById, updateRoleById } from "../../services/roleService";
+import { CreateRoleSchema, CreateRoleSchemaType, ListRoleQueryParamSchema, ListRoleQueryParamSchemaType, PatchRoleSchema, PatchRoleSchemaType, getRoleByIdSchema, getRoleByIdType } from "./roleSchema";
 
 const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Querystring: ListRoleQueryParamSchemaType}>('/', 
@@ -60,6 +60,28 @@ const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         return reply.status(404).send({message: "role not found"});
       }
       reply.status(200).send(role);
+  })
+  fastify.patch<{ Body: PatchRoleSchemaType, Reply: object, Params: getRoleByIdType }>(
+    '/:id',
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        body: PatchRoleSchema,
+        params: getRoleByIdSchema
+      }
+    },
+     async (request, reply) => {
+      const roleData = request.body;
+      if(Object.keys(roleData).length == 0){
+        return reply.status(422).send({message: "Provide at least one column to update."});
+      }
+      const id  = request.params.id;
+      
+      const role = await updateRoleById(id, roleData);
+      if(role.length == 0) {
+        return reply.status(404).send({message: "role not found"});
+      }
+      reply.status(201).send({message: "Role Updated", data: role});
   })
 }
 

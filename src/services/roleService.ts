@@ -3,6 +3,7 @@ import { desc, eq, or, sql } from "drizzle-orm";
 import { db } from "../config/db-connect";
 import { roles } from "../schema/schema";
 import { ilike } from "drizzle-orm";
+import { PatchRoleSchemaType } from "../routes/roles/roleSchema";
 
 export async function getRolesPaginate(search:string, limit=10, page=1, offset=0) {
     const condition = or(
@@ -50,4 +51,13 @@ export async function getRoleById(id:number): Promise<any> {
     
   );
   return results[0] ? results[0] : null;
+}
+
+export async function updateRoleById(id:number, role: PatchRoleSchemaType): Promise<any> {
+  const roleWithUpdatedAt = {...role, updatedAt: new Date()}
+  const updatedRole = await db.update(roles)
+  .set(roleWithUpdatedAt)
+  .where(eq(roles.id, id))
+  .returning({ id: roles.id, roleName: roles.roleName, description: roles.description, createdAt: roles.createdAt, updatedAt: roles.updatedAt });
+  return updatedRole;
 }
