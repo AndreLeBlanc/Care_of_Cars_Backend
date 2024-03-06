@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 
 import { CreateUser, CreateUserReply, CreateUserReplyType, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType, PatchUserSchema, PatchUserSchemaType, getUserByIdSchema, getUserByIdType } from "./schema"
-import { createUser, getUsersPaginate, verifyUser, getUserById, updateUserById, generatePasswordHash } from "../../services/userService"
+import { createUser, getUsersPaginate, verifyUser, getUserById, updateUserById, generatePasswordHash, isStrongPassword } from "../../services/userService"
 
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Querystring: ListUserQueryParamType}>('/',
@@ -101,6 +101,10 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       }
       const id  = request.params.id;
       if(userData?.password) {
+        const isStrongPass = await isStrongPassword(userData.password);
+        if(!isStrongPass) {
+          return reply.status(422).send({message: "Provide a strong password"});
+        }
         userData.password = await generatePasswordHash(userData.password);
       }
       const user = await updateUserById(id, userData);

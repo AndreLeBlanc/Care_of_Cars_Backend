@@ -1,6 +1,7 @@
 import { desc, or, sql, and, eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
+
 import { db } from "../config/db-connect";
 import { users } from "../schema/schema";
 import { ilike } from "drizzle-orm";
@@ -81,4 +82,12 @@ export async function updateUserById(id:number, user: PatchUserSchemaType): Prom
 export async function generatePasswordHash(password:string): Promise<string> {
   const salt = bcrypt.genSaltSync(10);
   return bcrypt.hashSync(password, salt);
+}
+
+export async function isStrongPassword(password:string): Promise<boolean> {
+  // TODO: add more strict checking's 
+  if(password.length <= 3) {
+    return false;
+  }
+  return true;
 }
