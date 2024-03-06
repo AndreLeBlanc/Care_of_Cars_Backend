@@ -13,7 +13,8 @@
     "watch:ts": "tsc -w",
     "dev": "npm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
     "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
-    "generate": "drizzle-kit generate:pg --config=src/config/drizzle.config.ts"
+    "generate": "drizzle-kit generate:pg --config=src/config/drizzle.config.ts",
+    "drizzle-studio": "npx drizzle-kit studio --config=src/config/drizzle.config.ts"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +32,7 @@
     "fastify": "^4.26.1",
     "fastify-cli": "^6.1.1",
     "fastify-plugin": "^4.0.0",
+    "pg": "^8.11.3",
     "postgres": "^3.4.3"
   },
   "devDependencies": {
