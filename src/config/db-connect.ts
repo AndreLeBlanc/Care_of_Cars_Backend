@@ -3,7 +3,7 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import * as schema from '../schema/schema';
 
-const connectionString = `postgres://postgres:postgres@localhost:5432/care-of-cars-fastify`;
+const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_USERNAME}@localhost:5432/${process.env.DB_NAME}`;
 
 
 export async function initDrizzle() {

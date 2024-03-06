@@ -3,12 +3,15 @@ import fp from 'fastify-plugin'
 
   const schema = {
     type: 'object',
-    required: ['DB_PASSWORD', 'DB_USERNAME'],
+    required: ['DB_PASSWORD', 'DB_USERNAME', 'DB_NAME', 'JWT_SECRET'],
     properties: {
       DB_PASSWORD: {
         type: 'string'
       },
       DB_USERNAME: {
+        type: 'string'
+      },
+      DB_NAME: {
         type: 'string'
       },
       JWT_SECRET: {
