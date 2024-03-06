@@ -8,7 +8,9 @@ import { ilike } from "drizzle-orm";
 import { PatchUserSchemaType } from "../routes/users/schema"
 
 export async function createUser(firstName: string, lastName: string, email: string, passwordHash: string) {
-    return  await db.insert(users).values({firstName: firstName, lastName: lastName, email: email, password: passwordHash})
+    return await db.insert(users).values({firstName: firstName, lastName: lastName, email: email, password: passwordHash})
+    .returning({ id: users.id, firstName: users.firstName, lastName: users.lastName, email: users.email, createdAt: users.createdAt, updatedAt: users.updatedAt });
+
 }
 
 export async function getUsersPaginate(search:string, limit=10, page=1, offset=0) {
@@ -71,7 +73,6 @@ export async function getUserById(id:number): Promise<any> {
 
 export async function updateUserById(id:number, user: PatchUserSchemaType): Promise<any> {
   const userWithUpdatedAt = {...user, updatedAt: new Date()}
-  console.log(userWithUpdatedAt)
   const updatedUser = await db.update(users)
   .set(userWithUpdatedAt)
   .where(eq(users.id, id))

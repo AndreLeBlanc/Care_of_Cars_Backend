@@ -33,22 +33,25 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         data: result.data 
       }
   })
-  fastify.post<{ Body: CreateUserType, Reply: CreateUserReplyType }>(
+  fastify.post<{ Body: CreateUserType, Reply: object }>(
     '/',
     {
       schema: {
       body: CreateUser,
         response: {
-          201: CreateUserReply
+          //201: CreateUserReply,
         },
       }
     },
      async (request, reply) => {
       const { firstName, lastName, email, password } = request.body;
-      const salt = bcrypt.genSaltSync(10);
-      const passwordHash = bcrypt.hashSync(password, salt);
-      await createUser(firstName, lastName, email, passwordHash)
-      reply.status(201).send(request.body);
+      const isStrongPass = await isStrongPassword(password);
+      if(!isStrongPass) {
+        return reply.status(422).send({message: "Provide a strong password"});
+      }
+      const passwordHash = await generatePasswordHash(password);
+      const createdUser = await createUser(firstName, lastName, email, passwordHash)
+      reply.status(201).send({message: "User created", data: createdUser});
   })
 
   fastify.post<{ Body: LoginUserType, Reply: object }>(
