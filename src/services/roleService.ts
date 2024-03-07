@@ -61,3 +61,11 @@ export async function updateRoleById(id:number, role: PatchRoleSchemaType): Prom
   .returning({ id: roles.id, roleName: roles.roleName, description: roles.description, createdAt: roles.createdAt, updatedAt: roles.updatedAt });
   return updatedRole;
 }
+
+export async function deleteRole(id:number): Promise<any> {
+  const deletedRole = await db.delete(roles).where(
+      eq(roles.id, id),
+  )
+  .returning();
+  return deletedRole[0] ? deletedRole[0] : null;
+}

@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify"
-import { createRole, getRolesPaginate, getRoleById, updateRoleById } from "../../services/roleService";
+import { createRole, getRolesPaginate, getRoleById, updateRoleById, deleteRole } from "../../services/roleService";
 import { CreateRoleSchema, CreateRoleSchemaType, ListRoleQueryParamSchema, ListRoleQueryParamSchemaType, PatchRoleSchema, PatchRoleSchemaType, getRoleByIdSchema, getRoleByIdType } from "./roleSchema";
 
 const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
@@ -82,6 +82,23 @@ const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         return reply.status(404).send({message: "role not found"});
       }
       reply.status(201).send({message: "Role Updated", data: role});
+  })
+  fastify.delete<{Params: getRoleByIdType }>(
+    '/:id',
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        params: getRoleByIdSchema
+      }
+    },
+     async (request, reply) => {
+      const id  = request.params.id;
+      const deletedRole = await deleteRole(id);
+      if(deletedRole == null) {
+        return reply.status(404).send({message: "Role doesn't exist!"})
+      }
+      return reply.status(200).send({message: "Role deleted"});
+      
   })
 }
 
