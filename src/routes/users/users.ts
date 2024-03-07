@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 
 import { CreateUser, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType, PatchUserSchema, PatchUserSchemaType, getUserByIdSchema, getUserByIdType } from "./userSchema"
 import { createUser, getUsersPaginate, verifyUser, getUserById, updateUserById, generatePasswordHash, isStrongPassword, deleteUser } from "../../services/userService"
+import { getAllPermissionStatus, getRoleWithPermissions } from "../../services/roleService";
 
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Querystring: ListUserQueryParamType}>('/',
@@ -71,7 +72,23 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       const match = await bcrypt.compare(password, user.password);
       if(match) {
         const token = fastify.jwt.sign({ user });
-        return reply.status(200).send({message: "Login success", token: token});
+        const rolePermissions = await getRoleWithPermissions(user.role.id);
+        const roleFullPermissions = await getAllPermissionStatus(rolePermissions, user.role.id);
+        
+        return reply.status(200).send({message: "Login success", token: token,
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: {
+              id: user.role.id,
+              roleName: user.role.roleName,
+              rolePermissions: rolePermissions,
+              roleFullPermissions: roleFullPermissions
+            }
+          }
+        });
       }
       reply.status(403).send({message: "Login failed, incorrect password"});
   })

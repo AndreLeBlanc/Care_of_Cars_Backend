@@ -77,3 +77,25 @@ export async function getRoleWithPermissions(roleId:number): Promise<any> {
                             .where(eq(roles.id, roleId));
   return roleWithPermissions;
 }
+
+export async function getAllPermissionStatus(userPermissions:Array<{permissionId: number, permissionName: string}>, roleId:number): Promise<Array<{permissionId: number, permissionName: string, hasPermission: boolean}>> {
+  const allPermissions = await db.select(
+    {id: permissions.id, permissionName: permissions.permissionName }
+    ).
+    from(permissions)
+    .limit(1000) // pagination is not possible here still we need to limit the rows.
+  const rolePermissions: Array<{permissionId: number, permissionName: string}> = await getRoleWithPermissions(roleId);
+  const allPermissionsWithStatus: Array<{permissionId: number, permissionName: string, hasPermission: boolean}> = [];
+  for(const  el of allPermissions) {
+    const hasPermission = rolePermissions.filter(e => e.permissionName === el.permissionName).length > 0
+    allPermissionsWithStatus.push({
+      permissionId: el.id,
+      permissionName: el.permissionName,
+      hasPermission: hasPermission
+      
+    })
+    
+  }
+  return allPermissionsWithStatus;
+  
+}

@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 
 import { db } from "../config/db-connect";
-import { users } from "../schema/schema";
+import { roles, users } from "../schema/schema";
 import { ilike } from "drizzle-orm";
 import { PatchUserSchemaType } from "../routes/users/userSchema"
 
@@ -53,7 +53,14 @@ export async function getUsersPaginate(search:string, limit=10, page=1, offset=0
 }
 
 export async function verifyUser(email:string): Promise<any> {
-    const results = await db.select().from(users).where(
+    const results = await db.select({id: users.id, firstName: users.firstName, email: users.email, password: users.password, 
+      role: {
+        id: roles.id,
+        roleName: roles.roleName
+      }
+    }).from(users)
+    .innerJoin(roles, eq(users.roleId, roles.id))
+    .where(
       and(
         eq(users.email, email),
         //eq(users.password, password)
