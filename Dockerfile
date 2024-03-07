@@ -2,7 +2,7 @@
 FROM node:20.11.1
 
 # Set the working directory inside the container
-WORKDIR /usr/src/app
+WORKDIR /usr/app
 
 # Copy package.json and package-lock.json files
 COPY package*.json ./
@@ -11,13 +11,15 @@ COPY package*.json ./
 RUN npm install
 
 # Copy the rest of the application code
-COPY src/ .
-COPY package.json .
+COPY src/ ./src
 COPY tsconfig.json .
+COPY drizzle ./drizzle
+
+# Build TypeScript code
+RUN npm run build:ts
 
 # Expose port 3000
 EXPOSE 3000
 
 # Command to run the application
-CMD ["tsc", "&&" ,"fastify" ,"start", "-l", "info", "dist/app.js"]
-
+CMD ["npm", "run", "dev:start"]
