@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify"
-import { createRole, getRolesPaginate, getRoleById, updateRoleById, deleteRole } from "../../services/roleService";
+import { createRole, getRolesPaginate, getRoleById, updateRoleById, deleteRole, getRoleWithPermissions } from "../../services/roleService";
 import { CreateRoleSchema, CreateRoleSchemaType, ListRoleQueryParamSchema, ListRoleQueryParamSchemaType, PatchRoleSchema, PatchRoleSchemaType, getRoleByIdSchema, getRoleByIdType } from "./roleSchema";
 
 const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
@@ -59,7 +59,8 @@ const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       if(role == null) {
         return reply.status(404).send({message: "role not found"});
       }
-      reply.status(200).send(role);
+      const rolePermissions = await getRoleWithPermissions(role.id);
+      reply.status(200).send({role: role, permissions: rolePermissions});
   })
   fastify.patch<{ Body: PatchRoleSchemaType, Reply: object, Params: getRoleByIdType }>(
     '/:id',

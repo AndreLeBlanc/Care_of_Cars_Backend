@@ -1,7 +1,7 @@
 import { desc, eq, or, sql } from "drizzle-orm";
 
 import { db } from "../config/db-connect";
-import { roles } from "../schema/schema";
+import { permissions, roleToPermissions, roles } from "../schema/schema";
 import { ilike } from "drizzle-orm";
 import { PatchRoleSchemaType } from "../routes/roles/roleSchema";
 
@@ -68,4 +68,12 @@ export async function deleteRole(id:number): Promise<any> {
   )
   .returning();
   return deletedRole[0] ? deletedRole[0] : null;
+}
+export async function getRoleWithPermissions(roleId:number): Promise<any> {
+  const roleWithPermissions = db.select({permissionId: permissions.id, permissionName: permissions.permissionName, createdAt: permissions.createdAt, updatedAt: permissions.updatedAt})
+                            .from(roleToPermissions)
+                            .leftJoin(roles, eq(roleToPermissions.roleId, roles.id))
+                            .leftJoin(permissions, eq(roleToPermissions.permissionId, permissions.id))
+                            .where(eq(roles.id, roleId));
+  return roleWithPermissions;
 }
