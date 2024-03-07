@@ -78,7 +78,7 @@ export async function getRoleWithPermissions(roleId:number): Promise<any> {
   return roleWithPermissions;
 }
 
-export async function getAllPermissionStatus(userPermissions:Array<{permissionId: number, permissionName: string}>, roleId:number): Promise<Array<{permissionId: number, permissionName: string, hasPermission: boolean}>> {
+export async function getAllPermissionStatus(roleId:number): Promise<Array<{permissionId: number, permissionName: string, hasPermission: boolean}>> {
   const allPermissions = await db.select(
     {id: permissions.id, permissionName: permissions.permissionName }
     ).
@@ -98,4 +98,9 @@ export async function getAllPermissionStatus(userPermissions:Array<{permissionId
   }
   return allPermissionsWithStatus;
   
+}
+export async function roleHasPermission(roleId: number, permissionName: string): Promise<boolean> {
+  const roleToPermissions: Array<{permissionId: number, permissionName: string}> = await getRoleWithPermissions(roleId);
+  const roleHasPermission = roleToPermissions.filter(e => e.permissionName === permissionName).length > 0
+  return roleHasPermission;
 }

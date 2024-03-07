@@ -9,7 +9,11 @@ import { getAllPermissionStatus, getRoleWithPermissions } from "../../services/r
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Querystring: ListUserQueryParamType}>('/',
   {
-    onRequest: [fastify.authenticate],
+    onRequest: async (request, reply) => {
+      fastify.authenticate(request, reply);
+      fastify.authorize(request, reply, 'list_user');
+      return reply;
+    },
     schema: {
       querystring: ListUserQueryParam,
       },
@@ -37,7 +41,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.post<{ Body: CreateUserType, Reply: object }>(
     '/',
     {
-      onRequest: [fastify.authenticate],
+      onRequest: async (request, reply) => {
+        fastify.authenticate(request, reply);
+        fastify.authorize(request, reply, 'create_user');
+        return reply;
+      },
       schema: {
       body: CreateUser,
         response: {
@@ -73,7 +81,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       if(match) {
         const token = fastify.jwt.sign({ user });
         const rolePermissions = await getRoleWithPermissions(user.role.id);
-        const roleFullPermissions = await getAllPermissionStatus(rolePermissions, user.role.id);
+        const roleFullPermissions = await getAllPermissionStatus(user.role.id);
         
         return reply.status(200).send({message: "Login success", token: token,
           user: {
@@ -95,7 +103,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{Params: getUserByIdType }>(
     '/:id',
     {
-      onRequest: [fastify.authenticate],
+      onRequest: async (request, reply) => {
+        fastify.authenticate(request, reply);
+        fastify.authorize(request, reply, 'view_user');
+        return reply;
+      },
       schema: {
         params: getUserByIdSchema
       }
@@ -106,12 +118,16 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       if(user == null) {
         return reply.status(404).send({message: "user not found"});
       }
-      reply.status(200).send(user);
+      return reply.status(200).send(user);
   })
   fastify.patch<{ Body: PatchUserSchemaType, Reply: object, Params: getUserByIdType }>(
     '/:id',
     {
-      onRequest: [fastify.authenticate],
+      onRequest: async (request, reply) => {
+        fastify.authenticate(request, reply);
+        fastify.authorize(request, reply, 'update_user');
+        return reply;
+      },
       schema: {
         body: PatchUserSchema,
         params: getUserByIdSchema
@@ -139,7 +155,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.delete<{Params: getUserByIdType }>(
     '/:id',
     {
-      onRequest: [fastify.authenticate],
+      onRequest: async (request, reply) => {
+        fastify.authenticate(request, reply);
+        fastify.authorize(request, reply, 'delete_user');
+        return reply;
+      },
       schema: {
         params: getUserByIdSchema
       }
