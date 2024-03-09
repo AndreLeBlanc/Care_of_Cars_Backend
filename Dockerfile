@@ -22,5 +22,6 @@ RUN npm run build:ts
 # Expose port 3000
 EXPOSE 3000
 
+RUN npm run generate
 # Command to run the application
-CMD ["npm", "run", "dev:start"]
+CMD ["npm", "run", "deployDocker"]

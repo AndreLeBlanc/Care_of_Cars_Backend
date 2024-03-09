@@ -3,14 +3,10 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import * as schema from "../schema/schema";
 
-const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@localhost:5432/${process.env.DB_NAME}`;
+const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@postgres:5432/${process.env.DB_NAME}`;
 
 export async function initDrizzle() {
   try {
-    console.log(
-      "connnnnnnnnnnnneccccccccccctiooooooooooooooonnnnnnnnnnnnn string",
-      connectionString
-    );
     const sql = postgres(connectionString, { max: 1 });
     const db = drizzle(sql);
 
