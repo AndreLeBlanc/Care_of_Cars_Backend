@@ -14,6 +14,7 @@ RUN npm install
 COPY src/ ./src
 COPY tsconfig.json .
 COPY drizzle ./drizzle
+COPY .env ./
 
 # Build TypeScript code
 RUN npm run build:ts
