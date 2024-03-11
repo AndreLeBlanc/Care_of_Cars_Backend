@@ -1,4 +1,4 @@
-import { serial, text, timestamp, pgTable, varchar, integer, primaryKey } from 'drizzle-orm/pg-core'
+import { serial, text, timestamp, pgTable, varchar, integer, primaryKey, boolean } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
                     id: serial('id').primaryKey().unique(),
@@ -6,6 +6,7 @@ export const users = pgTable('users', {
                     lastName: varchar('lastName'),
                     email: varchar('email').unique(),
                     password: text('password').notNull(),
+                    isSuperAdmin: boolean('isSuperAdmin').default(false),
                     roleId: integer('roleId')
                                         .references(() => roles.id)
                                         .notNull(),
