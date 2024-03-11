@@ -3,15 +3,15 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator'
 const { default: postgres } = await import('postgres')
 import * as schema from '../schema/schema.js'
 
-const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_USERNAME}@localhost:5432/${process.env.DB_NAME}`
+const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_USERNAME}@localhost:5432/${process.env.DB_NAME}`;
 
 export async function initDrizzle() {
-  const sql = postgres(connectionString, { max: 1 })
-  const db = drizzle(sql)
+  const sql = postgres(connectionString, { max: 1 });
+  const db = drizzle(sql);
 
-  await migrate(db, { migrationsFolder: 'drizzle' })
+  await migrate(db, { migrationsFolder: "drizzle" });
 
-  await sql.end()
+  await sql.end();
 }
 
 const sql = postgres(connectionString, { max: 1 })

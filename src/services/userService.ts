@@ -1,5 +1,6 @@
-import { desc, or, sql, and, eq } from 'drizzle-orm'
-import * as bcrypt from 'bcrypt'
+import { desc, or, sql, and, eq } from "drizzle-orm";
+//import bcrypt from "bcrypt";
+var bcrypt = require('bcryptjs');
 
 import { db } from '../config/db-connect'
 import { roles, users } from '../schema/schema'

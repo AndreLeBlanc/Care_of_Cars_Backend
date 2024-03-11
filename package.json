@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "This project was bootstrapped with Fastify-CLI.",
   "main": "app.ts",
-  "type": "module",
   "directories": {
     "test": "test"
   },
@@ -15,6 +14,7 @@
     "dev": "npm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
     "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
     "generate": "drizzle-kit generate:pg --config=src/config/drizzle.config.ts",
+    "deployDocker": "drizzle-kit generate:pg --config=src/config/drizzle.config.ts && fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
     "drizzle-studio": "npx drizzle-kit studio --config=src/config/drizzle.config.ts"
   },
   "keywords": [],
@@ -30,7 +30,7 @@
     "@sinclair/typebox": "^0.32.15",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "drizzle-orm": "^0.29.4",
     "eslint": "^8.57.0",
     "fastify": "^4.26.1",
@@ -40,7 +40,7 @@
     "postgres": "^3.4.3"
   },
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
+    "@fastify/pre-commit": "^2.1.0",
     "@types/node": "^20.4.4",
     "c8": "^9.0.0",
     "concurrently": "^8.2.2",
@@ -48,5 +48,9 @@
     "fastify-tsconfig": "^2.0.0",
     "ts-node": "^10.4.0",
     "typescript": "^5.2.2"
+  },
+  "pre-commit": {
+    "run": ["build:ts"],
+    "silent": false
   }
 }

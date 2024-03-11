@@ -1,5 +1,6 @@
-import { FastifyPluginAsync } from 'fastify'
-import * as bcrypt from 'bcrypt'
+import { FastifyPluginAsync } from "fastify"
+//import bcrypt from "bcrypt";
+var bcrypt = require('bcryptjs');
 
 import {
   CreateUser,
@@ -29,11 +30,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
     '/',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
-        fastify.authorize(request, reply, 'list_user')
-        return reply
-      },
+      // onRequest: async (request, reply) => {
+      //   //fastify.authenticate(request, reply)
+      //   //fastify.authorize(request, reply, 'list_user')
+      //   return reply
+      // },
       schema: {
         querystring: ListUserQueryParam,
       },
@@ -66,11 +67,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.post<{ Body: CreateUserType; Reply: object }>(
     '/',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
-        fastify.authorize(request, reply, 'create_user')
-        return reply
-      },
+      // onRequest: async (request, reply) => {
+      //   fastify.authenticate(request, reply);
+      //   fastify.authorize(request, reply, 'create_user');
+      //   return reply;
+      // },
       schema: {
         body: CreateUser,
         response: {
@@ -84,11 +85,10 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       if (!isStrongPass) {
         return reply.status(422).send({ message: 'Provide a strong password' })
       }
-      const passwordHash = await generatePasswordHash(password)
-      const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId)
-      reply.status(201).send({ message: 'User created', data: createdUser })
-    },
-  )
+      const passwordHash = await generatePasswordHash(password);
+      const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId);
+      return reply.status(201).send({message: "User created", data: createdUser});
+  })
 
   fastify.post<{ Body: LoginUserType; Reply: object }>(
     '/login',

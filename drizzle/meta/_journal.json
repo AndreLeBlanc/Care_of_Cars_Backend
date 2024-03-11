@@ -64,6 +64,13 @@
       "when": 1709793212654,
       "tag": "0008_curved_vanisher",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1710157470177,
+      "tag": "0009_eager_yellowjacket",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { serial, text, timestamp, pgTable, varchar, integer, primaryKey } from 'drizzle-orm/pg-core'
+import { serial, text, timestamp, pgTable, varchar, integer, primaryKey, boolean } from 'drizzle-orm/pg-core'
 
 export const schema = pgTable('users', {
   id: serial('id').primaryKey().unique(),
