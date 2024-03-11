@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
-import bcrypt from "bcrypt";
-
+//import bcrypt from "bcrypt";
+var bcrypt = require('bcryptjs');
 
 import { CreateUser, CreateUserType, ListUserQueryParam, ListUserQueryParamType, LoginUser, LoginUserType, PatchUserSchema, PatchUserSchemaType, getUserByIdSchema, getUserByIdType } from "./userSchema"
 import { createUser, getUsersPaginate, verifyUser, getUserById, updateUserById, generatePasswordHash, isStrongPassword, deleteUser } from "../../services/userService"
@@ -41,11 +41,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.post<{ Body: CreateUserType, Reply: object }>(
     '/',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply);
-        fastify.authorize(request, reply, 'create_user');
-        return reply;
-      },
+      // onRequest: async (request, reply) => {
+      //   fastify.authenticate(request, reply);
+      //   fastify.authorize(request, reply, 'create_user');
+      //   return reply;
+      // },
       schema: {
       body: CreateUser,
         response: {
@@ -61,7 +61,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       }
       const passwordHash = await generatePasswordHash(password);
       const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId);
-      reply.status(201).send({message: "User created", data: createdUser});
+      return reply.status(201).send({message: "User created", data: createdUser});
   })
 
   fastify.post<{ Body: LoginUserType, Reply: object }>(
