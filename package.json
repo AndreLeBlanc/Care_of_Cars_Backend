@@ -50,6 +50,7 @@
     "typescript": "^5.2.2"
   },
   "pre-commit": [
-    "build:ts"
+    "build:ts",
+    "test"
   ]
 }
