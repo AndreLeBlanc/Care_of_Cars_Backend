@@ -16,3 +16,4 @@ export async function initDrizzle() {
 
 const sql = postgres(connectionString, { max: 1 })
 export const db = drizzle(sql, { schema })
+
