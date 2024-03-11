@@ -30,11 +30,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
     '/',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
-        fastify.authorize(request, reply, 'list_user')
-        return reply
-      },
+      // onRequest: async (request, reply) => {
+      //   //fastify.authenticate(request, reply)
+      //   //fastify.authorize(request, reply, 'list_user')
+      //   return reply
+      // },
       schema: {
         querystring: ListUserQueryParam,
       },
