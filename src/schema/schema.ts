@@ -100,7 +100,7 @@ export const services = pgTable('services', {
     warantyCard: boolean('warantyCard'),
     itermNumber: varchar('itermNumber', { length: 256 }),
     suppliersArticleNumber: varchar('suppliersArticleNumber', { length: 256 }),
-    externalArticleNumber: varchar('suppliersArticleNumber', { length: 256 }),
+    externalArticleNumber: varchar('externalArticleNumber', { length: 256 }),
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
