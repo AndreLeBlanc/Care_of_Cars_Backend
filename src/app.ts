@@ -15,7 +15,8 @@ const app: FastifyPluginAsync<AppOptions> = async (
     opts
 ): Promise<void> => {
   // Place here your custom code!
-  initDrizzle()
+  initDrizzle();
+
   fastify.register(require('@fastify/swagger'), {
     // https://community.smartbear.com/discussions/swaggerostools/how-to-show-authorize-button-on-oas-3-swagger-in-javascript/234650
     openapi: {
@@ -72,6 +73,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
     dir: join(__dirname, 'routes'),
     options: opts
   })
+
 
 };
 

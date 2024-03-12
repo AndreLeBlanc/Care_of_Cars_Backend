@@ -13,6 +13,7 @@ export async function createUser(
   email: string,
   passwordHash: string,
   roleId: number,
+  isSuperAdmin: boolean = false
 ) {
   return await db
     .insert(users)
@@ -22,6 +23,7 @@ export async function createUser(
       email: email,
       password: passwordHash,
       roleId: roleId,
+      isSuperAdmin: isSuperAdmin
     })
     .returning({
       id: users.id,

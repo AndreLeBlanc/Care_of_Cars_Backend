@@ -30,6 +30,18 @@ http://localhost:3000/docs
 npm run generate
 ```
 
+6. To create Super admin enable seeding of super admin. set the below env's
+```
+RUN_SEED=true
+SUPER_ADMIN_EMAIL=
+SUPER_ADMIN_PASSWORD=
+```
+then run
+
+```
+npm run dev
+```
+seed will be executed and superadmin will be created. Once created make sure to set `RUN_SEED=false`
 # Getting Started with [Fastify-CLI](https://www.npmjs.com/package/fastify-cli)
 
 This project was bootstrapped with Fastify-CLI.
