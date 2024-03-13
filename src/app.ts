@@ -37,13 +37,13 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
     },
     swagger: {
       // properties...
-      securityDefinitions: {
-        Authorization: {
-          type: 'apiKey',
-          name: 'Authorization',
-          in: 'header',
-        },
-      },
+      // securityDefinitions: {
+      //   Authorization: {
+      //     type: 'apiKey',
+      //     name: 'Authorization',
+      //     in: 'header',
+      //   },
+      // },
       // security: [
       //   {
       //     authorization: []
@@ -51,21 +51,21 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
       // ]
     },
   })
-  fastify.register(fastifySwaggerUI, { routePrefix: '/docs' })
+  await fastify.register(fastifySwaggerUI, { routePrefix: '/docs' })
   // Do not touch the following lines
 
   // This loads all plugins defined in plugins
   // those should be support plugins that are reused
   // through your application
-  void fastify.register(AutoLoad, {
-    dir: join(__dirname, 'plugins'),
+  await void fastify.register(AutoLoad, {
+    dir: join(__dirname, '/plugins/'),
     options: opts,
   })
 
   // This loads all plugins defined in routes
   // define your routes in one of these
-  void fastify.register(AutoLoad, {
-    dir: join(__dirname, 'routes'),
+  await void fastify.register(AutoLoad, {
+    dir: join(__dirname, '/routes/'),
     options: opts,
   })
 }

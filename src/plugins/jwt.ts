@@ -1,4 +1,4 @@
-import { FastifyJwtNamespace } from '@fastify/jwt'
+import { FastifyJwtNamespace, fastifyJwt } from '@fastify/jwt'
 import fp from 'fastify-plugin'
 import { FastifyReply } from 'fastify/types/reply'
 import { FastifyRequest } from 'fastify/types/request'
@@ -10,7 +10,7 @@ export interface SupportPluginOptions {
 // The use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
 export default fp<SupportPluginOptions>(async (fastify, opts) => {
-  fastify.register(require('@fastify/jwt'), {
+  fastify.register(fastifyJwt, {
     secret: fastify?.config?.JWT_SECRET, //"supersecret"
   })
   fastify.decorate(

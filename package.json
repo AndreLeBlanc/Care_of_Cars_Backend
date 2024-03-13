@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.4.4",
     "c8": "^9.0.0",
     "concurrently": "^8.2.2",
@@ -51,7 +52,9 @@
     "typescript": "^5.2.2"
   },
   "pre-commit": {
-    "run": ["build:ts"],
+    "run": [
+      "build:ts"
+    ],
     "silent": false
   }
 }

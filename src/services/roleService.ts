@@ -3,7 +3,7 @@ import { desc, eq, or, sql } from 'drizzle-orm'
 import { db } from '../config/db-connect.js'
 import { permissions, roleToPermissions, roles } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
-import { PatchRoleSchemaType } from '../routes/roles/roleSchema'
+import { PatchRoleSchemaType } from '../routes/roles/roleSchema.js'
 
 export async function getRolesPaginate(search: string, limit = 10, page = 1, offset = 0) {
   const condition = or(
