@@ -1,4 +1,4 @@
-import { desc, or, sql } from 'drizzle-orm'
+import { desc, eq, or, sql } from 'drizzle-orm'
 
 import { db } from '../config/db-connect'
 import { serviceCategories } from '../schema/schema'
@@ -54,4 +54,33 @@ export async function createServiceCategory(name: string, description: string) {
       serviceCategoryName: serviceCategories.name,
       description: serviceCategories.description,
     })
+}
+
+export async function getServiceCategoryById(id: number): Promise<any> {
+  const results = await db.select().from(serviceCategories).where(eq(serviceCategories.id, id))
+  return results[0] ? results[0] : null
+}
+
+export async function updateServiceCategoryById(id: number, serviceCategory: any): Promise<any> {
+  const serviceCategoryWithUpdatedAt = { ...serviceCategory, updatedAt: new Date() }
+  const updatedServiceCategory = await db
+    .update(serviceCategories)
+    .set(serviceCategoryWithUpdatedAt)
+    .where(eq(serviceCategories.id, id))
+    .returning({
+      id: serviceCategories.id,
+      roleName: serviceCategories.name,
+      description: serviceCategories.description,
+      createdAt: serviceCategories.createdAt,
+      updatedAt: serviceCategories.updatedAt,
+    })
+  return updatedServiceCategory
+}
+
+export async function deleteServiceCategory(id: number): Promise<any> {
+  const deletedServiceCategory = await db
+    .delete(serviceCategories)
+    .where(eq(serviceCategories.id, id))
+    .returning()
+  return deletedServiceCategory[0] ? deletedServiceCategory[0] : null
 }
