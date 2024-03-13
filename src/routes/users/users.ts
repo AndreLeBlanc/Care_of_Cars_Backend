@@ -1,6 +1,6 @@
-import { FastifyPluginAsync } from "fastify"
+import { FastifyPluginAsync } from 'fastify'
 //import bcrypt from "bcrypt";
-var bcrypt = require('bcryptjs');
+var bcrypt = require('bcryptjs')
 
 import {
   CreateUser,
@@ -30,11 +30,18 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
     '/',
     {
-      // onRequest: async (request, reply) => {
-      //   //fastify.authenticate(request, reply)
-      //   //fastify.authorize(request, reply, 'list_user')
-      //   return reply
-      // },
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'list_user'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+
       schema: {
         querystring: ListUserQueryParam,
       },
@@ -67,11 +74,13 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.post<{ Body: CreateUserType; Reply: object }>(
     '/',
     {
-      // onRequest: async (request, reply) => {
-      //   fastify.authenticate(request, reply);
-      //   fastify.authorize(request, reply, 'create_user');
-      //   return reply;
-      // },
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, 'create_user')
+        done()
+        return reply
+      },
+
       schema: {
         body: CreateUser,
         response: {
@@ -85,10 +94,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       if (!isStrongPass) {
         return reply.status(422).send({ message: 'Provide a strong password' })
       }
-      const passwordHash = await generatePasswordHash(password);
-      const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId);
-      return reply.status(201).send({message: "User created", data: createdUser});
-  })
+      const passwordHash = await generatePasswordHash(password)
+      const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId)
+      return reply.status(201).send({ message: 'User created', data: createdUser })
+    },
+  )
 
   fastify.post<{ Body: LoginUserType; Reply: object }>(
     '/login',
@@ -99,12 +109,13 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     },
     async (request, reply) => {
       const { email, password } = request.body
-      const user = await verifyUser(email)
+      let user = await verifyUser(email)
       if (user == null) {
         return reply.status(403).send({ message: 'Login failed, incorrect email' })
       }
       const match = await bcrypt.compare(password, user.password)
       if (match) {
+        delete user.password
         const token = fastify.jwt.sign({ user })
         const rolePermissions = await getRoleWithPermissions(user.role.id)
         const roleFullPermissions = await getAllPermissionStatus(user.role.id)
@@ -117,6 +128,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
+            isSuperAdmin: user.isSuperAdmin,
             role: {
               id: user.role.id,
               roleName: user.role.roleName,
@@ -132,11 +144,13 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{ Params: getUserByIdType }>(
     '/:id',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
         fastify.authorize(request, reply, 'view_user')
+        done()
         return reply
       },
+
       schema: {
         params: getUserByIdSchema,
       },
@@ -153,9 +167,10 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.patch<{ Body: PatchUserSchemaType; Reply: object; Params: getUserByIdType }>(
     '/:id',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
         fastify.authorize(request, reply, 'update_user')
+        done()
         return reply
       },
       schema: {
@@ -186,9 +201,10 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.delete<{ Params: getUserByIdType }>(
     '/:id',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
         fastify.authorize(request, reply, 'delete_user')
+        done()
         return reply
       },
       schema: {

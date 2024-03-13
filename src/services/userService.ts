@@ -1,6 +1,6 @@
-import { desc, or, sql, and, eq } from "drizzle-orm";
+import { desc, or, sql, and, eq } from 'drizzle-orm'
 //import bcrypt from "bcrypt";
-var bcrypt = require('bcryptjs');
+var bcrypt = require('bcryptjs')
 
 import { db } from '../config/db-connect'
 import { roles, users } from '../schema/schema'
@@ -13,7 +13,7 @@ export async function createUser(
   email: string,
   passwordHash: string,
   roleId: number,
-  isSuperAdmin: boolean = false
+  isSuperAdmin: boolean = false,
 ) {
   return await db
     .insert(users)
@@ -23,7 +23,7 @@ export async function createUser(
       email: email,
       password: passwordHash,
       roleId: roleId,
-      isSuperAdmin: isSuperAdmin
+      isSuperAdmin: isSuperAdmin,
     })
     .returning({
       id: users.id,
@@ -87,6 +87,7 @@ export async function verifyUser(email: string): Promise<any> {
       firstName: users.firstName,
       email: users.email,
       password: users.password,
+      isSuperAdmin: users.isSuperAdmin,
       role: {
         id: roles.id,
         roleName: roles.roleName,

@@ -21,7 +21,17 @@ const serviceCategories: FastifyPluginAsync = async (fastify: FastifyInstance): 
   fastify.get<{ Querystring: ListServiceCategoryQueryParamSchemaType }>(
     '/',
     {
-      // onRequest: [fastify.authenticate],
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'list_service_category'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         querystring: ListServiceCategoryQueryParamSchema,
       },
@@ -54,7 +64,17 @@ const serviceCategories: FastifyPluginAsync = async (fastify: FastifyInstance): 
   fastify.post<{ Body: CreateServiceCategorySchemaType; Reply: object }>(
     '/',
     {
-      //onRequest: [fastify.authenticate],
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'create_service_category'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         body: CreateServiceCategorySchema,
         response: {},
@@ -69,7 +89,17 @@ const serviceCategories: FastifyPluginAsync = async (fastify: FastifyInstance): 
   fastify.get<{ Params: getServiceCategoryByIdType }>(
     '/:id',
     {
-      // onRequest: [fastify.authenticate],
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'view_service_category'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         params: getServiceCategoryByIdSchema,
       },
@@ -90,7 +120,17 @@ const serviceCategories: FastifyPluginAsync = async (fastify: FastifyInstance): 
   }>(
     '/:id',
     {
-      //onRequest: [fastify.authenticate],
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'update_service_category'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         body: PatchServiceCategorySchema,
         params: getServiceCategoryByIdSchema,
@@ -113,7 +153,17 @@ const serviceCategories: FastifyPluginAsync = async (fastify: FastifyInstance): 
   fastify.delete<{ Params: getServiceCategoryByIdType }>(
     '/:id',
     {
-      // onRequest: [fastify.authenticate],
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'delete_service_category'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         params: getServiceCategoryByIdSchema,
       },
