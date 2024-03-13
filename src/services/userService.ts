@@ -1,9 +1,7 @@
-import { desc, or, sql, and, eq } from "drizzle-orm";
-//import bcrypt from "bcrypt";
-var bcrypt = require('bcryptjs');
-
+import { desc, or, sql, and, eq } from 'drizzle-orm'
+import bcrypt from 'bcryptjs'
 import { db } from '../config/db-connect'
-import { roles, users } from '../schema/schema'
+import { roles, users } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchUserSchemaType } from '../routes/users/userSchema'
 

@@ -1,19 +1,20 @@
-import AutoLoad, { AutoloadPluginOptions } from '@fastify/autoload'
-import { FastifyPluginAsync, FastifyServerOptions } from 'fastify'
+//import AutoLoad, { AutoloadPluginOptions } from '@fastify/autoload'
+import { FastifyPluginAsync } from 'fastify'
 import { initDrizzle } from './config/db-connect.js'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
-import { join } from 'path'
-import path from 'path'
-import { fileURLToPath } from 'url'
-const __filename = fileURLToPath(import.meta.url)
+//import { join } from 'path'
+//import path from 'path'
+//import { fileURLToPath } from 'url'
+//import pagination from './plugins/pagination.js'
+//const __filename = fileURLToPath(import.meta.url)
 
-const __dirname = path.dirname(__filename)
-export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
+//const __dirname = path.dirname(__filename)
+//export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
 // Pass --options via CLI arguments in command to enable these options.
-const options: AppOptions = {}
+//const options: AppOptions = {}
 
-const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void> => {
+const app: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   // Place here your custom code!
 
   initDrizzle()
@@ -57,18 +58,19 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
   // This loads all plugins defined in plugins
   // those should be support plugins that are reused
   // through your application
-  void fastify.register(AutoLoad, {
-    dir: join(__dirname, 'plugins'),
-    options: opts,
-  })
+  //void fastify.register(AutoLoad, {
+  //  dir: join(__dirname, 'plugins'),
+  //  options: opts,
+  //})
 
+  //  fastify.register(pagination)
   // This loads all plugins defined in routes
   // define your routes in one of these
-  void fastify.register(AutoLoad, {
-    dir: join(__dirname, 'routes'),
-    options: opts,
-  })
+  // void fastify.register(AutoLoad, {
+  //   dir: join(__dirname, 'routes'),
+  //   options: opts,
+  // })
 }
 
 export default app
-export { app, options }
+export { app }

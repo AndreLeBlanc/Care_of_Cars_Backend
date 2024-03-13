@@ -35,16 +35,3 @@ export interface SupportPluginOptions {
 export default fp<SupportPluginOptions>(async (fastify, opts) => {
   await fastify.register(fastifyEnv, options)
 })
-
-// When using .decorate you have to specify added properties for Typescript
-declare module 'fastify' {
-  interface FastifyInstance {
-    config: {
-      // this should be same as the confKey in options
-      // specify your typing here
-      DB_USERNAME: string
-      DB_PASSWORD: string
-      JWT_SECRET: string
-    }
-  }
-}

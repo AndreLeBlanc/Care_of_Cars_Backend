@@ -1,18 +1,23 @@
-import { FastifyJwtNamespace } from '@fastify/jwt'
 import fp from 'fastify-plugin'
-import { FastifyReply } from 'fastify/types/reply'
-import { FastifyRequest } from 'fastify/types/request'
+import fastifyJwt from '@fastify/jwt'
+import { FastifyReply, FastifyRequest } from 'fastify'
+
 import { roleHasPermission } from '../services/roleService.js'
+
 export interface SupportPluginOptions {
   // Specify Support plugin options here
 }
 
-// The use of fastify-plugin is required to be able
-// to export the decorators to the outer scope
-export default fp<SupportPluginOptions>(async (fastify, opts) => {
-  fastify.register(require('@fastify/jwt'), {
-    secret: fastify?.config?.JWT_SECRET, //"supersecret"
+const supportPlugin = fp<SupportPluginOptions>(async (fastify, opts) => {
+  await fastify.register(fastifyJwt, {
+    //////////////////TODO
+    //////////////////TODO
+    //////////////////TODO
+    //////////////////TODO
+    //////////////////TODO
+    secret: 'supersecret',
   })
+
   fastify.decorate(
     'authenticate',
     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -23,6 +28,7 @@ export default fp<SupportPluginOptions>(async (fastify, opts) => {
       }
     },
   )
+
   fastify.decorate(
     'authorize',
     async function (
@@ -33,8 +39,6 @@ export default fp<SupportPluginOptions>(async (fastify, opts) => {
       try {
         const userData: any = request.user
         const hasPermission = await roleHasPermission(userData.user.role.id, permissionName)
-        // console.log("has permission ", permissionName, " = ", hasPermission);
-        // console.log("user is == ", userData.user.role);
         if (!hasPermission) {
           return reply
             .status(403)
@@ -46,9 +50,5 @@ export default fp<SupportPluginOptions>(async (fastify, opts) => {
     },
   )
 })
-declare module 'fastify' {
-  interface FastifyInstance extends FastifyJwtNamespace<{ namespace: 'security' }> {
-    authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void>
-    authorize(request: FastifyRequest, reply: FastifyReply, permissionName: string): Promise<void>
-  }
-}
+
+export default supportPlugin

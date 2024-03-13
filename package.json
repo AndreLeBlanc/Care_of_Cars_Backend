@@ -4,6 +4,7 @@
   "description": "This project was bootstrapped with Fastify-CLI.",
   "main": "app.ts",
   "type": "module",
+  "types": "app.d.ts",
   "directories": {
     "test": "test"
   },
@@ -15,7 +16,7 @@
     "dev": "npm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
     "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
     "generate": "drizzle-kit generate:pg --config=src/config/drizzle.config.ts",
-    "deployDocker": "drizzle-kit generate:pg --config=src/config/drizzle.config.ts && fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
+    "deployDocker": "drizzle-kit generate:pg --config=src/config/drizzle.config.ts && fastify start   --ignore-watch=.ts$ -w -l info -P dist/app.js",
     "drizzle-studio": "npx drizzle-kit studio --config=src/config/drizzle.config.ts"
   },
   "keywords": [],
@@ -42,13 +43,14 @@
   },
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
-    "@types/node": "^20.4.4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.11.26",
     "c8": "^9.0.0",
     "concurrently": "^8.2.2",
     "drizzle-kit": "^0.20.14",
     "fastify-tsconfig": "^2.0.0",
     "ts-node": "^10.4.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.4.2"
   },
   "pre-commit": {
     "run": ["build:ts"],

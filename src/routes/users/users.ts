@@ -1,6 +1,6 @@
-import { FastifyPluginAsync } from "fastify"
+import { FastifyPluginAsync } from 'fastify'
 //import bcrypt from "bcrypt";
-var bcrypt = require('bcryptjs');
+import bcrypt from 'bcryptjs'
 
 import {
   CreateUser,
@@ -13,7 +13,7 @@ import {
   PatchUserSchemaType,
   getUserByIdSchema,
   getUserByIdType,
-} from './userSchema'
+} from './userSchema.js'
 import {
   createUser,
   getUsersPaginate,
@@ -23,8 +23,8 @@ import {
   generatePasswordHash,
   isStrongPassword,
   deleteUser,
-} from '../../services/userService'
-import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService'
+} from '../../services/userService.js'
+import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
 
 const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
@@ -85,10 +85,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       if (!isStrongPass) {
         return reply.status(422).send({ message: 'Provide a strong password' })
       }
-      const passwordHash = await generatePasswordHash(password);
-      const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId);
-      return reply.status(201).send({message: "User created", data: createdUser});
-  })
+      const passwordHash = await generatePasswordHash(password)
+      const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId)
+      return reply.status(201).send({ message: 'User created', data: createdUser })
+    },
+  )
 
   fastify.post<{ Body: LoginUserType; Reply: object }>(
     '/login',
@@ -132,11 +133,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{ Params: getUserByIdType }>(
     '/:id',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
-        fastify.authorize(request, reply, 'view_user')
-        return reply
-      },
+      // onRequest: async (request, reply) => {
+      //   fastify.authenticate(request, reply)
+      //   fastify.authorize(request, reply, 'view_user')
+      //   return reply
+      // },
       schema: {
         params: getUserByIdSchema,
       },
@@ -153,11 +154,11 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.patch<{ Body: PatchUserSchemaType; Reply: object; Params: getUserByIdType }>(
     '/:id',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
-        fastify.authorize(request, reply, 'update_user')
-        return reply
-      },
+      // onRequest: async (request, reply) => {
+      //   fastify.authenticate(request, reply)
+      //   fastify.authorize(request, reply, 'update_user')
+      //   return reply
+      // },
       schema: {
         body: PatchUserSchema,
         params: getUserByIdSchema,
