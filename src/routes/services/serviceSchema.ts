@@ -1,4 +1,17 @@
 import { Static, Type } from '@sinclair/typebox'
+
+export const CreateServiceVariantsSchema = Type.Object({
+  description: Type.String(),
+  award: Type.Number({ minimum: 0.01 }),
+  cost: Type.Number({ minimum: 0.01 }),
+  day1: Type.Optional(Type.String()),
+  day2: Type.Optional(Type.String()),
+  day3: Type.Optional(Type.String()),
+  day4: Type.Optional(Type.String()),
+  day5: Type.Optional(Type.String()),
+})
+export type CreateServiceVariantsSchemaType = Static<typeof CreateServiceVariantsSchema>
+
 enum colorOnDutyEnum {
   LightBlue = 'LightBlue',
   Blue = 'Blue',
@@ -33,6 +46,7 @@ export const CreateServiceSchema = Type.Object({
   itermNumber: Type.Optional(Type.String()),
   suppliersArticleNumber: Type.Optional(Type.String()),
   externalArticleNumber: Type.Optional(Type.String()),
+  serviceVariants: Type.Optional(Type.Array(CreateServiceVariantsSchema)),
 })
 
 export type CreateServiceSchemaType = Static<typeof CreateServiceSchema>

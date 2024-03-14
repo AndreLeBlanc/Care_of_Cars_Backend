@@ -114,9 +114,9 @@ export const services = pgTable('services', {
 export const serviceVariants = pgTable('serviceVariants', {
   id: serial('id').primaryKey().unique(),
   description: varchar('description', { length: 256 }),
-  award: real('award'),
+  award: real('award').notNull(),
   cost: real('cost').notNull(),
-  day1: time('day1').notNull(),
+  day1: time('day1'),
   day2: time('day2'),
   day3: time('day3'),
   day4: time('day4'),
