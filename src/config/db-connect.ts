@@ -5,7 +5,7 @@ import * as schema from '../schema/schema.js'
 import * as dotenv from 'dotenv'
 dotenv.config()
 
-const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@postgres:5432/${process.env.DB_NAME}`
+const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.POSTGRES_HOST}:5432/${process.env.DB_NAME}`
 
 export async function initDrizzle() {
   const sql = postgres(connectionString, { max: 1 })

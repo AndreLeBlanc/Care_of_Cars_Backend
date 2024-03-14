@@ -18,5 +18,6 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
+      - POSTGRES_HOST=${POSTGRES_HOST}
     depends_on:
       - postgres
