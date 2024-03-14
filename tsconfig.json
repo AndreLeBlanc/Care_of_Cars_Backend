@@ -9,7 +9,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "noUnusedLocals": false,
+    //"noUnusedParameters": true,
     // "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./src"

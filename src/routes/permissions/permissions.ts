@@ -21,7 +21,7 @@ export async function permissions(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(
     '/permissions',
     {
-      //   onRequest: [fastify.authenticate],
+      onRequest: (request, reply) => fastify.authenticate(request, reply),
       schema: {
         querystring: ListPermissionQueryParamSchema,
       },
@@ -54,7 +54,7 @@ export async function permissions(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: CreatePermissionSchemaType; Reply: object }>(
     '/createPermission',
     {
-      //      onRequest: [fastify.authenticate],
+      onRequest: (request, reply) => fastify.authenticate(request, reply),
       schema: {
         body: CreatePermissionSchema,
         response: {},
@@ -69,7 +69,7 @@ export async function permissions(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Params: getPermissionByIdType }>(
     '/getperm:id',
     {
-      //      onRequest: [fastify.authenticate],
+      onRequest: (request, reply) => fastify.authenticate(request, reply),
       schema: {
         params: getPermissionByIdSchema,
       },
@@ -86,7 +86,7 @@ export async function permissions(fastify: FastifyInstance): Promise<void> {
   fastify.patch<{ Body: PatchPermissionSchemaType; Reply: object; Params: getPermissionByIdType }>(
     '/:id',
     {
-      //      onRequest: [fastify.authenticate],
+      onRequest: (request, reply) => fastify.authenticate(request, reply),
       schema: {
         body: PatchPermissionSchema,
         params: getPermissionByIdSchema,
@@ -109,7 +109,7 @@ export async function permissions(fastify: FastifyInstance): Promise<void> {
   fastify.delete<{ Params: getPermissionByIdType }>(
     '/permissions:id',
     {
-      //      onRequest: [fastify.authenticate],
+      onRequest: (request, reply) => fastify.authenticate(request, reply),
       schema: {
         params: getPermissionByIdSchema,
       },

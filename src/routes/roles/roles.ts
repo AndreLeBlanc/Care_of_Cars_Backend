@@ -22,7 +22,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: ListRoleQueryParamSchemaType }>(
     '/roles',
     {
-      //onRequest: [fastify.authenticate],
+      onRequest: (request, reply) => fastify.authenticate(request, reply), // no bind
       schema: {
         querystring: ListRoleQueryParamSchema,
       },
@@ -55,7 +55,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: CreateRoleSchemaType; Reply: object }>(
     '/createRole',
     {
-      //onRequest: [fastify.authenticate],
+      //  onRequest: (request, reply) => fastify.authenticate(request, reply), // no bind
       schema: {
         body: CreateRoleSchema,
         response: {},
@@ -70,7 +70,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Params: getRoleByIdType }>(
     '/roles:id',
     {
-      //onRequest: [fastify.authenticate],
+      onRequest: (request, reply) => fastify.authenticate(request, reply), // no bind
       schema: {
         params: getRoleByIdSchema,
       },
@@ -92,7 +92,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
   }>(
     '/roles:id',
     {
-      //onRequest: [fastify.authenticate],
+      onRequest: (request, reply) => fastify.authenticate(request, reply), // no bind
       schema: {
         body: PatchRoleSchema,
         params: getRoleByIdSchema,

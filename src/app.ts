@@ -1,19 +1,18 @@
-import AutoLoad, { AutoloadPluginOptions } from '@fastify/autoload'
+import { fastifyJwt } from '@fastify/jwt'
+import * as dotenv from 'dotenv'
+import { AutoloadPluginOptions } from '@fastify/autoload'
 import { FastifyPluginAsync, FastifyServerOptions } from 'fastify'
 import { initDrizzle } from './config/db-connect.js'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
-import { join } from 'path'
-import path from 'path'
-import { fileURLToPath } from 'url'
 import pagination from './plugins/pagination.js'
+import jwt from './plugins/jwt.js'
 import { permissions } from './routes/permissions/permissions.js'
 import { roleToPermissions } from './routes/role-to-permission/roleToPermissons.js'
 import { roles } from './routes/roles/roles.js'
 import { users } from './routes/users/users.js'
-const __filename = fileURLToPath(import.meta.url)
 
-const __dirname = path.dirname(__filename)
+dotenv.config()
 export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
 // Pass --options via CLI arguments in command to enable these options.
 const options: AppOptions = {}
@@ -57,23 +56,7 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
     },
   })
   await fastify.register(fastifySwaggerUI, { routePrefix: '/docs' })
-  // Do not touch the following lines
 
-  // This loads all plugins defined in plugins
-  // those should be support plugins that are reused
-  // through your application
-  // await void fastify.register(AutoLoad, {
-  //   dir: join(__dirname, 'routes/permissions'),
-  //   options: opts,
-  // })
-  // await void fastify.register(AutoLoad, {
-  //   dir: join(__dirname, 'routes/role-to-permission'),
-  //   options: opts,
-  // })
-  // await void fastify.register(AutoLoad, {
-  //   dir: join(__dirname, 'routes/roles'),
-  //   options: opts,
-  // })
   await void fastify.register(permissions)
   await void fastify.register(roleToPermissions)
   await void fastify.register(roles)
@@ -82,6 +65,14 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
   // This loads all plugins defined in routes
   // define your routes in one of these
   await void fastify.register(pagination)
+  await void fastify.register(jwt)
+  if (typeof process.env.JWT_SECRET === 'string') {
+    fastify.register(fastifyJwt, {
+      secret: process.env.JWT_SECRET,
+    })
+  } else {
+    console.log('can not find JWT_SECRET')
+  }
 }
 
 export default app

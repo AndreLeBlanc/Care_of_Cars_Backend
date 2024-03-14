@@ -1,4 +1,3 @@
-import { FastifyJwtNamespace, fastifyJwt } from '@fastify/jwt'
 import fp from 'fastify-plugin'
 import { FastifyReply } from 'fastify/types/reply'
 import { FastifyRequest } from 'fastify/types/request'
@@ -9,20 +8,15 @@ export interface SupportPluginOptions {
 
 // The use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
-export default fp<SupportPluginOptions>(async (fastify, opts) => {
-  //  fastify.register(fastifyJwt, {
-  //    secret: fastify?.config?.JWT_SECRET, //"supersecret"
-  //  })
-  fastify.decorate(
-    'authenticate',
-    async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
-      try {
-        await request.jwtVerify()
-      } catch (err) {
-        return reply.send(err)
-      }
-    },
-  )
+export default fp<SupportPluginOptions>(async (fastify, reply) => {
+  fastify.decorate('authenticate', async (request: FastifyRequest, opts: FastifyReply) => {
+    try {
+      await request.jwtVerify()
+    } catch (error) {
+      throw fastify.httpErrors.unauthorized()
+    }
+  })
+
   fastify.decorate(
     'authorize',
     async function (
@@ -47,7 +41,7 @@ export default fp<SupportPluginOptions>(async (fastify, opts) => {
   )
 })
 declare module 'fastify' {
-  interface FastifyInstance extends FastifyJwtNamespace<{ namespace: 'security' }> {
+  export interface FastifyInstance {
     authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void>
     authorize(request: FastifyRequest, reply: FastifyReply, permissionName: string): Promise<void>
   }

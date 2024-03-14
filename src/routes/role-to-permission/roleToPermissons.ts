@@ -14,7 +14,7 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
   fastify.post<{ Body: CreateRoleToPermissionSchemaType; Reply: object }>(
     '/createpermission',
     {
-      //  onRequest: [fastify.authenticate],
+      onRequest: (request, reply) => fastify.authenticate(request, reply), // no bind
       schema: {
         body: CreateRoleToPermissionSchema,
         response: {},
@@ -29,7 +29,7 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
   fastify.delete<{ Params: DeleteRoleToPermissionType }>(
     '/:roleId/:permissionId',
     {
-      //  onRequest: [fastify.authenticate],
+      onRequest: (request, reply) => fastify.authenticate(request, reply), // no bind
       schema: {
         params: DeleteRoleToPermissionSchema,
       },

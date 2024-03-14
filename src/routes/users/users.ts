@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs'
 import {
   CreateUser,
   CreateUserType,
+  CreateUserReply,
   ListUserQueryParam,
   ListUserQueryParamType,
   LoginUser,
@@ -30,11 +31,11 @@ export async function users(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
     '/users:users',
     {
-      // onRequest: async (request, reply) => {
-      //   //fastify.authenticate(request, reply)
-      //   //fastify.authorize(request, reply, 'list_user')
-      //   return reply
-      // },
+      onRequest: async (request, reply) => {
+        fastify.authenticate(request, reply)
+        fastify.authorize(request, reply, 'list_user')
+        return reply
+      },
       schema: {
         querystring: ListUserQueryParam,
       },
@@ -67,15 +68,15 @@ export async function users(fastify: FastifyInstance) {
   fastify.post<{ Body: CreateUserType; Reply: object }>(
     '/createUser',
     {
-      // onRequest: async (request, reply) => {
-      //   fastify.authenticate(request, reply);
-      //   fastify.authorize(request, reply, 'create_user');
-      //   return reply;
-      // },
+      onRequest: async (request, reply) => {
+        //  fastify.authenticate(request, reply)
+        //  fastify.authorize(request, reply, 'create_user')
+        //   return reply
+      },
       schema: {
         body: CreateUser,
         response: {
-          //201: CreateUserReply,
+          201: CreateUserReply,
         },
       },
     },
