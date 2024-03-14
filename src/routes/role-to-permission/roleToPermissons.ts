@@ -1,42 +1,68 @@
-import { FastifyPluginAsync } from "fastify"
-import { createRoleToPermissions, deleteRoleToPermissions } from "../../services/roleToPermissionService";
-import { CreateRoleToPermissionSchema, CreateRoleToPermissionSchemaType, DeleteRoleToPermissionSchema, DeleteRoleToPermissionType } from "./roleToPermissionSchema";
+import { FastifyPluginAsync } from 'fastify'
+import {
+  createRoleToPermissions,
+  deleteRoleToPermissions,
+} from '../../services/roleToPermissionService'
+import {
+  CreateRoleToPermissionSchema,
+  CreateRoleToPermissionSchemaType,
+  DeleteRoleToPermissionSchema,
+  DeleteRoleToPermissionType,
+} from './roleToPermissionSchema'
 
 const roleToPermissions: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
- 
-  fastify.post<{ Body: CreateRoleToPermissionSchemaType, Reply: object }>(
+  fastify.post<{ Body: CreateRoleToPermissionSchemaType; Reply: object }>(
     '/',
     {
-      onRequest: [fastify.authenticate],
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'create_role_to_permission'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
-      body: CreateRoleToPermissionSchema,
-        response: {
-        },
-      }
+        body: CreateRoleToPermissionSchema,
+        response: {},
+      },
     },
-     async (request, reply) => {
-      const { roleId, permissionId } = request.body;
-      const roleToPermissions = await createRoleToPermissions(roleId, permissionId);
-      reply.status(201).send({message: "Role to Permission created", data: roleToPermissions});
-  })
-  fastify.delete<{Params: DeleteRoleToPermissionType }>(
+    async (request, reply) => {
+      const { roleId, permissionId } = request.body
+      const roleToPermissions = await createRoleToPermissions(roleId, permissionId)
+      reply.status(201).send({ message: 'Role to Permission created', data: roleToPermissions })
+    },
+  )
+  fastify.delete<{ Params: DeleteRoleToPermissionType }>(
     '/:roleId/:permissionId',
     {
-      onRequest: [fastify.authenticate],
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'delete_role_to_permission'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
-        params: DeleteRoleToPermissionSchema
-      }
+        params: DeleteRoleToPermissionSchema,
+      },
     },
-     async (request, reply) => {
-      const {roleId, permissionId}  = request.params;
-      const deletedRoleToPermissions = await deleteRoleToPermissions(roleId, permissionId);
-      if(deletedRoleToPermissions == null) {
-        return reply.status(404).send({message: "Invalid role id or permission id"})
+    async (request, reply) => {
+      const { roleId, permissionId } = request.params
+      const deletedRoleToPermissions = await deleteRoleToPermissions(roleId, permissionId)
+      if (deletedRoleToPermissions == null) {
+        return reply.status(404).send({ message: 'Invalid role id or permission id' })
       }
-      return reply.status(200).send({message: "Role to permissions deleted"});
-      
-  })
+      return reply.status(200).send({ message: 'Role to permissions deleted' })
+    },
+  )
 }
 
-export default roleToPermissions;
-
+export default roleToPermissions
