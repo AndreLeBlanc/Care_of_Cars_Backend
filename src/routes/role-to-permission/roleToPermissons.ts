@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from 'fastify'
+import { FastifyInstance } from 'fastify'
 import {
   CreateRoleToPermissionSchema,
   CreateRoleToPermissionSchemaType,
@@ -10,11 +10,11 @@ import {
   deleteRoleToPermissions,
 } from '../../services/roleToPermissionService.js'
 
-const roleToPermissions: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
+export async function roleToPermissions(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: CreateRoleToPermissionSchemaType; Reply: object }>(
-    '/',
+    '/createpermission',
     {
-      onRequest: [fastify.authenticate],
+      //  onRequest: [fastify.authenticate],
       schema: {
         body: CreateRoleToPermissionSchema,
         response: {},
@@ -29,7 +29,7 @@ const roleToPermissions: FastifyPluginAsync = async (fastify, opts): Promise<voi
   fastify.delete<{ Params: DeleteRoleToPermissionType }>(
     '/:roleId/:permissionId',
     {
-      onRequest: [fastify.authenticate],
+      //  onRequest: [fastify.authenticate],
       schema: {
         params: DeleteRoleToPermissionSchema,
       },

@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from 'fastify'
+import { FastifyInstance } from 'fastify'
 //import bcrypt from "bcrypt";
 import bcrypt from 'bcryptjs'
 
@@ -26,9 +26,9 @@ import {
 } from '../../services/userService.js'
 import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
 
-const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
+export async function users(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
-    '/',
+    '/users:users',
     {
       // onRequest: async (request, reply) => {
       //   //fastify.authenticate(request, reply)
@@ -65,7 +65,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     },
   )
   fastify.post<{ Body: CreateUserType; Reply: object }>(
-    '/',
+    '/createUser',
     {
       // onRequest: async (request, reply) => {
       //   fastify.authenticate(request, reply);
@@ -131,7 +131,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     },
   )
   fastify.get<{ Params: getUserByIdType }>(
-    '/:id',
+    '/findUsers:id',
     {
       onRequest: async (request, reply) => {
         fastify.authenticate(request, reply)
@@ -152,7 +152,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     },
   )
   fastify.patch<{ Body: PatchUserSchemaType; Reply: object; Params: getUserByIdType }>(
-    '/:id',
+    '/users:id',
     {
       onRequest: async (request, reply) => {
         fastify.authenticate(request, reply)
@@ -185,7 +185,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     },
   )
   fastify.delete<{ Params: getUserByIdType }>(
-    '/:id',
+    '/user:id',
     {
       onRequest: async (request, reply) => {
         fastify.authenticate(request, reply)

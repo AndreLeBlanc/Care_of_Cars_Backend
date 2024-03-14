@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from 'fastify'
+import { FastifyInstance } from 'fastify'
 import {
   createRole,
   getRolesPaginate,
@@ -18,11 +18,11 @@ import {
   getRoleByIdType,
 } from './roleSchema.js'
 
-const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
+export async function roles(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: ListRoleQueryParamSchemaType }>(
-    '/',
+    '/roles',
     {
-      onRequest: [fastify.authenticate],
+      //onRequest: [fastify.authenticate],
       schema: {
         querystring: ListRoleQueryParamSchema,
       },
@@ -53,9 +53,9 @@ const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     },
   )
   fastify.post<{ Body: CreateRoleSchemaType; Reply: object }>(
-    '/',
+    '/createRole',
     {
-      onRequest: [fastify.authenticate],
+      //onRequest: [fastify.authenticate],
       schema: {
         body: CreateRoleSchema,
         response: {},
@@ -68,9 +68,9 @@ const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     },
   )
   fastify.get<{ Params: getRoleByIdType }>(
-    '/:id',
+    '/roles:id',
     {
-      onRequest: [fastify.authenticate],
+      //onRequest: [fastify.authenticate],
       schema: {
         params: getRoleByIdSchema,
       },
@@ -90,9 +90,9 @@ const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     Reply: object
     Params: getRoleByIdType
   }>(
-    '/:id',
+    '/roles:id',
     {
-      onRequest: [fastify.authenticate],
+      //onRequest: [fastify.authenticate],
       schema: {
         body: PatchRoleSchema,
         params: getRoleByIdSchema,
@@ -113,9 +113,9 @@ const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     },
   )
   fastify.delete<{ Params: getRoleByIdType }>(
-    '/:id',
+    '/roles:id',
     {
-      onRequest: [fastify.authenticate],
+      // //onRequest: [fastify.authenticate],
       schema: {
         params: getRoleByIdSchema,
       },

@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from 'fastify'
+import { FastifyInstance } from 'fastify'
 import {
   createPermission,
   getPermissionsPaginate,
@@ -17,11 +17,11 @@ import {
   getPermissionByIdType,
 } from './permissionSchema.js'
 
-const permissions: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
+export async function permissions(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(
-    '/',
+    '/permissions',
     {
-      onRequest: [fastify.authenticate],
+      //   onRequest: [fastify.authenticate],
       schema: {
         querystring: ListPermissionQueryParamSchema,
       },
@@ -52,9 +52,9 @@ const permissions: FastifyPluginAsync = async (fastify, opts): Promise<void> => 
     },
   )
   fastify.post<{ Body: CreatePermissionSchemaType; Reply: object }>(
-    '/',
+    '/createPermission',
     {
-      onRequest: [fastify.authenticate],
+      //      onRequest: [fastify.authenticate],
       schema: {
         body: CreatePermissionSchema,
         response: {},
@@ -67,9 +67,9 @@ const permissions: FastifyPluginAsync = async (fastify, opts): Promise<void> => 
     },
   )
   fastify.get<{ Params: getPermissionByIdType }>(
-    '/:id',
+    '/getperm:id',
     {
-      onRequest: [fastify.authenticate],
+      //      onRequest: [fastify.authenticate],
       schema: {
         params: getPermissionByIdSchema,
       },
@@ -86,7 +86,7 @@ const permissions: FastifyPluginAsync = async (fastify, opts): Promise<void> => 
   fastify.patch<{ Body: PatchPermissionSchemaType; Reply: object; Params: getPermissionByIdType }>(
     '/:id',
     {
-      onRequest: [fastify.authenticate],
+      //      onRequest: [fastify.authenticate],
       schema: {
         body: PatchPermissionSchema,
         params: getPermissionByIdSchema,
@@ -107,9 +107,9 @@ const permissions: FastifyPluginAsync = async (fastify, opts): Promise<void> => 
     },
   )
   fastify.delete<{ Params: getPermissionByIdType }>(
-    '/:id',
+    '/permissions:id',
     {
-      onRequest: [fastify.authenticate],
+      //      onRequest: [fastify.authenticate],
       schema: {
         params: getPermissionByIdSchema,
       },

@@ -10,9 +10,9 @@ export interface SupportPluginOptions {
 // The use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
 export default fp<SupportPluginOptions>(async (fastify, opts) => {
-  fastify.register(fastifyJwt, {
-    secret: fastify?.config?.JWT_SECRET, //"supersecret"
-  })
+  //  fastify.register(fastifyJwt, {
+  //    secret: fastify?.config?.JWT_SECRET, //"supersecret"
+  //  })
   fastify.decorate(
     'authenticate',
     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
