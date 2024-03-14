@@ -49,6 +49,7 @@ const users: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     async (request, reply) => {
       let { search = '', limit = 10, page = 1 } = request.query
       const offset = fastify.findOffset(limit, page)
+
       const result = await getUsersPaginate(search, limit, page, offset)
       let message: string = fastify.responseMessage('users', result.data.length)
       let requestUrl: string | null = request.protocol + '://' + request.hostname + request.url
