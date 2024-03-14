@@ -15,7 +15,9 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
       try {
         const requestPath = request.routeOptions.url
-        if (requestPath != '/users/login') {
+        //console.log(requestPath, requestPath?.startsWith('/docs'))
+
+        if (!requestPath?.startsWith('/users/login') && !requestPath?.startsWith('/docs')) {
           await request.jwtVerify()
         }
       } catch (err) {
