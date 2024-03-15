@@ -10,6 +10,7 @@ import { permissions } from './routes/permissions/permissions.js'
 import { roleToPermissions } from './routes/role-to-permission/roleToPermissons.js'
 import { roles } from './routes/roles/roles.js'
 import { users } from './routes/users/users.js'
+import { root } from './routes/root.js'
 
 dotenv.config()
 export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
@@ -54,15 +55,14 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
       // ]
     },
   })
-  await fastify.register(fastifySwaggerUI, { routePrefix: '/docs' })
+  await fastify.register(fastifySwaggerUI, { prefix: '/docs' })
 
-  await void fastify.register(permissions, { routePrefix: '/permissions' })
-  await void fastify.register(roleToPermissions, { routePrefix: '/roleToPermissions' })
-  await void fastify.register(roles, { routePrefix: '/roles' })
-  await void fastify.register(users, { routePrefix: '/users' })
+  await void fastify.register(roleToPermissions, { prefix: '/roleToPermissions' })
+  await void fastify.register(permissions, { prefix: '/permissions' })
+  await void fastify.register(roles, { prefix: '/roles' })
+  await void fastify.register(users, { prefix: '/users' })
+  await void fastify.register(root, { prefix: '/' })
 
-  // This loads all plugins defined in routes
-  // define your routes in one of these
   await void fastify.register(pagination)
   if (typeof process.env.JWT_SECRET === 'string') {
     fastify.register(fastifyJwt, {

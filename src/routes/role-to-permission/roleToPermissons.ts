@@ -12,7 +12,7 @@ import {
 
 export async function roleToPermissions(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: CreateRoleToPermissionSchemaType; Reply: object }>(
-    '/createpermission',
+    '/',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'create_role_to_permission'

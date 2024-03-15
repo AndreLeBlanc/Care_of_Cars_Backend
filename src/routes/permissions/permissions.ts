@@ -19,7 +19,7 @@ import {
 
 export async function permissions(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(
-    '/permissions',
+    '/',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'list_permission'
@@ -62,7 +62,7 @@ export async function permissions(fastify: FastifyInstance) {
     },
   )
   fastify.post<{ Body: CreatePermissionSchemaType; Reply: object }>(
-    '/createPermission',
+    '/',
 
     {
       preHandler: async (request, reply, done) => {

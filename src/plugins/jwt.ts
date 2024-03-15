@@ -39,16 +39,16 @@ export default fp<SupportPluginOptions>(async (fastify, reply) => {
       return true
     },
   )
-  //   fastify.decorate(
-  //     'authenticate',
-  //     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
-  //       try {
-  //         await request.jwtVerify()
-  //       } catch (err) {
-  //         return reply.send(err)
-  //       }
-  //     },
-  //   )
+  fastify.decorate(
+    'authenticate',
+    async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
+      try {
+        await request.jwtVerify()
+      } catch (err) {
+        return reply.send(err)
+      }
+    },
+  )
   //   fastify.decorate(
   //     'authorize',
   //     async function (
