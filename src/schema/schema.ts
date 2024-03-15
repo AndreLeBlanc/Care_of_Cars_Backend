@@ -8,7 +8,10 @@ import {
   primaryKey,
   boolean,
   pgEnum,
+  real,
+  time,
 } from 'drizzle-orm/pg-core'
+
 export const users = pgTable('users', {
   id: serial('id').primaryKey().unique(),
   firstName: varchar('firstName').notNull(),
@@ -104,6 +107,23 @@ export const services = pgTable('services', {
   itermNumber: varchar('itermNumber', { length: 256 }),
   suppliersArticleNumber: varchar('suppliersArticleNumber', { length: 256 }),
   externalArticleNumber: varchar('externalArticleNumber', { length: 256 }),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const serviceVariants = pgTable('serviceVariants', {
+  id: serial('id').primaryKey().unique(),
+  description: varchar('description', { length: 256 }),
+  award: real('award').notNull(),
+  cost: real('cost').notNull(),
+  day1: time('day1'),
+  day2: time('day2'),
+  day3: time('day3'),
+  day4: time('day4'),
+  day5: time('day5'),
+  serviceId: integer('serviceId')
+    .references(() => services.id)
+    .notNull(),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })

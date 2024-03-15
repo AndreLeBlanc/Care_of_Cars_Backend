@@ -85,6 +85,20 @@
       "when": 1710241132642,
       "tag": "0011_burly_jack_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1710403471167,
+      "tag": "0012_majestic_hydra",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1710410608975,
+      "tag": "0013_wooden_marrow",
+      "breakpoints": true
     }
   ]
 }
