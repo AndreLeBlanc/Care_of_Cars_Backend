@@ -6,7 +6,6 @@ import { initDrizzle } from './config/db-connect.js'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import pagination from './plugins/pagination.js'
-import jwt from './plugins/jwt.js'
 import { permissions } from './routes/permissions/permissions.js'
 import { roleToPermissions } from './routes/role-to-permission/roleToPermissons.js'
 import { roles } from './routes/roles/roles.js'
@@ -41,13 +40,13 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
     },
     swagger: {
       // properties...
-      // securityDefinitions: {
-      //   Authorization: {
-      //     type: 'apiKey',
-      //     name: 'Authorization',
-      //     in: 'header',
-      //   },
-      // },
+      securityDefinitions: {
+        Authorization: {
+          type: 'apiKey',
+          name: 'Authorization',
+          in: 'header',
+        },
+      },
       // security: [
       //   {
       //     authorization: []
@@ -57,15 +56,14 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
   })
   await fastify.register(fastifySwaggerUI, { routePrefix: '/docs' })
 
-  await void fastify.register(permissions)
-  await void fastify.register(roleToPermissions)
-  await void fastify.register(roles)
-  await void fastify.register(users)
+  await void fastify.register(permissions, { routePrefix: '/permissions' })
+  await void fastify.register(roleToPermissions, { routePrefix: '/roleToPermissions' })
+  await void fastify.register(roles, { routePrefix: '/roles' })
+  await void fastify.register(users, { routePrefix: '/users' })
 
   // This loads all plugins defined in routes
   // define your routes in one of these
   await void fastify.register(pagination)
-  await void fastify.register(jwt)
   if (typeof process.env.JWT_SECRET === 'string') {
     fastify.register(fastifyJwt, {
       secret: process.env.JWT_SECRET,

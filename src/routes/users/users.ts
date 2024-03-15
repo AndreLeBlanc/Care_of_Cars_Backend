@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify'
-//import bcrypt from "bcrypt";
 import bcrypt from 'bcryptjs'
 
 import {
@@ -31,11 +30,17 @@ export async function users(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
     '/users:users',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
-        fastify.authorize(request, reply, 'list_user')
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'list_user'
+        if (!(await fastify.authorize(request, reply, permissionName))) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
         return reply
       },
+
       schema: {
         querystring: ListUserQueryParam,
       },
@@ -43,6 +48,7 @@ export async function users(fastify: FastifyInstance) {
     async (request, reply) => {
       let { search = '', limit = 10, page = 1 } = request.query
       const offset = fastify.findOffset(limit, page)
+
       const result = await getUsersPaginate(search, limit, page, offset)
       let message: string = fastify.responseMessage('users', result.data.length)
       let requestUrl: string | null = request.protocol + '://' + request.hostname + request.url
@@ -68,11 +74,13 @@ export async function users(fastify: FastifyInstance) {
   fastify.post<{ Body: CreateUserType; Reply: object }>(
     '/createUser',
     {
-      onRequest: async (request, reply) => {
-        //  fastify.authenticate(request, reply)
-        //  fastify.authorize(request, reply, 'create_user')
-        //   return reply
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, 'create_user')
+        done()
+        return reply
       },
+
       schema: {
         body: CreateUser,
         response: {
@@ -101,12 +109,13 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const { email, password } = request.body
-      const user = await verifyUser(email)
+      let user = await verifyUser(email)
       if (user == null) {
         return reply.status(403).send({ message: 'Login failed, incorrect email' })
       }
       const match = await bcrypt.compare(password, user.password)
       if (match) {
+        delete user.password
         const token = fastify.jwt.sign({ user })
         const rolePermissions = await getRoleWithPermissions(user.role.id)
         const roleFullPermissions = await getAllPermissionStatus(user.role.id)
@@ -119,6 +128,7 @@ export async function users(fastify: FastifyInstance) {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
+            isSuperAdmin: user.isSuperAdmin,
             role: {
               id: user.role.id,
               roleName: user.role.roleName,
@@ -134,11 +144,13 @@ export async function users(fastify: FastifyInstance) {
   fastify.get<{ Params: getUserByIdType }>(
     '/findUsers:id',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
         fastify.authorize(request, reply, 'view_user')
+        done()
         return reply
       },
+
       schema: {
         params: getUserByIdSchema,
       },
@@ -155,9 +167,10 @@ export async function users(fastify: FastifyInstance) {
   fastify.patch<{ Body: PatchUserSchemaType; Reply: object; Params: getUserByIdType }>(
     '/users:id',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
         fastify.authorize(request, reply, 'update_user')
+        done()
         return reply
       },
       schema: {
@@ -188,9 +201,10 @@ export async function users(fastify: FastifyInstance) {
   fastify.delete<{ Params: getUserByIdType }>(
     '/user:id',
     {
-      onRequest: async (request, reply) => {
-        fastify.authenticate(request, reply)
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
         fastify.authorize(request, reply, 'delete_user')
+        done()
         return reply
       },
       schema: {

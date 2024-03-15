@@ -3,7 +3,15 @@ import fp from 'fastify-plugin'
 
 const schema = {
   type: 'object',
-  required: ['DB_PASSWORD', 'DB_USERNAME', 'DB_NAME', 'JWT_SECRET'],
+  required: [
+    'DB_PASSWORD',
+    'DB_USERNAME',
+    'DB_NAME',
+    'JWT_SECRET',
+    'RUN_SEED',
+    'SUPER_ADMIN_EMAIL',
+    'SUPER_ADMIN_PASSWORD',
+  ],
   properties: {
     DB_PASSWORD: {
       type: 'string',
@@ -16,6 +24,15 @@ const schema = {
     },
     JWT_SECRET: {
       type: 'string',
+    },
+    SUPER_ADMIN_EMAIL: {
+      type: 'string',
+    },
+    SUPER_ADMIN_PASSWORD: {
+      type: 'string',
+    },
+    RUN_SEED: {
+      type: 'boolean',
     },
   },
 }
@@ -45,6 +62,9 @@ declare module 'fastify' {
       DB_USERNAME: string
       DB_PASSWORD: string
       JWT_SECRET: string
+      RUN_SEED: boolean
+      SUPER_ADMIN_EMAIL: string
+      SUPER_ADMIN_PASSWORD: string
     }
   }
 }

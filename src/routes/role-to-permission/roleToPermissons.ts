@@ -14,7 +14,17 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
   fastify.post<{ Body: CreateRoleToPermissionSchemaType; Reply: object }>(
     '/createpermission',
     {
-      onRequest: (request, reply) => fastify.authenticate(request, reply), // no bind
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'create_role_to_permission'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         body: CreateRoleToPermissionSchema,
         response: {},
@@ -29,7 +39,17 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
   fastify.delete<{ Params: DeleteRoleToPermissionType }>(
     '/:roleId/:permissionId',
     {
-      onRequest: (request, reply) => fastify.authenticate(request, reply), // no bind
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'delete_role_to_permission'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         params: DeleteRoleToPermissionSchema,
       },

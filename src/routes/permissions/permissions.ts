@@ -17,11 +17,21 @@ import {
   getPermissionByIdType,
 } from './permissionSchema.js'
 
-export async function permissions(fastify: FastifyInstance): Promise<void> {
+export async function permissions(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(
     '/permissions',
     {
-      onRequest: (request, reply) => fastify.authenticate(request, reply),
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'list_permission'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         querystring: ListPermissionQueryParamSchema,
       },
@@ -53,8 +63,19 @@ export async function permissions(fastify: FastifyInstance): Promise<void> {
   )
   fastify.post<{ Body: CreatePermissionSchemaType; Reply: object }>(
     '/createPermission',
+
     {
-      onRequest: (request, reply) => fastify.authenticate(request, reply),
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'create_permission'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         body: CreatePermissionSchema,
         response: {},
@@ -67,9 +88,19 @@ export async function permissions(fastify: FastifyInstance): Promise<void> {
     },
   )
   fastify.get<{ Params: getPermissionByIdType }>(
-    '/getperm:id',
+    '/:id',
     {
-      onRequest: (request, reply) => fastify.authenticate(request, reply),
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'view_permission'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         params: getPermissionByIdSchema,
       },
@@ -86,7 +117,17 @@ export async function permissions(fastify: FastifyInstance): Promise<void> {
   fastify.patch<{ Body: PatchPermissionSchemaType; Reply: object; Params: getPermissionByIdType }>(
     '/:id',
     {
-      onRequest: (request, reply) => fastify.authenticate(request, reply),
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'update_permission'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         body: PatchPermissionSchema,
         params: getPermissionByIdSchema,
@@ -107,9 +148,19 @@ export async function permissions(fastify: FastifyInstance): Promise<void> {
     },
   )
   fastify.delete<{ Params: getPermissionByIdType }>(
-    '/permissions:id',
+    '/:id',
     {
-      onRequest: (request, reply) => fastify.authenticate(request, reply),
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'delete_permission'
+        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authrosieStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
       schema: {
         params: getPermissionByIdSchema,
       },
