@@ -1,5 +1,5 @@
 dist
 .env
 .node_modules
-drizzle
+drizzle/meta
 .env.sample
