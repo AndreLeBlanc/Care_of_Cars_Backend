@@ -19,5 +19,8 @@ services:
       - DB_NAME=${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
       - POSTGRES_HOST=${POSTGRES_HOST}
+      - RUN_SEED=${RUN_SEED}
+      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL}
+      - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD}
     depends_on:
       - postgres

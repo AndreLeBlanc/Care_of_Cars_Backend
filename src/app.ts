@@ -6,11 +6,13 @@ import { initDrizzle } from './config/db-connect.js'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import pagination from './plugins/pagination.js'
+import jwt from './plugins/jwt.js'
 import { permissions } from './routes/permissions/permissions.js'
 import { roleToPermissions } from './routes/role-to-permission/roleToPermissons.js'
 import { roles } from './routes/roles/roles.js'
 import { users } from './routes/users/users.js'
 import { root } from './routes/root.js'
+import seedSuperAdmin from './plugins/seed.js'
 
 dotenv.config()
 export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
@@ -55,6 +57,7 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
       // ]
     },
   })
+  await void fastify.register(seedSuperAdmin)
   await fastify.register(fastifySwaggerUI, { prefix: '/docs' })
 
   await void fastify.register(roleToPermissions, { prefix: '/roleToPermissions' })
@@ -71,6 +74,7 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
   } else {
     console.log('can not find JWT_SECRET')
   }
+  await void fastify.register(jwt)
 }
 
 export default app
