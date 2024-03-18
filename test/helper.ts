@@ -38,5 +38,15 @@ async function writeToFile(content: string, path: string) {
     console.log(err)
   }
 }
+async function readFile(path: string) {
+  try {
+    const data = await fs.readFile(path, { encoding: 'utf8' })
+    console.log(data)
+    return data
+  } catch (err) {
+    console.log(err)
+    throw err
+  }
+}
 
-export { config, build, writeToFile }
+export { config, build, writeToFile, readFile }
