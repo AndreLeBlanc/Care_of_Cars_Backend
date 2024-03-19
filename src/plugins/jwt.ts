@@ -13,16 +13,27 @@ export default fp<SupportPluginOptions>(async (fastify, opts) => {
   fastify.register(require('@fastify/jwt'), {
     secret: fastify?.config?.JWT_SECRET, //"supersecret"
   })
-  //   fastify.addHook(
-  //     'preHandler',
-  //     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
-  //       try {
-  //         await request.jwtVerify()
-  //       } catch (err) {
-  //         return reply.send(err)
-  //       }
-  //     },
-  //   )
+  fastify.addHook(
+    'preHandler',
+    async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
+      try {
+        const requestPath = request.routeOptions.url
+        //console.log(requestPath, requestPath?.startsWith('/docs'))
+
+        if (
+          !requestPath?.startsWith('/users/login') &&
+          !requestPath?.startsWith('/docs') &&
+          requestPath != '/' &&
+          requestPath != '/example'
+        ) {
+          await request.jwtVerify()
+        }
+      } catch (err) {
+        return reply.send(err)
+      }
+    },
+  )
+
   fastify.decorate(
     'authorize',
     async function (
@@ -45,45 +56,15 @@ export default fp<SupportPluginOptions>(async (fastify, opts) => {
       return true
     },
   )
-  //   fastify.decorate(
-  //     'authenticate',
-  //     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
-  //       try {
-  //         await request.jwtVerify()
-  //       } catch (err) {
-  //         return reply.send(err)
-  //       }
-  //     },
-  //   )
-  //   fastify.decorate(
-  //     'authorize',
-  //     async function (
-  //       request: FastifyRequest,
-  //       reply: FastifyReply,
-  //       permissionName: string,
-  //     ): Promise<void> {
-  //       try {
-  //         const userData: any = request.user
-  //         const hasPermission = await roleHasPermission(userData.user.role.id, permissionName)
-  //         // console.log("has permission ", permissionName, " = ", hasPermission);
-  //         // console.log("user is == ", userData.user.role);
-  //         if (userData.user.isSuperAdmin) {
-  //           console.log('super admin permissions skipping')
-  //           return
-  //         }
-  //         if (!hasPermission) {
-  //           return reply
-  //             .status(403)
-  //             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
-  //         }
-  //       } catch (err) {
-  //         return reply.send(err)
-  //       }
-  //     },
 })
 declare module 'fastify' {
-  interface FastifyInstance extends FastifyJwtNamespace<{ namespace: 'security' }> {
-    authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void>
+  interface FastifyInstance
+    extends FastifyJwtNamespace<{
+      jwtDecode: 'securityJwtDecode'
+      jwtSign: 'securityJwtSign'
+      jwtVerify: 'securityJwtVerify'
+    }> {
+    //authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void>
     authorize(
       request: FastifyRequest,
       reply: FastifyReply,

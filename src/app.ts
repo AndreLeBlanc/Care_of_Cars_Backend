@@ -1,6 +1,6 @@
 import { join } from 'path'
 import AutoLoad, { AutoloadPluginOptions } from '@fastify/autoload'
-import { FastifyPluginAsync, FastifyReply, FastifyRequest, FastifyServerOptions } from 'fastify'
+import { FastifyPluginAsync, FastifyServerOptions } from 'fastify'
 import { initDrizzle } from './config/db-connect'
 
 export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
@@ -9,22 +9,7 @@ const options: AppOptions = {}
 
 const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void> => {
   // Place here your custom code!
-  initDrizzle()
-  fastify.addHook(
-    'preHandler',
-    async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
-      try {
-        const requestPath = request.routeOptions.url
-        //console.log(requestPath, requestPath?.startsWith('/docs'))
-
-        if (!requestPath?.startsWith('/users/login') && !requestPath?.startsWith('/docs')) {
-          await request.jwtVerify()
-        }
-      } catch (err) {
-        return reply.send(err)
-      }
-    },
-  )
+  await initDrizzle()
 
   fastify.register(require('@fastify/swagger'), {
     // https://community.smartbear.com/discussions/swaggerostools/how-to-show-authorize-button-on-oas-3-swagger-in-javascript/234650
