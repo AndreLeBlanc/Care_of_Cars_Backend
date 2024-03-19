@@ -1,6 +1,6 @@
-import { db } from '../config/db-connect'
-import { CreateServiceSchemaType } from '../routes/services/serviceSchema'
-import { serviceVariants, services } from '../schema/schema'
+import { db } from '../config/db-connect.js'
+import { CreateServiceSchemaType } from '../routes/services/serviceSchema.js'
+import { serviceVariants, services } from '../schema/schema.js'
 
 export async function createService(service: CreateServiceSchemaType) {
   return await db.transaction(async (tx) => {

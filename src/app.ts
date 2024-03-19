@@ -10,6 +10,8 @@ import jwt from './plugins/jwt.js'
 import { permissions } from './routes/permissions/permissions.js'
 import { roleToPermissions } from './routes/role-to-permission/roleToPermissons.js'
 import { roles } from './routes/roles/roles.js'
+import { serviceCategory } from './routes/service-category/serviceCategory.js'
+import { services } from './routes/services/services.js'
 import { users } from './routes/users/users.js'
 import { root } from './routes/root.js'
 import seedSuperAdmin from './plugins/seed.js'
@@ -61,9 +63,11 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
   await void fastify.register(seedSuperAdmin)
   await fastify.register(fastifySwaggerUI, { prefix: '/docs' })
 
-  await void fastify.register(roleToPermissions, { prefix: '/roleToPermissions' })
   await void fastify.register(permissions, { prefix: '/permissions' })
+  await void fastify.register(roleToPermissions, { prefix: '/roleToPermissions' })
   await void fastify.register(roles, { prefix: '/roles' })
+  await void fastify.register(serviceCategory, { prefix: '/serviceCategory' })
+  await void fastify.register(services, { prefix: 'services' })
   await void fastify.register(users, { prefix: '/users' })
   await void fastify.register(root, { prefix: '/' })
 

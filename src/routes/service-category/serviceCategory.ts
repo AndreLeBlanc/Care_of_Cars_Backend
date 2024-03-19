@@ -1,11 +1,11 @@
-import { FastifyInstance, FastifyPluginAsync } from 'fastify'
+import { FastifyInstance } from 'fastify'
 import {
   createServiceCategory,
   deleteServiceCategory,
   getServiceCategoriesPaginate,
   getServiceCategoryById,
   updateServiceCategoryById,
-} from '../../services/serviceCategory'
+} from '../../services/serviceCategory.js'
 import {
   CreateServiceCategorySchema,
   CreateServiceCategorySchemaType,
@@ -15,9 +15,9 @@ import {
   PatchServiceCategorySchemaType,
   getServiceCategoryByIdSchema,
   getServiceCategoryByIdType,
-} from './serviceCategorySchema'
+} from './serviceCategorySchema.js'
 
-const serviceCategories: FastifyPluginAsync = async (fastify: FastifyInstance): Promise<void> => {
+export async function serviceCategory(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceCategoryQueryParamSchemaType }>(
     '/',
     {
@@ -178,4 +178,3 @@ const serviceCategories: FastifyPluginAsync = async (fastify: FastifyInstance): 
     },
   )
 }
-export default serviceCategories
