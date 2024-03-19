@@ -1,12 +1,9 @@
-//import { drizzle } from 'drizzle-orm/postgres-js'
-//import { migrate } from 'drizzle-orm/postgres-js/migrator'
-//import postgres from 'postgres'
-import { Pool } from 'pg'
-import * as schema from '../schema/schema'
+import pkg from 'pg'
+const { Pool } = pkg
+import * as schema from '../schema/schema.js'
 import { migrate } from 'drizzle-orm/node-postgres/migrator'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { newConnectionString } from './connection-string'
-//const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_USERNAME}@localhost:5432/${process.env.DB_NAME}`
+import { newConnectionString } from './connection-string.js'
 let connectionString: any = newConnectionString()
 
 const pool = new Pool({
