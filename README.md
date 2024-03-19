@@ -39,6 +39,19 @@ To access bash in one of the containers
 cp .env.sample .env
 ```
 
+```
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_NAME=dbname
+POSTGRES_HOST=localhost
+JWT_SECRET=mysecret
+SUPER_ADMIN_EMAIL=superadmin@test.com
+SUPER_ADMIN_PASSWORD=admin123
+RUN_SEED=false
+TEST_DB_NAME=dbname_test
+NODE_ENV=dev | test
+```
+
 2. To start the server in dev(All the pending DB migrations will run automatically when you start the server)
    on port 3000
 

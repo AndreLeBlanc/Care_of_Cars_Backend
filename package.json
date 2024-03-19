@@ -44,6 +44,7 @@
     "@fastify/pre-commit": "^2.1.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.4.4",
+    "@types/pg": "^8.11.2",
     "c8": "^9.0.0",
     "concurrently": "^8.2.2",
     "drizzle-kit": "^0.20.14",

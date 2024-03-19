@@ -53,6 +53,7 @@ export default fp<SupportPluginOptions>(async (fastify, reply) => {
       return true
     },
   )
+
   fastify.decorate(
     'authenticate',
     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {

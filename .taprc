@@ -3,3 +3,5 @@ test-env: [
   TS_NODE_PROJECT=./test/tsconfig.json
 ]
 timeout: 120
+coverage: false
+
