@@ -30,7 +30,6 @@ test('users list api', async (t) => {
     url: '/users/',
   })
   const parsedResponse = JSON.parse(res.payload)
-  console.log(parsedResponse)
   assert.strictEqual(res.statusCode, 200)
-  //assert.equal(parsedResponse.message, 'Login success')
+  assert.match(parsedResponse.message, /users found/)
 })

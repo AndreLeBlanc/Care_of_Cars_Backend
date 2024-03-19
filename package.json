@@ -51,9 +51,7 @@
     "typescript": "^5.2.2"
   },
   "pre-commit": {
-    "run": [
-      "build:ts"
-    ],
+    "run": ["build:ts"],
     "silent": false
   }
 }

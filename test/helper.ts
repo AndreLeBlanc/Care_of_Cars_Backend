@@ -35,16 +35,17 @@ async function writeToFile(content: string, path: string) {
   try {
     await fs.writeFile(path, content)
   } catch (err) {
-    console.log(err)
+    //console.log(err)
+    throw err
   }
 }
 async function readFile(path: string) {
   try {
     const data = await fs.readFile(path, { encoding: 'utf8' })
-    console.log(data)
+    //console.log(data)
     return data
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     throw err
   }
 }
