@@ -9,6 +9,9 @@ export type TestContext = {
 }
 
 const AppPath = path.join(__dirname, '..', 'src', 'app.ts')
+if (process.env.NODE_ENV != 'test') {
+  throw new Error('ENV must set to test in .env also test database TEST_DB_NAME must be set')
+}
 
 // Fill in this config with all the configurations
 // needed for testing the application

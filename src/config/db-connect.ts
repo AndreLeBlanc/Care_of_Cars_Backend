@@ -5,8 +5,8 @@ import { Pool } from 'pg'
 import * as schema from '../schema/schema'
 import { migrate } from 'drizzle-orm/node-postgres/migrator'
 import { drizzle } from 'drizzle-orm/node-postgres'
-
-const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_USERNAME}@localhost:5432/${process.env.DB_NAME}`
+import { connectionString } from './connection-string'
+//const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_USERNAME}@localhost:5432/${process.env.DB_NAME}`
 const pool = new Pool({
   connectionString: connectionString,
 })
