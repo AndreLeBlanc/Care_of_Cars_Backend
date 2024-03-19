@@ -1,6 +1,7 @@
 # Care of Cars
 
 ### Requirements
+
 1. Node 20.11.1
 2. Postgres 14.11
 
@@ -12,9 +13,21 @@
 cp .env.sample .env
 ```
 
-2. To start the server in dev(All the pending DB migrations will run automatically when you start the server) 
-on port 3000
+```
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_NAME=dbname
+POSTGRES_HOST=localhost
+JWT_SECRET=mysecret
+SUPER_ADMIN_EMAIL=superadmin@test.com
+SUPER_ADMIN_PASSWORD=admin123
+RUN_SEED=false
+TEST_DB_NAME=dbname_test
+NODE_ENV=dev | test
+```
 
+2. To start the server in dev(All the pending DB migrations will run automatically when you start the server)
+   on port 3000
 
 ```
 npm run dev
@@ -24,24 +37,28 @@ npm run dev
 
 http://localhost:3000/docs
 
-
 5. To generate the migration file after you have changes on `schema/schema.ts`
+
 ```
 npm run generate
 ```
 
 6. To create Super admin enable seeding of super admin. set the below env's
+
 ```
 RUN_SEED=true
 SUPER_ADMIN_EMAIL=
 SUPER_ADMIN_PASSWORD=
 ```
+
 then run
 
 ```
 npm run dev
 ```
+
 seed will be executed and superadmin will be created. Once created make sure to set `RUN_SEED=false`
+
 # Getting Started with [Fastify-CLI](https://www.npmjs.com/package/fastify-cli)
 
 This project was bootstrapped with Fastify-CLI.
