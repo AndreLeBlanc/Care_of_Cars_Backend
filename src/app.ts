@@ -13,8 +13,6 @@ import { roles } from './routes/roles/roles.js'
 import { users } from './routes/users/users.js'
 import { root } from './routes/root.js'
 import seedSuperAdmin from './plugins/seed.js'
-import { initDrizzle } from './config/db-connect'
-
 
 dotenv.config()
 export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}

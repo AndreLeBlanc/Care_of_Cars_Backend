@@ -1,6 +1,7 @@
 import type { Config } from 'drizzle-kit'
-import { connectionString } from './connection-string'
+import { newConnectionString } from './connection-string'
 
+let connectionString: any = newConnectionString()
 export default {
   schema: './src/schema/schema.ts',
   out: './drizzle',
