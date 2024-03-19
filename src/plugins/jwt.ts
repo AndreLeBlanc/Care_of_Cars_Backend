@@ -10,6 +10,27 @@ export interface SupportPluginOptions {
 // The use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
 export default fp<SupportPluginOptions>(async (fastify, reply) => {
+  fastify.addHook(
+    'preHandler',
+    async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
+      try {
+        const requestPath = request.routeOptions.url
+        //console.log(requestPath, requestPath?.startsWith('/docs'))
+
+        if (
+          !requestPath?.startsWith('/users/login') &&
+          !requestPath?.startsWith('/docs') &&
+          requestPath != '/' &&
+          requestPath != '/example'
+        ) {
+          await request.jwtVerify()
+        }
+      } catch (err) {
+        return reply.send(err)
+      }
+    },
+  )
+
   fastify.decorate(
     'authorize',
     async function (

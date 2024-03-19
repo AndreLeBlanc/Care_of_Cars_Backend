@@ -7,13 +7,17 @@
 
 ## Deploy with docker
 
-To run postgres and nodejs docker continers:
+To run postgres and nodejs docker continers (use this when you are deploying and no code changes have been made):
 
 `sudo docker-compose up`
+
+To run postgres and nodejs docker continers with new code (use this when changes have been made):
+
+`sudo docker-compose up --build`
 
 Stop containers:
 
-`sudo docker-compose up`
+`sudo docker-compose down`
 
 Stop containers and remove the database:
 
