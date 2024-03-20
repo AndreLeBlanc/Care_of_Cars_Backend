@@ -28,7 +28,7 @@ import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/r
 
 export async function users(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
-    '/users:users',
+    '/:users',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'list_user'
@@ -84,7 +84,7 @@ export async function users(fastify: FastifyInstance) {
       schema: {
         body: CreateUser,
         response: {
-          201: CreateUserReply,
+          201: { body: CreateUserReply },
         },
       },
     },
@@ -94,9 +94,20 @@ export async function users(fastify: FastifyInstance) {
       if (!isStrongPass) {
         return reply.status(422).send({ message: 'Provide a strong password' })
       }
-      const passwordHash = await generatePasswordHash(password)
-      const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId)
-      return reply.status(201).send({ message: 'User created', data: createdUser })
+      const passwordHash: string = await generatePasswordHash(password)
+      try {
+        const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId)
+        return reply.status(201).send({
+          message: 'User created',
+          body: {
+            firstName: createdUser[0].firstName,
+            lastName: createdUser[0].lastName,
+            email: createdUser[0].email,
+          },
+        })
+      } catch (error) {
+        return reply.status(500).send({ error: 'Promise rejected with error: ' + error })
+      }
     },
   )
 
@@ -165,7 +176,7 @@ export async function users(fastify: FastifyInstance) {
     },
   )
   fastify.patch<{ Body: PatchUserSchemaType; Reply: object; Params: getUserByIdType }>(
-    '/users:id',
+    '/:id',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
@@ -199,7 +210,7 @@ export async function users(fastify: FastifyInstance) {
     },
   )
   fastify.delete<{ Params: getUserByIdType }>(
-    '/user:id',
+    '/:id',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)

@@ -13,7 +13,17 @@ export async function createUser(
   passwordHash: string,
   roleId: number,
   isSuperAdmin: boolean = false,
-) {
+): Promise<
+  {
+    id: number
+    firstName: string
+    lastName: string | null
+    email: string | null
+    createdAt: Date
+    updatedAt: Date
+    roleId: number
+  }[]
+> {
   return await db
     .insert(users)
     .values({

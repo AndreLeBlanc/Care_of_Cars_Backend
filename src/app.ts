@@ -66,7 +66,7 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
   await void fastify.register(permissions, { prefix: '/permissions' })
   await void fastify.register(roleToPermissions, { prefix: '/roleToPermissions' })
   await void fastify.register(roles, { prefix: '/roles' })
-  await void fastify.register(serviceCategory, { prefix: '/serviceCategory' })
+  await void fastify.register(serviceCategory, { prefix: '/service-category' })
   await void fastify.register(services, { prefix: 'services' })
   await void fastify.register(users, { prefix: '/users' })
   await void fastify.register(root, { prefix: '/' })
