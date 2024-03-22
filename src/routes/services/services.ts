@@ -1,8 +1,8 @@
-import { FastifyInstance, FastifyPluginAsync } from 'fastify'
-import { CreateServiceSchema, CreateServiceSchemaType } from './serviceSchema'
-import { createService } from '../../services/serviceService'
+import { FastifyInstance } from 'fastify'
+import { CreateServiceSchema, CreateServiceSchemaType } from './serviceSchema.js'
+import { createService } from '../../services/serviceService.js'
 
-const services: FastifyPluginAsync = async (fastify: FastifyInstance): Promise<void> => {
+export async function services(fastify: FastifyInstance) {
   fastify.post<{ Body: CreateServiceSchemaType; Reply: object }>(
     '/',
     {

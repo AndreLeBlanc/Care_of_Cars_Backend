@@ -1,16 +1,16 @@
-import { FastifyPluginAsync } from 'fastify'
-import {
-  createRoleToPermissions,
-  deleteRoleToPermissions,
-} from '../../services/roleToPermissionService'
+import { FastifyInstance } from 'fastify'
 import {
   CreateRoleToPermissionSchema,
   CreateRoleToPermissionSchemaType,
   DeleteRoleToPermissionSchema,
   DeleteRoleToPermissionType,
-} from './roleToPermissionSchema'
+} from './roleToPermissionSchema.js'
+import {
+  createRoleToPermissions,
+  deleteRoleToPermissions,
+} from '../../services/roleToPermissionService.js'
 
-const roleToPermissions: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
+export async function roleToPermissions(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: CreateRoleToPermissionSchemaType; Reply: object }>(
     '/',
     {

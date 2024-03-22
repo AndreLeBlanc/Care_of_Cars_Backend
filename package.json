@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "This project was bootstrapped with Fastify-CLI.",
   "main": "app.ts",
+  "type": "module",
   "directories": {
     "test": "test"
   },
@@ -41,6 +42,7 @@
   },
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.4.4",
     "@types/pg": "^8.11.2",
     "c8": "^9.0.0",

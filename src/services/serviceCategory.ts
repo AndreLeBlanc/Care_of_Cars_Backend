@@ -1,7 +1,7 @@
 import { desc, eq, or, sql } from 'drizzle-orm'
 
-import { db } from '../config/db-connect'
-import { serviceCategories } from '../schema/schema'
+import { db } from '../config/db-connect.js'
+import { serviceCategories } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 
 export async function getServiceCategoriesPaginate(

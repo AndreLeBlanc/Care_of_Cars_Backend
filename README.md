@@ -5,6 +5,32 @@
 1. Node 20.11.1
 2. Postgres 14.11
 
+## Deploy with docker
+
+To run postgres and nodejs docker continers (use this when you are deploying and no code changes have been made):
+
+`sudo docker-compose up`
+
+To run postgres and nodejs docker continers with new code (use this when changes have been made):
+
+`sudo docker-compose up --build`
+
+Stop containers:
+
+`sudo docker-compose down`
+
+Stop containers and remove the database:
+
+`sudo docker-compose down --rmi all --volumes`
+
+To see running docker containers:
+
+`sudo docker ps`
+
+To access bash in one of the containers
+
+`sudo docker exec -it CONTAINER_ID bash` replace CONTAINER_ID with the actual container ID.
+
 ## How to install locally
 
 1. Create `.env` at the root and fill out the actual values.
@@ -83,25 +109,3 @@ Run the test cases.
 ## Learn More
 
 To learn Fastify, check out the [Fastify documentation](https://fastify.dev/docs/latest/).
-
-## Deploy with docker
-
-To run postgres and nodejs docker continers:
-
-`sudo docker-compose up`
-
-Stop containers:
-
-`sudo docker-compose up`
-
-Stop containers and remove the database:
-
-`sudo docker-compose down --rmi all --volumes`
-
-To see running docker containers:
-
-`sudo docker ps`
-
-To access bash in one of the containers
-
-`sudo docker exec -it CONTAINER_ID bash` replace CONTAINER_ID with the actual container ID.

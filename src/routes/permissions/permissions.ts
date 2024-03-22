@@ -1,11 +1,12 @@
-import { FastifyPluginAsync } from 'fastify'
+import { FastifyInstance } from 'fastify'
+
 import {
   createPermission,
   getPermissionsPaginate,
   getPermissionById,
   updatePermissionById,
   deletePermission,
-} from '../../services/permissionService'
+} from '../../services/permissionService.js'
 import {
   CreatePermissionSchema,
   CreatePermissionSchemaType,
@@ -15,9 +16,9 @@ import {
   PatchPermissionSchemaType,
   getPermissionByIdSchema,
   getPermissionByIdType,
-} from './permissionSchema'
+} from './permissionSchema.js'
 
-const permissions: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
+export async function permissions(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(
     '/',
     {
@@ -63,6 +64,7 @@ const permissions: FastifyPluginAsync = async (fastify, opts): Promise<void> => 
   )
   fastify.post<{ Body: CreatePermissionSchemaType; Reply: object }>(
     '/',
+
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'create_permission'

@@ -1,0 +1,37 @@
+name: Care of Cars Backend CI
+
+on:
+  push:
+    branches:
+      - routeNotFunc
+  pull_request:
+    branches:
+      - routeNotFunc
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: db_admin
+          POSTGRES_PASSWORD: 12345
+          POSTGRES_DB: superdbdocker
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build and run containers
+        run: |
+          docker-compose build
+          docker-compose up -d
+
+      - name: Run tests
+        run: docker-compose exec -T app npm test
+
+      - name: Tear down containers
+        run: docker-compose down

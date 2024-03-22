@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from 'fastify'
+import { FastifyInstance } from 'fastify'
 import {
   createRole,
   getRolesPaginate,
@@ -6,7 +6,7 @@ import {
   updateRoleById,
   deleteRole,
   getRoleWithPermissions,
-} from '../../services/roleService'
+} from '../../services/roleService.js'
 import {
   CreateRoleSchema,
   CreateRoleSchemaType,
@@ -16,9 +16,9 @@ import {
   PatchRoleSchemaType,
   getRoleByIdSchema,
   getRoleByIdType,
-} from './roleSchema'
+} from './roleSchema.js'
 
-const roles: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
+export async function roles(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: ListRoleQueryParamSchemaType }>(
     '/',
     {
