@@ -109,3 +109,97 @@ Run the test cases.
 ## Learn More
 
 To learn Fastify, check out the [Fastify documentation](https://fastify.dev/docs/latest/).
+
+## Adding Routes and Plugins
+
+Create a new file in the `src/plugins` folder with the name `nameOfThePlugin.ts`.
+
+Add the following boilerplate:
+
+```
+import fp from 'fastify-plugin'
+import { FastifyReply } from 'fastify/types/reply'
+import { FastifyRequest } from 'fastify/types/request'
+export interface SupportPluginOptions {
+  // Specify Support plugin options here
+}
+
+// The use of fastify-plugin is required to be able
+// to export the decorators to the outer scope
+export default fp<SupportPluginOptions>(async (fastify, reply) => {
+  fastify.decorate(
+    'exampleFunction',
+    function (request: FastifyRequest, reply: FastifyReply): returnType {
+      try {
+        console.log('run example plugin')
+      } catch (err) {
+        throw err
+      }
+      return true
+    },
+  )
+})
+
+declare module 'fastify' {
+  export interface FastifyInstance {
+    exampleFunction(request: FastifyRequest, reply: FastifyReply): returnType
+  }
+}
+
+```
+
+###Add a route:
+
+in `src/routes/` add a folder with the name of your route. Add two files in the folder: one called `nameOfRoute.ts` and one called `nameOfRouteSchema.ts`. Add a schema to validate the response in the schema file. In the file containing the route use the boilerplate:
+
+```
+import { FastifyInstance } from 'fastify'
+import { exampleFuncSchema, exampleFuncInputSchema } from './exampleSchema.js'
+
+export async function exampleRoute(fastify: FastifyInstance) {
+  fastify.get<{ Querystring: exampleFuncInputSchema }>(
+    '/',
+    {
+      preHandler: async (request, reply, done) => {
+
+         //Your code goes here
+        done()
+        return reply
+      },
+      schema: {
+        querystring: exampleFuncSchema,
+      },
+    },
+    async function (request, reply) {
+      const str: boolean = await fastify.exampleFunction(request, reply)
+      return {
+        message: 'hello care of cars developer! ' + str,
+      }
+    },
+  )
+}
+
+export default exampleRoute
+
+```
+
+in `src/app.ts` import:
+
+```
+import { exampleRoute } from './routes/example/example.js'
+import exampleFunction from './plugins/example.js
+
+```
+
+Add the plugin and route:
+
+```
+  await void fastify.register(exampleFunction)
+  await void fastify.register(exampleRoute, { prefix: '/exampleRoute' })
+```
+
+Please ensure that your functions have a return type.
+
+Null is broken in typescript so other return types than null are recommended:
+
+https://hamednourhani.gitbooks.io/typescript-book/content/docs/tips/null.html
