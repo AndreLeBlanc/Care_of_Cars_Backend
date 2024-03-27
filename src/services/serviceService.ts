@@ -1,11 +1,11 @@
-import { asc, desc, ilike, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { db } from '../config/db-connect.js'
 import {
   CreateServiceSchemaType,
   listServiceOrderByEnum,
   serviceOrderEnum,
 } from '../routes/services/serviceSchema.js'
-import { serviceVariants, services } from '../schema/schema.js'
+import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
 
 export async function createService(service: CreateServiceSchemaType) {
   return await db.transaction(async (tx) => {
@@ -50,17 +50,23 @@ export async function getServicesPaginate(
   offset = 0,
   orderBy: listServiceOrderByEnum,
   order: serviceOrderEnum,
+  hidden: boolean = true,
 ) {
-  const condition = or(
-    ilike(services.description, '%' + search + '%'),
-    ilike(services.itermNumber, '%' + search + '%'),
-    ilike(services.suppliersArticleNumber, '%' + search + '%'),
-    ilike(services.externalArticleNumber, '%' + search + '%'),
+  const condition = and(
+    eq(services.hidden, hidden),
+    or(
+      ilike(services.description, '%' + search + '%'),
+      ilike(services.itermNumber, '%' + search + '%'),
+      ilike(services.suppliersArticleNumber, '%' + search + '%'),
+      ilike(services.externalArticleNumber, '%' + search + '%'),
+    ),
   )
   let orderCondition = desc(services.id)
   if (order == serviceOrderEnum.desc) {
     if (orderBy == listServiceOrderByEnum.description) {
       orderCondition = desc(services.description)
+    } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
+      orderCondition = desc(serviceCategories.id)
     } else {
       orderCondition = desc(services.id)
     }
@@ -69,6 +75,8 @@ export async function getServicesPaginate(
   if (order == serviceOrderEnum.asc) {
     if (orderBy == listServiceOrderByEnum.description) {
       orderCondition = asc(services.description)
+    } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
+      orderCondition = asc(serviceCategories.id)
     } else {
       orderCondition = asc(services.id)
     }

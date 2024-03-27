@@ -35,9 +35,10 @@ export async function services(fastify: FastifyInstance) {
         page = 1,
         orderBy = listServiceOrderByEnum.id,
         order = serviceOrderEnum.desc,
+        hidden = true,
       } = request.query
       const offset = fastify.findOffset(limit, page)
-      const result = await getServicesPaginate(search, limit, page, offset, orderBy, order)
+      const result = await getServicesPaginate(search, limit, page, offset, orderBy, order, hidden)
       let message: string = fastify.responseMessage('services', result.data.length)
       let requestUrl: string | null = request.protocol + '://' + request.hostname + request.url
       const nextUrl: string | null = fastify.findNextPageUrl(requestUrl, result.totalPage, page)
