@@ -22,8 +22,8 @@ import {
   updateUserById,
   generatePasswordHash,
   isStrongPassword,
-  deleteUser,
   DeleteUser,
+  UserWithSuperAdmin,
 } from '../../services/userService.js'
 import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
 
@@ -229,7 +229,7 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id = request.params.id
-      const user: DeleteUser | undefined = await deleteUser(id)
+      const user: UserWithSuperAdmin | undefined = await DeleteUser(id)
       if (user == undefined || user == null) {
         return reply.status(404).send({ message: "User doesn't exist!" })
       }

@@ -5,6 +5,14 @@ import { permissions } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchPermissionSchemaType } from '../routes/permissions/permissionSchema.js'
 
+type Permission = {
+  id: number
+  description: string | null
+  createdAt: Date
+  updatedAt: Date
+  permissionName: string
+}
+
 export async function getPermissionsPaginate(search: string, limit = 10, page = 1, offset = 0) {
   const condition = or(
     ilike(permissions.permissionName, '%' + search + '%'),
@@ -52,7 +60,7 @@ export async function createPermission(permissionName: string, description: stri
     })
 }
 
-export async function getPermissionById(id: number): Promise<any> {
+export async function getPermissionById(id: number): Promise<Permission | undefined> {
   const results = await db.select().from(permissions).where(eq(permissions.id, id))
   return results[0] ? results[0] : undefined
 }
@@ -60,7 +68,7 @@ export async function getPermissionById(id: number): Promise<any> {
 export async function updatePermissionById(
   id: number,
   permission: PatchPermissionSchemaType,
-): Promise<any> {
+): Promise<Permission> {
   const permissionWithUpdatedAt = { ...permission, updatedAt: new Date() }
   const updatedPermission = await db
     .update(permissions)
@@ -73,10 +81,10 @@ export async function updatePermissionById(
       createdAt: permissions.createdAt,
       updatedAt: permissions.updatedAt,
     })
-  return updatedPermission
+  return updatedPermission[0]
 }
 
-export async function deletePermission(id: number): Promise<any> {
+export async function deletePermission(id: number): Promise<Permission | undefined> {
   const deletedPermission = await db.delete(permissions).where(eq(permissions.id, id)).returning()
   return deletedPermission[0] ? deletedPermission[0] : undefined
 }
