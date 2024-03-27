@@ -16,8 +16,8 @@ import {
 export const users = pgTable('users', {
   id: serial('id').primaryKey().unique(),
   firstName: varchar('firstName').notNull(),
-  lastName: varchar('lastName'),
-  email: varchar('email').unique(),
+  lastName: varchar('lastName').notNull(),
+  email: varchar('email').notNull().unique(),
   password: text('password').notNull(),
   isSuperAdmin: boolean('isSuperAdmin').default(false),
   roleId: integer('roleId')

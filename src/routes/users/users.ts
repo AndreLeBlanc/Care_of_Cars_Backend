@@ -23,6 +23,7 @@ import {
   generatePasswordHash,
   isStrongPassword,
   deleteUser,
+  DeleteUser,
 } from '../../services/userService.js'
 import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
 
@@ -51,9 +52,13 @@ export async function users(fastify: FastifyInstance) {
 
       const result = await getUsersPaginate(search, limit, page, offset)
       let message: string = fastify.responseMessage('users', result.data.length)
-      let requestUrl: string | null = request.protocol + '://' + request.hostname + request.url
-      const nextUrl: string | null = fastify.findNextPageUrl(requestUrl, result.totalPage, page)
-      const previousUrl: string | null = fastify.findPreviousPageUrl(
+      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const nextUrl: string | undefined = fastify.findNextPageUrl(
+        requestUrl,
+        result.totalPage,
+        page,
+      )
+      const previousUrl: string | undefined = fastify.findPreviousPageUrl(
         requestUrl,
         result.totalPage,
         page,
@@ -121,7 +126,7 @@ export async function users(fastify: FastifyInstance) {
     async (request, reply) => {
       const { email, password } = request.body
       let user = await verifyUser(email)
-      if (user == null) {
+      if (user == undefined || user == null) {
         return reply.status(403).send({ message: 'Login failed, incorrect email' })
       }
       const match = await bcrypt.compare(password, user.password)
@@ -203,7 +208,7 @@ export async function users(fastify: FastifyInstance) {
         userData.password = await generatePasswordHash(userData.password)
       }
       const user = await updateUserById(id, userData)
-      if (user.length == 0) {
+      if (user !== undefined) {
         return reply.status(404).send({ message: 'user not found' })
       }
       reply.status(201).send({ message: 'User Updated', data: user })
@@ -224,8 +229,8 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id = request.params.id
-      const deletedUser = await deleteUser(id)
-      if (deletedUser == null) {
+      const user: DeleteUser | undefined = await deleteUser(id)
+      if (user == undefined || user == null) {
         return reply.status(404).send({ message: "User doesn't exist!" })
       }
       return reply.status(200).send({ message: 'user deleted' })

@@ -1,9 +1,9 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
 
-export type connectionString = string | undefined
+export type ConnectionString = string | undefined
 
-export function newConnectionString(): connectionString {
+export function newConnectionString(): ConnectionString {
   if (
     (process.env.DB_NAME as 'string') ||
     (process.env.DB_USERNAME as 'string') ||

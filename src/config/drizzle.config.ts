@@ -1,12 +1,18 @@
 import type { Config } from 'drizzle-kit'
-import { newConnectionString } from './connection-string'
+import { ConnectionString, newConnectionString } from './connection-string'
 
-let connectionString: any = newConnectionString()
+const maybeConnectionString: ConnectionString = newConnectionString()
+let conString: string = ''
+
+if (typeof maybeConnectionString === 'string') {
+  conString = maybeConnectionString
+}
+
 export default {
   schema: './src/schema/schema.ts',
   out: './drizzle',
   driver: 'pg',
   dbCredentials: {
-    connectionString: connectionString,
+    connectionString: conString,
   },
 } satisfies Config

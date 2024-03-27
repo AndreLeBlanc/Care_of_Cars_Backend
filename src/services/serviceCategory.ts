@@ -58,7 +58,7 @@ export async function createServiceCategory(name: string, description: string) {
 
 export async function getServiceCategoryById(id: number): Promise<any> {
   const results = await db.select().from(serviceCategories).where(eq(serviceCategories.id, id))
-  return results[0] ? results[0] : null
+  return results[0] ? results[0] : undefined
 }
 
 export async function updateServiceCategoryById(id: number, serviceCategory: any): Promise<any> {
@@ -82,5 +82,5 @@ export async function deleteServiceCategory(id: number): Promise<any> {
     .delete(serviceCategories)
     .where(eq(serviceCategories.id, id))
     .returning()
-  return deletedServiceCategory[0] ? deletedServiceCategory[0] : null
+  return deletedServiceCategory[0] ? deletedServiceCategory[0] : undefined
 }

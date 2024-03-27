@@ -6,6 +6,39 @@ import { roles, users } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchUserSchemaType } from '../routes/users/userSchema.js'
 
+export type updateUser = {
+  id: number
+  firstName: string
+  lastName: string
+  email: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type UserInfo = {
+  id: number
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  isSuperAdmin: boolean | null
+  roleId: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type DeleteUser = {
+  id: number
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  isSuperAdmin: boolean | null
+  roleId: number
+  createdAt: Date
+  updatedAt: Date
+}
+
 export async function createUser(
   firstName: string,
   lastName: string,
@@ -17,8 +50,8 @@ export async function createUser(
   {
     id: number
     firstName: string
-    lastName: string | null
-    email: string | null
+    lastName: string | undefined
+    email: string | undefined
     createdAt: Date
     updatedAt: Date
     roleId: number
@@ -110,15 +143,15 @@ export async function verifyUser(email: string): Promise<any> {
         //eq(users.password, password)
       ),
     )
-  return results[0] ? results[0] : null
+  return results[0] ? results[0] : undefined
 }
 
-export async function getUserById(id: number): Promise<any> {
+export async function getUserById(id: number): Promise<UserInfo | undefined> {
   const results = await db.select().from(users).where(eq(users.id, id))
-  return results[0] ? results[0] : null
+  return results[0] ? results[0] : undefined
 }
 
-export async function updateUserById(id: number, user: PatchUserSchemaType): Promise<any> {
+export async function updateUserById(id: number, user: PatchUserSchemaType): Promise<updateUser> {
   const userWithUpdatedAt = { ...user, updatedAt: new Date() }
   const updatedUser = await db
     .update(users)
@@ -132,7 +165,7 @@ export async function updateUserById(id: number, user: PatchUserSchemaType): Pro
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
     })
-  return updatedUser
+  return updatedUser[0]
 }
 
 export async function generatePasswordHash(password: string): Promise<string> {
@@ -142,12 +175,10 @@ export async function generatePasswordHash(password: string): Promise<string> {
 
 export async function isStrongPassword(password: string): Promise<boolean> {
   // TODO: add more strict checking's
-  if (password.length <= 3) {
-    return false
-  }
-  return true
+  return password.length >= 3
 }
-export async function deleteUser(id: number): Promise<any> {
+
+export async function deleteUser(id: number): Promise<DeleteUser | undefined> {
   const deletedUser = await db.delete(users).where(eq(users.id, id)).returning()
-  return deletedUser[0] ? deletedUser[0] : null
+  return deletedUser[0] ? deletedUser[0] : undefined
 }

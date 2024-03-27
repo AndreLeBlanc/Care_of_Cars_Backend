@@ -22,5 +22,5 @@ export async function deleteRoleToPermissions(roleId: number, permissionId: numb
       and(eq(roleToPermissions.roleId, roleId), eq(roleToPermissions.permissionId, permissionId)),
     )
     .returning()
-  return deletedRoleToPermissions[0] ? deletedRoleToPermissions[0] : null
+  return deletedRoleToPermissions[0] ? deletedRoleToPermissions[0] : undefined
 }

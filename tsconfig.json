@@ -7,6 +7,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "strict": true,
+    "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     //"noUnusedParameters": true,

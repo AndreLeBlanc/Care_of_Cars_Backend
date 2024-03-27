@@ -54,7 +54,7 @@ export async function createPermission(permissionName: string, description: stri
 
 export async function getPermissionById(id: number): Promise<any> {
   const results = await db.select().from(permissions).where(eq(permissions.id, id))
-  return results[0] ? results[0] : null
+  return results[0] ? results[0] : undefined
 }
 
 export async function updatePermissionById(
@@ -78,5 +78,5 @@ export async function updatePermissionById(
 
 export async function deletePermission(id: number): Promise<any> {
   const deletedPermission = await db.delete(permissions).where(eq(permissions.id, id)).returning()
-  return deletedPermission[0] ? deletedPermission[0] : null
+  return deletedPermission[0] ? deletedPermission[0] : undefined
 }

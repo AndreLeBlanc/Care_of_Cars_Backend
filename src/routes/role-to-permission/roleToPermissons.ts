@@ -57,7 +57,7 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
     async (request, reply) => {
       const { roleId, permissionId } = request.params
       const deletedRoleToPermissions = await deleteRoleToPermissions(roleId, permissionId)
-      if (deletedRoleToPermissions == null) {
+      if (deletedRoleToPermissions === undefined || deletedRoleToPermissions === null) {
         return reply.status(404).send({ message: 'Invalid role id or permission id' })
       }
       return reply.status(200).send({ message: 'Role to permissions deleted' })

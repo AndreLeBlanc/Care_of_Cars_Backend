@@ -3,8 +3,8 @@ const { Pool } = pkg
 import * as schema from '../schema/schema.js'
 import { migrate } from 'drizzle-orm/node-postgres/migrator'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { newConnectionString } from './connection-string.js'
-let connectionString: any = newConnectionString()
+import { ConnectionString, newConnectionString } from './connection-string.js'
+const connectionString: ConnectionString = newConnectionString()
 
 const pool = new Pool({
   connectionString: connectionString,

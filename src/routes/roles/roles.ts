@@ -42,9 +42,13 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       const offset = fastify.findOffset(limit, page)
       const result = await getRolesPaginate(search, limit, page, offset)
       let message: string = fastify.responseMessage('roles', result.data.length)
-      let requestUrl: string | null = request.protocol + '://' + request.hostname + request.url
-      const nextUrl: string | null = fastify.findNextPageUrl(requestUrl, result.totalPage, page)
-      const previousUrl: string | null = fastify.findPreviousPageUrl(
+      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const nextUrl: string | undefined = fastify.findNextPageUrl(
+        requestUrl,
+        result.totalPage,
+        page,
+      )
+      const previousUrl: string | undefined = fastify.findPreviousPageUrl(
         requestUrl,
         result.totalPage,
         page,
@@ -108,7 +112,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     async (request, reply) => {
       const id = request.params.id
       const role = await getRoleById(id)
-      if (role == null) {
+      if (role == undefined || role == null) {
         return reply.status(404).send({ message: 'role not found' })
       }
       const rolePermissions = await getRoleWithPermissions(role.id)
@@ -173,7 +177,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     async (request, reply) => {
       const id = request.params.id
       const deletedRole = await deleteRole(id)
-      if (deletedRole == null) {
+      if (deletedRole === undefined || deletedRole === null) {
         return reply.status(404).send({ message: "Role doesn't exist!" })
       }
       return reply.status(200).send({ message: 'Role deleted' })

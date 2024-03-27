@@ -41,9 +41,13 @@ export async function serviceCategory(fastify: FastifyInstance) {
       const offset = fastify.findOffset(limit, page)
       const result = await getServiceCategoriesPaginate(search, limit, page, offset)
       let message: string = fastify.responseMessage('service category', result.data.length)
-      let requestUrl: string | null = request.protocol + '://' + request.hostname + request.url
-      const nextUrl: string | null = fastify.findNextPageUrl(requestUrl, result.totalPage, page)
-      const previousUrl: string | null = fastify.findPreviousPageUrl(
+      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const nextUrl: string | undefined = fastify.findNextPageUrl(
+        requestUrl,
+        result.totalPage,
+        page,
+      )
+      const previousUrl: string | undefined = fastify.findPreviousPageUrl(
         requestUrl,
         result.totalPage,
         page,
@@ -107,7 +111,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     async (request, reply) => {
       const id = request.params.id
       const serviceCategory = await getServiceCategoryById(id)
-      if (serviceCategory == null) {
+      if (serviceCategory == undefined || serviceCategory == null) {
         return reply.status(404).send({ message: 'Service Category not found' })
       }
       reply.status(200).send({ serviceCategory: serviceCategory })
@@ -171,7 +175,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     async (request, reply) => {
       const id = request.params.id
       const deletedServiceCategory = await deleteServiceCategory(id)
-      if (deletedServiceCategory == null) {
+      if (deletedServiceCategory == undefined || deletedServiceCategory == null) {
         return reply.status(404).send({ message: "Service Category doesn't exist!" })
       }
       return reply.status(200).send({ message: 'Service Category deleted' })

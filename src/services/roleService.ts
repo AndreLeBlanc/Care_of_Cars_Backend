@@ -50,7 +50,7 @@ export async function createRole(roleName: string, description: string) {
 
 export async function getRoleById(id: number): Promise<any> {
   const results = await db.select().from(roles).where(eq(roles.id, id))
-  return results[0] ? results[0] : null
+  return results[0] ? results[0] : undefined
 }
 
 export async function updateRoleById(id: number, role: PatchRoleSchemaType): Promise<any> {
@@ -71,7 +71,7 @@ export async function updateRoleById(id: number, role: PatchRoleSchemaType): Pro
 
 export async function deleteRole(id: number): Promise<any> {
   const deletedRole = await db.delete(roles).where(eq(roles.id, id)).returning()
-  return deletedRole[0] ? deletedRole[0] : null
+  return deletedRole[0] ? deletedRole[0] : undefined
 }
 export async function getRoleWithPermissions(roleId: number): Promise<any> {
   const roleWithPermissions = db
