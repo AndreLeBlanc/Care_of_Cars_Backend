@@ -67,8 +67,8 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'create_role'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -92,8 +92,8 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'view_role'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -124,8 +124,8 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'update_role'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -157,8 +157,8 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'delete_role'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })

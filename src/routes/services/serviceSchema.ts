@@ -50,3 +50,26 @@ export const CreateServiceSchema = Type.Object({
 })
 
 export type CreateServiceSchemaType = Static<typeof CreateServiceSchema>
+
+export enum listServiceOrderByEnum {
+  id = 'id',
+  description = 'description',
+  serviceCategoryId = 'serviceCategoryId',
+}
+const listServiceOrderByEnumType = Type.Enum(listServiceOrderByEnum)
+
+export enum serviceOrderEnum {
+  asc = 'asc',
+  desc = 'desc',
+}
+const serviceOrderType = Type.Enum(serviceOrderEnum)
+
+export const ListServiceQueryParamSchema = Type.Object({
+  search: Type.Optional(Type.String()),
+  limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+  orderBy: Type.Optional(listServiceOrderByEnumType),
+  order: Type.Optional(serviceOrderType),
+  hidden: Type.Optional(Type.Boolean()),
+})
+export type ListServiceQueryParamSchemaType = Static<typeof ListServiceQueryParamSchema>

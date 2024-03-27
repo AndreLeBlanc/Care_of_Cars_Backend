@@ -1,6 +1,11 @@
+import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { db } from '../config/db-connect.js'
-import { CreateServiceSchemaType } from '../routes/services/serviceSchema.js'
-import { serviceVariants, services } from '../schema/schema.js'
+import {
+  CreateServiceSchemaType,
+  listServiceOrderByEnum,
+  serviceOrderEnum,
+} from '../routes/services/serviceSchema.js'
+import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
 
 export async function createService(service: CreateServiceSchemaType) {
   return await db.transaction(async (tx) => {
@@ -36,4 +41,94 @@ export async function createService(service: CreateServiceSchemaType) {
     }
     return insertedService
   })
+}
+
+export async function getServicesPaginate(
+  search: string,
+  limit = 10,
+  page = 1,
+  offset = 0,
+  orderBy: listServiceOrderByEnum,
+  order: serviceOrderEnum,
+  hidden: boolean = true,
+) {
+  const condition = and(
+    eq(services.hidden, hidden),
+    or(
+      ilike(services.description, '%' + search + '%'),
+      ilike(services.itermNumber, '%' + search + '%'),
+      ilike(services.suppliersArticleNumber, '%' + search + '%'),
+      ilike(services.externalArticleNumber, '%' + search + '%'),
+    ),
+  )
+  let orderCondition = desc(services.id)
+  if (order == serviceOrderEnum.desc) {
+    if (orderBy == listServiceOrderByEnum.description) {
+      orderCondition = desc(services.description)
+    } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
+      orderCondition = desc(serviceCategories.id)
+    } else {
+      orderCondition = desc(services.id)
+    }
+  }
+
+  if (order == serviceOrderEnum.asc) {
+    if (orderBy == listServiceOrderByEnum.description) {
+      orderCondition = asc(services.description)
+    } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
+      orderCondition = asc(serviceCategories.id)
+    } else {
+      orderCondition = asc(services.id)
+    }
+  }
+
+  const [totalItems] = await db
+    .select({
+      count: sql`count(*)`.mapWith(Number).as('count'),
+    })
+    .from(services)
+    .where(condition)
+
+  // const servicesList = await db
+  //   .select({
+  //     id: services.id,
+  //     description: services.description,
+  //     serviceCategoryId: services.serviceCategoryId,
+  //     includeInAutomaticSms: services.includeInAutomaticSms,
+  //     hidden: services.hidden,
+  //     callInterval: services.callInterval,
+  //     colorOnDuty: services.colorOnDuty,
+  //     warantyCard: services.warantyCard,
+  //     itermNumber: services.itermNumber,
+  //     suppliersArticleNumber: services.suppliersArticleNumber,
+  //     externalArticleNumber: services.externalArticleNumber,
+  //     createdAt: services.createdAt,
+  //     updatedAt: services.updatedAt,
+  //     serviceVariants: serviceVariants,
+  //   })
+  //   .from(services)
+  //   .leftJoin(serviceVariants, eq(services.id, serviceVariants.serviceId))
+  //   .where(condition)
+  //   //.orderBy(desc(services.id))
+  //   .orderBy(orderCondition)
+  //   .limit(limit || 10)
+  //   .offset(offset || 0)
+  const servicesList = await db.query.services.findMany({
+    where: condition,
+    limit: limit || 10,
+    offset: offset || 0,
+    orderBy: orderCondition,
+    with: {
+      serviceCategories: true,
+      serviceVariants: true,
+    },
+  })
+  const totalPage = Math.ceil(totalItems.count / limit)
+
+  return {
+    totalItems: totalItems.count,
+    totalPage,
+    perPage: page,
+    data: servicesList,
+  }
 }

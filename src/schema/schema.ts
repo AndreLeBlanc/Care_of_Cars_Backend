@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm'
 import {
   serial,
   text,
@@ -111,6 +112,17 @@ export const services = pgTable('services', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
+export const servicesCategoryToServiceRelations = relations(serviceCategories, ({ many }) => ({
+  services: many(services),
+}))
+
+export const serviceToServiceCategoryRelations = relations(services, ({ one }) => ({
+  serviceCategories: one(serviceCategories, {
+    fields: [services.serviceCategoryId],
+    references: [serviceCategories.id],
+  }),
+}))
+
 export const serviceVariants = pgTable('serviceVariants', {
   id: serial('id').primaryKey().unique(),
   description: varchar('description', { length: 256 }),
@@ -127,3 +139,11 @@ export const serviceVariants = pgTable('serviceVariants', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
+
+export const servicesRelations = relations(services, ({ many }) => ({
+  serviceVariants: many(serviceVariants),
+}))
+
+export const serviceVariantsRelations = relations(serviceVariants, ({ one }) => ({
+  service: one(services, { fields: [serviceVariants.serviceId], references: [services.id] }),
+}))
