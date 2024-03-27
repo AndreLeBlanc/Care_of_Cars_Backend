@@ -4,6 +4,8 @@ import {
   CreateServiceSchemaType,
   ListServiceQueryParamSchema,
   ListServiceQueryParamSchemaType,
+  listServiceOrderByEnum,
+  serviceOrderEnum,
 } from './serviceSchema.js'
 import { createService, getServicesPaginate } from '../../services/serviceService.js'
 
@@ -27,9 +29,15 @@ export async function services(fastify: FastifyInstance) {
       },
     },
     async function (request, reply) {
-      let { search = '', limit = 10, page = 1 } = request.query
+      let {
+        search = '',
+        limit = 10,
+        page = 1,
+        orderBy = listServiceOrderByEnum.id,
+        order = serviceOrderEnum.desc,
+      } = request.query
       const offset = fastify.findOffset(limit, page)
-      const result = await getServicesPaginate(search, limit, page, offset)
+      const result = await getServicesPaginate(search, limit, page, offset, orderBy, order)
       let message: string = fastify.responseMessage('services', result.data.length)
       let requestUrl: string | null = request.protocol + '://' + request.hostname + request.url
       const nextUrl: string | null = fastify.findNextPageUrl(requestUrl, result.totalPage, page)

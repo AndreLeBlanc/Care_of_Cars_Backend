@@ -1,6 +1,10 @@
-import { ilike, or, sql, desc } from 'drizzle-orm'
+import { ilike, or, sql, desc, asc } from 'drizzle-orm'
 import { db } from '../config/db-connect.js'
-import { CreateServiceSchemaType } from '../routes/services/serviceSchema.js'
+import {
+  CreateServiceSchemaType,
+  listServiceOrderByEnum,
+  serviceOrderEnum,
+} from '../routes/services/serviceSchema.js'
 import { serviceVariants, services } from '../schema/schema.js'
 
 export async function createService(service: CreateServiceSchemaType) {
@@ -39,13 +43,36 @@ export async function createService(service: CreateServiceSchemaType) {
   })
 }
 
-export async function getServicesPaginate(search: string, limit = 10, page = 1, offset = 0) {
+export async function getServicesPaginate(
+  search: string,
+  limit = 10,
+  page = 1,
+  offset = 0,
+  orderBy: listServiceOrderByEnum,
+  order: serviceOrderEnum,
+) {
   const condition = or(
     ilike(services.description, '%' + search + '%'),
     ilike(services.itermNumber, '%' + search + '%'),
     ilike(services.suppliersArticleNumber, '%' + search + '%'),
     ilike(services.externalArticleNumber, '%' + search + '%'),
   )
+  let orderCondition = desc(services.id)
+  if (order == serviceOrderEnum.desc) {
+    if (orderBy == listServiceOrderByEnum.description) {
+      orderCondition = desc(services.description)
+    } else {
+      orderCondition = desc(services.id)
+    }
+  }
+
+  if (order == serviceOrderEnum.asc) {
+    if (orderBy == listServiceOrderByEnum.description) {
+      orderCondition = asc(services.description)
+    } else {
+      orderCondition = asc(services.id)
+    }
+  }
 
   const [totalItems] = await db
     .select({
@@ -72,7 +99,8 @@ export async function getServicesPaginate(search: string, limit = 10, page = 1, 
     })
     .from(services)
     .where(condition)
-    .orderBy(desc(services.id))
+    //.orderBy(desc(services.id))
+    .orderBy(orderCondition)
     .limit(limit || 10)
     .offset(offset || 0)
   const totalPage = Math.ceil(totalItems.count / limit)
