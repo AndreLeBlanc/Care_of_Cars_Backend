@@ -1,4 +1,4 @@
-import { ilike, or, sql, desc, asc } from 'drizzle-orm'
+import { asc, desc, ilike, or, sql } from 'drizzle-orm'
 import { db } from '../config/db-connect.js'
 import {
   CreateServiceSchemaType,
@@ -81,28 +81,40 @@ export async function getServicesPaginate(
     .from(services)
     .where(condition)
 
-  const servicesList = await db
-    .select({
-      id: services.id,
-      description: services.description,
-      serviceCategoryId: services.serviceCategoryId,
-      includeInAutomaticSms: services.includeInAutomaticSms,
-      hidden: services.hidden,
-      callInterval: services.callInterval,
-      colorOnDuty: services.colorOnDuty,
-      warantyCard: services.warantyCard,
-      itermNumber: services.itermNumber,
-      suppliersArticleNumber: services.suppliersArticleNumber,
-      externalArticleNumber: services.externalArticleNumber,
-      createdAt: services.createdAt,
-      updatedAt: services.updatedAt,
-    })
-    .from(services)
-    .where(condition)
-    //.orderBy(desc(services.id))
-    .orderBy(orderCondition)
-    .limit(limit || 10)
-    .offset(offset || 0)
+  // const servicesList = await db
+  //   .select({
+  //     id: services.id,
+  //     description: services.description,
+  //     serviceCategoryId: services.serviceCategoryId,
+  //     includeInAutomaticSms: services.includeInAutomaticSms,
+  //     hidden: services.hidden,
+  //     callInterval: services.callInterval,
+  //     colorOnDuty: services.colorOnDuty,
+  //     warantyCard: services.warantyCard,
+  //     itermNumber: services.itermNumber,
+  //     suppliersArticleNumber: services.suppliersArticleNumber,
+  //     externalArticleNumber: services.externalArticleNumber,
+  //     createdAt: services.createdAt,
+  //     updatedAt: services.updatedAt,
+  //     serviceVariants: serviceVariants,
+  //   })
+  //   .from(services)
+  //   .leftJoin(serviceVariants, eq(services.id, serviceVariants.serviceId))
+  //   .where(condition)
+  //   //.orderBy(desc(services.id))
+  //   .orderBy(orderCondition)
+  //   .limit(limit || 10)
+  //   .offset(offset || 0)
+  const servicesList = await db.query.services.findMany({
+    where: condition,
+    limit: limit || 10,
+    offset: offset || 0,
+    orderBy: orderCondition,
+    with: {
+      serviceCategories: true,
+      serviceVariants: true,
+    },
+  })
   const totalPage = Math.ceil(totalItems.count / limit)
 
   return {
