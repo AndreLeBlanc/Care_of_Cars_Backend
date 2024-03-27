@@ -146,7 +146,7 @@ export async function permissions(fastify: FastifyInstance) {
       const id = request.params.id
 
       const Permission = await updatePermissionById(id, PermissionData)
-      if (Permission.length == 0) {
+      if (Permission === undefined || Permission === null) {
         return reply.status(404).send({ message: 'Permission not found' })
       }
       reply.status(201).send({ message: 'Permission Updated', data: Permission })

@@ -5,6 +5,14 @@ import { permissions, roleToPermissions, roles } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchRoleSchemaType } from '../routes/roles/roleSchema.js'
 
+export type Role = {
+  id: number
+  roleName: string
+  description: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
 export async function getRolesPaginate(search: string, limit = 10, page = 1, offset = 0) {
   const condition = or(
     ilike(roles.roleName, '%' + search + '%'),
@@ -48,12 +56,12 @@ export async function createRole(roleName: string, description: string) {
     .returning({ id: roles.id, roleName: roles.roleName, description: roles.description })
 }
 
-export async function getRoleById(id: number): Promise<any> {
+export async function getRoleById(id: number): Promise<Role | undefined> {
   const results = await db.select().from(roles).where(eq(roles.id, id))
   return results[0] ? results[0] : undefined
 }
 
-export async function updateRoleById(id: number, role: PatchRoleSchemaType): Promise<any> {
+export async function updateRoleById(id: number, role: PatchRoleSchemaType): Promise<Role> {
   const roleWithUpdatedAt = { ...role, updatedAt: new Date() }
   const updatedRole = await db
     .update(roles)
@@ -66,10 +74,10 @@ export async function updateRoleById(id: number, role: PatchRoleSchemaType): Pro
       createdAt: roles.createdAt,
       updatedAt: roles.updatedAt,
     })
-  return updatedRole
+  return updatedRole[0]
 }
 
-export async function deleteRole(id: number): Promise<any> {
+export async function deleteRole(id: number): Promise<Role | undefined> {
   const deletedRole = await db.delete(roles).where(eq(roles.id, id)).returning()
   return deletedRole[0] ? deletedRole[0] : undefined
 }

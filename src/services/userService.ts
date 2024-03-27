@@ -6,38 +6,20 @@ import { roles, users } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchUserSchemaType } from '../routes/users/userSchema.js'
 
-export type updateUser = {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
-  createdAt: Date
-  updatedAt: Date
-}
-
 export type UserInfo = {
   id: number
   firstName: string
   lastName: string
   email: string
-  password: string
-  isSuperAdmin: boolean | null
-  roleId: number
   createdAt: Date
   updatedAt: Date
 }
 
-export type DeleteUser = {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
-  password: string
+export type IsSuperAdmin = {
   isSuperAdmin: boolean | null
-  roleId: number
-  createdAt: Date
-  updatedAt: Date
 }
+
+export type UserWithSuperAdmin = IsSuperAdmin & UserInfo
 
 export async function createUser(
   firstName: string,
@@ -151,7 +133,7 @@ export async function getUserById(id: number): Promise<UserInfo | undefined> {
   return results[0] ? results[0] : undefined
 }
 
-export async function updateUserById(id: number, user: PatchUserSchemaType): Promise<updateUser> {
+export async function updateUserById(id: number, user: PatchUserSchemaType): Promise<UserInfo> {
   const userWithUpdatedAt = { ...user, updatedAt: new Date() }
   const updatedUser = await db
     .update(users)
@@ -178,7 +160,7 @@ export async function isStrongPassword(password: string): Promise<boolean> {
   return password.length >= 3
 }
 
-export async function deleteUser(id: number): Promise<DeleteUser | undefined> {
+export async function DeleteUser(id: number): Promise<UserWithSuperAdmin | undefined> {
   const deletedUser = await db.delete(users).where(eq(users.id, id)).returning()
   return deletedUser[0] ? deletedUser[0] : undefined
 }
