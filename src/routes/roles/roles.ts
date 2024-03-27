@@ -150,7 +150,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       const id = request.params.id
 
       const role = await updateRoleById(id, roleData)
-      if (role.length == 0) {
+      if (role == null) {
         return reply.status(404).send({ message: 'role not found' })
       }
       reply.status(201).send({ message: 'Role Updated', data: role })
