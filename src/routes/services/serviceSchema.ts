@@ -50,3 +50,10 @@ export const CreateServiceSchema = Type.Object({
 })
 
 export type CreateServiceSchemaType = Static<typeof CreateServiceSchema>
+
+export const ListServiceQueryParamSchema = Type.Object({
+  search: Type.Optional(Type.String()),
+  limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+})
+export type ListServiceQueryParamSchemaType = Static<typeof ListServiceQueryParamSchema>
