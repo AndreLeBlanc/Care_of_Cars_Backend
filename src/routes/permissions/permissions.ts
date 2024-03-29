@@ -27,8 +27,8 @@ export async function permissions(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'list_permission'
-        const authrosieStatus: boolean = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -75,8 +75,8 @@ export async function permissions(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         const permissionName: string = 'create_permission'
-        const authrosieStatus: boolean = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })

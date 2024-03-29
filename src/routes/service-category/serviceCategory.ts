@@ -25,8 +25,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'list_service_category'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -72,8 +72,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'create_service_category'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -97,8 +97,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'view_service_category'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -128,8 +128,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'update_service_category'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -171,8 +171,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = 'delete_service_category'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
