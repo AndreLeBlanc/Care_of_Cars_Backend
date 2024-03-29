@@ -5,12 +5,28 @@ import { permissions, roleToPermissions, roles } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchRoleSchemaType } from '../routes/roles/roleSchema.js'
 
-export type Role = {
-  id: number
+export type RoleName = {
   roleName: string
+}
+
+export type RoleID = {
+  id: number
+}
+
+export type RoleDescDate = {
   description: string | null
   createdAt: Date
   updatedAt: Date
+}
+
+export type RoleIDName = RoleName & RoleID
+
+export type Role = RoleIDName & RoleDescDate
+
+export type PermissionStatus = {
+  permissionId: number
+  permissionName: string
+  hasPermission: boolean
 }
 
 export async function getRolesPaginate(search: string, limit = 10, page = 1, offset = 0) {
@@ -81,6 +97,7 @@ export async function deleteRole(id: number): Promise<Role | undefined> {
   const deletedRole = await db.delete(roles).where(eq(roles.id, id)).returning()
   return deletedRole[0] ? deletedRole[0] : undefined
 }
+
 export async function getRoleWithPermissions(roleId: number): Promise<any> {
   const roleWithPermissions = db
     .select({
@@ -96,9 +113,7 @@ export async function getRoleWithPermissions(roleId: number): Promise<any> {
   return roleWithPermissions
 }
 
-export async function getAllPermissionStatus(
-  roleId: number,
-): Promise<Array<{ permissionId: number; permissionName: string; hasPermission: boolean }>> {
+export async function getAllPermissionStatus(roleId: number): Promise<PermissionStatus[]> {
   const allPermissions = await db
     .select({ id: permissions.id, permissionName: permissions.permissionName })
     .from(permissions)
@@ -121,6 +136,7 @@ export async function getAllPermissionStatus(
   }
   return allPermissionsWithStatus
 }
+
 export async function roleHasPermission(roleId: number, permissionName: string): Promise<boolean> {
   const roleToPermissions: Array<{ permissionId: number; permissionName: string }> =
     await getRoleWithPermissions(roleId)

@@ -40,7 +40,10 @@ export default fp<SupportPluginOptions>(async (fastify, reply) => {
     ): Promise<boolean> {
       try {
         const userData: any = request.user
-        const hasPermission = await roleHasPermission(userData.user.role.id, permissionName)
+        const hasPermission: boolean = await roleHasPermission(
+          userData.user.role.id,
+          permissionName,
+        )
         if (userData.user.isSuperAdmin) {
           return true
         }
@@ -50,7 +53,7 @@ export default fp<SupportPluginOptions>(async (fastify, reply) => {
       } catch (err) {
         throw err
       }
-      return true
+      return false
     },
   )
 

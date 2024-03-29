@@ -8,6 +8,7 @@ import {
 import {
   createRoleToPermissions,
   deleteRoleToPermissions,
+  RoleToPermissions,
 } from '../../services/roleToPermissionService.js'
 
 export async function roleToPermissions(fastify: FastifyInstance): Promise<void> {
@@ -56,7 +57,10 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
     },
     async (request, reply) => {
       const { roleId, permissionId } = request.params
-      const deletedRoleToPermissions = await deleteRoleToPermissions(roleId, permissionId)
+      const deletedRoleToPermissions: RoleToPermissions | undefined = await deleteRoleToPermissions(
+        roleId,
+        permissionId,
+      )
       if (deletedRoleToPermissions === undefined || deletedRoleToPermissions === null) {
         return reply.status(404).send({ message: 'Invalid role id or permission id' })
       }

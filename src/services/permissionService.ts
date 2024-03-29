@@ -5,15 +5,31 @@ import { permissions } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchPermissionSchemaType } from '../routes/permissions/permissionSchema.js'
 
-type Permission = {
+type PermissionIDDescName = {
   id: number
   description: string | null
-  createdAt: Date
-  updatedAt: Date
   permissionName: string
 }
+type PermissionCreatedAndUpdated = {
+  createdAt: Date
+  updatedAt: Date
+}
 
-export async function getPermissionsPaginate(search: string, limit = 10, page = 1, offset = 0) {
+export type Permission = PermissionIDDescName & PermissionCreatedAndUpdated
+
+export type PermissionsPaginate = {
+  totalItems: number
+  totalPage: number
+  perPage: number
+  data: Permission[]
+}
+
+export async function getPermissionsPaginate(
+  search: string,
+  limit = 10,
+  page = 1,
+  offset = 0,
+): Promise<PermissionsPaginate> {
   const condition = or(
     ilike(permissions.permissionName, '%' + search + '%'),
     ilike(permissions.description, '%' + search + '%'),
@@ -49,8 +65,11 @@ export async function getPermissionsPaginate(search: string, limit = 10, page = 
   }
 }
 
-export async function createPermission(permissionName: string, description: string) {
-  return await db
+export async function createPermission(
+  permissionName: string,
+  description: string,
+): Promise<PermissionIDDescName> {
+  const createdPermission: PermissionIDDescName[] = await db
     .insert(permissions)
     .values({ permissionName: permissionName, description: description })
     .returning({
@@ -58,6 +77,7 @@ export async function createPermission(permissionName: string, description: stri
       permissionName: permissions.permissionName,
       description: permissions.description,
     })
+  return createdPermission[0]
 }
 
 export async function getPermissionById(id: number): Promise<Permission | undefined> {

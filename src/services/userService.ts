@@ -5,6 +5,7 @@ import { db } from '../config/db-connect.js'
 import { roles, users } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchUserSchemaType } from '../routes/users/userSchema.js'
+import { RoleID, RoleIDName } from './roleService.js'
 
 export type UserInfo = {
   id: number
@@ -21,6 +22,18 @@ export type IsSuperAdmin = {
 
 export type UserWithSuperAdmin = IsSuperAdmin & UserInfo
 
+export type VerifyUser = {
+  id: number
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  isSuperAdmin: boolean | null
+  role: RoleIDName
+}
+
+export type CreatedUser = UserInfo & RoleID
+
 export async function createUser(
   firstName: string,
   lastName: string,
@@ -28,18 +41,8 @@ export async function createUser(
   passwordHash: string,
   roleId: number,
   isSuperAdmin: boolean = false,
-): Promise<
-  {
-    id: number
-    firstName: string
-    lastName: string | undefined
-    email: string | undefined
-    createdAt: Date
-    updatedAt: Date
-    roleId: number
-  }[]
-> {
-  return await db
+): Promise<CreatedUser> {
+  const [user] = await db
     .insert(users)
     .values({
       firstName: firstName,
@@ -58,6 +61,7 @@ export async function createUser(
       updatedAt: users.updatedAt,
       roleId: users.roleId,
     })
+  return user
 }
 
 export async function getUsersPaginate(search: string, limit = 10, page = 1, offset = 0) {
@@ -104,11 +108,12 @@ export async function getUsersPaginate(search: string, limit = 10, page = 1, off
   }
 }
 
-export async function verifyUser(email: string): Promise<any> {
+export async function verifyUser(email: string): Promise<VerifyUser | undefined> {
   const results = await db
     .select({
       id: users.id,
       firstName: users.firstName,
+      lastName: users.lastName,
       email: users.email,
       password: users.password,
       isSuperAdmin: users.isSuperAdmin,

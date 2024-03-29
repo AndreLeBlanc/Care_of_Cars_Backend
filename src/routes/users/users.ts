@@ -16,6 +16,7 @@ import {
 } from './userSchema.js'
 import {
   createUser,
+  CreatedUser,
   getUsersPaginate,
   verifyUser,
   getUserById,
@@ -24,6 +25,8 @@ import {
   isStrongPassword,
   DeleteUser,
   UserWithSuperAdmin,
+  UserInfo,
+  VerifyUser,
 } from '../../services/userService.js'
 import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
 
@@ -95,19 +98,25 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const { firstName, lastName, email, password, roleId } = request.body
-      const isStrongPass = await isStrongPassword(password)
+      const isStrongPass: boolean = await isStrongPassword(password)
       if (!isStrongPass) {
         return reply.status(422).send({ message: 'Provide a strong password' })
       }
       const passwordHash: string = await generatePasswordHash(password)
       try {
-        const createdUser = await createUser(firstName, lastName, email, passwordHash, roleId)
+        const createdUser: CreatedUser = await createUser(
+          firstName,
+          lastName,
+          email,
+          passwordHash,
+          roleId,
+        )
         return reply.status(201).send({
           message: 'User created',
           body: {
-            firstName: createdUser[0].firstName,
-            lastName: createdUser[0].lastName,
-            email: createdUser[0].email,
+            firstName: createdUser.firstName,
+            lastName: createdUser.lastName,
+            email: createdUser.email,
           },
         })
       } catch (error) {
@@ -125,29 +134,29 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const { email, password } = request.body
-      let user = await verifyUser(email)
+      let user: VerifyUser | undefined = await verifyUser(email)
       if (user == undefined || user == null) {
         return reply.status(403).send({ message: 'Login failed, incorrect email' })
       }
       const match = await bcrypt.compare(password, user.password)
       if (match) {
-        delete user.password
-        const token = fastify.jwt.sign({ user })
-        const rolePermissions = await getRoleWithPermissions(user.role.id)
-        const roleFullPermissions = await getAllPermissionStatus(user.role.id)
+        const { password, ...userNoPassword } = user
+        const token = fastify.jwt.sign({ userNoPassword })
+        const rolePermissions = await getRoleWithPermissions(userNoPassword.role.id)
+        const roleFullPermissions = await getAllPermissionStatus(userNoPassword.role.id)
 
         return reply.status(200).send({
           message: 'Login success',
           token: token,
           user: {
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            isSuperAdmin: user.isSuperAdmin,
+            id: userNoPassword.id,
+            firstName: userNoPassword.firstName,
+            lastName: userNoPassword.lastName,
+            email: userNoPassword.email,
+            isSuperAdmin: userNoPassword.isSuperAdmin,
             role: {
-              id: user.role.id,
-              roleName: user.role.roleName,
+              id: userNoPassword.role.id,
+              roleName: userNoPassword.role.roleName,
               rolePermissions: rolePermissions,
               roleFullPermissions: roleFullPermissions,
             },
@@ -173,7 +182,7 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id = request.params.id
-      const user = await getUserById(id)
+      const user: UserInfo | undefined = await getUserById(id)
       if (user == null) {
         return reply.status(404).send({ message: 'user not found' })
       }
@@ -201,13 +210,13 @@ export async function users(fastify: FastifyInstance) {
       }
       const id = request.params.id
       if (userData?.password) {
-        const isStrongPass = await isStrongPassword(userData.password)
+        const isStrongPass: boolean = await isStrongPassword(userData.password)
         if (!isStrongPass) {
           return reply.status(422).send({ message: 'Provide a strong password' })
         }
         userData.password = await generatePasswordHash(userData.password)
       }
-      const user = await updateUserById(id, userData)
+      const user: UserInfo = await updateUserById(id, userData)
       if (user !== undefined) {
         return reply.status(404).send({ message: 'user not found' })
       }
