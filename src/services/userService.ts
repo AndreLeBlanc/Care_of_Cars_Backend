@@ -42,7 +42,7 @@ export async function createUser(
   roleId: number,
   isSuperAdmin: boolean = false,
 ): Promise<CreatedUser> {
-  const [user] = await db
+  const [user]: CreatedUser[] = await db
     .insert(users)
     .values({
       firstName: firstName,
@@ -109,7 +109,7 @@ export async function getUsersPaginate(search: string, limit = 10, page = 1, off
 }
 
 export async function verifyUser(email: string): Promise<VerifyUser | undefined> {
-  const results = await db
+  const results: VerifyUser[] | undefined = await db
     .select({
       id: users.id,
       firstName: users.firstName,
@@ -134,13 +134,13 @@ export async function verifyUser(email: string): Promise<VerifyUser | undefined>
 }
 
 export async function getUserById(id: number): Promise<UserInfo | undefined> {
-  const results = await db.select().from(users).where(eq(users.id, id))
+  const results: UserInfo[] | undefined = await db.select().from(users).where(eq(users.id, id))
   return results[0] ? results[0] : undefined
 }
 
 export async function updateUserById(id: number, user: PatchUserSchemaType): Promise<UserInfo> {
   const userWithUpdatedAt = { ...user, updatedAt: new Date() }
-  const updatedUser = await db
+  const updatedUser: UserInfo[] = await db
     .update(users)
     .set(userWithUpdatedAt)
     .where(eq(users.id, id))
@@ -166,6 +166,9 @@ export async function isStrongPassword(password: string): Promise<boolean> {
 }
 
 export async function DeleteUser(id: number): Promise<UserWithSuperAdmin | undefined> {
-  const deletedUser = await db.delete(users).where(eq(users.id, id)).returning()
+  const deletedUser: UserWithSuperAdmin[] | undefined = await db
+    .delete(users)
+    .where(eq(users.id, id))
+    .returning()
   return deletedUser[0] ? deletedUser[0] : undefined
 }

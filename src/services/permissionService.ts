@@ -5,7 +5,7 @@ import { permissions } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchPermissionSchemaType } from '../routes/permissions/permissionSchema.js'
 
-type PermissionIDDescName = {
+export type PermissionIDDescName = {
   id: number
   description: string | null
   permissionName: string

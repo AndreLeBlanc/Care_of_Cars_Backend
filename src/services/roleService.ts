@@ -13,15 +13,22 @@ export type RoleID = {
   id: number
 }
 
-export type RoleDescDate = {
+export type RoleDesc = {
   description: string | null
+}
+
+type RoleDate = {
   createdAt: Date
   updatedAt: Date
 }
 
+export type CreatedRole = RoleID & RoleName & RoleDesc
+
+export type RoleDescDate = RoleName & RoleID & RoleDate
+
 export type RoleIDName = RoleName & RoleID
 
-export type Role = RoleIDName & RoleDescDate
+export type Role = RoleIDName & RoleDate
 
 export type PermissionStatus = {
   permissionId: number
@@ -29,6 +36,7 @@ export type PermissionStatus = {
   hasPermission: boolean
 }
 
+///TODO
 export async function getRolesPaginate(search: string, limit = 10, page = 1, offset = 0) {
   const condition = or(
     ilike(roles.roleName, '%' + search + '%'),
@@ -65,11 +73,12 @@ export async function getRolesPaginate(search: string, limit = 10, page = 1, off
   }
 }
 
-export async function createRole(roleName: string, description: string) {
-  return await db
+export async function createRole(roleName: string, description: string): Promise<CreatedRole> {
+  const newRole: CreatedRole[] = await db
     .insert(roles)
     .values({ roleName: roleName, description: description })
     .returning({ id: roles.id, roleName: roles.roleName, description: roles.description })
+  return newRole[0]
 }
 
 export async function getRoleById(id: number): Promise<Role | undefined> {
