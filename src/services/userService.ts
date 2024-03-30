@@ -7,39 +7,52 @@ import { ilike } from 'drizzle-orm'
 import { PatchUserSchemaType } from '../routes/users/userSchema.js'
 import { RoleID, RoleIDName } from './roleService.js'
 
-export type UserInfo = {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
+export type UserID = number
+type UserPassword = string
+type UserFirstName = string
+type UserLastName = string
+type UserEmail = string
+
+type UserName = {
+  firstName: UserFirstName
+  lastName: UserLastName
+  email: UserEmail
+}
+
+type UserDates = {
   createdAt: Date
   updatedAt: Date
 }
+
+type CreatedUserRole = { roleId: RoleID }
 
 export type IsSuperAdmin = {
   isSuperAdmin: boolean | null
 }
 
+export type UserInfo = UserName & UserDates
+
 export type UserWithSuperAdmin = IsSuperAdmin & UserInfo
 
-export type VerifyUser = {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
-  password: string
-  isSuperAdmin: boolean | null
-  role: RoleIDName
+export type CreatedUser = UserInfo & CreatedUserRole
+
+export type VerifyUser = { userId: UserID } & UserName & {
+    password: UserPassword
+  } & IsSuperAdmin & { role: RoleIDName }
+
+export type UsersPaginated = {
+  totalItems: number
+  totalPage: number
+  perPage: number
+  data: UserInfo[]
 }
 
-export type CreatedUser = UserInfo & RoleID
-
 export async function createUser(
-  firstName: string,
-  lastName: string,
-  email: string,
+  firstName: UserFirstName,
+  lastName: UserLastName,
+  email: UserEmail,
   passwordHash: string,
-  roleId: number,
+  roleId: RoleID,
   isSuperAdmin: boolean = false,
 ): Promise<CreatedUser> {
   const [user]: CreatedUser[] = await db
@@ -64,7 +77,12 @@ export async function createUser(
   return user
 }
 
-export async function getUsersPaginate(search: string, limit = 10, page = 1, offset = 0) {
+export async function getUsersPaginate(
+  search: string,
+  limit = 10,
+  page = 1,
+  offset = 0,
+): Promise<UsersPaginated> {
   const condition = or(
     ilike(users.firstName, '%' + search + '%'),
     ilike(users.lastName, '%' + search + '%'),
@@ -108,10 +126,10 @@ export async function getUsersPaginate(search: string, limit = 10, page = 1, off
   }
 }
 
-export async function verifyUser(email: string): Promise<VerifyUser | undefined> {
+export async function verifyUser(email: UserEmail): Promise<VerifyUser | undefined> {
   const results: VerifyUser[] | undefined = await db
     .select({
-      id: users.id,
+      userId: users.id,
       firstName: users.firstName,
       lastName: users.lastName,
       email: users.email,
@@ -155,12 +173,12 @@ export async function updateUserById(id: number, user: PatchUserSchemaType): Pro
   return updatedUser[0]
 }
 
-export async function generatePasswordHash(password: string): Promise<string> {
+export async function generatePasswordHash(password: UserPassword): Promise<string> {
   const salt = bcrypt.genSaltSync(10)
   return bcrypt.hashSync(password, salt)
 }
 
-export async function isStrongPassword(password: string): Promise<boolean> {
+export async function isStrongPassword(password: UserPassword): Promise<boolean> {
   // TODO: add more strict checking's
   return password.length >= 3
 }

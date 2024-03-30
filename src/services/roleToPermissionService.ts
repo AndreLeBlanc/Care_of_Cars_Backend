@@ -2,17 +2,19 @@ import { and, eq } from 'drizzle-orm'
 
 import { db } from '../config/db-connect.js'
 import { roleToPermissions } from '../schema/schema.js'
+import { RoleID } from './roleService.js'
+import { PermissionID } from './permissionService.js'
 
 export type RoleToPermissions = {
-  roleId: number | null
+  roleId: RoleID | null
   createdAt: Date
   updatedAt: Date
-  permissionId: number | null
+  permissionId: PermissionID | null
 }
 
 export async function createRoleToPermissions(
-  roleId: number,
-  permissionId: number,
+  roleId: RoleID,
+  permissionId: PermissionID,
 ): Promise<RoleToPermissions> {
   const createdRole: RoleToPermissions[] = await db
     .insert(roleToPermissions)
@@ -27,8 +29,8 @@ export async function createRoleToPermissions(
 }
 
 export async function deleteRoleToPermissions(
-  roleId: number,
-  permissionId: number,
+  roleId: RoleID,
+  permissionId: PermissionID,
 ): Promise<RoleToPermissions | undefined> {
   const deletedRoleToPermissions = await db
     .delete(roleToPermissions)

@@ -18,6 +18,8 @@ import {
   createUser,
   CreatedUser,
   getUsersPaginate,
+  UserID,
+  UsersPaginated,
   verifyUser,
   getUserById,
   updateUserById,
@@ -28,6 +30,7 @@ import {
   UserInfo,
   VerifyUser,
 } from '../../services/userService.js'
+
 import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
 
 export async function users(fastify: FastifyInstance) {
@@ -53,7 +56,7 @@ export async function users(fastify: FastifyInstance) {
       let { search = '', limit = 10, page = 1 } = request.query
       const offset = fastify.findOffset(limit, page)
 
-      const result = await getUsersPaginate(search, limit, page, offset)
+      const result: UsersPaginated = await getUsersPaginate(search, limit, page, offset)
       let message: string = fastify.responseMessage('users', result.data.length)
       let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
       const nextUrl: string | undefined = fastify.findNextPageUrl(
@@ -149,7 +152,7 @@ export async function users(fastify: FastifyInstance) {
           message: 'Login success',
           token: token,
           user: {
-            id: userNoPassword.id,
+            id: userNoPassword.userId,
             firstName: userNoPassword.firstName,
             lastName: userNoPassword.lastName,
             email: userNoPassword.email,
@@ -181,7 +184,7 @@ export async function users(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id = request.params.id
+      const id: UserID = request.params.id
       const user: UserInfo | undefined = await getUserById(id)
       if (user == null) {
         return reply.status(404).send({ message: 'user not found' })
@@ -208,7 +211,7 @@ export async function users(fastify: FastifyInstance) {
       if (Object.keys(userData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id = request.params.id
+      const id: UserID = request.params.id
       if (userData?.password) {
         const isStrongPass: boolean = await isStrongPassword(userData.password)
         if (!isStrongPass) {
@@ -237,7 +240,7 @@ export async function users(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id = request.params.id
+      const id: UserID = request.params.id
       const user: UserWithSuperAdmin | undefined = await DeleteUser(id)
       if (user == undefined || user == null) {
         return reply.status(404).send({ message: "User doesn't exist!" })

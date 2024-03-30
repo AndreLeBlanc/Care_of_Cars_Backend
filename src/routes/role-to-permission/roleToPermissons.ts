@@ -10,14 +10,15 @@ import {
   deleteRoleToPermissions,
   RoleToPermissions,
 } from '../../services/roleToPermissionService.js'
+import { PermissionTitle } from '../../services/permissionService.js'
 
 export async function roleToPermissions(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: CreateRoleToPermissionSchemaType; Reply: object }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'create_role_to_permission'
-        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        const permissionName: PermissionTitle = 'create_role_to_permission'
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
             .status(403)
@@ -44,7 +45,7 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
     '/:roleId/:permissionId',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'delete_role_to_permission'
+        const permissionName: PermissionTitle = 'delete_role_to_permission'
         const authorizeStatus = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply

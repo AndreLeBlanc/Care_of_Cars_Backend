@@ -5,10 +5,14 @@ import { permissions } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchPermissionSchemaType } from '../routes/permissions/permissionSchema.js'
 
+export type PermissionID = number
+export type PermissionTitle = string
+type PermissionDescription = string | null
+
 export type PermissionIDDescName = {
-  id: number
-  description: string | null
-  permissionName: string
+  id: PermissionID
+  permissionName: PermissionTitle
+  description: PermissionDescription
 }
 type PermissionCreatedAndUpdated = {
   createdAt: Date
@@ -66,8 +70,8 @@ export async function getPermissionsPaginate(
 }
 
 export async function createPermission(
-  permissionName: string,
-  description: string,
+  permissionName: PermissionTitle,
+  description: PermissionDescription,
 ): Promise<PermissionIDDescName> {
   const createdPermission: PermissionIDDescName[] = await db
     .insert(permissions)
@@ -86,7 +90,7 @@ export async function getPermissionById(id: number): Promise<Permission | undefi
 }
 
 export async function updatePermissionById(
-  id: number,
+  id: PermissionID,
   permission: PatchPermissionSchemaType,
 ): Promise<Permission> {
   const permissionWithUpdatedAt = { ...permission, updatedAt: new Date() }

@@ -18,6 +18,7 @@ import {
   getServiceCategoryByIdSchema,
   getServiceCategoryByIdType,
 } from './serviceCategorySchema.js'
+import { PermissionTitle } from '../../services/permissionService.js'
 
 export async function serviceCategory(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceCategoryQueryParamSchemaType }>(
@@ -71,8 +72,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'create_service_category'
-        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        const permissionName: PermissionTitle = 'create_service_category'
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
             .status(403)
@@ -96,8 +97,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'view_service_category'
-        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        const permissionName: PermissionTitle = 'view_service_category'
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
             .status(403)
@@ -127,8 +128,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'update_service_category'
-        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        const permissionName: PermissionTitle = 'update_service_category'
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
             .status(403)
@@ -170,8 +171,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'delete_service_category'
-        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        const permissionName: PermissionTitle = 'delete_service_category'
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
             .status(403)
