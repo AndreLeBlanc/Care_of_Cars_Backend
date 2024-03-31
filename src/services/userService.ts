@@ -18,7 +18,7 @@ type UserDates = {
   updatedAt: Date
 }
 
-export type IsSuperAdmin = {
+type IsSuperAdmin = {
   isSuperAdmin: boolean | null
 }
 

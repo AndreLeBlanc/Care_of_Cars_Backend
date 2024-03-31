@@ -4,11 +4,10 @@ import { db } from '../config/db-connect.js'
 import { serviceCategories } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 
-export type serviceCategoryID = { serviceCategoryID: number }
-export type serviceCategoryName = { serviceCategoryName: string }
-export type serviceCategoryDescription = { serviceCategoryDescription: string | null }
-
-export type serviceCategory = {
+type serviceCategoryID = { serviceCategoryID: number }
+type serviceCategoryName = { serviceCategoryName: string }
+type serviceCategoryDescription = { serviceCategoryDescription: string | null }
+type serviceCategory = {
   createdAt: Date
   updatedAt: Date
 } & serviceCategoryID &

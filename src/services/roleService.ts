@@ -10,7 +10,7 @@ export type RoleName = { roleName: string }
 
 export type RoleID = { roleID: number }
 
-export type RoleDescription = { roleDescription: string | null }
+type RoleDescription = { roleDescription: string | null }
 
 type RoleDate = {
   createdAt: Date
@@ -21,13 +21,13 @@ export type CreatedRole = RoleID & RoleName & RoleDescription
 
 export type RoleDescDate = RoleName & RoleID & RoleDate
 
-export type RoleIDName = RoleName & RoleID
+type RoleIDName = RoleName & RoleID
 
 export type Role = RoleIDName & RoleDate
 
 type RolesList = Role & RoleDescription
 
-export type PermissionStatus = {
+type PermissionStatus = {
   permissionId: PermissionID
   permissionName: PermissionTitle
   hasPermission: boolean
