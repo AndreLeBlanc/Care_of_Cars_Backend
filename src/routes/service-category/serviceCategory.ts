@@ -25,7 +25,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'list_service_category'
+        const permissionName = { permissionName: 'list_service_category' }
         const authorizeStatus = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -72,7 +72,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = 'create_service_category'
+        const permissionName: PermissionTitle = { permissionName: 'create_service_category' }
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -97,7 +97,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = 'view_service_category'
+        const permissionName: PermissionTitle = { permissionName: 'view_service_category' }
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -128,7 +128,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = 'update_service_category'
+        const permissionName: PermissionTitle = { permissionName: 'update_service_category' }
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -171,7 +171,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = 'delete_service_category'
+        const permissionName: PermissionTitle = { permissionName: 'delete_service_category' }
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply

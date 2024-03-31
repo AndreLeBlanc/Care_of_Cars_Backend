@@ -14,21 +14,21 @@ import {
 } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
-  id: serial('id').primaryKey().unique(),
+  userID: serial('id').primaryKey().unique(),
   firstName: varchar('firstName').notNull(),
   lastName: varchar('lastName').notNull(),
   email: varchar('email').notNull().unique(),
   password: text('password').notNull(),
   isSuperAdmin: boolean('isSuperAdmin').default(false),
   roleId: integer('roleId')
-    .references(() => roles.id)
+    .references(() => roles.roleID)
     .notNull(),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
 export const roles = pgTable('roles', {
-  id: serial('id').primaryKey().unique(),
+  roleID: serial('id').primaryKey().unique(),
   roleName: varchar('roleName', { length: 256 }).unique().notNull(),
   description: text('description'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
@@ -36,7 +36,7 @@ export const roles = pgTable('roles', {
 })
 
 export const permissions = pgTable('permissions', {
-  id: serial('id').primaryKey().unique(),
+  permissionID: serial('id').primaryKey().unique(),
   permissionName: varchar('permissionName', { length: 256 }).unique().notNull(),
   description: text('description'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
@@ -87,7 +87,7 @@ export const colorOnDutyEnum = pgEnum('colorOnDuty', [
   'Red',
 ])
 export const serviceCategories = pgTable('serviceCategories', {
-  id: serial('id').primaryKey().unique(),
+  serviceCategoryID: serial('id').primaryKey().unique(),
   name: varchar('name', { length: 256 }).unique().notNull(),
   description: text('description'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
@@ -95,9 +95,9 @@ export const serviceCategories = pgTable('serviceCategories', {
 })
 
 export const services = pgTable('services', {
-  id: serial('id').primaryKey().unique(),
+  serviceID: serial('id').primaryKey().unique(),
   serviceCategoryId: integer('serviceCategoryId')
-    .references(() => serviceCategories.id)
+    .references(() => serviceCategories.serviceCategoryID)
     .notNull(),
   description: varchar('description', { length: 256 }).unique().notNull(),
   includeInAutomaticSms: boolean('includeInAutomaticSms'),
@@ -119,12 +119,12 @@ export const servicesCategoryToServiceRelations = relations(serviceCategories, (
 export const serviceToServiceCategoryRelations = relations(services, ({ one }) => ({
   serviceCategories: one(serviceCategories, {
     fields: [services.serviceCategoryId],
-    references: [serviceCategories.id],
+    references: [serviceCategories.serviceCategoryID],
   }),
 }))
 
 export const serviceVariants = pgTable('serviceVariants', {
-  id: serial('id').primaryKey().unique(),
+  serviceVariantID: serial('id').primaryKey().unique(),
   description: varchar('description', { length: 256 }),
   award: real('award').notNull(),
   cost: real('cost').notNull(),
@@ -134,7 +134,7 @@ export const serviceVariants = pgTable('serviceVariants', {
   day4: time('day4'),
   day5: time('day5'),
   serviceId: integer('serviceId')
-    .references(() => services.id)
+    .references(() => services.serviceID)
     .notNull(),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
@@ -145,5 +145,5 @@ export const servicesRelations = relations(services, ({ many }) => ({
 }))
 
 export const serviceVariantsRelations = relations(serviceVariants, ({ one }) => ({
-  service: one(services, { fields: [serviceVariants.serviceId], references: [services.id] }),
+  service: one(services, { fields: [serviceVariants.serviceId], references: [services.serviceID] }),
 }))

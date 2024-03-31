@@ -22,15 +22,20 @@ export default fp<SupportPluginOptions>(async (fastify) => {
         typeof process.env.SUPER_ADMIN_PASSWORD === 'string' &&
         typeof process.env.SUPER_ADMIN_EMAIL === 'string'
       ) {
-        const role: CreatedRole = await createRole('SuperAdmin', 'Super admin user')
+        const role: CreatedRole = await createRole(
+          { roleName: 'SuperAdmin' },
+          { roleDescription: 'Super admin user' },
+        )
         // Below two envs are required in plugins/env.ts so it will throw message in console if not added.
-        const passwordHash = await generatePasswordHash(process.env.SUPER_ADMIN_PASSWORD)
+        const passwordHash = await generatePasswordHash({
+          userPassword: process.env.SUPER_ADMIN_PASSWORD,
+        })
         const user: CreatedUser = await createUser(
-          'SuperAdmin',
-          'SuperAdmin',
-          process.env.SUPER_ADMIN_EMAIL,
+          { userFirstName: 'SuperAdmin' },
+          { userLastName: 'SuperAdmin' },
+          { userEmail: process.env.SUPER_ADMIN_EMAIL },
           passwordHash,
-          role?.id,
+          { roleID: role?.roleID },
           true,
         )
         console.info('Super admin created from seed!', role, user)

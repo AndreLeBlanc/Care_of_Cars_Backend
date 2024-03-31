@@ -24,7 +24,7 @@ export async function createService(service: CreateServiceSchemaType) {
         externalArticleNumber: service.externalArticleNumber,
       })
       .returning({
-        id: services.id,
+        id: services.serviceID,
       })
     for (const serviceVariant of service.serviceVariants || []) {
       await tx.insert(serviceVariants).values({
@@ -61,14 +61,14 @@ export async function getServicesPaginate(
       ilike(services.externalArticleNumber, '%' + search + '%'),
     ),
   )
-  let orderCondition = desc(services.id)
+  let orderCondition = desc(services.serviceID)
   if (order == serviceOrderEnum.desc) {
     if (orderBy == listServiceOrderByEnum.description) {
       orderCondition = desc(services.description)
     } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
-      orderCondition = desc(serviceCategories.id)
+      orderCondition = desc(serviceCategories.serviceCategoryID)
     } else {
-      orderCondition = desc(services.id)
+      orderCondition = desc(services.serviceID)
     }
   }
 
@@ -76,9 +76,9 @@ export async function getServicesPaginate(
     if (orderBy == listServiceOrderByEnum.description) {
       orderCondition = asc(services.description)
     } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
-      orderCondition = asc(serviceCategories.id)
+      orderCondition = asc(serviceCategories.serviceCategoryID)
     } else {
-      orderCondition = asc(services.id)
+      orderCondition = asc(services.serviceID)
     }
   }
 
@@ -91,7 +91,7 @@ export async function getServicesPaginate(
 
   // const servicesList = await db
   //   .select({
-  //     id: services.id,
+  //     id: services.serviceID,
   //     description: services.description,
   //     serviceCategoryId: services.serviceCategoryId,
   //     includeInAutomaticSms: services.includeInAutomaticSms,
@@ -107,9 +107,9 @@ export async function getServicesPaginate(
   //     serviceVariants: serviceVariants,
   //   })
   //   .from(services)
-  //   .leftJoin(serviceVariants, eq(services.id, serviceVariants.serviceId))
+  //   .leftJoin(serviceVariants, eq(services.serviceID, serviceVariants.serviceId))
   //   .where(condition)
-  //   //.orderBy(desc(services.id))
+  //   //.orderBy(desc(services.serviceID))
   //   .orderBy(orderCondition)
   //   .limit(limit || 10)
   //   .offset(offset || 0)

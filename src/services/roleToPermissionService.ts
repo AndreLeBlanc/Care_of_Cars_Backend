@@ -5,12 +5,14 @@ import { roleToPermissions } from '../schema/schema.js'
 import { RoleID } from './roleService.js'
 import { PermissionID } from './permissionService.js'
 
+type MaybeRoleID = { roleID: number | null }
+type MaybePermissionID = { permissionID: number | null }
+
 export type RoleToPermissions = {
-  roleId: RoleID | null
   createdAt: Date
   updatedAt: Date
-  permissionId: PermissionID | null
-}
+} & MaybeRoleID &
+  MaybePermissionID
 
 export async function createRoleToPermissions(
   roleId: RoleID,
@@ -18,25 +20,32 @@ export async function createRoleToPermissions(
 ): Promise<RoleToPermissions> {
   const createdRole: RoleToPermissions[] = await db
     .insert(roleToPermissions)
-    .values({ roleId: roleId, permissionId: permissionId })
+    .values({ roleId: roleId.roleID, permissionId: permissionId.permissionID })
     .returning({
-      permissionId: roleToPermissions.permissionId,
-      roleId: roleToPermissions.roleId,
+      permissionID: roleToPermissions.permissionId,
+      roleID: roleToPermissions.roleId,
       createdAt: roleToPermissions.createdAt,
       updatedAt: roleToPermissions.updatedAt,
     })
   return createdRole[0]
 }
-
 export async function deleteRoleToPermissions(
   roleId: RoleID,
   permissionId: PermissionID,
 ): Promise<RoleToPermissions | undefined> {
-  const deletedRoleToPermissions = await db
+  const deletedRoleToPermissions: RoleToPermissions[] = await db
     .delete(roleToPermissions)
     .where(
-      and(eq(roleToPermissions.roleId, roleId), eq(roleToPermissions.permissionId, permissionId)),
+      and(
+        eq(roleToPermissions.roleId, roleId.roleID),
+        eq(roleToPermissions.permissionId, permissionId.permissionID),
+      ),
     )
-    .returning()
+    .returning({
+      permissionID: roleToPermissions.permissionId,
+      roleID: roleToPermissions.roleId,
+      createdAt: roleToPermissions.createdAt,
+      updatedAt: roleToPermissions.updatedAt,
+    })
   return deletedRoleToPermissions[0] ? deletedRoleToPermissions[0] : undefined
 }

@@ -38,7 +38,7 @@ export async function users(fastify: FastifyInstance) {
     '/:users',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'list_user'
+        const permissionName = { permissionName: 'list_user' }
         if (!(await fastify.authorize(request, reply, permissionName))) {
           return reply
             .status(403)
@@ -87,7 +87,7 @@ export async function users(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
-        fastify.authorize(request, reply, 'create_user')
+        fastify.authorize(request, reply, { permissionName: 'create_user' })
         done()
         return reply
       },
@@ -101,25 +101,25 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const { firstName, lastName, email, password, roleId } = request.body
-      const isStrongPass: boolean = await isStrongPassword(password)
+      const isStrongPass: boolean = await isStrongPassword({ userPassword: password })
       if (!isStrongPass) {
         return reply.status(422).send({ message: 'Provide a strong password' })
       }
-      const passwordHash: string = await generatePasswordHash(password)
+      const passwordHash: string = await generatePasswordHash({ userPassword: password })
       try {
         const createdUser: CreatedUser = await createUser(
-          firstName,
-          lastName,
-          email,
+          { userFirstName: firstName },
+          { userLastName: lastName },
+          { userEmail: email },
           passwordHash,
-          roleId,
+          { roleID: roleId },
         )
         return reply.status(201).send({
           message: 'User created',
           body: {
-            firstName: createdUser.firstName,
-            lastName: createdUser.lastName,
-            email: createdUser.email,
+            firstName: createdUser.userFirstName,
+            lastName: createdUser.userLastName,
+            email: createdUser.userEmail,
           },
         })
       } catch (error) {
@@ -137,28 +137,28 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const { email, password } = request.body
-      let user: VerifyUser | undefined = await verifyUser(email)
+      let user: VerifyUser | undefined = await verifyUser({ userEmail: email })
       if (user == undefined || user == null) {
         return reply.status(403).send({ message: 'Login failed, incorrect email' })
       }
-      const match = await bcrypt.compare(password, user.password)
+      const match = await bcrypt.compare(password, user.userPassword)
       if (match) {
-        const { password, ...userNoPassword } = user
+        const { userPassword, ...userNoPassword } = user
         const token = fastify.jwt.sign({ userNoPassword })
-        const rolePermissions = await getRoleWithPermissions(userNoPassword.role.id)
-        const roleFullPermissions = await getAllPermissionStatus(userNoPassword.role.id)
+        const rolePermissions = await getRoleWithPermissions(userNoPassword.role)
+        const roleFullPermissions = await getAllPermissionStatus(userNoPassword.role)
 
         return reply.status(200).send({
           message: 'Login success',
           token: token,
           user: {
-            id: userNoPassword.userId,
-            firstName: userNoPassword.firstName,
-            lastName: userNoPassword.lastName,
-            email: userNoPassword.email,
+            id: userNoPassword.userID,
+            firstName: userNoPassword.userFirstName,
+            lastName: userNoPassword.userLastName,
+            email: userNoPassword.userEmail,
             isSuperAdmin: userNoPassword.isSuperAdmin,
             role: {
-              id: userNoPassword.role.id,
+              id: userNoPassword.role.roleID,
               roleName: userNoPassword.role.roleName,
               rolePermissions: rolePermissions,
               roleFullPermissions: roleFullPermissions,
@@ -174,7 +174,7 @@ export async function users(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
-        fastify.authorize(request, reply, 'view_user')
+        fastify.authorize(request, reply, { permissionName: 'view_user' })
         done()
         return reply
       },
@@ -184,7 +184,7 @@ export async function users(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id: UserID = request.params.id
+      const id: UserID = { userID: request.params.id }
       const user: UserInfo | undefined = await getUserById(id)
       if (user == null) {
         return reply.status(404).send({ message: 'user not found' })
@@ -197,7 +197,7 @@ export async function users(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
-        fastify.authorize(request, reply, 'update_user')
+        fastify.authorize(request, reply, { permissionName: 'update_user' })
         done()
         return reply
       },
@@ -211,15 +211,15 @@ export async function users(fastify: FastifyInstance) {
       if (Object.keys(userData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id: UserID = request.params.id
+      const id: UserID = { userID: request.params.id }
       if (userData?.password) {
-        const isStrongPass: boolean = await isStrongPassword(userData.password)
+        const isStrongPass: boolean = await isStrongPassword({ userPassword: userData.password })
         if (!isStrongPass) {
           return reply.status(422).send({ message: 'Provide a strong password' })
         }
-        userData.password = await generatePasswordHash(userData.password)
+        userData.password = await generatePasswordHash({ userPassword: userData.password })
       }
-      const user: UserInfo = await updateUserById(id, userData)
+      const user: UserInfo = await updateUserById(id.userID, userData)
       if (user !== undefined) {
         return reply.status(404).send({ message: 'user not found' })
       }
@@ -231,7 +231,7 @@ export async function users(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
-        fastify.authorize(request, reply, 'delete_user')
+        fastify.authorize(request, reply, { permissionName: 'delete_user' })
         done()
         return reply
       },
@@ -240,8 +240,8 @@ export async function users(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id: UserID = request.params.id
-      const user: UserWithSuperAdmin | undefined = await DeleteUser(id)
+      const id: UserID = { userID: request.params.id }
+      const user: UserWithSuperAdmin | undefined = await DeleteUser(id.userID)
       if (user == undefined || user == null) {
         return reply.status(404).send({ message: "User doesn't exist!" })
       }

@@ -2,6 +2,7 @@ import fp from 'fastify-plugin'
 import { FastifyReply } from 'fastify/types/reply'
 import { FastifyRequest } from 'fastify/types/request'
 import { roleHasPermission } from '../services/roleService.js'
+import { PermissionTitle } from '../services/permissionService.js'
 import { FastifyJwtNamespace } from '@fastify/jwt'
 export interface SupportPluginOptions {
   // Specify Support plugin options here
@@ -36,7 +37,7 @@ export default fp<SupportPluginOptions>(async (fastify, reply) => {
     async function (
       request: FastifyRequest,
       reply: FastifyReply,
-      permissionName: string,
+      permissionName: PermissionTitle,
     ): Promise<boolean> {
       try {
         const userData: any = request.user
@@ -79,7 +80,7 @@ declare module 'fastify' {
     authorize(
       request: FastifyRequest,
       reply: FastifyReply,
-      permissionName: string,
+      permissionName: PermissionTitle,
     ): Promise<boolean>
     authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void>
   }
