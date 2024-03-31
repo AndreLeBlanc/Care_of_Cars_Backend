@@ -7,7 +7,9 @@ import {
 } from '../routes/services/serviceSchema.js'
 import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
 
-export async function createService(service: CreateServiceSchemaType) {
+export type serviceID = { serviceID: number }
+
+export async function createService(service: CreateServiceSchemaType): Promise<serviceID> {
   return await db.transaction(async (tx) => {
     const [insertedService] = await tx
       .insert(services)
@@ -24,12 +26,12 @@ export async function createService(service: CreateServiceSchemaType) {
         externalArticleNumber: service.externalArticleNumber,
       })
       .returning({
-        id: services.serviceID,
+        serviceID: services.serviceID,
       })
     for (const serviceVariant of service.serviceVariants || []) {
       await tx.insert(serviceVariants).values({
         description: serviceVariant.description,
-        serviceId: insertedService.id,
+        serviceId: insertedService.serviceID,
         award: serviceVariant.award,
         cost: serviceVariant.cost,
         day1: serviceVariant.day1,
