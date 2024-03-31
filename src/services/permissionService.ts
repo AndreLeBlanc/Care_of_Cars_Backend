@@ -102,7 +102,11 @@ export async function updatePermissionById(
   id: PermissionID,
   permission: PatchPermissionSchemaType,
 ): Promise<Permission> {
-  const permissionWithUpdatedAt = { ...permission, updatedAt: new Date() }
+  const permissionWithUpdatedAt = {
+    permissionName: permission.PermissionName,
+    description: permission.description,
+    updatedAt: new Date(),
+  }
   const updatedPermission = await db
     .update(permissions)
     .set(permissionWithUpdatedAt)

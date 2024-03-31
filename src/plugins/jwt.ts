@@ -42,10 +42,10 @@ export default fp<SupportPluginOptions>(async (fastify, reply) => {
       try {
         const userData: any = request.user
         const hasPermission: boolean = await roleHasPermission(
-          userData.user.role.id,
+          { roleID: userData.userNoPassword.role.roleID },
           permissionName,
         )
-        if (userData.user.isSuperAdmin) {
+        if (userData.userNoPassword) {
           return true
         }
         if (!hasPermission) {
