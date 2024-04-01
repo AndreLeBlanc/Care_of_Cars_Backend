@@ -23,6 +23,10 @@ Stop containers and remove the database:
 
 `sudo docker-compose down --rmi all --volumes`
 
+Remove all Docker images:
+
+`sudo docker system prune -a`
+
 To see running docker containers:
 
 `sudo docker ps`
@@ -203,3 +207,50 @@ Please ensure that your functions have a return type.
 Null is broken in typescript so other return types than null are recommended:
 
 https://hamednourhani.gitbooks.io/typescript-book/content/docs/tips/null.html
+
+# Branded types
+
+To reduce the risk of bugs the use of [branded types](https://egghead.io/blog/using-branded-types-in-typescript) is prefered. Take the following code
+
+```
+type a = number;
+type b = number;
+
+function myFunc(myVar: a): a {
+  return myVar + 1;
+}
+
+const myArg: b = 3;
+myFunc(myArg);
+
+´´´
+
+It compiles and there are no warnings. However, there is a major risk in the code. myFunc is supposed to take an argument of type a, yet it accepts myArg which is of type b.
+
+This is a potential source of bugs in the project as we might have multiple differennt types with similar names and function. There are many types that are numbers. For example a serviceID and a roleID might get confused if we define our types as they were defined above. We can reduce this risk by using branded types. Branded types can store the same data yet can not be mixed. Rewriting the code above using branded types we get:
+
+```
+
+type a = { a: number };
+type b = { b: number };
+
+function myFunc(myVar: a): a {
+return { a: myVar.a + 1 };
+}
+
+const myArg: b = { b: 3 };
+myFunc(myArg);
+´´´
+
+This code will not compile. The compiler realizes that we are trying to pass an argument of type b to myFunc which takes an argument of type a. Even if the two types contain the same data the compiler can tell the difference. All JavaScript variables are objects so there is no performance penalty to using branded types. It can also make code easy to read
+
+```
+function example(id: serviceID)
+´´´
+
+is easier to understand and more difficult to confuse than
+
+```
+
+function example(id: number)
+´´´
