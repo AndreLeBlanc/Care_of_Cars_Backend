@@ -1,0 +1,1 @@
+ALTER TABLE "serviceVariants" RENAME COLUMN "description" TO "name";
