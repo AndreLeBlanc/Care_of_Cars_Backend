@@ -12,7 +12,7 @@ export async function createService(service: CreateServiceSchemaType) {
     const [insertedService] = await tx
       .insert(services)
       .values({
-        description: service.description,
+        name: service.name,
         serviceCategoryId: service.serviceCategoryId,
         includeInAutomaticSms: service.includeInAutomaticSms,
         hidden: service.hidden,
@@ -28,7 +28,7 @@ export async function createService(service: CreateServiceSchemaType) {
       })
     for (const serviceVariant of service.serviceVariants || []) {
       await tx.insert(serviceVariants).values({
-        description: serviceVariant.description,
+        name: serviceVariant.name,
         serviceId: insertedService.id,
         award: serviceVariant.award,
         cost: serviceVariant.cost,
@@ -55,7 +55,7 @@ export async function getServicesPaginate(
   const condition = and(
     eq(services.hidden, hidden),
     or(
-      ilike(services.description, '%' + search + '%'),
+      ilike(services.name, '%' + search + '%'),
       ilike(services.itermNumber, '%' + search + '%'),
       ilike(services.suppliersArticleNumber, '%' + search + '%'),
       ilike(services.externalArticleNumber, '%' + search + '%'),
@@ -63,8 +63,8 @@ export async function getServicesPaginate(
   )
   let orderCondition = desc(services.id)
   if (order == serviceOrderEnum.desc) {
-    if (orderBy == listServiceOrderByEnum.description) {
-      orderCondition = desc(services.description)
+    if (orderBy == listServiceOrderByEnum.name) {
+      orderCondition = desc(services.name)
     } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
       orderCondition = desc(serviceCategories.id)
     } else {
@@ -73,8 +73,8 @@ export async function getServicesPaginate(
   }
 
   if (order == serviceOrderEnum.asc) {
-    if (orderBy == listServiceOrderByEnum.description) {
-      orderCondition = asc(services.description)
+    if (orderBy == listServiceOrderByEnum.name) {
+      orderCondition = asc(services.name)
     } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
       orderCondition = asc(serviceCategories.id)
     } else {
