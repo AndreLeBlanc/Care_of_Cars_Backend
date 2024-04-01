@@ -4,10 +4,18 @@ import {
   CreateServiceSchemaType,
   ListServiceQueryParamSchema,
   ListServiceQueryParamSchemaType,
+  PatchServiceSchemaType,
   listServiceOrderByEnum,
   serviceOrderEnum,
+  getServiceByIdSchemaType,
+  PatchServiceSchema,
+  getServiceByIdSchema,
 } from './serviceSchema.js'
-import { createService, getServicesPaginate } from '../../services/serviceService.js'
+import {
+  createService,
+  getServicesPaginate,
+  updateServiceById,
+} from '../../services/serviceService.js'
 
 export async function services(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceQueryParamSchemaType }>(
@@ -87,6 +95,43 @@ export async function services(fastify: FastifyInstance) {
       const service = request.body
       const serviceData = await createService(service)
       reply.status(201).send({ message: 'Service created', data: serviceData })
+    },
+  )
+  fastify.patch<{
+    Body: PatchServiceSchemaType
+    Reply: object
+    Params: getServiceByIdSchemaType
+  }>(
+    '/:id',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName = 'update_service'
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        body: PatchServiceSchema,
+        params: getServiceByIdSchema,
+      },
+    },
+    async (request, reply) => {
+      const serviceData = request.body
+      if (Object.keys(serviceData).length == 0) {
+        return reply.status(422).send({ message: 'Provide at least one column to update.' })
+      }
+      const id = request.params.id
+
+      const service = await updateServiceById(id, serviceData)
+      if (service == undefined) {
+        return reply.status(404).send({ message: 'Service not found' })
+      }
+      reply.status(201).send({ message: 'Service Updated', data: service })
     },
   )
 }

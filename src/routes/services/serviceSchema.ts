@@ -1,4 +1,5 @@
 import { Static, Type } from '@sinclair/typebox'
+import { colorOnDutyEnum } from '../../services/serviceService.js'
 
 export const CreateServiceVariantsSchema = Type.Object({
   name: Type.String(),
@@ -12,28 +13,28 @@ export const CreateServiceVariantsSchema = Type.Object({
 })
 export type CreateServiceVariantsSchemaType = Static<typeof CreateServiceVariantsSchema>
 
-enum colorOnDutyEnum {
-  LightBlue = 'LightBlue',
-  Blue = 'Blue',
-  DarkBlue = 'DarkBlue',
-  LightGreen = 'LightGreen',
-  Green = 'Green',
-  DarkGreen = 'DarkGreen',
-  LightYellow = 'LightYellow',
-  Yellow = 'Yellow',
-  DarkYellow = 'DarkYellow',
-  LightPurple = 'LightPurple',
-  Purple = 'Purple',
-  DarkPurple = 'DarkPurple',
-  LightPink = 'LightPink',
-  Pink = 'Pink',
-  DarkPink = 'DarkPink',
-  LightTurquoise = 'LightTurquoise',
-  Turquoise = 'Turquoise',
-  DarkTurquoise = 'DarkTurquoise',
-  Orange = 'Orange',
-  Red = 'Red',
-}
+// enum colorOnDutyEnum {
+//   LightBlue = 'LightBlue',
+//   Blue = 'Blue',
+//   DarkBlue = 'DarkBlue',
+//   LightGreen = 'LightGreen',
+//   Green = 'Green',
+//   DarkGreen = 'DarkGreen',
+//   LightYellow = 'LightYellow',
+//   Yellow = 'Yellow',
+//   DarkYellow = 'DarkYellow',
+//   LightPurple = 'LightPurple',
+//   Purple = 'Purple',
+//   DarkPurple = 'DarkPurple',
+//   LightPink = 'LightPink',
+//   Pink = 'Pink',
+//   DarkPink = 'DarkPink',
+//   LightTurquoise = 'LightTurquoise',
+//   Turquoise = 'Turquoise',
+//   DarkTurquoise = 'DarkTurquoise',
+//   Orange = 'Orange',
+//   Red = 'Red',
+// }
 const colorOnDutyEnumType = Type.Enum(colorOnDutyEnum)
 export const CreateServiceSchema = Type.Object({
   name: Type.String(),
@@ -42,8 +43,8 @@ export const CreateServiceSchema = Type.Object({
   hidden: Type.Optional(Type.Boolean()),
   callInterval: Type.Optional(Type.Integer({ minimum: 1, maximum: 12 })),
   colorOnDuty: Type.Optional(colorOnDutyEnumType),
-  warantyCard: Type.Optional(Type.Boolean()),
-  itermNumber: Type.Optional(Type.String()),
+  warrantyCard: Type.Optional(Type.Boolean()),
+  itemNumber: Type.Optional(Type.String()),
   suppliersArticleNumber: Type.Optional(Type.String()),
   externalArticleNumber: Type.Optional(Type.String()),
   serviceVariants: Type.Optional(Type.Array(CreateServiceVariantsSchema)),
@@ -73,3 +74,36 @@ export const ListServiceQueryParamSchema = Type.Object({
   hidden: Type.Optional(Type.Boolean()),
 })
 export type ListServiceQueryParamSchemaType = Static<typeof ListServiceQueryParamSchema>
+
+export const PatchServiceVariantsSchema = Type.Object({
+  name: Type.String(),
+  award: Type.Number({ minimum: 0.01 }),
+  cost: Type.Number({ minimum: 0.01 }),
+  day1: Type.Optional(Type.String()),
+  day2: Type.Optional(Type.String()),
+  day3: Type.Optional(Type.String()),
+  day4: Type.Optional(Type.String()),
+  day5: Type.Optional(Type.String()),
+})
+export type PatchServiceVariantsSchemaType = Static<typeof PatchServiceVariantsSchema>
+
+export const PatchServiceSchema = Type.Object({
+  name: Type.Optional(Type.String()),
+  serviceCategoryId: Type.Optional(Type.Integer()),
+  includeInAutomaticSms: Type.Optional(Type.Optional(Type.Boolean())),
+  hidden: Type.Optional(Type.Boolean()),
+  callInterval: Type.Optional(Type.Integer({ minimum: 1, maximum: 12 })),
+  colorOnDuty: Type.Optional(colorOnDutyEnumType),
+  warrantyCard: Type.Optional(Type.Boolean()),
+  itemNumber: Type.Optional(Type.String()),
+  suppliersArticleNumber: Type.Optional(Type.String()),
+  externalArticleNumber: Type.Optional(Type.String()),
+  serviceVariants: Type.Optional(Type.Array(PatchServiceVariantsSchema)),
+})
+export type PatchServiceSchemaType = Static<typeof PatchServiceSchema>
+
+export const getServiceByIdSchema = Type.Object({
+  id: Type.Number(),
+})
+
+export type getServiceByIdSchemaType = Static<typeof getServiceByIdSchema>
