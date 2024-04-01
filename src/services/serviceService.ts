@@ -10,7 +10,6 @@ import { serviceCategories, serviceVariants, services } from '../schema/schema.j
 
 export type serviceID = { serviceID: number }
 
-export async function createService(service: CreateServiceSchemaType): Promise<serviceID> {
 export type updateServiceVariant = {
   id: number
   name: string
@@ -186,9 +185,9 @@ export async function updateServiceById(
         externalArticleNumber: serviceWithUpdatedAt.externalArticleNumber,
         updatedAt: serviceWithUpdatedAt.updatedAt,
       })
-      .where(eq(services.id, id))
+      .where(eq(services.serviceCategoryId, id))
       .returning({
-        id: services.id,
+        id: services.serviceCategoryId,
         name: services.name,
         serviceCategoryId: services.serviceCategoryId,
         includeInAutomaticSms: services.includeInAutomaticSms,
@@ -221,7 +220,7 @@ export async function updateServiceById(
       })
     }
     const updatedServiceWithVariants = await tx.query.services.findFirst({
-      where: eq(services.id, updatedService.id),
+      where: eq(services.serviceCategoryId, updatedService.id),
       with: {
         serviceCategories: true,
         serviceVariants: true,

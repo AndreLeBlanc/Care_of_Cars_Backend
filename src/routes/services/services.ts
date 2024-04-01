@@ -105,7 +105,7 @@ export async function services(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'update_service'
+        const permissionName = { permissionName: 'update_service' }
         const authorizeStatus = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
