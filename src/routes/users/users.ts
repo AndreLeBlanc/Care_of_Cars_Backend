@@ -137,29 +137,29 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const { email, password } = request.body
-      let user: VerifyUser | undefined = await verifyUser({ userEmail: email })
-      if (user == undefined || user == null) {
+      let userWithPassword: VerifyUser | undefined = await verifyUser({ userEmail: email })
+      if (userWithPassword == undefined || userWithPassword == null) {
         return reply.status(403).send({ message: 'Login failed, incorrect email' })
       }
-      const match = await bcrypt.compare(password, user.userPassword)
+      const match = await bcrypt.compare(password, userWithPassword.userPassword)
       if (match) {
-        const { userPassword, ...userNoPassword } = user
-        const token = fastify.jwt.sign({ userNoPassword })
-        const rolePermissions = await getRoleWithPermissions(userNoPassword.role)
-        const roleFullPermissions = await getAllPermissionStatus(userNoPassword.role)
+        const { userPassword, ...user } = userWithPassword
+        const token = fastify.jwt.sign({ user })
+        const rolePermissions = await getRoleWithPermissions(user.role)
+        const roleFullPermissions = await getAllPermissionStatus(user.role)
 
         return reply.status(200).send({
           message: 'Login success',
           token: token,
           user: {
-            id: userNoPassword.userID,
-            firstName: userNoPassword.userFirstName,
-            lastName: userNoPassword.userLastName,
-            email: userNoPassword.userEmail,
-            isSuperAdmin: userNoPassword.isSuperAdmin,
+            id: user.userID,
+            firstName: user.userFirstName,
+            lastName: user.userLastName,
+            email: user.userEmail,
+            isSuperAdmin: user.isSuperAdmin,
             role: {
-              id: userNoPassword.role.roleID,
-              roleName: userNoPassword.role.roleName,
+              id: user.role.roleID,
+              roleName: user.role.roleName,
               rolePermissions: rolePermissions,
               roleFullPermissions: roleFullPermissions,
             },
