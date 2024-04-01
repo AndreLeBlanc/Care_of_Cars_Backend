@@ -219,8 +219,8 @@ export async function users(fastify: FastifyInstance) {
         }
         userData.password = await generatePasswordHash({ userPassword: userData.password })
       }
-      const user: UserInfo = await updateUserById(id.userID, userData)
-      if (user !== undefined) {
+      const user: UserInfo = await updateUserById(id, userData)
+      if (user === undefined) {
         return reply.status(404).send({ message: 'user not found' })
       }
       reply.status(201).send({ message: 'User Updated', data: user })

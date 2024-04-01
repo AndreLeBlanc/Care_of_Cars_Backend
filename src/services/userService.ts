@@ -22,13 +22,11 @@ type IsSuperAdmin = {
   isSuperAdmin: boolean | null
 }
 
-export type UserInfo = UserFirstName & UserLastName & UserEmail & UserDates
+export type UserInfo = UserID & UserFirstName & UserLastName & UserEmail & UserDates
 
 export type UserWithSuperAdmin = IsSuperAdmin & UserInfo
 
 export type CreatedUser = UserInfo & RoleID
-
-type User = UserID & UserInfo
 
 export type VerifyUser = UserID &
   UserFirstName &
@@ -93,7 +91,7 @@ export async function getUsersPaginate(
     .from(users)
     .where(condition)
 
-  const usersList: User[] = await db
+  const usersList: UserInfo[] = await db
     .select({
       userID: users.userID,
       userFirstName: users.firstName,
@@ -163,12 +161,12 @@ export async function getUserById(id: UserID): Promise<UserInfo | undefined> {
   return results[0] ? results[0] : undefined
 }
 
-export async function updateUserById(id: number, user: PatchUserSchemaType): Promise<UserInfo> {
+export async function updateUserById(id: UserID, user: PatchUserSchemaType): Promise<UserInfo> {
   const userWithUpdatedAt = { ...user, updatedAt: new Date() }
   const updatedUser: UserInfo[] = await db
     .update(users)
     .set(userWithUpdatedAt)
-    .where(eq(users.userID, id))
+    .where(eq(users.userID, id.userID))
     .returning({
       userID: users.userID,
       userFirstName: users.firstName,
