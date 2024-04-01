@@ -99,7 +99,7 @@ export const services = pgTable('services', {
   serviceCategoryId: integer('serviceCategoryId')
     .references(() => serviceCategories.serviceCategoryID)
     .notNull(),
-  description: varchar('description', { length: 256 }).unique().notNull(),
+  name: varchar('name', { length: 256 }).unique().notNull(),
   includeInAutomaticSms: boolean('includeInAutomaticSms'),
   hidden: boolean('hidden'),
   callInterval: integer('callInterval'),
@@ -125,7 +125,7 @@ export const serviceToServiceCategoryRelations = relations(services, ({ one }) =
 
 export const serviceVariants = pgTable('serviceVariants', {
   serviceVariantID: serial('id').primaryKey().unique(),
-  description: varchar('description', { length: 256 }),
+  name: varchar('name', { length: 256 }),
   award: real('award').notNull(),
   cost: real('cost').notNull(),
   day1: time('day1'),

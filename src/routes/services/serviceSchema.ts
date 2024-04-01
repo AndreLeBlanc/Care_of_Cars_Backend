@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 
 export const CreateServiceVariantsSchema = Type.Object({
-  description: Type.String(),
+  name: Type.String(),
   award: Type.Number({ minimum: 0.01 }),
   cost: Type.Number({ minimum: 0.01 }),
   day1: Type.Optional(Type.String()),
@@ -36,7 +36,7 @@ enum colorOnDutyEnum {
 }
 const colorOnDutyEnumType = Type.Enum(colorOnDutyEnum)
 export const CreateServiceSchema = Type.Object({
-  description: Type.String(),
+  name: Type.String(),
   serviceCategoryId: Type.Integer(),
   includeInAutomaticSms: Type.Optional(Type.Boolean()),
   hidden: Type.Optional(Type.Boolean()),
@@ -53,7 +53,7 @@ export type CreateServiceSchemaType = Static<typeof CreateServiceSchema>
 
 export enum listServiceOrderByEnum {
   id = 'id',
-  description = 'description',
+  name = 'name',
   serviceCategoryId = 'serviceCategoryId',
 }
 const listServiceOrderByEnumType = Type.Enum(listServiceOrderByEnum)
