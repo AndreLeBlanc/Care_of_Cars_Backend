@@ -23,6 +23,10 @@ Stop containers and remove the database:
 
 `sudo docker-compose down --rmi all --volumes`
 
+Remove all docker images:
+
+`docker image prune -a`
+
 To see running docker containers:
 
 `sudo docker ps`
