@@ -47,7 +47,7 @@ export async function createUser(
   lastName: UserLastName,
   email: UserEmail,
   passwordHash: string,
-  roleId: RoleID,
+  roleID: RoleID,
   isSuperAdmin: boolean = false,
 ): Promise<CreatedUser> {
   const [user]: CreatedUser[] = await db
@@ -57,7 +57,7 @@ export async function createUser(
       lastName: lastName.userLastName,
       email: email.userEmail,
       password: passwordHash,
-      roleId: roleId.roleID,
+      roleID: roleID.roleID,
       isSuperAdmin: isSuperAdmin,
     })
     .returning({
@@ -67,7 +67,7 @@ export async function createUser(
       userEmail: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
-      roleID: users.roleId,
+      roleID: users.roleID,
     })
   return user
 }
@@ -136,7 +136,7 @@ export async function verifyUser(email: UserEmail): Promise<VerifyUser | undefin
       },
     })
     .from(users)
-    .innerJoin(roles, eq(users.roleId, roles.roleID))
+    .innerJoin(roles, eq(users.roleID, roles.roleID))
     .where(
       and(
         eq(users.email, email.userEmail),

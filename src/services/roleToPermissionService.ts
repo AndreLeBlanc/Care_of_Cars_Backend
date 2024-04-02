@@ -15,35 +15,35 @@ export type RoleToPermissions = {
   MaybePermissionID
 
 export async function createRoleToPermissions(
-  roleId: RoleID,
-  permissionId: PermissionID,
+  roleID: RoleID,
+  permissionID: PermissionID,
 ): Promise<RoleToPermissions> {
   const createdRole: RoleToPermissions[] = await db
     .insert(roleToPermissions)
-    .values({ roleId: roleId.roleID, permissionId: permissionId.permissionID })
+    .values({ roleID: roleID.roleID, permissionID: permissionID.permissionID })
     .returning({
-      permissionID: roleToPermissions.permissionId,
-      roleID: roleToPermissions.roleId,
+      permissionID: roleToPermissions.permissionID,
+      roleID: roleToPermissions.roleID,
       createdAt: roleToPermissions.createdAt,
       updatedAt: roleToPermissions.updatedAt,
     })
   return createdRole[0]
 }
 export async function deleteRoleToPermissions(
-  roleId: RoleID,
-  permissionId: PermissionID,
+  roleID: RoleID,
+  permissionID: PermissionID,
 ): Promise<RoleToPermissions | undefined> {
   const deletedRoleToPermissions: RoleToPermissions[] = await db
     .delete(roleToPermissions)
     .where(
       and(
-        eq(roleToPermissions.roleId, roleId.roleID),
-        eq(roleToPermissions.permissionId, permissionId.permissionID),
+        eq(roleToPermissions.roleID, roleID.roleID),
+        eq(roleToPermissions.permissionID, permissionID.permissionID),
       ),
     )
     .returning({
-      permissionID: roleToPermissions.permissionId,
-      roleID: roleToPermissions.roleId,
+      permissionID: roleToPermissions.permissionID,
+      roleID: roleToPermissions.roleID,
       createdAt: roleToPermissions.createdAt,
       updatedAt: roleToPermissions.updatedAt,
     })

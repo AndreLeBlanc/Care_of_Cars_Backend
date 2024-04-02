@@ -67,7 +67,7 @@ export async function createService(service: CreateServiceSchemaType): Promise<S
       .insert(services)
       .values({
         name: service.name,
-        serviceCategoryId: service.serviceCategoryId,
+        serviceCategoryID: service.serviceCategoryId,
         includeInAutomaticSms: service.includeInAutomaticSms,
         hidden: service.hidden,
         callInterval: service.callInterval,
@@ -82,7 +82,7 @@ export async function createService(service: CreateServiceSchemaType): Promise<S
       })
     for (const serviceVariant of service.serviceVariants || []) {
       await tx.insert(serviceVariants).values({
-        serviceId: insertedService.serviceID,
+        serviceID: insertedService.serviceID,
         name: serviceVariant.name,
         award: serviceVariant.award,
         cost: serviceVariant.cost,
@@ -119,7 +119,7 @@ export async function getServicesPaginate(
   if (order == serviceOrderEnum.desc) {
     if (orderBy == listServiceOrderByEnum.name) {
       orderCondition = desc(services.name)
-    } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
+    } else if (orderBy == listServiceOrderByEnum.serviceCategoryID) {
       orderCondition = desc(serviceCategories.serviceCategoryID)
     } else {
       orderCondition = desc(services.serviceID)
@@ -129,7 +129,7 @@ export async function getServicesPaginate(
   if (order == serviceOrderEnum.asc) {
     if (orderBy == listServiceOrderByEnum.name) {
       orderCondition = asc(services.name)
-    } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
+    } else if (orderBy == listServiceOrderByEnum.serviceCategoryID) {
       orderCondition = asc(serviceCategories.serviceCategoryID)
     } else {
       orderCondition = asc(services.serviceID)
@@ -174,7 +174,7 @@ export async function updateServiceById(
       .update(services)
       .set({
         name: serviceWithUpdatedAt.name,
-        serviceCategoryId: serviceWithUpdatedAt.serviceCategoryId,
+        serviceCategoryID: serviceWithUpdatedAt.serviceCategoryId,
         includeInAutomaticSms: serviceWithUpdatedAt.includeInAutomaticSms,
         hidden: serviceWithUpdatedAt.hidden,
         callInterval: serviceWithUpdatedAt.callInterval,
@@ -187,9 +187,9 @@ export async function updateServiceById(
       })
       .where(eq(services.serviceID, id.serviceID))
       .returning({
-        serviceID: services.serviceCategoryId,
+        serviceID: services.serviceCategoryID,
         name: services.name,
-        serviceCategoryId: services.serviceCategoryId,
+        serviceCategoryId: services.serviceCategoryID,
         includeInAutomaticSms: services.includeInAutomaticSms,
         hidden: services.hidden,
         callInterval: services.callInterval,
@@ -205,11 +205,11 @@ export async function updateServiceById(
       return undefined
     }
     // delete all existing variants and insert fresh
-    await db.delete(serviceVariants).where(eq(serviceVariants.serviceId, updatedService.serviceID))
+    await db.delete(serviceVariants).where(eq(serviceVariants.serviceID, updatedService.serviceID))
     for (const serviceVariant of service.serviceVariants || []) {
       await tx.insert(serviceVariants).values({
         name: serviceVariant.name,
-        serviceId: updatedService.serviceID,
+        serviceID: updatedService.serviceID,
         award: serviceVariant.award,
         cost: serviceVariant.cost,
         day1: serviceVariant.day1,
@@ -220,7 +220,7 @@ export async function updateServiceById(
       })
     }
     const updatedServiceWithVariants = await tx.query.services.findFirst({
-      where: eq(services.serviceCategoryId, updatedService.serviceID),
+      where: eq(services.serviceCategoryID, updatedService.serviceID),
       with: {
         serviceCategories: true,
         serviceVariants: true,

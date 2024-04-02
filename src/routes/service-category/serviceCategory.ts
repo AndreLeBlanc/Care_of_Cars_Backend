@@ -6,7 +6,7 @@ import {
   getServiceCategoryById,
   UpdatedServiceCategory,
   updateServiceCategoryById,
-  UpdatedServiceCategoryById,
+  UpdatedServiceCategoryByID,
 } from '../../services/serviceCategory.js'
 import {
   CreateServiceCategorySchema,
@@ -145,11 +145,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const serviceCategoryData = request.body
-      if (!(serviceCategoryData as string) || !(serviceCategoryData.description as string)) {
-        return reply.status(422).send({ message: 'Provide at least one column to update.' })
-      }
-
-      if (!(serviceCategoryData.name as string) || !(serviceCategoryData.description as string)) {
+      if (!(serviceCategoryData.name as string) && !(serviceCategoryData.description as string)) {
         return reply
           .status(422)
           .send({ message: 'Provide at least one required property to update.' })
@@ -158,7 +154,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
         const serviceCategory: UpdatedServiceCategory | undefined = await updateServiceCategoryById(
           id,
-          serviceCategoryData as UpdatedServiceCategoryById,
+          serviceCategoryData as UpdatedServiceCategoryByID,
         )
         if (serviceCategory == null) {
           return reply.status(404).send({ message: 'Service Category not found' })

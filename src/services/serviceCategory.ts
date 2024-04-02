@@ -14,7 +14,10 @@ type serviceCategory = {
   serviceCategoryName &
   serviceCategoryDescription
 
-export type UpdatedServiceCategoryById = { description: string; name: string }
+export type UpdatedServiceCategoryByID = {
+  description?: serviceCategoryID
+  name?: serviceCategoryName
+}
 
 export type UpdatedServiceCategory = {
   serviceCategoryID: serviceCategoryID | null

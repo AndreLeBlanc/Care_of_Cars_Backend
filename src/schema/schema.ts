@@ -14,13 +14,13 @@ import {
 } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
-  userID: serial('id').primaryKey().unique(),
+  userID: serial('userID').primaryKey().unique(),
   firstName: varchar('firstName').notNull(),
   lastName: varchar('lastName').notNull(),
   email: varchar('email').notNull().unique(),
   password: text('password').notNull(),
   isSuperAdmin: boolean('isSuperAdmin').default(false),
-  roleId: integer('roleId')
+  roleID: integer('roleID')
     .references(() => roles.roleID)
     .notNull(),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
@@ -28,7 +28,7 @@ export const users = pgTable('users', {
 })
 
 export const roles = pgTable('roles', {
-  roleID: serial('id').primaryKey().unique(),
+  roleID: serial('roleID').primaryKey().unique(),
   roleName: varchar('roleName', { length: 256 }).unique().notNull(),
   description: text('description'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
@@ -36,7 +36,7 @@ export const roles = pgTable('roles', {
 })
 
 export const permissions = pgTable('permissions', {
-  permissionID: serial('id').primaryKey().unique(),
+  permissionID: serial('permissionID').primaryKey().unique(),
   permissionName: varchar('permissionName', { length: 256 }).unique().notNull(),
   description: text('description'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
@@ -46,19 +46,19 @@ export const permissions = pgTable('permissions', {
 export const roleToPermissions = pgTable(
   'roleToPermissions',
   {
-    roleId: integer('roleId'),
-    permissionId: integer('permissionId'),
+    roleID: integer('roleID'),
+    permissionID: integer('permissionID'),
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
   },
   (table) => {
     return {
       pk: primaryKey({
-        columns: [table.roleId, table.permissionId],
+        columns: [table.roleID, table.permissionID],
       }),
       pkWithCustomName: primaryKey({
-        name: 'roleToPermissionId',
-        columns: [table.roleId, table.permissionId],
+        name: 'roleToPermissionID',
+        columns: [table.roleID, table.permissionID],
       }),
     }
   },
@@ -87,7 +87,7 @@ export const colorOnDutyEnum = pgEnum('colorOnDuty', [
   'Red',
 ])
 export const serviceCategories = pgTable('serviceCategories', {
-  serviceCategoryID: serial('id').primaryKey().unique(),
+  serviceCategoryID: serial('serviceCategoryID').primaryKey().unique(),
   name: varchar('name', { length: 256 }).unique().notNull(),
   description: text('description'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
@@ -95,8 +95,8 @@ export const serviceCategories = pgTable('serviceCategories', {
 })
 
 export const services = pgTable('services', {
-  serviceID: serial('id').primaryKey().unique(),
-  serviceCategoryId: integer('serviceCategoryId')
+  serviceID: serial('serviceID').primaryKey().unique(),
+  serviceCategoryID: integer('serviceCategoryID')
     .references(() => serviceCategories.serviceCategoryID)
     .notNull(),
   name: varchar('name', { length: 256 }).unique().notNull(),
@@ -118,13 +118,13 @@ export const servicesCategoryToServiceRelations = relations(serviceCategories, (
 
 export const serviceToServiceCategoryRelations = relations(services, ({ one }) => ({
   serviceCategories: one(serviceCategories, {
-    fields: [services.serviceCategoryId],
+    fields: [services.serviceCategoryID],
     references: [serviceCategories.serviceCategoryID],
   }),
 }))
 
 export const serviceVariants = pgTable('serviceVariants', {
-  serviceVariantID: serial('id').primaryKey().unique(),
+  serviceVariantID: serial('serviceVariantID').primaryKey().unique(),
   name: varchar('name', { length: 256 }),
   award: real('award').notNull(),
   cost: real('cost').notNull(),
@@ -133,7 +133,7 @@ export const serviceVariants = pgTable('serviceVariants', {
   day3: time('day3'),
   day4: time('day4'),
   day5: time('day5'),
-  serviceId: integer('serviceId')
+  serviceID: integer('serviceID')
     .references(() => services.serviceID)
     .notNull(),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
@@ -145,5 +145,5 @@ export const servicesRelations = relations(services, ({ many }) => ({
 }))
 
 export const serviceVariantsRelations = relations(serviceVariants, ({ one }) => ({
-  service: one(services, { fields: [serviceVariants.serviceId], references: [services.serviceID] }),
+  service: one(services, { fields: [serviceVariants.serviceID], references: [services.serviceID] }),
 }))
