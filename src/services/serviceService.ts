@@ -8,6 +8,8 @@ import {
 } from '../routes/services/serviceSchema.js'
 import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
 
+export type serviceID = { serviceID: number }
+
 export type updateServiceVariant = {
   id: number
   name: string
@@ -59,7 +61,7 @@ export type updateService = {
   updatedAt: Date
 }
 
-export async function createService(service: CreateServiceSchemaType) {
+export async function createService(service: CreateServiceSchemaType): Promise<serviceID> {
   return await db.transaction(async (tx) => {
     const [insertedService] = await tx
       .insert(services)
@@ -76,12 +78,12 @@ export async function createService(service: CreateServiceSchemaType) {
         externalArticleNumber: service.externalArticleNumber,
       })
       .returning({
-        id: services.id,
+        serviceID: services.serviceID,
       })
     for (const serviceVariant of service.serviceVariants || []) {
       await tx.insert(serviceVariants).values({
+        serviceId: insertedService.serviceID,
         name: serviceVariant.name,
-        serviceId: insertedService.id,
         award: serviceVariant.award,
         cost: serviceVariant.cost,
         day1: serviceVariant.day1,
@@ -113,14 +115,14 @@ export async function getServicesPaginate(
       ilike(services.externalArticleNumber, '%' + search + '%'),
     ),
   )
-  let orderCondition = desc(services.id)
+  let orderCondition = desc(services.serviceID)
   if (order == serviceOrderEnum.desc) {
     if (orderBy == listServiceOrderByEnum.name) {
       orderCondition = desc(services.name)
     } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
-      orderCondition = desc(serviceCategories.id)
+      orderCondition = desc(serviceCategories.serviceCategoryID)
     } else {
-      orderCondition = desc(services.id)
+      orderCondition = desc(services.serviceID)
     }
   }
 
@@ -128,9 +130,9 @@ export async function getServicesPaginate(
     if (orderBy == listServiceOrderByEnum.name) {
       orderCondition = asc(services.name)
     } else if (orderBy == listServiceOrderByEnum.serviceCategoryId) {
-      orderCondition = asc(serviceCategories.id)
+      orderCondition = asc(serviceCategories.serviceCategoryID)
     } else {
-      orderCondition = asc(services.id)
+      orderCondition = asc(services.serviceID)
     }
   }
 
@@ -183,9 +185,9 @@ export async function updateServiceById(
         externalArticleNumber: serviceWithUpdatedAt.externalArticleNumber,
         updatedAt: serviceWithUpdatedAt.updatedAt,
       })
-      .where(eq(services.id, id))
+      .where(eq(services.serviceCategoryId, id))
       .returning({
-        id: services.id,
+        id: services.serviceCategoryId,
         name: services.name,
         serviceCategoryId: services.serviceCategoryId,
         includeInAutomaticSms: services.includeInAutomaticSms,
@@ -218,7 +220,7 @@ export async function updateServiceById(
       })
     }
     const updatedServiceWithVariants = await tx.query.services.findFirst({
-      where: eq(services.id, updatedService.id),
+      where: eq(services.serviceCategoryId, updatedService.id),
       with: {
         serviceCategories: true,
         serviceVariants: true,
