@@ -5,7 +5,32 @@ import { permissions } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchPermissionSchemaType } from '../routes/permissions/permissionSchema.js'
 
-export async function getPermissionsPaginate(search: string, limit = 10, page = 1, offset = 0) {
+export type PermissionID = { permissionID: number }
+export type PermissionTitle = { permissionName: string }
+type PermissionDescription = { permissionDesc: string | null }
+
+export type PermissionIDDescName = PermissionID & PermissionTitle & PermissionDescription
+
+type PermissionCreatedAndUpdated = {
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type Permission = PermissionIDDescName & PermissionCreatedAndUpdated
+
+export type PermissionsPaginate = {
+  totalItems: number
+  totalPage: number
+  perPage: number
+  data: Permission[]
+}
+
+export async function getPermissionsPaginate(
+  search: string,
+  limit = 10,
+  page = 1,
+  offset = 0,
+): Promise<PermissionsPaginate> {
   const condition = or(
     ilike(permissions.permissionName, '%' + search + '%'),
     ilike(permissions.description, '%' + search + '%'),
@@ -20,15 +45,15 @@ export async function getPermissionsPaginate(search: string, limit = 10, page = 
 
   const permissionsList = await db
     .select({
-      id: permissions.id,
+      permissionID: permissions.permissionID,
       permissionName: permissions.permissionName,
-      description: permissions.description,
+      permissionDesc: permissions.description,
       createdAt: permissions.createdAt,
       updatedAt: permissions.updatedAt,
     })
     .from(permissions)
     .where(condition)
-    .orderBy(desc(permissions.id))
+    .orderBy(desc(permissions.permissionID))
     .limit(limit || 10)
     .offset(offset || 0)
   const totalPage = Math.ceil(totalItems.count / limit)
@@ -41,42 +66,71 @@ export async function getPermissionsPaginate(search: string, limit = 10, page = 
   }
 }
 
-export async function createPermission(permissionName: string, description: string) {
-  return await db
+export async function createPermission(
+  permissionName: PermissionTitle,
+  description: PermissionDescription,
+): Promise<PermissionIDDescName> {
+  const createdPermission: PermissionIDDescName[] = await db
     .insert(permissions)
-    .values({ permissionName: permissionName, description: description })
-    .returning({
-      id: permissions.id,
-      permissionName: permissions.permissionName,
-      description: permissions.description,
+    .values({
+      permissionName: permissionName.permissionName,
+      description: description.permissionDesc,
     })
+    .returning({
+      permissionID: permissions.permissionID,
+      permissionName: permissions.permissionName,
+      permissionDesc: permissions.description,
+    })
+  return createdPermission[0]
 }
 
-export async function getPermissionById(id: number): Promise<any> {
-  const results = await db.select().from(permissions).where(eq(permissions.id, id))
+export async function getPermissionById(id: PermissionID): Promise<Permission | undefined> {
+  const results: Permission[] = await db
+    .select({
+      permissionID: permissions.permissionID,
+      permissionName: permissions.permissionName,
+      permissionDesc: permissions.description,
+      createdAt: permissions.createdAt,
+      updatedAt: permissions.updatedAt,
+    })
+    .from(permissions)
+    .where(eq(permissions.permissionID, id.permissionID))
   return results[0] ? results[0] : undefined
 }
 
 export async function updatePermissionById(
-  id: number,
+  id: PermissionID,
   permission: PatchPermissionSchemaType,
-): Promise<any> {
-  const permissionWithUpdatedAt = { ...permission, updatedAt: new Date() }
+): Promise<Permission> {
+  const permissionWithUpdatedAt = {
+    permissionName: permission.PermissionName,
+    description: permission.description,
+    updatedAt: new Date(),
+  }
   const updatedPermission = await db
     .update(permissions)
     .set(permissionWithUpdatedAt)
-    .where(eq(permissions.id, id))
+    .where(eq(permissions.permissionID, id.permissionID))
     .returning({
-      id: permissions.id,
+      permissionID: permissions.permissionID,
       permissionName: permissions.permissionName,
-      description: permissions.description,
+      permissionDesc: permissions.description,
       createdAt: permissions.createdAt,
       updatedAt: permissions.updatedAt,
     })
-  return updatedPermission
+  return updatedPermission[0]
 }
 
-export async function deletePermission(id: number): Promise<any> {
-  const deletedPermission = await db.delete(permissions).where(eq(permissions.id, id)).returning()
+export async function deletePermission(id: PermissionID): Promise<Permission | undefined> {
+  const deletedPermission: Permission[] = await db
+    .delete(permissions)
+    .where(eq(permissions.permissionID, id.permissionID))
+    .returning({
+      permissionID: permissions.permissionID,
+      permissionName: permissions.permissionName,
+      permissionDesc: permissions.description,
+      createdAt: permissions.createdAt,
+      updatedAt: permissions.updatedAt,
+    })
   return deletedPermission[0] ? deletedPermission[0] : undefined
 }

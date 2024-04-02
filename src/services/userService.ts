@@ -5,80 +5,79 @@ import { db } from '../config/db-connect.js'
 import { roles, users } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchUserSchemaType } from '../routes/users/userSchema.js'
+import { RoleID, RoleName } from './roleService.js'
 
-export type updateUser = {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
+export type UserID = { userID: number }
+type UserPassword = { userPassword: string }
+type UserFirstName = { userFirstName: string }
+type UserLastName = { userLastName: string }
+type UserEmail = { userEmail: string }
+
+type UserDates = {
   createdAt: Date
   updatedAt: Date
 }
 
-export type UserInfo = {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
-  password: string
+type IsSuperAdmin = {
   isSuperAdmin: boolean | null
-  roleId: number
-  createdAt: Date
-  updatedAt: Date
 }
 
-export type DeleteUser = {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
-  password: string
-  isSuperAdmin: boolean | null
-  roleId: number
-  createdAt: Date
-  updatedAt: Date
+export type UserInfo = UserID & UserFirstName & UserLastName & UserEmail & UserDates
+
+export type UserWithSuperAdmin = IsSuperAdmin & UserInfo
+
+export type CreatedUser = UserInfo & RoleID
+
+export type VerifyUser = UserID &
+  UserFirstName &
+  UserLastName &
+  UserEmail &
+  UserPassword &
+  IsSuperAdmin & { role: RoleName & RoleID }
+
+export type UsersPaginated = {
+  totalItems: number
+  totalPage: number
+  perPage: number
+  data: UserInfo[]
 }
 
 export async function createUser(
-  firstName: string,
-  lastName: string,
-  email: string,
+  firstName: UserFirstName,
+  lastName: UserLastName,
+  email: UserEmail,
   passwordHash: string,
-  roleId: number,
+  roleId: RoleID,
   isSuperAdmin: boolean = false,
-): Promise<
-  {
-    id: number
-    firstName: string
-    lastName: string | undefined
-    email: string | undefined
-    createdAt: Date
-    updatedAt: Date
-    roleId: number
-  }[]
-> {
-  return await db
+): Promise<CreatedUser> {
+  const [user]: CreatedUser[] = await db
     .insert(users)
     .values({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
+      firstName: firstName.userFirstName,
+      lastName: lastName.userLastName,
+      email: email.userEmail,
       password: passwordHash,
-      roleId: roleId,
+      roleId: roleId.roleID,
       isSuperAdmin: isSuperAdmin,
     })
     .returning({
-      id: users.id,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      email: users.email,
+      userID: users.userID,
+      userFirstName: users.firstName,
+      userLastName: users.lastName,
+      userEmail: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
-      roleId: users.roleId,
+      roleID: users.roleId,
     })
+  return user
 }
 
-export async function getUsersPaginate(search: string, limit = 10, page = 1, offset = 0) {
+export async function getUsersPaginate(
+  search: string,
+  limit = 10,
+  page = 1,
+  offset = 0,
+): Promise<UsersPaginated> {
   const condition = or(
     ilike(users.firstName, '%' + search + '%'),
     ilike(users.lastName, '%' + search + '%'),
@@ -92,12 +91,12 @@ export async function getUsersPaginate(search: string, limit = 10, page = 1, off
     .from(users)
     .where(condition)
 
-  const usersList = await db
+  const usersList: UserInfo[] = await db
     .select({
-      id: users.id,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      email: users.email,
+      userID: users.userID,
+      userFirstName: users.firstName,
+      userLastName: users.lastName,
+      userEmail: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
     })
@@ -109,7 +108,7 @@ export async function getUsersPaginate(search: string, limit = 10, page = 1, off
         ilike(users.email, '%' + search + '%'),
       ),
     )
-    .orderBy(desc(users.id))
+    .orderBy(desc(users.userID))
     .limit(limit || 10)
     .offset(offset || 0)
   const totalPage = Math.ceil(totalItems.count / limit)
@@ -122,63 +121,85 @@ export async function getUsersPaginate(search: string, limit = 10, page = 1, off
   }
 }
 
-export async function verifyUser(email: string): Promise<any> {
-  const results = await db
+export async function verifyUser(email: UserEmail): Promise<VerifyUser | undefined> {
+  const results: VerifyUser[] | undefined = await db
     .select({
-      id: users.id,
-      firstName: users.firstName,
-      email: users.email,
-      password: users.password,
+      userID: users.userID,
+      userFirstName: users.firstName,
+      userLastName: users.lastName,
+      userEmail: users.email,
+      userPassword: users.password,
       isSuperAdmin: users.isSuperAdmin,
       role: {
-        id: roles.id,
+        roleID: roles.roleID,
         roleName: roles.roleName,
       },
     })
     .from(users)
-    .innerJoin(roles, eq(users.roleId, roles.id))
+    .innerJoin(roles, eq(users.roleId, roles.roleID))
     .where(
       and(
-        eq(users.email, email),
+        eq(users.email, email.userEmail),
         //eq(users.password, password)
       ),
     )
   return results[0] ? results[0] : undefined
 }
 
-export async function getUserById(id: number): Promise<UserInfo | undefined> {
-  const results = await db.select().from(users).where(eq(users.id, id))
+export async function getUserById(id: UserID): Promise<UserInfo | undefined> {
+  const results: UserInfo[] | undefined = await db
+    .select({
+      userID: users.userID,
+      userFirstName: users.firstName,
+      userLastName: users.lastName,
+      userEmail: users.email,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    })
+    .from(users)
+    .where(eq(users.userID, id.userID))
   return results[0] ? results[0] : undefined
 }
 
-export async function updateUserById(id: number, user: PatchUserSchemaType): Promise<updateUser> {
+export async function updateUserById(id: UserID, user: PatchUserSchemaType): Promise<UserInfo> {
   const userWithUpdatedAt = { ...user, updatedAt: new Date() }
-  const updatedUser = await db
+  const updatedUser: UserInfo[] = await db
     .update(users)
     .set(userWithUpdatedAt)
-    .where(eq(users.id, id))
+    .where(eq(users.userID, id.userID))
     .returning({
-      id: users.id,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      email: users.email,
+      userID: users.userID,
+      userFirstName: users.firstName,
+      userLastName: users.lastName,
+      userEmail: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
     })
   return updatedUser[0]
 }
 
-export async function generatePasswordHash(password: string): Promise<string> {
+export async function generatePasswordHash(password: UserPassword): Promise<string> {
   const salt = bcrypt.genSaltSync(10)
-  return bcrypt.hashSync(password, salt)
+  return bcrypt.hashSync(password.userPassword, salt)
 }
 
-export async function isStrongPassword(password: string): Promise<boolean> {
+export async function isStrongPassword(password: UserPassword): Promise<boolean> {
   // TODO: add more strict checking's
-  return password.length >= 3
+  return password.userPassword.length >= 3
 }
 
-export async function deleteUser(id: number): Promise<DeleteUser | undefined> {
-  const deletedUser = await db.delete(users).where(eq(users.id, id)).returning()
+export async function DeleteUser(id: number): Promise<UserWithSuperAdmin | undefined> {
+  const deletedUser: UserWithSuperAdmin[] | undefined = await db
+    .delete(users)
+    .where(eq(users.userID, id))
+    .returning({
+      userID: users.userID,
+      userFirstName: users.firstName,
+      userLastName: users.lastName,
+      userEmail: users.email,
+      isSuperAdmin: users.isSuperAdmin,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    })
   return deletedUser[0] ? deletedUser[0] : undefined
 }

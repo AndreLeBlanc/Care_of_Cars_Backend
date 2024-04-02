@@ -4,7 +4,9 @@ import {
   deleteServiceCategory,
   getServiceCategoriesPaginate,
   getServiceCategoryById,
+  UpdatedServiceCategory,
   updateServiceCategoryById,
+  UpdatedServiceCategoryById,
 } from '../../services/serviceCategory.js'
 import {
   CreateServiceCategorySchema,
@@ -16,15 +18,16 @@ import {
   getServiceCategoryByIdSchema,
   getServiceCategoryByIdType,
 } from './serviceCategorySchema.js'
+import { PermissionTitle } from '../../services/permissionService.js'
 
 export async function serviceCategory(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceCategoryQueryParamSchemaType }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'list_service_category'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const permissionName = { permissionName: 'list_service_category' }
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -69,9 +72,9 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'create_service_category'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const permissionName: PermissionTitle = { permissionName: 'create_service_category' }
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -94,9 +97,9 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'view_service_category'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const permissionName: PermissionTitle = { permissionName: 'view_service_category' }
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -125,9 +128,9 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'update_service_category'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const permissionName: PermissionTitle = { permissionName: 'update_service_category' }
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
@@ -142,14 +145,24 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const serviceCategoryData = request.body
-      if (Object.keys(serviceCategoryData).length == 0) {
+      if (!(serviceCategoryData as string) || !(serviceCategoryData.description as string)) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id = request.params.id
 
-      const serviceCategory = await updateServiceCategoryById(id, serviceCategoryData)
-      if (serviceCategory.length == 0) {
-        return reply.status(404).send({ message: 'Service Category not found' })
+      if (!(serviceCategoryData.name as string) || !(serviceCategoryData.description as string)) {
+        return reply
+          .status(422)
+          .send({ message: 'Provide at least one required property to update.' })
+      } else {
+        const id = request.params.id
+
+        const serviceCategory: UpdatedServiceCategory | undefined = await updateServiceCategoryById(
+          id,
+          serviceCategoryData as UpdatedServiceCategoryById,
+        )
+        if (serviceCategory == null) {
+          return reply.status(404).send({ message: 'Service Category not found' })
+        }
       }
       reply.status(201).send({ message: 'Service Category Updated', data: serviceCategory })
     },
@@ -158,9 +171,9 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = 'delete_service_category'
-        const authrosieStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authrosieStatus) {
+        const permissionName: PermissionTitle = { permissionName: 'delete_service_category' }
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
           return reply
             .status(403)
             .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })

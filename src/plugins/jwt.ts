@@ -2,6 +2,7 @@ import fp from 'fastify-plugin'
 import { FastifyReply } from 'fastify/types/reply'
 import { FastifyRequest } from 'fastify/types/request'
 import { roleHasPermission } from '../services/roleService.js'
+import { PermissionTitle } from '../services/permissionService.js'
 import { FastifyJwtNamespace } from '@fastify/jwt'
 export interface SupportPluginOptions {
   // Specify Support plugin options here
@@ -36,12 +37,16 @@ export default fp<SupportPluginOptions>(async (fastify, reply) => {
     async function (
       request: FastifyRequest,
       reply: FastifyReply,
-      permissionName: string,
+      permissionName: PermissionTitle,
     ): Promise<boolean> {
       try {
         const userData: any = request.user
-        const hasPermission = await roleHasPermission(userData.user.role.id, permissionName)
-        if (userData.user.isSuperAdmin) {
+        console.log('sssssssssssssssssssssssssssssssssssssssssssss', userData)
+        const hasPermission: boolean = await roleHasPermission(
+          { roleID: userData.user.role.roleID },
+          permissionName,
+        )
+        if (userData.user) {
           return true
         }
         if (!hasPermission) {
@@ -50,7 +55,7 @@ export default fp<SupportPluginOptions>(async (fastify, reply) => {
       } catch (err) {
         throw err
       }
-      return true
+      return false
     },
   )
 
@@ -76,7 +81,7 @@ declare module 'fastify' {
     authorize(
       request: FastifyRequest,
       reply: FastifyReply,
-      permissionName: string,
+      permissionName: PermissionTitle,
     ): Promise<boolean>
     authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void>
   }
