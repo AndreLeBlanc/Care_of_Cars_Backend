@@ -1,11 +1,11 @@
 import { desc, eq, or, sql } from 'drizzle-orm'
-
+import { PatchServiceCategorySchemaType } from '../routes/service-category/serviceCategorySchema.js'
 import { db } from '../config/db-connect.js'
 import { serviceCategories } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 
-type serviceCategoryID = { serviceCategoryID: number }
-type serviceCategoryName = { serviceCategoryName: string }
+export type serviceCategoryID = { serviceCategoryID: number }
+type serviceCategoryName = { serviceCategoryName: string | null }
 type serviceCategoryDescription = { serviceCategoryDescription: string | null }
 type serviceCategory = {
   createdAt: Date
@@ -94,7 +94,7 @@ export async function getServiceCategoryById(id: number): Promise<serviceCategor
 
 export async function updateServiceCategoryById(
   id: number,
-  serviceCategory: UpdatedServiceCategoryById,
+  serviceCategory: PatchServiceCategorySchemaType,
 ): Promise<UpdatedServiceCategory | undefined> {
   const serviceCategoryWithUpdatedAt = { ...serviceCategory, updatedAt: new Date() }
   const updatedServiceCategory: UpdatedServiceCategory[] = await db

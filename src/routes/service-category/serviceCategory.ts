@@ -6,7 +6,7 @@ import {
   getServiceCategoryById,
   UpdatedServiceCategory,
   updateServiceCategoryById,
-  UpdatedServiceCategoryByID,
+  serviceCategoryID,
 } from '../../services/serviceCategory.js'
 import {
   CreateServiceCategorySchema,
@@ -150,11 +150,10 @@ export async function serviceCategory(fastify: FastifyInstance) {
           .status(422)
           .send({ message: 'Provide at least one required property to update.' })
       } else {
-        const id = request.params.id
-
+        const id: serviceCategoryID = { serviceCategoryID: request.params.id }
         const serviceCategory: UpdatedServiceCategory | undefined = await updateServiceCategoryById(
-          id,
-          serviceCategoryData as UpdatedServiceCategoryByID,
+          id.serviceCategoryID,
+          serviceCategoryData as PatchServiceCategorySchemaType,
         )
         if (serviceCategory == null) {
           return reply.status(404).send({ message: 'Service Category not found' })
