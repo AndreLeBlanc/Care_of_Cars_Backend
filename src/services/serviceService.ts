@@ -8,8 +8,6 @@ import {
 } from '../routes/services/serviceSchema.js'
 import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
 
-export type serviceID = { serviceID: number }
-
 export type updateServiceVariant = {
   id: number
   name: string
@@ -44,6 +42,23 @@ export enum colorOnDutyEnum {
   Orange = 'Orange',
   Red = 'Red',
 }
+export type serviceID = { serviceID: number }
+export type name = { name: string }
+export type serviceCategoryId = { serviceCategoryId: number }
+export type includeInAutomaticSms = { includeInAutomaticSms: boolean | null }
+export type hidden = { hidden: boolean | null }
+export type callInterval = { callInterval: number | null }
+export type warrantyCard = { warrantyCard: boolean | null }
+export type itemNumber = { itemNumber: string | null }
+export type suppliersArticleNumber = { suppliersArticleNumber: string | null }
+export type externalArticleNumber = { externalArticleNumber: string | null }
+//export type colorOnDuty = { colorOnDuty: colorOnDutyEnum }
+
+type ServiceDates = {
+  createdAt: Date
+  updatedAt: Date
+}
+
 export type updateService = {
   id: number
   name: string
@@ -60,6 +75,20 @@ export type updateService = {
   createdAt: Date
   updatedAt: Date
 }
+
+export type DetailService = serviceID &
+  name &
+  serviceCategoryId &
+  includeInAutomaticSms &
+  hidden &
+  callInterval &
+  //colorOnDuty &
+  warrantyCard &
+  itemNumber &
+  suppliersArticleNumber &
+  externalArticleNumber &
+  ServiceDates
+//serviceVariants: Array<updateServiceVariant>
 
 export async function createService(service: CreateServiceSchemaType): Promise<serviceID> {
   return await db.transaction(async (tx) => {
@@ -228,4 +257,20 @@ export async function updateServiceById(
     })
     return [updatedServiceWithVariants]
   })
+}
+
+export async function getServiceById(serviceID: serviceID): Promise<DetailService | undefined> {
+  const servicesDetail = await db.query.services.findFirst({
+    where: eq(services.serviceID, serviceID.serviceID),
+    with: {
+      serviceCategories: true,
+      serviceVariants: true,
+    },
+  })
+  // const servicesDetail: DetailService | undefined = await db
+  //   .select()
+  //   .from(services)
+  //   .where(eq(services.serviceID, serviceID.serviceID))
+  // console.log(typeof servicesDetail)
+  return servicesDetail
 }

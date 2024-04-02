@@ -13,9 +13,12 @@ import {
 } from './serviceSchema.js'
 import {
   createService,
+  getServiceById,
   getServicesPaginate,
+  serviceID,
   updateServiceById,
 } from '../../services/serviceService.js'
+import { PermissionTitle } from '../../services/permissionService.js'
 
 export async function services(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceQueryParamSchemaType }>(
@@ -132,6 +135,33 @@ export async function services(fastify: FastifyInstance) {
         return reply.status(404).send({ message: 'Service not found' })
       }
       reply.status(201).send({ message: 'Service Updated', data: service })
+    },
+  )
+  fastify.get<{ Params: getServiceByIdSchemaType }>(
+    '/:id',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = { permissionName: 'view_service' }
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        params: getServiceByIdSchema,
+      },
+    },
+    async (request, reply) => {
+      const serviceID: serviceID = { serviceID: request.params.id }
+      const service: any | undefined = await getServiceById(serviceID)
+      if (service == undefined || service == null) {
+        return reply.status(404).send({ message: 'service not found' })
+      }
+      reply.status(200).send({ service: service })
     },
   )
 }
