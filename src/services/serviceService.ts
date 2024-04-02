@@ -52,7 +52,8 @@ export type warrantyCard = { warrantyCard: boolean | null }
 export type itemNumber = { itemNumber: string | null }
 export type suppliersArticleNumber = { suppliersArticleNumber: string | null }
 export type externalArticleNumber = { externalArticleNumber: string | null }
-//export type colorOnDuty = { colorOnDuty: colorOnDutyEnum }
+export type serviceVariants = { serviceVariants?: Array<updateServiceVariant> }
+//export type colorOnDuty = `${colorOnDutyEnum}` //Record<colorOnDutyEnum, string> //; { colorOnDuty: Record<colorOnDutyEnum, string> | null }
 
 type ServiceDates = {
   createdAt: Date
@@ -87,8 +88,8 @@ export type DetailService = serviceID &
   itemNumber &
   suppliersArticleNumber &
   externalArticleNumber &
-  ServiceDates
-//serviceVariants: Array<updateServiceVariant>
+  ServiceDates &
+  serviceVariants
 
 export async function createService(service: CreateServiceSchemaType): Promise<serviceID> {
   return await db.transaction(async (tx) => {
@@ -267,10 +268,5 @@ export async function getServiceById(serviceID: serviceID): Promise<DetailServic
       serviceVariants: true,
     },
   })
-  // const servicesDetail: DetailService | undefined = await db
-  //   .select()
-  //   .from(services)
-  //   .where(eq(services.serviceID, serviceID.serviceID))
-  // console.log(typeof servicesDetail)
   return servicesDetail
 }
