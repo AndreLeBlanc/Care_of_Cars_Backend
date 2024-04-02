@@ -8,7 +8,7 @@ import {
 } from '../routes/services/serviceSchema.js'
 import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
 
-export type serviceID = { serviceID: number }
+export type ServiceID = { serviceID: number }
 
 export type updateServiceVariant = {
   id: number
@@ -61,7 +61,7 @@ export type updateService = {
   updatedAt: Date
 }
 
-export async function createService(service: CreateServiceSchemaType): Promise<serviceID> {
+export async function createService(service: CreateServiceSchemaType): Promise<ServiceID> {
   return await db.transaction(async (tx) => {
     const [insertedService] = await tx
       .insert(services)
@@ -164,7 +164,7 @@ export async function getServicesPaginate(
 }
 
 export async function updateServiceById(
-  id: number,
+  id: ServiceID,
   service: PatchServiceSchemaType,
 ): Promise<any | undefined> {
   // TODO: updateService type currently not working using any need to fix it.
@@ -185,9 +185,9 @@ export async function updateServiceById(
         externalArticleNumber: serviceWithUpdatedAt.externalArticleNumber,
         updatedAt: serviceWithUpdatedAt.updatedAt,
       })
-      .where(eq(services.serviceCategoryId, id))
+      .where(eq(services.serviceID, id.serviceID))
       .returning({
-        id: services.serviceCategoryId,
+        serviceID: services.serviceCategoryId,
         name: services.name,
         serviceCategoryId: services.serviceCategoryId,
         includeInAutomaticSms: services.includeInAutomaticSms,
@@ -201,15 +201,15 @@ export async function updateServiceById(
         createdAt: services.createdAt,
         updatedAt: services.updatedAt,
       })
-    if (updatedService == undefined) {
+    if (updatedService == null) {
       return undefined
     }
     // delete all existing variants and insert fresh
-    await db.delete(serviceVariants).where(eq(serviceVariants.serviceId, updatedService.id))
+    await db.delete(serviceVariants).where(eq(serviceVariants.serviceId, updatedService.serviceID))
     for (const serviceVariant of service.serviceVariants || []) {
       await tx.insert(serviceVariants).values({
         name: serviceVariant.name,
-        serviceId: updatedService.id,
+        serviceId: updatedService.serviceID,
         award: serviceVariant.award,
         cost: serviceVariant.cost,
         day1: serviceVariant.day1,
@@ -220,7 +220,7 @@ export async function updateServiceById(
       })
     }
     const updatedServiceWithVariants = await tx.query.services.findFirst({
-      where: eq(services.serviceCategoryId, updatedService.id),
+      where: eq(services.serviceCategoryId, updatedService.serviceID),
       with: {
         serviceCategories: true,
         serviceVariants: true,
