@@ -144,12 +144,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const serviceCategoryData = request.body
-      if (!(serviceCategoryData as string) || !(serviceCategoryData.description as string)) {
-        return reply.status(422).send({ message: 'Provide at least one column to update.' })
-      }
-
-      if (!(serviceCategoryData.name as string) || !(serviceCategoryData.description as string)) {
+      const serviceCategoryData: UpdatedServiceCategoryById = request.body
+      if (!(serviceCategoryData.name as string) && !(serviceCategoryData.description as string)) {
         return reply
           .status(422)
           .send({ message: 'Provide at least one required property to update.' })
