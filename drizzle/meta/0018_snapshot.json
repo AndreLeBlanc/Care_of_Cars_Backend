@@ -1,0 +1,584 @@
+{
+  "id": "a0c1d193-7de0-4a73-b5ed-492073e4a427",
+  "prevId": "baee1433-ffce-4273-8616-91db3b8394ba",
+  "version": "5",
+  "dialect": "pg",
+  "tables": {
+    "permissions": {
+      "name": "permissions",
+      "schema": "",
+      "columns": {
+        "permissionID": {
+          "name": "permissionID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "permissionName": {
+          "name": "permissionName",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "permissions_permissionID_unique": {
+          "name": "permissions_permissionID_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "permissionID"
+          ]
+        },
+        "permissions_permissionName_unique": {
+          "name": "permissions_permissionName_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "permissionName"
+          ]
+        }
+      }
+    },
+    "roleToPermissions": {
+      "name": "roleToPermissions",
+      "schema": "",
+      "columns": {
+        "roleID": {
+          "name": "roleID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "permissionID": {
+          "name": "permissionID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "roleToPermissions_roleID_permissionID_pk": {
+          "name": "roleToPermissions_roleID_permissionID_pk",
+          "columns": [
+            "roleID",
+            "permissionID"
+          ]
+        },
+        "roleToPermissionID": {
+          "name": "roleToPermissionID",
+          "columns": [
+            "roleID",
+            "permissionID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "roles": {
+      "name": "roles",
+      "schema": "",
+      "columns": {
+        "roleID": {
+          "name": "roleID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "roleName": {
+          "name": "roleName",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "roles_roleID_unique": {
+          "name": "roles_roleID_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "roleID"
+          ]
+        },
+        "roles_roleName_unique": {
+          "name": "roles_roleName_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "roleName"
+          ]
+        }
+      }
+    },
+    "serviceCategories": {
+      "name": "serviceCategories",
+      "schema": "",
+      "columns": {
+        "serviceCategoryID": {
+          "name": "serviceCategoryID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "serviceCategories_serviceCategoryID_unique": {
+          "name": "serviceCategories_serviceCategoryID_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "serviceCategoryID"
+          ]
+        },
+        "serviceCategories_name_unique": {
+          "name": "serviceCategories_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      }
+    },
+    "serviceVariants": {
+      "name": "serviceVariants",
+      "schema": "",
+      "columns": {
+        "serviceVariantID": {
+          "name": "serviceVariantID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "award": {
+          "name": "award",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost": {
+          "name": "cost",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "day1": {
+          "name": "day1",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day2": {
+          "name": "day2",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3": {
+          "name": "day3",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day4": {
+          "name": "day4",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5": {
+          "name": "day5",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "serviceID": {
+          "name": "serviceID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "serviceVariants_serviceID_services_serviceID_fk": {
+          "name": "serviceVariants_serviceID_services_serviceID_fk",
+          "tableFrom": "serviceVariants",
+          "tableTo": "services",
+          "columnsFrom": [
+            "serviceID"
+          ],
+          "columnsTo": [
+            "serviceID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "serviceVariants_serviceVariantID_unique": {
+          "name": "serviceVariants_serviceVariantID_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "serviceVariantID"
+          ]
+        }
+      }
+    },
+    "services": {
+      "name": "services",
+      "schema": "",
+      "columns": {
+        "serviceID": {
+          "name": "serviceID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "serviceCategoryID": {
+          "name": "serviceCategoryID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "includeInAutomaticSms": {
+          "name": "includeInAutomaticSms",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "callInterval": {
+          "name": "callInterval",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "colorOnDuty": {
+          "name": "colorOnDuty",
+          "type": "colorOnDuty",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "warrantyCard": {
+          "name": "warrantyCard",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "itemNumber": {
+          "name": "itemNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "suppliersArticleNumber": {
+          "name": "suppliersArticleNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "externalArticleNumber": {
+          "name": "externalArticleNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "services_serviceCategoryID_serviceCategories_serviceCategoryID_fk": {
+          "name": "services_serviceCategoryID_serviceCategories_serviceCategoryID_fk",
+          "tableFrom": "services",
+          "tableTo": "serviceCategories",
+          "columnsFrom": [
+            "serviceCategoryID"
+          ],
+          "columnsTo": [
+            "serviceCategoryID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "services_serviceID_unique": {
+          "name": "services_serviceID_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "serviceID"
+          ]
+        },
+        "services_name_unique": {
+          "name": "services_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      }
+    },
+    "users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "userID": {
+          "name": "userID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "firstName": {
+          "name": "firstName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastName": {
+          "name": "lastName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isSuperAdmin": {
+          "name": "isSuperAdmin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "roleID": {
+          "name": "roleID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "users_roleID_roles_roleID_fk": {
+          "name": "users_roleID_roles_roleID_fk",
+          "tableFrom": "users",
+          "tableTo": "roles",
+          "columnsFrom": [
+            "roleID"
+          ],
+          "columnsTo": [
+            "roleID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_userID_unique": {
+          "name": "users_userID_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "userID"
+          ]
+        },
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      }
+    }
+  },
+  "enums": {
+    "colorOnDuty": {
+      "name": "colorOnDuty",
+      "values": {
+        "LightBlue": "LightBlue",
+        "Blue": "Blue",
+        "DarkBlue": "DarkBlue",
+        "LightGreen": "LightGreen",
+        "Green": "Green",
+        "DarkGreen": "DarkGreen",
+        "LightYellow": "LightYellow",
+        "Yellow": "Yellow",
+        "DarkYellow": "DarkYellow",
+        "LightPurple": "LightPurple",
+        "Purple": "Purple",
+        "DarkPurple": "DarkPurple",
+        "LightPink": "LightPink",
+        "Pink": "Pink",
+        "DarkPink": "DarkPink",
+        "LightTurquoise": "LightTurquoise",
+        "Turquoise": "Turquoise",
+        "DarkTurquoise": "DarkTurquoise",
+        "Orange": "Orange",
+        "Red": "Red"
+      }
+    }
+  },
+  "schemas": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
