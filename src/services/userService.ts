@@ -146,7 +146,7 @@ export async function verifyUser(email: UserEmail): Promise<VerifyUser | undefin
   return results[0] ? results[0] : undefined
 }
 
-export async function getUserById(id: UserID): Promise<UserInfo | undefined> {
+export async function getUserByID(id: UserID): Promise<UserInfo | undefined> {
   const results: UserInfo[] | undefined = await db
     .select({
       userID: users.userID,
@@ -161,7 +161,7 @@ export async function getUserById(id: UserID): Promise<UserInfo | undefined> {
   return results[0] ? results[0] : undefined
 }
 
-export async function updateUserById(id: UserID, user: PatchUserSchemaType): Promise<UserInfo> {
+export async function updateUserByID(id: UserID, user: PatchUserSchemaType): Promise<UserInfo> {
   const userWithUpdatedAt = { ...user, updatedAt: new Date() }
   const updatedUser: UserInfo[] = await db
     .update(users)

@@ -7,19 +7,28 @@ import {
   serviceOrderEnum,
 } from '../routes/services/serviceSchema.js'
 import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
+import { ServiceCategoryID } from './serviceCategory.js'
 
 export type ServiceID = { serviceID: number }
+type ServiceName = { servicename: string }
+type ServiceAward = { serviceaward: number }
+type ServiceCost = { servicecost: number }
+type ServiceDay1 = { serviceday1: string }
+type ServiceDay2 = { serviceday2: string }
+type ServiceDay3 = { serviceday3: string }
+type ServiceDay4 = { serviceday4: string }
+type ServiceDay5 = { serviceday5: string }
 
 export type updateServiceVariant = {
-  id: number
-  name: string
-  award: number
-  cost: number
-  day1: string
-  day2: string
-  day3: string
-  day4: string
-  day5: string
+  serviceID: ServiceID
+  serviceName: ServiceName
+  serviceAward: ServiceAward
+  serviceCost: ServiceCost
+  serviceDay1: ServiceDay1
+  serviceDay2: ServiceDay2
+  serviceDay3: ServiceDay3
+  serviceDay4: ServiceDay4
+  serviceDay5: ServiceDay5
 }
 
 export enum colorOnDutyEnum {
@@ -44,18 +53,28 @@ export enum colorOnDutyEnum {
   Orange = 'Orange',
   Red = 'Red',
 }
-export type updateService = {
-  id: number
-  name: string
-  serviceCategoryId: number
-  includeInAutomaticSms: boolean
-  hidden: boolean
-  callInterval: number
-  colorOnDuty: colorOnDutyEnum
-  warrantyCard: boolean
-  itemNumber: boolean
-  suppliersArticleNumber: string
-  externalArticleNumber: string
+
+type ServiceIncludeInAutomaticSms = { serviceIncludeInAutomaticSms: boolean }
+type ServiceHidden = { serviceHidden: boolean }
+type ServiceCallInterval = { serviceCallInterval: number }
+type ServiceColorOnDuty = { serviceColorOnDuty: colorOnDutyEnum }
+type ServiceWarrantyCard = { serviceWarrantyCard: boolean }
+type ServiceItemNumber = { serviceItemNumber: boolean }
+type ServiceSuppliersArticleNumber = { serviceSuppliersArticleNumber: string }
+type ServiceExternalArticleNumber = { serviceExternalArticleNumber: string }
+
+export type UpdateService = {
+  serviceID: ServiceID
+  serviceName: ServiceName
+  serviceCategoryID: ServiceCategoryID
+  serviceIncludeInAutomaticSms: ServiceIncludeInAutomaticSms
+  serviceHidden: ServiceHidden
+  serviceCallInterval: ServiceCallInterval
+  serviceColorOnDuty: ServiceColorOnDuty
+  serviceWarrantyCard: ServiceWarrantyCard
+  serviceItemNumber: ServiceItemNumber
+  serviceSuppliersArticleNumber: ServiceSuppliersArticleNumber
+  serviceExternalArticleNumber: ServiceExternalArticleNumber
   serviceVariants: Array<updateServiceVariant>
   createdAt: Date
   updatedAt: Date
@@ -67,7 +86,7 @@ export async function createService(service: CreateServiceSchemaType): Promise<S
       .insert(services)
       .values({
         name: service.name,
-        serviceCategoryID: service.serviceCategoryId,
+        serviceCategoryID: service.serviceCategoryID,
         includeInAutomaticSms: service.includeInAutomaticSms,
         hidden: service.hidden,
         callInterval: service.callInterval,
@@ -105,7 +124,7 @@ export async function getServicesPaginate(
   orderBy: listServiceOrderByEnum,
   order: serviceOrderEnum,
   hidden: boolean = true,
-) {
+): Promise<any> {
   const condition = and(
     eq(services.hidden, hidden),
     or(
@@ -153,7 +172,7 @@ export async function getServicesPaginate(
       serviceVariants: true,
     },
   })
-  const totalPage = Math.ceil(totalItems.count / limit)
+  const totalPage: number = Math.ceil(totalItems.count / limit)
 
   return {
     totalItems: totalItems.count,
@@ -163,7 +182,7 @@ export async function getServicesPaginate(
   }
 }
 
-export async function updateServiceById(
+export async function updateServiceByID(
   id: ServiceID,
   service: PatchServiceSchemaType,
 ): Promise<any | undefined> {
@@ -174,7 +193,7 @@ export async function updateServiceById(
       .update(services)
       .set({
         name: serviceWithUpdatedAt.name,
-        serviceCategoryID: serviceWithUpdatedAt.serviceCategoryId,
+        serviceCategoryID: serviceWithUpdatedAt.serviceCategoryID,
         includeInAutomaticSms: serviceWithUpdatedAt.includeInAutomaticSms,
         hidden: serviceWithUpdatedAt.hidden,
         callInterval: serviceWithUpdatedAt.callInterval,
@@ -189,7 +208,7 @@ export async function updateServiceById(
       .returning({
         serviceID: services.serviceCategoryID,
         name: services.name,
-        serviceCategoryId: services.serviceCategoryID,
+        ServiceCategoryID: services.serviceCategoryID,
         includeInAutomaticSms: services.includeInAutomaticSms,
         hidden: services.hidden,
         callInterval: services.callInterval,

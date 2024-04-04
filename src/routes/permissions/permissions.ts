@@ -3,8 +3,8 @@ import { FastifyInstance } from 'fastify'
 import {
   createPermission,
   getPermissionsPaginate,
-  getPermissionById,
-  updatePermissionById,
+  getPermissionByID,
+  updatePermissionByID,
   deletePermission,
   Permission,
   PermissionsPaginate,
@@ -19,8 +19,8 @@ import {
   ListPermissionQueryParamSchemaType,
   PatchPermissionSchema,
   PatchPermissionSchemaType,
-  getPermissionByIdSchema,
-  getPermissionByIdType,
+  getPermissionByIDSchema,
+  getPermissionByIDType,
 } from './permissionSchema.js'
 
 export async function permissions(fastify: FastifyInstance) {
@@ -100,7 +100,7 @@ export async function permissions(fastify: FastifyInstance) {
       reply.status(201).send({ message: 'Permission created', data: Permission })
     },
   )
-  fastify.get<{ Params: getPermissionByIdType }>(
+  fastify.get<{ Params: getPermissionByIDType }>(
     '/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -115,19 +115,19 @@ export async function permissions(fastify: FastifyInstance) {
         return reply
       },
       schema: {
-        params: getPermissionByIdSchema,
+        params: getPermissionByIDSchema,
       },
     },
     async (request, reply) => {
       const id: PermissionID = { permissionID: request.params.id }
-      const Permission: Permission | undefined = await getPermissionById(id)
+      const Permission: Permission | undefined = await getPermissionByID(id)
       if (Permission == null || Permission === undefined) {
         return reply.status(404).send({ message: 'Permission not found' })
       }
       reply.status(200).send(Permission)
     },
   )
-  fastify.patch<{ Body: PatchPermissionSchemaType; Reply: object; Params: getPermissionByIdType }>(
+  fastify.patch<{ Body: PatchPermissionSchemaType; Reply: object; Params: getPermissionByIDType }>(
     '/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -143,7 +143,7 @@ export async function permissions(fastify: FastifyInstance) {
       },
       schema: {
         body: PatchPermissionSchema,
-        params: getPermissionByIdSchema,
+        params: getPermissionByIDSchema,
       },
     },
     async (request, reply) => {
@@ -153,14 +153,14 @@ export async function permissions(fastify: FastifyInstance) {
       }
       const id: PermissionID = { permissionID: request.params.id }
 
-      const Permission: Permission = await updatePermissionById(id, PermissionData)
+      const Permission: Permission = await updatePermissionByID(id, PermissionData)
       if (Permission === undefined || Permission === null) {
         return reply.status(404).send({ message: 'Permission not found' })
       }
       reply.status(201).send({ message: 'Permission Updated', data: Permission })
     },
   )
-  fastify.delete<{ Params: getPermissionByIdType }>(
+  fastify.delete<{ Params: getPermissionByIDType }>(
     '/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -175,7 +175,7 @@ export async function permissions(fastify: FastifyInstance) {
         return reply
       },
       schema: {
-        params: getPermissionByIdSchema,
+        params: getPermissionByIDSchema,
       },
     },
     async (request, reply) => {

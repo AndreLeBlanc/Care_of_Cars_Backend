@@ -38,7 +38,7 @@ export type CreateServiceVariantsSchemaType = Static<typeof CreateServiceVariant
 const colorOnDutyEnumType = Type.Enum(colorOnDutyEnum)
 export const CreateServiceSchema = Type.Object({
   name: Type.String(),
-  serviceCategoryId: Type.Integer(),
+  serviceCategoryID: Type.Integer(),
   includeInAutomaticSms: Type.Optional(Type.Boolean()),
   hidden: Type.Optional(Type.Boolean()),
   callInterval: Type.Optional(Type.Integer({ minimum: 1, maximum: 12 })),
@@ -55,7 +55,7 @@ export type CreateServiceSchemaType = Static<typeof CreateServiceSchema>
 export enum listServiceOrderByEnum {
   id = 'id',
   name = 'name',
-  serviceCategoryID = 'serviceCategoryId',
+  serviceCategoryID = 'ServiceCategoryID',
 }
 const listServiceOrderByEnumType = Type.Enum(listServiceOrderByEnum)
 
@@ -89,7 +89,7 @@ export type PatchServiceVariantsSchemaType = Static<typeof PatchServiceVariantsS
 
 export const PatchServiceSchema = Type.Object({
   name: Type.Optional(Type.String()),
-  serviceCategoryId: Type.Optional(Type.Integer()),
+  serviceCategoryID: Type.Optional(Type.Integer()),
   includeInAutomaticSms: Type.Optional(Type.Optional(Type.Boolean())),
   hidden: Type.Optional(Type.Boolean()),
   callInterval: Type.Optional(Type.Integer({ minimum: 1, maximum: 12 })),
@@ -102,8 +102,8 @@ export const PatchServiceSchema = Type.Object({
 })
 export type PatchServiceSchemaType = Static<typeof PatchServiceSchema>
 
-export const getServiceByIdSchema = Type.Object({
+export const getServiceByIDSchema = Type.Object({
   id: Type.Number(),
 })
 
-export type getServiceByIdSchemaType = Static<typeof getServiceByIdSchema>
+export type getServiceByIDSchemaType = Static<typeof getServiceByIDSchema>

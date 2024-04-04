@@ -11,8 +11,8 @@ import {
   LoginUserType,
   PatchUserSchema,
   PatchUserSchemaType,
-  getUserByIdSchema,
-  getUserByIdType,
+  getUserByIDSchema,
+  getUserByIDType,
 } from './userSchema.js'
 import {
   createUser,
@@ -21,8 +21,8 @@ import {
   UserID,
   UsersPaginated,
   verifyUser,
-  getUserById,
-  updateUserById,
+  getUserByID,
+  updateUserByID,
   generatePasswordHash,
   isStrongPassword,
   DeleteUser,
@@ -100,7 +100,7 @@ export async function users(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const { firstName, lastName, email, password, roleId } = request.body
+      const { firstName, lastName, email, password, roleID } = request.body
       const isStrongPass: boolean = await isStrongPassword({ userPassword: password })
       if (!isStrongPass) {
         return reply.status(422).send({ message: 'Provide a strong password' })
@@ -112,7 +112,7 @@ export async function users(fastify: FastifyInstance) {
           { userLastName: lastName },
           { userEmail: email },
           passwordHash,
-          { roleID: roleId },
+          { roleID: roleID },
         )
         return reply.status(201).send({
           message: 'User created',
@@ -169,7 +169,7 @@ export async function users(fastify: FastifyInstance) {
       reply.status(403).send({ message: 'Login failed, incorrect password' })
     },
   )
-  fastify.get<{ Params: getUserByIdType }>(
+  fastify.get<{ Params: getUserByIDType }>(
     '/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -180,19 +180,19 @@ export async function users(fastify: FastifyInstance) {
       },
 
       schema: {
-        params: getUserByIdSchema,
+        params: getUserByIDSchema,
       },
     },
     async (request, reply) => {
       const id: UserID = { userID: request.params.id }
-      const user: UserInfo | undefined = await getUserById(id)
+      const user: UserInfo | undefined = await getUserByID(id)
       if (user == null) {
         return reply.status(404).send({ message: 'user not found' })
       }
       return reply.status(200).send(user)
     },
   )
-  fastify.patch<{ Body: PatchUserSchemaType; Reply: object; Params: getUserByIdType }>(
+  fastify.patch<{ Body: PatchUserSchemaType; Reply: object; Params: getUserByIDType }>(
     '/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -203,7 +203,7 @@ export async function users(fastify: FastifyInstance) {
       },
       schema: {
         body: PatchUserSchema,
-        params: getUserByIdSchema,
+        params: getUserByIDSchema,
       },
     },
     async (request, reply) => {
@@ -219,14 +219,14 @@ export async function users(fastify: FastifyInstance) {
         }
         userData.password = await generatePasswordHash({ userPassword: userData.password })
       }
-      const user: UserInfo = await updateUserById(id, userData)
+      const user: UserInfo = await updateUserByID(id, userData)
       if (user === undefined) {
         return reply.status(404).send({ message: 'user not found' })
       }
       reply.status(201).send({ message: 'User Updated', data: user })
     },
   )
-  fastify.delete<{ Params: getUserByIdType }>(
+  fastify.delete<{ Params: getUserByIDType }>(
     '/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -236,7 +236,7 @@ export async function users(fastify: FastifyInstance) {
         return reply
       },
       schema: {
-        params: getUserByIdSchema,
+        params: getUserByIDSchema,
       },
     },
     async (request, reply) => {

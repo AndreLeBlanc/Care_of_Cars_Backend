@@ -7,14 +7,14 @@ import {
   PatchServiceSchemaType,
   listServiceOrderByEnum,
   serviceOrderEnum,
-  getServiceByIdSchemaType,
+  getServiceByIDSchemaType,
   PatchServiceSchema,
-  getServiceByIdSchema,
+  getServiceByIDSchema,
 } from './serviceSchema.js'
 import {
   createService,
   getServicesPaginate,
-  updateServiceById,
+  updateServiceByID,
 } from '../../services/serviceService.js'
 
 export async function services(fastify: FastifyInstance) {
@@ -100,7 +100,7 @@ export async function services(fastify: FastifyInstance) {
   fastify.patch<{
     Body: PatchServiceSchemaType
     Reply: object
-    Params: getServiceByIdSchemaType
+    Params: getServiceByIDSchemaType
   }>(
     '/:id',
     {
@@ -117,7 +117,7 @@ export async function services(fastify: FastifyInstance) {
       },
       schema: {
         body: PatchServiceSchema,
-        params: getServiceByIdSchema,
+        params: getServiceByIDSchema,
       },
     },
     async (request, reply) => {
@@ -127,7 +127,7 @@ export async function services(fastify: FastifyInstance) {
       }
       const id = { serviceID: request.params.id }
 
-      const service = await updateServiceById(id, serviceData)
+      const service = await updateServiceByID(id, serviceData)
       if (service == undefined) {
         return reply.status(404).send({ message: 'Service not found' })
       }

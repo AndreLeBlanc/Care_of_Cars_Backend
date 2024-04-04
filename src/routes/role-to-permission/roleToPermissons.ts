@@ -33,16 +33,16 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
       },
     },
     async (request, reply) => {
-      const { roleId, permissionId } = request.body
+      const { roleID, permissionID } = request.body
       const roleToPermissions: RoleToPermissions = await createRoleToPermissions(
-        { roleID: roleId },
-        { permissionID: permissionId },
+        { roleID: roleID },
+        { permissionID: permissionID },
       )
       reply.status(201).send({ message: 'Role to Permission created', data: roleToPermissions })
     },
   )
   fastify.delete<{ Params: DeleteRoleToPermissionType }>(
-    '/:roleId/:permissionId',
+    '/:roleID/:permissionID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = { permissionName: 'delete_role_to_permission' }
@@ -60,10 +60,10 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
       },
     },
     async (request, reply) => {
-      const { roleId, permissionId } = request.params
+      const { roleID, permissionID } = request.params
       const deletedRoleToPermissions: RoleToPermissions | undefined = await deleteRoleToPermissions(
-        { roleID: roleId },
-        { permissionID: permissionId },
+        { roleID: roleID },
+        { permissionID: permissionID },
       )
       if (deletedRoleToPermissions === undefined || deletedRoleToPermissions === null) {
         return reply.status(404).send({ message: 'Invalid role id or permission id' })

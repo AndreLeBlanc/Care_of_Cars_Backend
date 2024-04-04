@@ -9,7 +9,7 @@ export const CreateUser = Type.Object({
   lastName: Type.String(),
   email: Type.String({ format: 'email' }),
   password: Type.String(),
-  roleId: Type.Integer(),
+  roleID: Type.Integer(),
 })
 export const CreateUserReply = Type.Object({
   // id: Type.Number(),
@@ -34,10 +34,10 @@ export type LoginUserType = Static<typeof LoginUser>
  * This is a common schema used by get(/:id), patch(/:id), delete(/:id)
  * If this is modified both will be affected
  */
-export const getUserByIdSchema = Type.Object({
+export const getUserByIDSchema = Type.Object({
   id: Type.Number(),
 })
-export type getUserByIdType = Static<typeof getUserByIdSchema>
+export type getUserByIDType = Static<typeof getUserByIDSchema>
 
 export const PatchUserSchema = Type.Object({
   firstName: Type.Optional(Type.String()),
