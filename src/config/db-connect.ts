@@ -13,7 +13,6 @@ const pool = new Pool({
 export async function initDrizzle() {
   //const sql = postgres(connectionString, { max: 1 })
   const db = drizzle(pool)
-
   await migrate(db, { migrationsFolder: 'drizzle' })
 
   // await sql.end()
