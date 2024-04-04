@@ -125,7 +125,7 @@ export async function services(fastify: FastifyInstance) {
       if (Object.keys(serviceData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id = request.params.id
+      const id = { serviceID: request.params.id }
 
       const service = await updateServiceById(id, serviceData)
       if (service == undefined) {

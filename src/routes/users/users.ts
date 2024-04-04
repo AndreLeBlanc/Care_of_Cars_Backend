@@ -35,7 +35,7 @@ import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/r
 
 export async function users(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
-    '/:users',
+    '/',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = { permissionName: 'list_user' }
@@ -83,7 +83,7 @@ export async function users(fastify: FastifyInstance) {
     },
   )
   fastify.post<{ Body: CreateUserType; Reply: object }>(
-    '/createUser',
+    '/',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
@@ -170,7 +170,7 @@ export async function users(fastify: FastifyInstance) {
     },
   )
   fastify.get<{ Params: getUserByIdType }>(
-    '/findUsers:id',
+    '/:id',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)

@@ -55,7 +55,7 @@ export type CreateServiceSchemaType = Static<typeof CreateServiceSchema>
 export enum listServiceOrderByEnum {
   id = 'id',
   name = 'name',
-  serviceCategoryId = 'serviceCategoryId',
+  serviceCategoryID = 'serviceCategoryId',
 }
 const listServiceOrderByEnumType = Type.Enum(listServiceOrderByEnum)
 
