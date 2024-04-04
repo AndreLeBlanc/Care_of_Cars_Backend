@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
-  "id": "73ba4a99-daaf-4257-8f6b-130b01867ae2",
-=======
-  "id": "f7ec985e-9a23-4885-b4f9-1934d75ca049",
->>>>>>> merge
+  "id": "b41cfd2c-125b-46fc-a304-eb954123bf0b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -177,13 +173,8 @@
       "name": "serviceCategories",
       "schema": "",
       "columns": {
-<<<<<<< HEAD
-        "ServiceCategoryID": {
-          "name": "ServiceCategoryID",
-=======
         "serviceCategoryID": {
           "name": "serviceCategoryID",
->>>>>>> merge
           "type": "serial",
           "primaryKey": true,
           "notNull": true
@@ -219,19 +210,11 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-<<<<<<< HEAD
-        "serviceCategories_ServiceCategoryID_unique": {
-          "name": "serviceCategories_ServiceCategoryID_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "ServiceCategoryID"
-=======
         "serviceCategories_serviceCategoryID_unique": {
           "name": "serviceCategories_serviceCategoryID_unique",
           "nullsNotDistinct": false,
           "columns": [
             "serviceCategoryID"
->>>>>>> merge
           ]
         },
         "serviceCategories_name_unique": {
@@ -359,13 +342,8 @@
           "primaryKey": true,
           "notNull": true
         },
-<<<<<<< HEAD
-        "ServiceCategoryID": {
-          "name": "ServiceCategoryID",
-=======
         "serviceCategoryID": {
           "name": "serviceCategoryID",
->>>>>>> merge
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -394,11 +372,12 @@
           "primaryKey": false,
           "notNull": false
         },
-        "colorOnDuty": {
-          "name": "colorOnDuty",
-          "type": "colorOnDuty",
+        "colorForService": {
+          "name": "colorForService",
+          "type": "colorForService",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'None'"
         },
         "warrantyCard": {
           "name": "warrantyCard",
@@ -441,17 +420,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-<<<<<<< HEAD
-        "services_ServiceCategoryID_serviceCategories_ServiceCategoryID_fk": {
-          "name": "services_ServiceCategoryID_serviceCategories_ServiceCategoryID_fk",
-          "tableFrom": "services",
-          "tableTo": "serviceCategories",
-          "columnsFrom": [
-            "ServiceCategoryID"
-          ],
-          "columnsTo": [
-            "ServiceCategoryID"
-=======
         "services_serviceCategoryID_serviceCategories_serviceCategoryID_fk": {
           "name": "services_serviceCategoryID_serviceCategories_serviceCategoryID_fk",
           "tableFrom": "services",
@@ -461,7 +429,6 @@
           ],
           "columnsTo": [
             "serviceCategoryID"
->>>>>>> merge
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -583,8 +550,8 @@
     }
   },
   "enums": {
-    "colorOnDuty": {
-      "name": "colorOnDuty",
+    "colorForService": {
+      "name": "colorForService",
       "values": {
         "LightBlue": "LightBlue",
         "Blue": "Blue",
@@ -605,7 +572,8 @@
         "Turquoise": "Turquoise",
         "DarkTurquoise": "DarkTurquoise",
         "Orange": "Orange",
-        "Red": "Red"
+        "Red": "Red",
+        "None": "None"
       }
     }
   },

@@ -64,7 +64,7 @@ export const roleToPermissions = pgTable(
   },
 )
 
-export const colorOnDutyEnum = pgEnum('colorOnDuty', [
+export const colorForService = [
   'LightBlue',
   'Blue',
   'DarkBlue',
@@ -85,7 +85,10 @@ export const colorOnDutyEnum = pgEnum('colorOnDuty', [
   'DarkTurquoise',
   'Orange',
   'Red',
-])
+  'None',
+] as const
+
+export const colorForServicepgEnum = pgEnum('colorForService', colorForService)
 export const serviceCategories = pgTable('serviceCategories', {
   serviceCategoryID: serial('serviceCategoryID').primaryKey().unique(),
   name: varchar('name', { length: 256 }).unique().notNull(),
@@ -103,7 +106,7 @@ export const services = pgTable('services', {
   includeInAutomaticSms: boolean('includeInAutomaticSms'),
   hidden: boolean('hidden'),
   callInterval: integer('callInterval'),
-  colorOnDuty: colorOnDutyEnum('colorOnDuty'),
+  colorForService: colorForServicepgEnum('colorForService').notNull().default('None'),
   warrantyCard: boolean('warrantyCard'),
   itemNumber: varchar('itemNumber', { length: 256 }),
   suppliersArticleNumber: varchar('suppliersArticleNumber', { length: 256 }),
@@ -111,7 +114,6 @@ export const services = pgTable('services', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
-
 export const servicesCategoryToServiceRelations = relations(serviceCategories, ({ many }) => ({
   services: many(services),
 }))

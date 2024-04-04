@@ -33,6 +33,7 @@
     "@typescript-eslint/parser": "^7.1.1",
     "bcryptjs": "^2.4.3",
     "drizzle-orm": "^0.29.4",
+    "drizzle-typebox": "^0.1.1",
     "eslint": "^8.57.0",
     "fastify": "^4.26.1",
     "fastify-cli": "^6.1.1",
@@ -53,7 +54,9 @@
     "typescript": "^5.2.2"
   },
   "pre-commit": {
-    "run": ["build:ts"],
+    "run": [
+      "build:ts"
+    ],
     "silent": false
   }
 }

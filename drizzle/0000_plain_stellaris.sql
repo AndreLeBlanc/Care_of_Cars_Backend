@@ -1,5 +1,5 @@
 DO $$ BEGIN
- CREATE TYPE "colorOnDuty" AS ENUM('LightBlue', 'Blue', 'DarkBlue', 'LightGreen', 'Green', 'DarkGreen', 'LightYellow', 'Yellow', 'DarkYellow', 'LightPurple', 'Purple', 'DarkPurple', 'LightPink', 'Pink', 'DarkPink', 'LightTurquoise', 'Turquoise', 'DarkTurquoise', 'Orange', 'Red');
+ CREATE TYPE "colorForService" AS ENUM('LightBlue', 'Blue', 'DarkBlue', 'LightGreen', 'Green', 'DarkGreen', 'LightYellow', 'Yellow', 'DarkYellow', 'LightPurple', 'Purple', 'DarkPurple', 'LightPink', 'Pink', 'DarkPink', 'LightTurquoise', 'Turquoise', 'DarkTurquoise', 'Orange', 'Red', 'None');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -33,12 +33,12 @@ CREATE TABLE IF NOT EXISTS "roles" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "serviceCategories" (
-	"ServiceCategoryID" serial PRIMARY KEY NOT NULL,
+	"serviceCategoryID" serial PRIMARY KEY NOT NULL,
 	"name" varchar(256) NOT NULL,
 	"description" text,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "serviceCategories_ServiceCategoryID_unique" UNIQUE("ServiceCategoryID"),
+	CONSTRAINT "serviceCategories_serviceCategoryID_unique" UNIQUE("serviceCategoryID"),
 	CONSTRAINT "serviceCategories_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
@@ -60,12 +60,12 @@ CREATE TABLE IF NOT EXISTS "serviceVariants" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "services" (
 	"serviceID" serial PRIMARY KEY NOT NULL,
-	"ServiceCategoryID" integer NOT NULL,
+	"serviceCategoryID" integer NOT NULL,
 	"name" varchar(256) NOT NULL,
 	"includeInAutomaticSms" boolean,
 	"hidden" boolean,
 	"callInterval" integer,
-	"colorOnDuty" "colorOnDuty",
+	"colorForService" "colorForService" DEFAULT 'None' NOT NULL,
 	"warrantyCard" boolean,
 	"itemNumber" varchar(256),
 	"suppliersArticleNumber" varchar(256),
@@ -97,7 +97,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "services" ADD CONSTRAINT "services_ServiceCategoryID_serviceCategories_ServiceCategoryID_fk" FOREIGN KEY ("ServiceCategoryID") REFERENCES "serviceCategories"("ServiceCategoryID") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "services" ADD CONSTRAINT "services_serviceCategoryID_serviceCategories_serviceCategoryID_fk" FOREIGN KEY ("serviceCategoryID") REFERENCES "serviceCategories"("serviceCategoryID") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
