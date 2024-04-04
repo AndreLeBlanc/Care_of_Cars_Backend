@@ -1,5 +1,5 @@
 import { desc, eq, or, sql } from 'drizzle-orm'
-
+import { PatchServiceCategorySchemaType } from '../routes/service-category/serviceCategorySchema.js'
 import { db } from '../config/db-connect.js'
 import { serviceCategories } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
@@ -15,8 +15,10 @@ type ServiceCategory = {
   ServiceCategoryName &
   serviceCategoryDescription
 
-export type UpdatedServiceCategoryByID = { description: string; name: string }
-
+export type UpdatedServiceCategoryByID = {
+  description?: ServiceCategoryID
+  name?: ServiceCategoryName
+}
 export type UpdatedServiceCategory = {
   serviceCategoryID: ServiceCategoryID
   serviceCategoryDescription: serviceCategoryDescription
@@ -93,7 +95,7 @@ export async function getServiceCategoryByID(id: number): Promise<ServiceCategor
 
 export async function updateServiceCategoryByID(
   id: number,
-  serviceCategory: UpdatedServiceCategoryByID,
+  serviceCategory: PatchServiceCategorySchemaType,
 ): Promise<UpdatedServiceCategory | undefined> {
   const serviceCategoryWithUpdatedAt = { ...serviceCategory, updatedAt: new Date() }
   const updatedServiceCategory: UpdatedServiceCategory[] = await db
