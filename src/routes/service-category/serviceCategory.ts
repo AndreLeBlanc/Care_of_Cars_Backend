@@ -3,10 +3,10 @@ import {
   createServiceCategory,
   deleteServiceCategory,
   getServiceCategoriesPaginate,
-  getServiceCategoryById,
+  getServiceCategoryByID,
   UpdatedServiceCategory,
-  updateServiceCategoryById,
-  UpdatedServiceCategoryById,
+  updateServiceCategoryByID,
+  UpdatedServiceCategoryByID,
 } from '../../services/serviceCategory.js'
 import {
   CreateServiceCategorySchema,
@@ -15,8 +15,8 @@ import {
   ListServiceCategoryQueryParamSchemaType,
   PatchServiceCategorySchema,
   PatchServiceCategorySchemaType,
-  getServiceCategoryByIdSchema,
-  getServiceCategoryByIdType,
+  getServiceCategoryByIDSchema,
+  getServiceCategoryByIDType,
 } from './serviceCategorySchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
 
@@ -93,7 +93,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       reply.status(201).send({ message: 'Service created', data: serviceCategory })
     },
   )
-  fastify.get<{ Params: getServiceCategoryByIdType }>(
+  fastify.get<{ Params: getServiceCategoryByIDType }>(
     '/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -108,12 +108,12 @@ export async function serviceCategory(fastify: FastifyInstance) {
         return reply
       },
       schema: {
-        params: getServiceCategoryByIdSchema,
+        params: getServiceCategoryByIDSchema,
       },
     },
     async (request, reply) => {
       const id = request.params.id
-      const serviceCategory = await getServiceCategoryById(id)
+      const serviceCategory = await getServiceCategoryByID(id)
       if (serviceCategory == undefined || serviceCategory == null) {
         return reply.status(404).send({ message: 'Service Category not found' })
       }
@@ -123,7 +123,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
   fastify.patch<{
     Body: PatchServiceCategorySchemaType
     Reply: object
-    Params: getServiceCategoryByIdType
+    Params: getServiceCategoryByIDType
   }>(
     '/:id',
     {
@@ -140,7 +140,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
       schema: {
         body: PatchServiceCategorySchema,
-        params: getServiceCategoryByIdSchema,
+        params: getServiceCategoryByIDSchema,
       },
     },
     async (request, reply) => {
@@ -156,9 +156,9 @@ export async function serviceCategory(fastify: FastifyInstance) {
       } else {
         const id = request.params.id
 
-        const serviceCategory: UpdatedServiceCategory | undefined = await updateServiceCategoryById(
+        const serviceCategory: UpdatedServiceCategory | undefined = await updateServiceCategoryByID(
           id,
-          serviceCategoryData as UpdatedServiceCategoryById,
+          serviceCategoryData as UpdatedServiceCategoryByID,
         )
         if (serviceCategory == null) {
           return reply.status(404).send({ message: 'Service Category not found' })
@@ -167,7 +167,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       reply.status(201).send({ message: 'Service Category Updated', data: serviceCategory })
     },
   )
-  fastify.delete<{ Params: getServiceCategoryByIdType }>(
+  fastify.delete<{ Params: getServiceCategoryByIDType }>(
     '/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -182,7 +182,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
         return reply
       },
       schema: {
-        params: getServiceCategoryByIdSchema,
+        params: getServiceCategoryByIDSchema,
       },
     },
     async (request, reply) => {

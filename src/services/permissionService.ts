@@ -84,7 +84,7 @@ export async function createPermission(
   return createdPermission[0]
 }
 
-export async function getPermissionById(id: PermissionID): Promise<Permission | undefined> {
+export async function getPermissionByID(id: PermissionID): Promise<Permission | undefined> {
   const results: Permission[] = await db
     .select({
       permissionID: permissions.permissionID,
@@ -98,7 +98,7 @@ export async function getPermissionById(id: PermissionID): Promise<Permission | 
   return results[0] ? results[0] : undefined
 }
 
-export async function updatePermissionById(
+export async function updatePermissionByID(
   id: PermissionID,
   permission: PatchPermissionSchemaType,
 ): Promise<Permission> {

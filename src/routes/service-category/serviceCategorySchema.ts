@@ -15,10 +15,10 @@ export const CreateServiceCategorySchema = Type.Object({
 })
 export type CreateServiceCategorySchemaType = Static<typeof CreateServiceCategorySchema>
 
-export const getServiceCategoryByIdSchema = Type.Object({
+export const getServiceCategoryByIDSchema = Type.Object({
   id: Type.Number(),
 })
-export type getServiceCategoryByIdType = Static<typeof getServiceCategoryByIdSchema>
+export type getServiceCategoryByIDType = Static<typeof getServiceCategoryByIDSchema>
 
 export const PatchServiceCategorySchema = Type.Object({
   name: Type.Optional(Type.String()),

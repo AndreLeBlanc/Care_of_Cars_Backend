@@ -3,22 +3,24 @@ import { desc, eq, or, sql } from 'drizzle-orm'
 import { db } from '../config/db-connect.js'
 import { serviceCategories } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
+import { RoleName } from './roleService.js'
 
-type serviceCategoryID = { serviceCategoryID: number }
-type serviceCategoryName = { serviceCategoryName: string }
+export type ServiceCategoryID = { serviceCategoryID: number }
+type ServiceCategoryName = { serviceCategoryName: string }
 type serviceCategoryDescription = { serviceCategoryDescription: string | null }
-type serviceCategory = {
+type ServiceCategory = {
   createdAt: Date
   updatedAt: Date
-} & serviceCategoryID &
-  serviceCategoryName &
+} & ServiceCategoryID &
+  ServiceCategoryName &
   serviceCategoryDescription
 
-export type UpdatedServiceCategoryById = { description: string; name: string }
+export type UpdatedServiceCategoryByID = { description: string; name: string }
 
 export type UpdatedServiceCategory = {
-  serviceCategoryID: serviceCategoryID | null
-  serviceCategoryDescription: serviceCategoryDescription | null
+  serviceCategoryID: ServiceCategoryID
+  serviceCategoryDescription: serviceCategoryDescription
+  roleName: RoleName
   createdAt: Date
   updatedAt: Date
 }
@@ -70,13 +72,13 @@ export async function createServiceCategory(name: string, description: string) {
     .values({ name: name, description: description })
     .returning({
       id: serviceCategories.serviceCategoryID,
-      serviceCategoryName: serviceCategories.name,
+      ServiceCategoryName: serviceCategories.name,
       description: serviceCategories.description,
     })
 }
 
-export async function getServiceCategoryById(id: number): Promise<serviceCategory | undefined> {
-  const results: serviceCategory[] = await db
+export async function getServiceCategoryByID(id: number): Promise<ServiceCategory | undefined> {
+  const results: ServiceCategory[] = await db
     .select({
       serviceCategoryID: serviceCategories.serviceCategoryID,
       serviceCategoryName: serviceCategories.name,
@@ -89,9 +91,9 @@ export async function getServiceCategoryById(id: number): Promise<serviceCategor
   return results[0] ? results[0] : undefined
 }
 
-export async function updateServiceCategoryById(
+export async function updateServiceCategoryByID(
   id: number,
-  serviceCategory: UpdatedServiceCategoryById,
+  serviceCategory: UpdatedServiceCategoryByID,
 ): Promise<UpdatedServiceCategory | undefined> {
   const serviceCategoryWithUpdatedAt = { ...serviceCategory, updatedAt: new Date() }
   const updatedServiceCategory: UpdatedServiceCategory[] = await db
@@ -100,7 +102,7 @@ export async function updateServiceCategoryById(
     .where(eq(serviceCategories.serviceCategoryID, id))
     .returning({
       serviceCategoryID: { serviceCategoryID: serviceCategories.serviceCategoryID },
-      roleName: serviceCategories.name,
+      roleName: { roleName: serviceCategories.name },
       serviceCategoryDescription: { serviceCategoryDescription: serviceCategories.description },
       createdAt: serviceCategories.createdAt,
       updatedAt: serviceCategories.updatedAt,
@@ -108,8 +110,8 @@ export async function updateServiceCategoryById(
   return updatedServiceCategory[0]
 }
 
-export async function deleteServiceCategory(id: number): Promise<serviceCategory | undefined> {
-  const deletedServiceCategory: serviceCategory[] = await db
+export async function deleteServiceCategory(id: number): Promise<ServiceCategory | undefined> {
+  const deletedServiceCategory: ServiceCategory[] = await db
     .delete(serviceCategories)
     .where(eq(serviceCategories.serviceCategoryID, id))
     .returning({
