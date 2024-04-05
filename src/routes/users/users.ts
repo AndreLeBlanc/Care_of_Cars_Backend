@@ -139,7 +139,7 @@ export async function users(fastify: FastifyInstance) {
       const { email, password } = request.body
       let userWithPassword: VerifyUser | undefined = await verifyUser({ userEmail: email })
       if (userWithPassword == undefined || userWithPassword == null) {
-        return reply.status(403).send({ message: 'Login failed, incorrect email' })
+        return reply.status(403).send({ message: 'Login failed, incorrect email or password' })
       }
       const match = await bcrypt.compare(password, userWithPassword.userPassword)
       if (match) {
@@ -166,7 +166,7 @@ export async function users(fastify: FastifyInstance) {
           },
         })
       }
-      reply.status(403).send({ message: 'Login failed, incorrect password' })
+      reply.status(403).send({ message: 'Login failed, incorrect email or password' })
     },
   )
   fastify.get<{ Params: getUserByIDType }>(
