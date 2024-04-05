@@ -36,7 +36,7 @@ export async function services(fastify: FastifyInstance) {
         querystring: ListServiceQueryParamSchema,
       },
     },
-    async function (request, reply) {
+    async function (request, _) {
       let {
         search = '',
         limit = 10,

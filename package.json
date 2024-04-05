@@ -8,14 +8,14 @@
     "test": "test"
   },
   "scripts": {
-    "test": "npm run build:ts && tsc -p test/tsconfig.json && c8 node --test -r ts-node/register test/**/*.ts",
-    "start": "npm run build:ts && fastify start -l info dist/app.js",
+    "test": "node   --loader ts-node/esm --test test/**/*.test.ts",
+    "start": "npm run build:ts && node dist/index.js",
     "build:ts": "tsc",
     "watch:ts": "tsc -w",
     "dev": "npm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
     "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
     "generate": "drizzle-kit generate:pg --config=src/config/drizzle.config.ts",
-    "deployDocker": "npm run build:ts &&  fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
+    "deployDocker": "npm run build:ts &&  node dist/index.js",
     "drizzle-studio": "npx drizzle-kit studio --config=src/config/drizzle.config.ts"
   },
   "keywords": [],
@@ -51,6 +51,7 @@
     "drizzle-kit": "^0.20.14",
     "fastify-tsconfig": "^2.0.0",
     "ts-node": "^10.4.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2"
   },
   "pre-commit": {

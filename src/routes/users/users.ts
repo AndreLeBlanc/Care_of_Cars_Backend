@@ -52,7 +52,7 @@ export async function users(fastify: FastifyInstance) {
         querystring: ListUserQueryParam,
       },
     },
-    async (request, reply) => {
+    async (request, _) => {
       let { search = '', limit = 10, page = 1 } = request.query
       const offset = fastify.findOffset(limit, page)
 

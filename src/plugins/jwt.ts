@@ -10,7 +10,7 @@ export interface SupportPluginOptions {
 
 // The use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
-export default fp<SupportPluginOptions>(async (fastify, reply) => {
+export default fp<SupportPluginOptions>(async (fastify) => {
   fastify.addHook(
     'preHandler',
     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -36,7 +36,7 @@ export default fp<SupportPluginOptions>(async (fastify, reply) => {
     'authorize',
     async function (
       request: FastifyRequest,
-      reply: FastifyReply,
+      _: FastifyReply,
       permissionName: PermissionTitle,
     ): Promise<boolean> {
       try {

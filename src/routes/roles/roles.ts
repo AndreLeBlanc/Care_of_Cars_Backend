@@ -41,7 +41,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
         querystring: ListRoleQueryParamSchema,
       },
     },
-    async function (request, reply) {
+    async function (request, _) {
       let { search = '', limit = 10, page = 1 } = request.query
       const offset: number = fastify.findOffset(limit, page)
       const result = await getRolesPaginate(search, limit, page, offset)

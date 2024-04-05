@@ -9,11 +9,15 @@
 
 To run postgres and nodejs docker continers (use this when you are deploying and no code changes have been made):
 
-`sudo docker-compose up`
+`sudo docker-compose up app postgres`
 
 To run postgres and nodejs docker continers with new code (use this when changes have been made):
 
-`sudo docker-compose up --build`
+`docker-compose build app postgres test`
+
+Run Tests:
+
+`sudo docker-compose up test postgres`
 
 Stop containers:
 
@@ -35,7 +39,17 @@ To access bash in one of the containers
 
 `sudo docker exec -it CONTAINER_ID bash` replace CONTAINER_ID with the actual container ID.
 
+## Testing
+
+We are using [Node native test runner](https://nodejs.org/api/test.html)
+
+Please write tests during development. If you add a new route, write a few tests for it. We want to maintain decent test coverage and testing is far less time consuming than manual debugging!
+
+Try to maintain similar folder structure in the test folder as in the src folder.
+
 ## How to install locally
+
+Avoid installing locally, this app is supposed to run in docker. Only do this if you have very good reasons to do so. If you want to interact with the app while running please log into the docker container instead. See section regarding docker.
 
 1. Create `.env` at the root and fill out the actual values.
 
@@ -88,10 +102,6 @@ npm run dev
 ```
 
 seed will be executed and superadmin will be created. Once created make sure to set `RUN_SEED=false`
-
-# Getting Started with [Fastify-CLI](https://www.npmjs.com/package/fastify-cli)
-
-This project was bootstrapped with Fastify-CLI.
 
 ## Available Scripts
 
@@ -207,6 +217,20 @@ Please ensure that your functions have a return type.
 Null is broken in typescript so other return types than null are recommended:
 
 https://hamednourhani.gitbooks.io/typescript-book/content/docs/tips/null.html
+
+# Workflow
+
+Checkout the latest commits on master.
+
+Make a relatively small change, not more than a days work.
+
+Create a new branch and commit your work.
+
+The githooks will check the formatting of the code. Ensure that the commit hooks pass.
+
+Create a pull request for your work. If there are merge errors fix them. Collaborating on fixing merge errors is encouraged. If your code conflicts with someone elses it is best if you help each other merge your code.
+
+Request a review from another developer. Nobody is allowed to merge their own PRs or push changes directly to master.
 
 # Branded types
 

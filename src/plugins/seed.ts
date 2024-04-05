@@ -15,7 +15,7 @@ export enum seedResult {
   AlreadySeeded,
 }
 
-export default fp<SupportPluginOptions>(async (fastify) => {
+export default fp<SupportPluginOptions>(async (_) => {
   async function seedSuperAdmin(): Promise<seedResult> {
     try {
       if (

@@ -14,6 +14,7 @@ RUN npm install
 COPY src/ ./src
 COPY tsconfig.json .
 COPY drizzle/ ./drizzle
+COPY test/ ./test
 
 # Build TypeScript code
 RUN npm run build:ts
@@ -22,6 +23,6 @@ RUN npm run build:ts
 EXPOSE 3000
 
 # Command to run the application
-CMD ["npm", "run", "deployDocker"]
- 
-# Check Dockerfile.test for the tests!
+#CMD ["npm", "run", "deployDocker"]
+CMD ["npm", "run", "test"]
+

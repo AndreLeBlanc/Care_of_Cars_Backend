@@ -1,8 +1,7 @@
 import { fastifyJwt } from '@fastify/jwt'
 import * as dotenv from 'dotenv'
 import { AutoloadPluginOptions } from '@fastify/autoload'
-import { FastifyPluginAsync, FastifyServerOptions } from 'fastify'
-import { initDrizzle } from './config/db-connect.js'
+import { FastifyInstance, FastifyServerOptions, fastify } from 'fastify'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import pagination from './plugins/pagination.js'
@@ -16,17 +15,20 @@ import { users } from './routes/users/users.js'
 import { root } from './routes/root.js'
 import seedSuperAdmin from './plugins/seed.js'
 
+const defaultOptions = {
+  logger: true,
+  ignoreTrailingSlash: true,
+}
 dotenv.config()
 export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
 // Pass --options via CLI arguments in command to enable these options.
-const options: AppOptions = {}
 
-const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void> => {
+export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
+  const app: FastifyInstance = fastify({ ...defaultOptions, ...options })
+
   // Place here your custom code!
-  await initDrizzle()
 
-  initDrizzle()
-  fastify.register(fastifySwagger, {
+  app.register(fastifySwagger, {
     // https://community.smartbear.com/discussions/swaggerostools/how-to-show-authorize-button-on-oas-3-swagger-in-javascript/234650
     openapi: {
       security: [
@@ -60,27 +62,25 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
       // ]
     },
   })
-  await void fastify.register(seedSuperAdmin)
-  await fastify.register(fastifySwaggerUI, { prefix: '/docs' })
+  app.register(seedSuperAdmin)
+  app.register(fastifySwaggerUI, { prefix: '/docs' })
 
-  await void fastify.register(permissions, { prefix: '/permissions' })
-  await void fastify.register(roleToPermissions, { prefix: '/roleToPermissions' })
-  await void fastify.register(roles, { prefix: '/roles' })
-  await void fastify.register(serviceCategory, { prefix: '/service-category' })
-  await void fastify.register(services, { prefix: 'services' })
-  await void fastify.register(users, { prefix: '/users' })
-  await void fastify.register(root, { prefix: '/' })
+  app.register(permissions, { prefix: '/permissions' })
+  app.register(roleToPermissions, { prefix: '/roleToPermissions' })
+  app.register(roles, { prefix: '/roles' })
+  app.register(serviceCategory, { prefix: '/service-category' })
+  app.register(services, { prefix: 'services' })
+  app.register(users, { prefix: '/users' })
+  app.register(root, { prefix: '/' })
 
-  await void fastify.register(pagination)
+  app.register(pagination)
   if (typeof process.env.JWT_SECRET === 'string') {
-    fastify.register(fastifyJwt, {
+    app.register(fastifyJwt, {
       secret: process.env.JWT_SECRET,
     })
   } else {
     console.log('can not find JWT_SECRET')
   }
-  await void fastify.register(jwt)
+  app.register(jwt)
+  return app
 }
-
-export default app
-export { app, options }

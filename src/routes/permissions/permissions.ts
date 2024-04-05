@@ -42,7 +42,7 @@ export async function permissions(fastify: FastifyInstance) {
         querystring: ListPermissionQueryParamSchema,
       },
     },
-    async function (request, reply) {
+    async function (request, _) {
       let { search = '', limit = 10, page = 1 } = request.query
       const offset: number = fastify.findOffset(limit, page)
       const result: PermissionsPaginate = await getPermissionsPaginate(search, limit, page, offset)
