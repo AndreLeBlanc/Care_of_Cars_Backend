@@ -137,12 +137,7 @@ export async function verifyUser(email: UserEmail): Promise<VerifyUser | undefin
     })
     .from(users)
     .innerJoin(roles, eq(users.roleID, roles.roleID))
-    .where(
-      and(
-        eq(users.email, email.userEmail),
-        //eq(users.password, password)
-      ),
-    )
+    .where(and(eq(users.email, email.userEmail)))
   return results[0] ? results[0] : undefined
 }
 

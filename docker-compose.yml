@@ -9,7 +9,7 @@ services:
     ports:
       - '5432:5432'
 
-  app:
+  deployapp:
     build:
       dockerfile: Dockerfile
       context: .
@@ -26,6 +26,26 @@ services:
       - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD}
     depends_on:
       - postgres
+
+  devapp:
+    build:
+      dockerfile: Dockerfile.dev
+      context: .
+    ports:
+      - '3000:3000'
+    environment:
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - RUN_SEED=${RUN_SEED}
+      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL}
+      - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD}
+    depends_on:
+      - postgres
+    volumes:
+      - ./dist:/usr/app/dist
 
   test:
     build:

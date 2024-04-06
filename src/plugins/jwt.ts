@@ -4,12 +4,8 @@ import { FastifyRequest } from 'fastify/types/request'
 import { roleHasPermission } from '../services/roleService.js'
 import { PermissionTitle } from '../services/permissionService.js'
 import { FastifyJwtNamespace } from '@fastify/jwt'
-export interface SupportPluginOptions {
-  // Specify Support plugin options here
-}
+export interface SupportPluginOptions {}
 
-// The use of fastify-plugin is required to be able
-// to export the decorators to the outer scope
 export default fp<SupportPluginOptions>(async (fastify) => {
   fastify.addHook(
     'preHandler',
