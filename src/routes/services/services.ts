@@ -12,10 +12,14 @@ import {
   getServiceByIDSchema,
 } from './serviceSchema.js'
 import {
+  ServiceID,
   createService,
   getServicesPaginate,
   updateServiceByID,
+  getServiceById,
+  ServiceNoVariant,
 } from '../../services/serviceService.js'
+import { NextPageUrl, PreviousPageUrl, ResponseMessage } from '../../plugins/pagination.js'
 
 export async function services(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceQueryParamSchemaType }>(
@@ -47,14 +51,14 @@ export async function services(fastify: FastifyInstance) {
       } = request.query
       const offset = fastify.findOffset(limit, page)
       const result = await getServicesPaginate(search, limit, page, offset, orderBy, order, hidden)
-      let message: string = fastify.responseMessage('services', result.data.length)
+      let message: ResponseMessage = fastify.responseMessage('services', result.data.length)
       let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
-      const nextUrl: string | undefined = fastify.findNextPageUrl(
+      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
         result.totalPage,
         page,
       )
-      const previousUrl: string | undefined = fastify.findPreviousPageUrl(
+      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
         result.totalPage,
         page,
@@ -63,8 +67,8 @@ export async function services(fastify: FastifyInstance) {
       return {
         message: message,
         totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl: previousUrl,
+        nextUrl: nextUrl?.nextPageUrl,
+        previousUrl: previousUrl?.previousPageUrl,
         totalPage: result.totalPage,
         page: page,
         limit: limit,
@@ -132,6 +136,30 @@ export async function services(fastify: FastifyInstance) {
         return reply.status(404).send({ message: 'Service not found' })
       }
       reply.status(201).send({ message: 'Service Updated', data: service })
+    },
+  )
+
+  fastify.get<{ Params: getServiceByIDSchemaType }>(
+    '/:id',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, { permissionName: 'view_user' })
+        done()
+        return reply
+      },
+
+      schema: {
+        params: getServiceByIDSchema,
+      },
+    },
+    async (request, reply) => {
+      const id: ServiceID = { serviceID: request.params.id }
+      const user: ServiceNoVariant | undefined = await getServiceById(id)
+      if (user == null) {
+        return reply.status(404).send({ message: 'user not found' })
+      }
+      return reply.status(200).send(user)
     },
   )
 }

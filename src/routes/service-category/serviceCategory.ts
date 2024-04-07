@@ -19,6 +19,7 @@ import {
   getServiceCategoryByIDType,
 } from './serviceCategorySchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
+import { NextPageUrl, PreviousPageUrl, ResponseMessage, Offset } from '../../plugins/pagination.js'
 
 export async function serviceCategory(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceCategoryQueryParamSchemaType }>(
@@ -41,16 +42,16 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async function (request, reply) {
       let { search = '', limit = 10, page = 1 } = request.query
-      const offset = fastify.findOffset(limit, page)
+      const offset: Offset = fastify.findOffset(limit, page)
       const result = await getServiceCategoriesPaginate(search, limit, page, offset)
-      let message: string = fastify.responseMessage('service category', result.data.length)
+      let message: ResponseMessage = fastify.responseMessage('service category', result.data.length)
       let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
-      const nextUrl: string | undefined = fastify.findNextPageUrl(
+      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
         result.totalPage,
         page,
       )
-      const previousUrl: string | undefined = fastify.findPreviousPageUrl(
+      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
         result.totalPage,
         page,
@@ -59,8 +60,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
       return reply.status(200).send({
         message: message,
         totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl: previousUrl,
+        nextUrl: nextUrl?.nextPageUrl,
+        previousUrl: previousUrl?.previousPageUrl,
         totalPage: result.totalPage,
         page: page,
         limit: limit,
@@ -153,7 +154,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
         const id: ServiceCategoryID = { serviceCategoryID: request.params.id }
 
         const serviceCategory: UpdatedServiceCategory | undefined = await updateServiceCategoryByID(
-          id.serviceCategoryID,
+          id,
           serviceCategoryData as PatchServiceCategorySchemaType,
         )
         if (serviceCategory == null) {
@@ -182,8 +183,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id = request.params.id
-      const deletedServiceCategory = await deleteServiceCategory(id)
+      const id: ServiceCategoryID = { serviceCategoryID: request.params.id }
+      const deletedServiceCategory: ServiceCategoryID | undefined = await deleteServiceCategory(id)
       if (deletedServiceCategory == undefined || deletedServiceCategory == null) {
         return reply.status(404).send({ message: "Service Category doesn't exist!" })
       }

@@ -4,6 +4,7 @@ import { db } from '../config/db-connect.js'
 import { serviceCategories } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { RoleName } from './roleService.js'
+import { Offset } from '../plugins/pagination.js'
 
 export type ServiceCategoryID = { serviceCategoryID: number }
 type ServiceCategoryName = { serviceCategoryName: string }
@@ -27,12 +28,20 @@ export type UpdatedServiceCategory = {
   updatedAt: Date
 }
 
+export type ServicesPaginated = {
+  totalItems: number
+  totalPage: number
+  perPage: number
+  data: ServiceCategory[]
+}
+
 export async function getServiceCategoriesPaginate(
   search: string,
   limit = 10,
   page = 1,
-  offset = 0,
-) {
+  offset: Offset = { offset: 0 },
+): Promise<any> {
+  //ServicesPaginated | undefined {
   const condition = or(
     ilike(serviceCategories.name, '%' + search + '%'),
     ilike(serviceCategories.description, '%' + search + '%'),
@@ -57,7 +66,8 @@ export async function getServiceCategoriesPaginate(
     .where(condition)
     .orderBy(desc(serviceCategories.serviceCategoryID))
     .limit(limit || 10)
-    .offset(offset || 0)
+    .offset(offset.offset || 0)
+
   const totalPage = Math.ceil(totalItems.count / limit)
 
   return {
@@ -94,14 +104,14 @@ export async function getServiceCategoryByID(id: number): Promise<ServiceCategor
 }
 
 export async function updateServiceCategoryByID(
-  id: number,
+  id: ServiceCategoryID,
   serviceCategory: PatchServiceCategorySchemaType,
 ): Promise<UpdatedServiceCategory | undefined> {
   const serviceCategoryWithUpdatedAt = { ...serviceCategory, updatedAt: new Date() }
   const updatedServiceCategory: UpdatedServiceCategory[] = await db
     .update(serviceCategories)
     .set(serviceCategoryWithUpdatedAt)
-    .where(eq(serviceCategories.serviceCategoryID, id))
+    .where(eq(serviceCategories.serviceCategoryID, id.serviceCategoryID))
     .returning({
       serviceCategoryID: { serviceCategoryID: serviceCategories.serviceCategoryID },
       roleName: { roleName: serviceCategories.name },
@@ -112,10 +122,12 @@ export async function updateServiceCategoryByID(
   return updatedServiceCategory[0]
 }
 
-export async function deleteServiceCategory(id: number): Promise<ServiceCategory | undefined> {
+export async function deleteServiceCategory(
+  id: ServiceCategoryID,
+): Promise<ServiceCategory | undefined> {
   const deletedServiceCategory: ServiceCategory[] = await db
     .delete(serviceCategories)
-    .where(eq(serviceCategories.serviceCategoryID, id))
+    .where(eq(serviceCategories.serviceCategoryID, id.serviceCategoryID))
     .returning({
       serviceCategoryID: serviceCategories.serviceCategoryID,
       serviceCategoryName: serviceCategories.name,

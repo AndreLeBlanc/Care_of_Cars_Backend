@@ -22,6 +22,7 @@ import {
   getPermissionByIDSchema,
   getPermissionByIDType,
 } from './permissionSchema.js'
+import { ResponseMessage, Offset, NextPageUrl, PreviousPageUrl } from '../../plugins/pagination.js'
 
 export async function permissions(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(
@@ -44,26 +45,26 @@ export async function permissions(fastify: FastifyInstance) {
     },
     async function (request, _) {
       let { search = '', limit = 10, page = 1 } = request.query
-      const offset: number = fastify.findOffset(limit, page)
+      const offset: Offset = fastify.findOffset(limit, page)
       const result: PermissionsPaginate = await getPermissionsPaginate(search, limit, page, offset)
-      let message: string = fastify.responseMessage('Permissions', result.data.length)
+      let message: ResponseMessage = fastify.responseMessage('Permissions', result.data.length)
       let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
-      const nextUrl: string | undefined = fastify.findNextPageUrl(
+      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
         result.totalPage,
         page,
       )
-      const previousUrl: string | undefined = fastify.findPreviousPageUrl(
+      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
         result.totalPage,
         page,
       )
 
       return {
-        message: message,
+        message: message.responseMessage,
         totalItems: result.totalItems,
         nextUrl: nextUrl,
-        previousUrl: previousUrl,
+        previousUrl: previousUrl?.previousPageUrl,
         totalPage: result.totalPage,
         page: page,
         limit: limit,

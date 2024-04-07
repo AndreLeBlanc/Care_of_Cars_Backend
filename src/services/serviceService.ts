@@ -8,6 +8,7 @@ import {
 } from '../routes/services/serviceSchema.js'
 import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
 import { ServiceCategoryID } from './serviceCategory.js'
+import { Offset } from '../plugins/pagination.js'
 
 export type ServiceID = { serviceID: number }
 type ServiceName = { serviceName: string }
@@ -98,7 +99,7 @@ export async function getServicesPaginate(
   search: string,
   limit = 10,
   page = 1,
-  offset = 0,
+  offset: Offset = { offset: 0 },
   orderBy: listServiceOrderByEnum,
   order: serviceOrderEnum,
   hidden: boolean = true,
@@ -143,7 +144,7 @@ export async function getServicesPaginate(
   const servicesList = await db.query.services.findMany({
     where: condition,
     limit: limit || 10,
-    offset: offset || 0,
+    offset: offset.offset || 0,
     orderBy: orderCondition,
     with: {
       serviceCategories: true,

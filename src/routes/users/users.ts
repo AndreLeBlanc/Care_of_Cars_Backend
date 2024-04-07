@@ -30,15 +30,17 @@ import {
   UserInfo,
   VerifyUser,
 } from '../../services/userService.js'
+import { PermissionTitle } from '../../services/permissionService.js'
 
 import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
+import { NextPageUrl, PreviousPageUrl, ResponseMessage, Offset } from '../../plugins/pagination.js'
 
 export async function users(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = { permissionName: 'list_user' }
+        const permissionName: PermissionTitle = { permissionName: 'list_user' }
         if (!(await fastify.authorize(request, reply, permissionName))) {
           return reply
             .status(403)
@@ -54,17 +56,17 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, _) => {
       let { search = '', limit = 10, page = 1 } = request.query
-      const offset = fastify.findOffset(limit, page)
+      const offset: Offset = fastify.findOffset(limit, page)
 
       const result: UsersPaginated = await getUsersPaginate(search, limit, page, offset)
-      let message: string = fastify.responseMessage('users', result.data.length)
+      let message: ResponseMessage = fastify.responseMessage('users', result.data.length)
       let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
-      const nextUrl: string | undefined = fastify.findNextPageUrl(
+      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
         result.totalPage,
         page,
       )
-      const previousUrl: string | undefined = fastify.findPreviousPageUrl(
+      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
         result.totalPage,
         page,
@@ -73,8 +75,8 @@ export async function users(fastify: FastifyInstance) {
       return {
         message: message,
         totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl: previousUrl,
+        nextUrl: nextUrl?.nextPageUrl,
+        previousUrl: previousUrl?.previousPageUrl,
         totalPage: result.totalPage,
         page: page,
         limit: limit,
@@ -138,10 +140,11 @@ export async function users(fastify: FastifyInstance) {
     async (request, reply) => {
       const { email, password } = request.body
       let userWithPassword: VerifyUser | undefined = await verifyUser({ userEmail: email })
+      console.log(userWithPassword)
       if (userWithPassword == undefined || userWithPassword == null) {
         return reply.status(403).send({ message: 'Login failed, incorrect email or password' })
       }
-      const match = await bcrypt.compare(password, userWithPassword.userPassword)
+      const match = await bcrypt.compare(password, userWithPassword.userPassword.userPassword)
       if (match) {
         const { userPassword, ...user } = userWithPassword
         const token = fastify.jwt.sign({ user })
@@ -169,6 +172,7 @@ export async function users(fastify: FastifyInstance) {
       reply.status(403).send({ message: 'Login failed, incorrect email or password' })
     },
   )
+
   fastify.get<{ Params: getUserByIDType }>(
     '/:id',
     {

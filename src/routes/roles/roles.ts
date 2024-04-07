@@ -21,6 +21,8 @@ import {
   getRoleByIDType,
 } from './roleSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
+import { RolesPaginated } from '../../services/roleService.js'
+import { NextPageUrl, Offset, PreviousPageUrl, ResponseMessage } from '../../plugins/pagination.js'
 
 export async function roles(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: ListRoleQueryParamSchemaType }>(
@@ -43,30 +45,30 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     },
     async function (request, _) {
       let { search = '', limit = 10, page = 1 } = request.query
-      const offset: number = fastify.findOffset(limit, page)
-      const result = await getRolesPaginate(search, limit, page, offset)
-      let message: string = fastify.responseMessage('roles', result.data.length)
+      const offset: Offset = fastify.findOffset(limit, page)
+      const rolePaginated: RolesPaginated = await getRolesPaginate(search, limit, page, offset)
+      let message: ResponseMessage = fastify.responseMessage('roles', rolePaginated.data.length)
       let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
-      const nextUrl: string | undefined = fastify.findNextPageUrl(
+      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
-        result.totalPage,
+        rolePaginated.totalPage,
         page,
       )
-      const previousUrl: string | undefined = fastify.findPreviousPageUrl(
+      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
-        result.totalPage,
+        rolePaginated.totalPage,
         page,
       )
 
       return {
         message: message,
-        totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl: previousUrl,
-        totalPage: result.totalPage,
+        totalItems: rolePaginated.totalItems,
+        nextUrl: nextUrl?.nextPageUrl,
+        previousUrl: previousUrl?.previousPageUrl,
+        totalPage: rolePaginated.totalPage,
         page: page,
         limit: limit,
-        data: result.data,
+        data: rolePaginated.data,
       }
     },
   )
@@ -75,7 +77,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = { permissionName: 'create_role' }
-        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
             .status(403)
