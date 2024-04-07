@@ -5,29 +5,38 @@ import { db } from '../config/db-connect.js'
 import { roles, users } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchUserSchemaType } from '../routes/users/userSchema.js'
-import { RoleID, RoleIDName } from './roleService.js'
+import { RoleID, RoleName } from './roleService.js'
 import { Offset } from '../plugins/pagination.js'
+import { Brand, make } from 'ts-brand'
 
-export type UserID = { userID: number }
-type UserPassword = { userPassword: string }
-type UserFirstName = { userFirstName: string }
-type UserLastName = { userLastName: string }
-type UserEmail = { userEmail: string }
+export type UserID = Brand<number, 'userID'>
+export const UserID = make<UserID>()
+export type UserPassword = Brand<string, ' userPassword'>
+export const UserPassword = make<UserPassword>()
+export type UserFirstName = Brand<string, ' userFirstName'>
+export const UserFirstName = make<UserFirstName>()
+export type UserLastName = Brand<string, ' userLastName'>
+export const UserLastName = make<UserLastName>()
+export type UserEmail = Brand<string, ' userEmail'>
+export const UserEmail = make<UserEmail>()
 
-type UserDates = {
+createdAt: Date
+updatedAt: Date
+
+type IsSuperAdmin = Brand<boolean | null, 'isSuperAdmin'>
+const IsSuperAdmin = make<IsSuperAdmin>()
+
+export type UserInfo = {
+  userID: UserID
+  userFirstName: UserFirstName
+  userLastName: UserLastName
+  userEmail: UserEmail
   createdAt: Date
   updatedAt: Date
 }
+export type UserWithSuperAdmin = { isSuperAdmin: IsSuperAdmin } & UserInfo
 
-type IsSuperAdmin = {
-  isSuperAdmin: boolean | null
-}
-
-export type UserInfo = UserID & UserFirstName & UserLastName & UserEmail & UserDates
-
-export type UserWithSuperAdmin = IsSuperAdmin & UserInfo
-
-export type CreatedUser = UserInfo & RoleID
+export type CreatedUser = UserInfo & { roleID: RoleID }
 
 export type VerifyUser = {
   userID: UserID
@@ -36,7 +45,7 @@ export type VerifyUser = {
   userEmail: UserEmail
   userPassword: UserPassword
   isSuperAdmin: IsSuperAdmin
-  role: RoleIDName
+  role: { roleID: RoleID; roleName: RoleName }
 }
 
 export type UsersPaginated = {
@@ -54,14 +63,14 @@ export async function createUser(
   roleID: RoleID,
   isSuperAdmin: boolean = false,
 ): Promise<CreatedUser> {
-  const [user]: CreatedUser[] = await db
+  const [user] = await db
     .insert(users)
     .values({
-      firstName: firstName.userFirstName,
-      lastName: lastName.userLastName,
-      email: email.userEmail,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
       password: passwordHash,
-      roleID: roleID.roleID,
+      roleID: roleID,
       isSuperAdmin: isSuperAdmin,
     })
     .returning({
@@ -73,7 +82,15 @@ export async function createUser(
       updatedAt: users.updatedAt,
       roleID: users.roleID,
     })
-  return user
+  return {
+    userID: UserID(user.userID),
+    userFirstName: UserFirstName(user.userFirstName),
+    userLastName: UserLastName(user.userLastName),
+    userEmail: UserEmail(user.userEmail),
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    roleID: RoleID(user.roleID),
+  }
 }
 
 export async function getUsersPaginate(
@@ -95,7 +112,7 @@ export async function getUsersPaginate(
     .from(users)
     .where(condition)
 
-  const usersList: UserInfo[] = await db
+  const usersList = await db
     .select({
       userID: users.userID,
       userFirstName: users.firstName,
@@ -117,23 +134,33 @@ export async function getUsersPaginate(
     .offset(offset.offset || 0)
   const totalPage = Math.ceil(totalItems.count / limit)
 
+  const brandedUserList = usersList.map((user) => {
+    return {
+      userID: UserID(user.userID),
+      userFirstName: UserFirstName(user.userFirstName),
+      userLastName: UserLastName(user.userLastName),
+      userEmail: UserEmail(user.userEmail),
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }
+  })
   return {
     totalItems: totalItems.count,
     totalPage,
     perPage: page,
-    data: usersList,
+    data: brandedUserList,
   }
 }
 
 export async function verifyUser(email: UserEmail): Promise<VerifyUser | undefined> {
-  const results: VerifyUser[] | undefined = await db
+  const [results] = await db
     .select({
-      userID: { userID: users.userID },
-      userFirstName: { userFirstName: users.firstName },
-      userLastName: { userLastName: users.lastName },
-      userEmail: { userEmail: users.email },
-      userPassword: { userPassword: users.password },
-      isSuperAdmin: { isSuperAdmin: users.isSuperAdmin },
+      userID: users.userID,
+      userFirstName: users.firstName,
+      userLastName: users.lastName,
+      userEmail: users.email,
+      userPassword: users.password,
+      isSuperAdmin: users.isSuperAdmin,
       role: {
         roleID: roles.roleID,
         roleName: roles.roleName,
@@ -141,12 +168,25 @@ export async function verifyUser(email: UserEmail): Promise<VerifyUser | undefin
     })
     .from(users)
     .innerJoin(roles, eq(users.roleID, roles.roleID))
-    .where(and(eq(users.email, email.userEmail)))
-  return results[0] ? results[0] : undefined
+    .where(and(eq(users.email, email)))
+  return results
+    ? {
+        userID: UserID(results.userID),
+        userFirstName: UserFirstName(results.userFirstName),
+        userLastName: UserLastName(results.userLastName),
+        userEmail: UserEmail(results.userEmail),
+        userPassword: UserPassword(results.userPassword),
+        isSuperAdmin: IsSuperAdmin(results.isSuperAdmin),
+        role: {
+          roleID: RoleID(results.role.roleID),
+          roleName: RoleName(results.role.roleName),
+        },
+      }
+    : undefined
 }
 
 export async function getUserByID(id: UserID): Promise<UserInfo | undefined> {
-  const results: UserInfo[] | undefined = await db
+  const [user] = await db
     .select({
       userID: users.userID,
       userFirstName: users.firstName,
@@ -156,49 +196,72 @@ export async function getUserByID(id: UserID): Promise<UserInfo | undefined> {
       updatedAt: users.updatedAt,
     })
     .from(users)
-    .where(eq(users.userID, id.userID))
-  return results[0] ? results[0] : undefined
+    .where(eq(users.userID, id))
+  return user
+    ? {
+        userID: UserID(user.userID),
+        userFirstName: UserFirstName(user.userFirstName),
+        userLastName: UserLastName(user.userLastName),
+        userEmail: UserEmail(user.userEmail),
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      }
+    : undefined
 }
 
 export async function updateUserByID(id: UserID, user: PatchUserSchemaType): Promise<UserInfo> {
   const userWithUpdatedAt = { ...user, updatedAt: new Date() }
-  const updatedUser: UserInfo[] = await db
+  const [updatedUser] = await db
     .update(users)
     .set(userWithUpdatedAt)
-    .where(eq(users.userID, id.userID))
-    .returning({
-      userID: users.userID,
-      userFirstName: users.firstName,
-      userLastName: users.lastName,
-      userEmail: users.email,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt,
-    })
-  return updatedUser[0]
-}
-
-export async function generatePasswordHash(password: UserPassword): Promise<string> {
-  const salt = bcrypt.genSaltSync(10)
-  return bcrypt.hashSync(password.userPassword, salt)
-}
-
-export async function isStrongPassword(password: UserPassword): Promise<boolean> {
-  // TODO: add more strict checking's
-  return password.userPassword.length >= 3
-}
-
-export async function DeleteUser(id: number): Promise<UserWithSuperAdmin | undefined> {
-  const deletedUser: UserWithSuperAdmin[] | undefined = await db
-    .delete(users)
     .where(eq(users.userID, id))
     .returning({
       userID: users.userID,
       userFirstName: users.firstName,
       userLastName: users.lastName,
       userEmail: users.email,
-      isSuperAdmin: users.isSuperAdmin,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
     })
-  return deletedUser[0] ? deletedUser[0] : undefined
+  return {
+    userID: UserID(updatedUser.userID),
+    userFirstName: UserFirstName(updatedUser.userFirstName),
+    userLastName: UserLastName(updatedUser.userLastName),
+    userEmail: UserEmail(updatedUser.userEmail),
+    createdAt: updatedUser.createdAt,
+    updatedAt: updatedUser.updatedAt,
+  }
+}
+
+export async function generatePasswordHash(password: UserPassword): Promise<string> {
+  const salt = bcrypt.genSaltSync(10)
+  return bcrypt.hashSync(password, salt)
+}
+
+export async function isStrongPassword(password: UserPassword): Promise<boolean> {
+  // TODO: add more strict checking's
+  return password.length >= 3
+}
+
+export async function DeleteUser(id: number): Promise<UserWithSuperAdmin | undefined> {
+  const [deletedUser] = await db.delete(users).where(eq(users.userID, id)).returning({
+    userID: users.userID,
+    userFirstName: users.firstName,
+    userLastName: users.lastName,
+    userEmail: users.email,
+    isSuperAdmin: users.isSuperAdmin,
+    createdAt: users.createdAt,
+    updatedAt: users.updatedAt,
+  })
+  return deletedUser
+    ? {
+        userID: UserID(deletedUser.userID),
+        userFirstName: UserFirstName(deletedUser.userFirstName),
+        userLastName: UserLastName(deletedUser.userLastName),
+        userEmail: UserEmail(deletedUser.userEmail),
+        isSuperAdmin: IsSuperAdmin(deletedUser.isSuperAdmin),
+        createdAt: deletedUser.createdAt,
+        updatedAt: deletedUser.updatedAt,
+      }
+    : undefined
 }

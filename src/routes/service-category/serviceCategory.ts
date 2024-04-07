@@ -7,6 +7,7 @@ import {
   UpdatedServiceCategory,
   updateServiceCategoryByID,
   ServiceCategoryID,
+  ServiceCategory,
 } from '../../services/serviceCategory.js'
 import {
   CreateServiceCategorySchema,
@@ -26,7 +27,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = { permissionName: 'list_service_category' }
+        const permissionName = PermissionTitle('list_service_category')
         const authorizeStatus = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -73,7 +74,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'create_service_category' }
+        const permissionName = PermissionTitle('create_service_category')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -98,7 +99,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'view_service_category' }
+        const permissionName = PermissionTitle('view_service_category')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -129,7 +130,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'update_service_category' }
+        const permissionName = PermissionTitle('update_service_category')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -151,7 +152,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
           .status(422)
           .send({ message: 'Provide at least one required property to update.' })
       } else {
-        const id: ServiceCategoryID = { serviceCategoryID: request.params.id }
+        const id: ServiceCategoryID = ServiceCategoryID(request.params.id)
 
         const serviceCategory: UpdatedServiceCategory | undefined = await updateServiceCategoryByID(
           id,
@@ -168,7 +169,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'delete_service_category' }
+        const permissionName = PermissionTitle('delete_service_category')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -183,8 +184,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id: ServiceCategoryID = { serviceCategoryID: request.params.id }
-      const deletedServiceCategory: ServiceCategoryID | undefined = await deleteServiceCategory(id)
+      const id = ServiceCategoryID(request.params.id)
+      const deletedServiceCategory: ServiceCategory | undefined = await deleteServiceCategory(id)
       if (deletedServiceCategory == undefined || deletedServiceCategory == null) {
         return reply.status(404).send({ message: "Service Category doesn't exist!" })
       }

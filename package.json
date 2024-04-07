@@ -38,7 +38,8 @@
     "fastify-plugin": "^4.0.0",
     "nodemon": "^3.1.0",
     "pg": "^8.11.3",
-    "postgres": "^3.4.3"
+    "postgres": "^3.4.3",
+    "ts-brand": "^0.1.0"
   },
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",

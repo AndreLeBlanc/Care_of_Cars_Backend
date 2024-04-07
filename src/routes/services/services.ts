@@ -19,6 +19,7 @@ import {
   getServiceById,
   ServiceNoVariant,
 } from '../../services/serviceService.js'
+import { PermissionTitle } from '../../services/permissionService.js'
 import { NextPageUrl, PreviousPageUrl, ResponseMessage } from '../../plugins/pagination.js'
 
 export async function services(fastify: FastifyInstance) {
@@ -26,7 +27,7 @@ export async function services(fastify: FastifyInstance) {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = { permissionName: 'list_service' }
+        const permissionName = PermissionTitle('list_service')
         const authorizeStatus = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -80,7 +81,7 @@ export async function services(fastify: FastifyInstance) {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = { permissionName: 'create_service' }
+        const permissionName = PermissionTitle('create_service')
         const authorizeStatus = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -109,7 +110,7 @@ export async function services(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName = { permissionName: 'update_service' }
+        const permissionName = PermissionTitle('update_service')
         const authorizeStatus = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -129,9 +130,8 @@ export async function services(fastify: FastifyInstance) {
       if (Object.keys(serviceData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id = { serviceID: request.params.id }
 
-      const service = await updateServiceByID(id, serviceData)
+      const service = await updateServiceByID(ServiceID(request.params.id), serviceData)
       if (service == undefined) {
         return reply.status(404).send({ message: 'Service not found' })
       }
@@ -144,7 +144,7 @@ export async function services(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
-        fastify.authorize(request, reply, { permissionName: 'view_user' })
+        fastify.authorize(request, reply, PermissionTitle('view_user'))
         done()
         return reply
       },
@@ -154,7 +154,7 @@ export async function services(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id: ServiceID = { serviceID: request.params.id }
+      const id = ServiceID(request.params.id)
       const user: ServiceNoVariant | undefined = await getServiceById(id)
       if (user == null) {
         return reply.status(404).send({ message: 'user not found' })

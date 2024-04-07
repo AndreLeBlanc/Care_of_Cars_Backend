@@ -10,14 +10,16 @@ import {
   deleteRoleToPermissions,
   RoleToPermissions,
 } from '../../services/roleToPermissionService.js'
-import { PermissionTitle } from '../../services/permissionService.js'
+import { PermissionTitle, PermissionID } from '../../services/permissionService.js'
+
+import { RoleID } from '../../services/roleService.js'
 
 export async function roleToPermissions(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: CreateRoleToPermissionSchemaType; Reply: object }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'create_role_to_permission' }
+        const permissionName: PermissionTitle = PermissionTitle('create_role_to_permission')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -35,8 +37,8 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
     async (request, reply) => {
       const { roleID, permissionID } = request.body
       const roleToPermissions: RoleToPermissions = await createRoleToPermissions(
-        { roleID: roleID },
-        { permissionID: permissionID },
+        RoleID(roleID),
+        PermissionID(permissionID),
       )
       reply.status(201).send({ message: 'Role to Permission created', data: roleToPermissions })
     },
@@ -45,7 +47,7 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
     '/:roleID/:permissionID',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'delete_role_to_permission' }
+        const permissionName: PermissionTitle = PermissionTitle('delete_role_to_permission')
         const authorizeStatus = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -62,8 +64,8 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
     async (request, reply) => {
       const { roleID, permissionID } = request.params
       const deletedRoleToPermissions: RoleToPermissions | undefined = await deleteRoleToPermissions(
-        { roleID: roleID },
-        { permissionID: permissionID },
+        RoleID(roleID),
+        PermissionID(permissionID),
       )
       if (deletedRoleToPermissions === undefined || deletedRoleToPermissions === null) {
         return reply.status(404).send({ message: 'Invalid role id or permission id' })

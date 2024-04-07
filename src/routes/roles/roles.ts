@@ -9,6 +9,8 @@ import {
   getRoleWithPermissions,
   Role,
   RoleID,
+  RoleDescription,
+  RoleName,
 } from '../../services/roleService.js'
 import {
   CreateRoleSchema,
@@ -29,7 +31,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'list_role' }
+        const permissionName: PermissionTitle = PermissionTitle('list_role')
         const authorizeStatus = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -76,7 +78,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'create_role' }
+        const permissionName: PermissionTitle = PermissionTitle('create_role')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -93,10 +95,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     },
     async (request, reply) => {
       const { roleName, description = '' } = request.body
-      const role: CreatedRole = await createRole(
-        { roleName: roleName },
-        { roleDescription: description },
-      )
+      const role: CreatedRole = await createRole(RoleName(roleName), RoleDescription(description))
       reply.status(201).send({ message: 'Role created', data: role })
     },
   )
@@ -104,7 +103,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'view_role' }
+        const permissionName: PermissionTitle = PermissionTitle('view_role')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -119,12 +118,12 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      const roleID: RoleID = { roleID: request.params.id }
+      const roleID: RoleID = RoleID(request.params.id)
       const role: Role | undefined = await getRoleByID(roleID)
       if (role == undefined || role == null) {
         return reply.status(404).send({ message: 'role not found' })
       }
-      const rolePermissions = await getRoleWithPermissions(role)
+      const rolePermissions = await getRoleWithPermissions(roleID)
       reply.status(200).send({ role: role, permissions: rolePermissions })
     },
   )
@@ -136,7 +135,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'update_role' }
+        const permissionName: PermissionTitle = PermissionTitle('update_role')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -156,7 +155,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       if (Object.keys(roleData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id: RoleID = { roleID: request.params.id }
+      const id: RoleID = RoleID(request.params.id)
 
       const role: Role = await updateRoleByID(id, roleData)
       if (role == null) {
@@ -169,7 +168,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'delete_role' }
+        const permissionName: PermissionTitle = PermissionTitle('delete_role')
         const authorizeStatus = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -184,7 +183,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      const roleID: RoleID = { roleID: request.params.id }
+      const roleID: RoleID = RoleID(request.params.id)
       const deletedRole: Role | undefined = await deleteRole(roleID)
       if (deletedRole === undefined || deletedRole === null) {
         return reply.status(404).send({ message: "Role doesn't exist!" })

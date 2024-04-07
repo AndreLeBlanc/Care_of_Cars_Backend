@@ -11,6 +11,7 @@ import {
   PermissionIDDescName,
   PermissionID,
   PermissionTitle,
+  PermissionDescription,
 } from '../../services/permissionService.js'
 import {
   CreatePermissionSchema,
@@ -29,7 +30,7 @@ export async function permissions(fastify: FastifyInstance) {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'list_permission' }
+        const permissionName: PermissionTitle = PermissionTitle('list_permission')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -77,7 +78,7 @@ export async function permissions(fastify: FastifyInstance) {
 
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'create_permission' }
+        const permissionName: PermissionTitle = PermissionTitle('create_permission')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -95,8 +96,8 @@ export async function permissions(fastify: FastifyInstance) {
     async (request, reply) => {
       const { PermissionName, description = '' } = request.body
       const Permission: PermissionIDDescName = await createPermission(
-        { permissionName: PermissionName },
-        { permissionDesc: description },
+        PermissionTitle(PermissionName),
+        PermissionDescription(description),
       )
       reply.status(201).send({ message: 'Permission created', data: Permission })
     },
@@ -105,7 +106,7 @@ export async function permissions(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'view_permission' }
+        const permissionName: PermissionTitle = PermissionTitle('view_permission')
         const authroizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authroizeStatus) {
           return reply
@@ -120,7 +121,7 @@ export async function permissions(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id: PermissionID = { permissionID: request.params.id }
+      const id: PermissionID = PermissionID(request.params.id)
       const Permission: Permission | undefined = await getPermissionByID(id)
       if (Permission == null || Permission === undefined) {
         return reply.status(404).send({ message: 'Permission not found' })
@@ -132,7 +133,7 @@ export async function permissions(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'update_permission' }
+        const permissionName: PermissionTitle = PermissionTitle('update_permission')
         const authroizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authroizeStatus) {
           return reply
@@ -152,7 +153,7 @@ export async function permissions(fastify: FastifyInstance) {
       if (Object.keys(PermissionData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id: PermissionID = { permissionID: request.params.id }
+      const id: PermissionID = PermissionID(request.params.id)
 
       const Permission: Permission = await updatePermissionByID(id, PermissionData)
       if (Permission === undefined || Permission === null) {
@@ -165,7 +166,7 @@ export async function permissions(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = { permissionName: 'delete_permission' }
+        const permissionName: PermissionTitle = PermissionTitle('delete_permission')
         const authorize = await fastify.authorize(request, reply, permissionName)
         if (!authorize) {
           return reply
@@ -180,7 +181,7 @@ export async function permissions(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id: PermissionID = { permissionID: request.params.id }
+      const id: PermissionID = PermissionID(request.params.id)
       const deletedPermission: Permission | undefined = await deletePermission(id)
       if (deletedPermission == null) {
         return reply.status(404).send({ message: "Permission doesn't exist!" })

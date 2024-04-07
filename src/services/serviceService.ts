@@ -3,22 +3,33 @@ import { db } from '../config/db-connect.js'
 import {
   CreateServiceSchemaType,
   PatchServiceSchemaType,
+  colorForService,
   listServiceOrderByEnum,
   serviceOrderEnum,
 } from '../routes/services/serviceSchema.js'
 import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
 import { ServiceCategoryID } from './serviceCategory.js'
 import { Offset } from '../plugins/pagination.js'
+import { Brand, make } from 'ts-brand'
 
-export type ServiceID = { serviceID: number }
-type ServiceName = { serviceName: string }
-type ServiceAward = { serviceAward?: number }
-type ServiceCost = { serviceCost: number }
-type ServiceDay1 = { serviceDay1: string }
-type ServiceDay2 = { serviceDay2: string }
-type ServiceDay3 = { serviceDay3: string }
-type ServiceDay4 = { serviceDay4: string }
-type ServiceDay5 = { serviceDay5: string }
+export type ServiceID = Brand<number, ' serviceID'>
+export const ServiceID = make<ServiceID>()
+type ServiceName = Brand<string, ' serviceName'>
+const ServiceName = make<ServiceName>()
+type ServiceAward = Brand<number, ' serviceAward'>
+const ServiceAward = make<ServiceAward>()
+type ServiceCost = Brand<number, ' serviceCost'>
+const ServiceCost = make<ServiceCost>()
+type ServiceDay1 = Brand<string, ' serviceDay1'>
+const ServiceDay1 = make<ServiceDay1>()
+type ServiceDay2 = Brand<string, ' serviceDay2'>
+const ServiceDay2 = make<ServiceDay2>()
+type ServiceDay3 = Brand<string, ' serviceDay3'>
+const ServiceDay3 = make<ServiceDay3>()
+type ServiceDay4 = Brand<string, ' serviceDay4'>
+const ServiceDay4 = make<ServiceDay4>()
+type ServiceDay5 = Brand<string, ' serviceDay5'>
+const ServiceDay5 = make<ServiceDay5>()
 
 export type updateServiceVariant = {
   serviceID: ServiceID
@@ -32,14 +43,20 @@ export type updateServiceVariant = {
   serviceDay5: ServiceDay5
 }
 
-type ServiceIncludeInAutomaticSms = { serviceIncludeInAutomaticSms: boolean | null }
-type ServiceHidden = { serviceHidden: boolean | null }
-type ServiceCallInterval = { serviceCallInterval: number | null }
-type ServiceWarrantyCard = { serviceWarrantyCard: boolean | null }
-type ServiceItemNumber = { serviceItemNumber: string | null }
-type ServiceSuppliersArticleNumber = { serviceSuppliersArticleNumber: string | null }
-type ServiceExternalArticleNumber = { serviceExternalArticleNumber: string | null }
-type ServiceVariants = Array<updateServiceVariant>
+type ServiceIncludeInAutomaticSms = Brand<boolean | null, 'ServiceIncludeInAutomaticSms'>
+const ServiceIncludeInAutomaticSms = make<ServiceIncludeInAutomaticSms>()
+type ServiceHidden = Brand<boolean | null, 'ServiceHidden'>
+const ServiceHidden = make<ServiceHidden>()
+type ServiceCallInterval = Brand<number | null, 'ServiceCallInterval'>
+const ServiceCallInterval = make<ServiceCallInterval>()
+type ServiceWarrantyCard = Brand<boolean | null, 'ServiceWarrantyCard'>
+const ServiceWarrantyCard = make<ServiceWarrantyCard>()
+type ServiceItemNumber = Brand<string | null, 'ServiceItemNumber'>
+const ServiceItemNumber = make<ServiceItemNumber>()
+type ServiceSuppliersArticleNumber = Brand<string | null, 'ServiceSuppliersArticleNumber'>
+const ServiceSuppliersArticleNumber = make<ServiceSuppliersArticleNumber>()
+type ServiceExternalArticleNumber = Brand<string | null, 'ServiceExternalArticleNumber'>
+const ServiceExternalArticleNumber = make<ServiceExternalArticleNumber>()
 
 export type ServiceNoVariant = {
   serviceID: ServiceID
@@ -48,7 +65,7 @@ export type ServiceNoVariant = {
   serviceIncludeInAutomaticSms: ServiceIncludeInAutomaticSms
   serviceHidden: ServiceHidden
   serviceCallInterval: ServiceCallInterval
-  serviceColorForService: string
+  serviceColorForService: colorForService
   serviceWarrantyCard: ServiceWarrantyCard
   serviceItemNumber: ServiceItemNumber
   serviceSuppliersArticleNumber: ServiceSuppliersArticleNumber
@@ -57,7 +74,7 @@ export type ServiceNoVariant = {
   updatedAt: Date
 }
 
-export type UpdateService = ServiceNoVariant & ServiceVariants
+export type UpdateService = ServiceNoVariant & { serviceVariants: updateServiceVariant[] }
 
 export async function createService(service: CreateServiceSchemaType): Promise<ServiceID> {
   return await db.transaction(async (tx) => {
@@ -91,7 +108,7 @@ export async function createService(service: CreateServiceSchemaType): Promise<S
         day5: serviceVariant.day5,
       })
     }
-    return insertedService
+    return ServiceID(insertedService.serviceID)
   })
 }
 
@@ -164,7 +181,7 @@ export async function getServicesPaginate(
 export async function updateServiceByID(id: ServiceID, service: PatchServiceSchemaType) {
   const serviceWithUpdatedAt = { ...service, updatedAt: new Date() }
   return await db.transaction(async (tx) => {
-    const [updatedService]: ServiceNoVariant[] = await tx
+    const [updatedService] = await tx
       .update(services)
       .set({
         name: serviceWithUpdatedAt.name,
@@ -179,7 +196,7 @@ export async function updateServiceByID(id: ServiceID, service: PatchServiceSche
         externalArticleNumber: serviceWithUpdatedAt.externalArticleNumber,
         updatedAt: serviceWithUpdatedAt.updatedAt,
       })
-      .where(eq(services.serviceID, id.serviceID))
+      .where(eq(services.serviceID, id))
       .returning({
         serviceID: { serviceID: services.serviceCategoryID },
         serviceName: { serviceName: services.name },
@@ -234,7 +251,7 @@ export async function updateServiceByID(id: ServiceID, service: PatchServiceSche
 
 export async function getServiceById(serviceID: ServiceID): Promise<ServiceNoVariant | undefined> {
   const servicesDetail = await db.query.services.findFirst({
-    where: eq(services.serviceID, serviceID.serviceID),
+    where: eq(services.serviceID, serviceID),
     with: {
       serviceCategories: true,
       serviceVariants: true,
@@ -243,24 +260,38 @@ export async function getServiceById(serviceID: ServiceID): Promise<ServiceNoVar
   if (servicesDetail == null) {
     return undefined
   }
+
+  function convertToColorEnum(str: string): colorForService | undefined {
+    const colorValue = colorForService[str as keyof typeof colorForService]
+    return colorValue
+  }
+
+  const serviceColor = convertToColorEnum(servicesDetail.colorForService)
+
+  if (serviceColor === undefined) {
+    return undefined
+  }
+
   return {
-    serviceID: { serviceID: servicesDetail.serviceID },
-    serviceName: { serviceName: servicesDetail.name },
-    serviceCategoryID: { serviceCategoryID: servicesDetail.serviceCategoryID },
-    serviceIncludeInAutomaticSms: {
-      serviceIncludeInAutomaticSms: servicesDetail.includeInAutomaticSms,
-    },
-    serviceHidden: { serviceHidden: servicesDetail.hidden },
-    serviceCallInterval: { serviceCallInterval: servicesDetail.callInterval },
-    serviceColorForService: servicesDetail.colorForService,
-    serviceWarrantyCard: { serviceWarrantyCard: servicesDetail.warrantyCard },
-    serviceItemNumber: { serviceItemNumber: servicesDetail.itemNumber },
-    serviceSuppliersArticleNumber: {
-      serviceSuppliersArticleNumber: servicesDetail.suppliersArticleNumber,
-    },
-    serviceExternalArticleNumber: {
-      serviceExternalArticleNumber: servicesDetail.externalArticleNumber,
-    },
+    serviceID: ServiceID(servicesDetail.serviceID),
+    serviceName: ServiceName(servicesDetail.name),
+    serviceCategoryID: ServiceCategoryID(servicesDetail.serviceCategoryID),
+
+    serviceIncludeInAutomaticSms: ServiceIncludeInAutomaticSms(
+      servicesDetail.includeInAutomaticSms,
+    ),
+    serviceHidden: ServiceHidden(servicesDetail.hidden),
+    serviceCallInterval: ServiceCallInterval(servicesDetail.callInterval),
+    serviceColorForService: serviceColor,
+    serviceWarrantyCard: ServiceWarrantyCard(servicesDetail.warrantyCard),
+    serviceItemNumber: ServiceItemNumber(servicesDetail.itemNumber),
+
+    serviceSuppliersArticleNumber: ServiceSuppliersArticleNumber(
+      servicesDetail.suppliersArticleNumber,
+    ),
+    serviceExternalArticleNumber: ServiceExternalArticleNumber(
+      servicesDetail.externalArticleNumber,
+    ),
     createdAt: servicesDetail.createdAt,
     updatedAt: servicesDetail.updatedAt,
   }

@@ -6,27 +6,29 @@ import { ilike } from 'drizzle-orm'
 import { PatchRoleSchemaType } from '../routes/roles/roleSchema.js'
 import { PermissionTitle, PermissionID } from './permissionService.js'
 import { Offset } from '../plugins/pagination.js'
+import { Brand, make } from 'ts-brand'
 
-export type RoleName = { roleName: string }
+export type RoleName = Brand<string, 'roleName'>
+export const RoleName = make<RoleName>()
 
-export type RoleID = { roleID: number }
+export type RoleID = Brand<number, 'roleID'>
+export const RoleID = make<RoleID>()
 
-type RoleDescription = { roleDescription: string | null }
+export type RoleDescription = Brand<string | null, 'roleDescription'>
+export const RoleDescription = make<RoleDescription>()
 
 type RoleDate = {
   createdAt: Date
   updatedAt: Date
 }
 
-export type CreatedRole = RoleID & RoleName & RoleDescription
+export type CreatedRole = { roleID: RoleID; roleName: RoleName; roleDescription: RoleDescription }
 
-export type RoleDescDate = RoleName & RoleID & RoleDate
+export type RoleIDName = { roleName: RoleName; roleID: RoleID } & RoleDate
 
-export type RoleIDName = RoleName & RoleID
+export type Role = { roleName: RoleName } & RoleDate
 
-export type Role = RoleIDName & RoleDate
-
-type RolesList = Role & RoleDescription
+type RolesList = Role & { roleDescription: RoleDescription }
 
 type PermissionStatus = {
   permissionID: PermissionID
@@ -58,7 +60,7 @@ export async function getRolesPaginate(
     .from(roles)
     .where(condition)
 
-  const rolesList: RolesList[] = await db
+  const rolesList = await db
     .select({
       roleID: roles.roleID,
       roleName: roles.roleName,
@@ -73,11 +75,20 @@ export async function getRolesPaginate(
     .offset(offset.offset || 0)
   const totalPage = Math.ceil(totalItems.count / limit)
 
+  const brandedRoleList: RolesList[] = rolesList.map((role) => {
+    return {
+      roleID: RoleID(role.roleID),
+      roleName: RoleName(role.roleName),
+      roleDescription: RoleDescription(role.roleDescription),
+      createdAt: role.createdAt,
+      updatedAt: role.updatedAt,
+    }
+  })
   return {
     totalItems: totalItems.count,
     totalPage,
     perPage: page,
-    data: rolesList,
+    data: brandedRoleList,
   }
 }
 
@@ -85,28 +96,38 @@ export async function createRole(
   roleName: RoleName,
   description: RoleDescription,
 ): Promise<CreatedRole> {
-  const newRole: CreatedRole[] = await db
+  const [newRole] = await db
     .insert(roles)
-    .values({ roleName: roleName.roleName, description: description.roleDescription })
+    .values({ roleName: roleName, description: description })
     .returning({
       roleID: roles.roleID,
       roleName: roles.roleName,
       roleDescription: roles.description,
     })
-  return newRole[0]
+  return {
+    roleID: RoleID(newRole.roleID),
+    roleName: RoleName(newRole.roleName),
+    roleDescription: RoleDescription(newRole.roleDescription),
+  }
 }
 
 export async function getRoleByID(id: RoleID): Promise<Role | undefined> {
-  const results = await db.select().from(roles).where(eq(roles.roleID, id.roleID))
-  return results[0] ? results[0] : undefined
+  const [results] = await db.select().from(roles).where(eq(roles.roleID, id))
+  return results
+    ? {
+        roleName: RoleName(results.roleName),
+        createdAt: results.createdAt,
+        updatedAt: results.updatedAt,
+      }
+    : undefined
 }
 
 export async function updateRoleByID(id: RoleID, role: PatchRoleSchemaType): Promise<Role> {
   const roleWithUpdatedAt = { ...role, updatedAt: new Date() }
-  const updatedRole: Role[] = await db
+  const [updatedRole] = await db
     .update(roles)
     .set(roleWithUpdatedAt)
-    .where(eq(roles.roleID, id.roleID))
+    .where(eq(roles.roleID, id))
     .returning({
       roleID: roles.roleID,
       roleName: roles.roleName,
@@ -114,12 +135,22 @@ export async function updateRoleByID(id: RoleID, role: PatchRoleSchemaType): Pro
       createdAt: roles.createdAt,
       updatedAt: roles.updatedAt,
     })
-  return updatedRole[0]
+  return {
+    roleName: RoleName(updatedRole.roleName),
+    createdAt: updatedRole.createdAt,
+    updatedAt: updatedRole.updatedAt,
+  }
 }
 
 export async function deleteRole(id: RoleID): Promise<Role | undefined> {
-  const deletedRole = await db.delete(roles).where(eq(roles.roleID, id.roleID)).returning()
-  return deletedRole[0] ? deletedRole[0] : undefined
+  const [deletedRole] = await db.delete(roles).where(eq(roles.roleID, id)).returning()
+  return deletedRole
+    ? {
+        roleName: RoleName(deletedRole.roleName),
+        createdAt: deletedRole.createdAt,
+        updatedAt: deletedRole.updatedAt,
+      }
+    : undefined
 }
 
 export async function getRoleWithPermissions(roleID: RoleID): Promise<any> {
@@ -133,7 +164,7 @@ export async function getRoleWithPermissions(roleID: RoleID): Promise<any> {
     .from(roleToPermissions)
     .leftJoin(roles, eq(roleToPermissions.roleID, roles.roleID))
     .leftJoin(permissions, eq(roleToPermissions.permissionID, permissions.permissionID))
-    .where(eq(roles.roleID, roleID.roleID))
+    .where(eq(roles.roleID, roleID))
   return roleWithPermissions
 }
 
@@ -151,11 +182,10 @@ export async function getAllPermissionStatus(roleID: RoleID): Promise<Permission
   }> = []
   for (const el of allPermissions) {
     const hasPermission: boolean =
-      rolePermissions.filter((e) => e.permissionName.permissionName === el.permissionName).length >
-      0
+      rolePermissions.filter((e) => e.permissionName === el.permissionName).length > 0
     allPermissionsWithStatus.push({
-      permissionID: { permissionID: el.id },
-      permissionName: { permissionName: el.permissionName },
+      permissionID: PermissionID(el.id),
+      permissionName: PermissionTitle(el.permissionName),
       hasPermission: hasPermission,
     })
   }

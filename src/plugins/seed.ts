@@ -1,7 +1,16 @@
 import fp from 'fastify-plugin'
 import * as dotenv from 'dotenv'
 import { createRole, CreatedRole } from '../services/roleService.js'
-import { createUser, CreatedUser, generatePasswordHash } from '../services/userService.js'
+import {
+  createUser,
+  CreatedUser,
+  generatePasswordHash,
+  UserFirstName,
+  UserLastName,
+  UserEmail,
+  UserPassword,
+} from '../services/userService.js'
+import { RoleID, RoleName, RoleDescription } from '../services/roleService.js'
 dotenv.config()
 
 export interface SupportPluginOptions {
@@ -23,19 +32,19 @@ export default fp<SupportPluginOptions>(async (_) => {
         typeof process.env.SUPER_ADMIN_EMAIL === 'string'
       ) {
         const role: CreatedRole = await createRole(
-          { roleName: 'SuperAdmin' },
-          { roleDescription: 'Super admin user' },
+          RoleName('SuperAdmin'),
+          RoleDescription('Super admin user'),
         )
         // Below two envs are required in plugins/env.ts so it will throw message in console if not added.
-        const passwordHash = await generatePasswordHash({
-          userPassword: process.env.SUPER_ADMIN_PASSWORD,
-        })
+        const passwordHash = await generatePasswordHash(
+          UserPassword(process.env.SUPER_ADMIN_PASSWORD),
+        )
         const user: CreatedUser = await createUser(
-          { userFirstName: 'SuperAdmin' },
-          { userLastName: 'SuperAdmin' },
-          { userEmail: process.env.SUPER_ADMIN_EMAIL },
+          UserFirstName('SuperAdmin'),
+          UserLastName('SuperAdmin'),
+          UserEmail(process.env.SUPER_ADMIN_EMAIL),
           passwordHash,
-          { roleID: role?.roleID },
+          RoleID(role?.roleID),
           true,
         )
         console.info('Super admin created from seed!', role, user)
