@@ -8,6 +8,9 @@ import {
   updateServiceCategoryByID,
   ServiceCategoryID,
   ServiceCategory,
+  ServiceCategoryDescription,
+  ServiceCategoryName,
+  ServicesPaginated,
 } from '../../services/serviceCategory.js'
 import {
   CreateServiceCategorySchema,
@@ -44,30 +47,44 @@ export async function serviceCategory(fastify: FastifyInstance) {
     async function (request, reply) {
       let { search = '', limit = 10, page = 1 } = request.query
       const offset: Offset = fastify.findOffset(limit, page)
-      const result = await getServiceCategoriesPaginate(search, limit, page, offset)
-      let message: ResponseMessage = fastify.responseMessage('service category', result.data.length)
-      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
-      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-        requestUrl,
-        result.totalPage,
+      const servicesPaginated: ServicesPaginated | undefined = await getServiceCategoriesPaginate(
+        search,
+        limit,
         page,
-      )
-      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-        requestUrl,
-        result.totalPage,
-        page,
+        offset,
       )
 
-      return reply.status(200).send({
-        message: message,
-        totalItems: result.totalItems,
-        nextUrl: nextUrl?.nextPageUrl,
-        previousUrl: previousUrl?.previousPageUrl,
-        totalPage: result.totalPage,
-        page: page,
-        limit: limit,
-        data: result.data,
-      })
+      if (servicesPaginated == null) {
+        return reply.status(403).send({ message: "Can't find service Categories" })
+      } else {
+        let message: ResponseMessage = fastify.responseMessage(
+          'service category',
+          servicesPaginated.data.length,
+        )
+        let requestUrl: string | undefined =
+          request.protocol + '://' + request.hostname + request.url
+        const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+          requestUrl,
+          servicesPaginated.totalPage,
+          page,
+        )
+        const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+          requestUrl,
+          servicesPaginated.totalPage,
+          page,
+        )
+
+        return reply.status(200).send({
+          message: message,
+          totalItems: servicesPaginated.totalItems,
+          nextUrl: nextUrl?.nextPageUrl,
+          previousUrl: previousUrl?.previousPageUrl,
+          totalPage: servicesPaginated.totalPage,
+          page: page,
+          limit: limit,
+          data: servicesPaginated.data,
+        })
+      }
     },
   )
   fastify.post<{ Body: CreateServiceCategorySchemaType; Reply: object }>(
@@ -91,7 +108,10 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const { name, description = '' } = request.body
-      const serviceCategory = await createServiceCategory(name, description)
+      const serviceCategory = await createServiceCategory(
+        ServiceCategoryName(name),
+        ServiceCategoryDescription(description),
+      )
       reply.status(201).send({ message: 'Service created', data: serviceCategory })
     },
   )

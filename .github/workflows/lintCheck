@@ -3,7 +3,7 @@ name: Prettier Check
 on:
   push:
     branches:
-      - main # Adjust this according to your default branch
+      - gitworkflowTest # Adjust this according to your default branch
 
 jobs:
   prettier-check:
@@ -19,7 +19,7 @@ jobs:
           node-version: '20.11.1' # Adjust the Node.js version as per your requirement
 
       - name: Install dependencies
-        run: npm install
+        run: docker-compose up devapp postgres
 
       - name: Check code formatting with Prettier
         run: npx prettier --check .

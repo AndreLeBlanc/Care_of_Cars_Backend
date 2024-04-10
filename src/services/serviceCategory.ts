@@ -15,8 +15,13 @@ export type ServiceCategoryDescription = Brand<string | null, 'ServiceCategoryDe
 export const ServiceCategoryDescription = make<ServiceCategoryDescription>()
 
 export type ServiceCategory = {
+  serviceCategoryID: ServiceCategoryID
+  serviceCategoryName: ServiceCategoryName
+  ServiceCategoryDescription: ServiceCategoryDescription
   createdAt: Date
   updatedAt: Date
+}
+export type CreateServiceCategory = {
   serviceCategoryID: ServiceCategoryID
   serviceCategoryName: ServiceCategoryName
   ServiceCategoryDescription: ServiceCategoryDescription
@@ -46,8 +51,7 @@ export async function getServiceCategoriesPaginate(
   limit = 10,
   page = 1,
   offset: Offset = { offset: 0 },
-): Promise<any> {
-  //ServicesPaginated | undefined {
+): Promise<ServicesPaginated | undefined> {
   const condition = or(
     ilike(serviceCategories.name, '%' + search + '%'),
     ilike(serviceCategories.description, '%' + search + '%'),
@@ -74,25 +78,45 @@ export async function getServiceCategoriesPaginate(
     .limit(limit || 10)
     .offset(offset.offset || 0)
 
+  const serviceCategorysListBranded: ServiceCategory[] = serviceCategorysList.map(
+    (serviceCategory) => {
+      return {
+        serviceCategoryID: ServiceCategoryID(serviceCategory.id),
+        serviceCategoryName: ServiceCategoryName(serviceCategory.name),
+        ServiceCategoryDescription: ServiceCategoryDescription(serviceCategory.description),
+        createdAt: serviceCategory.createdAt,
+        updatedAt: serviceCategory.updatedAt,
+      }
+    },
+  )
+
   const totalPage = Math.ceil(totalItems.count / limit)
 
   return {
     totalItems: totalItems.count,
     totalPage,
     perPage: page,
-    data: serviceCategorysList,
+    data: serviceCategorysListBranded,
   }
 }
 
-export async function createServiceCategory(name: string, description: string) {
-  return await db
+export async function createServiceCategory(
+  name: ServiceCategoryName,
+  description: ServiceCategoryDescription,
+): Promise<CreateServiceCategory> {
+  const [createdServiceCategory] = await db
     .insert(serviceCategories)
     .values({ name: name, description: description })
     .returning({
       id: serviceCategories.serviceCategoryID,
-      ServiceCategoryName: serviceCategories.name,
+      serviceCategoryName: serviceCategories.name,
       description: serviceCategories.description,
     })
+  return {
+    serviceCategoryID: ServiceCategoryID(createdServiceCategory.id),
+    serviceCategoryName: ServiceCategoryName(createdServiceCategory.serviceCategoryName),
+    ServiceCategoryDescription: ServiceCategoryDescription(createdServiceCategory.description),
+  }
 }
 
 export async function getServiceCategoryByID(id: number): Promise<ServiceCategory | undefined> {
