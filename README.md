@@ -43,6 +43,10 @@ To access bash in one of the containers
 
 `sudo docker exec -it CONTAINER_ID bash` replace CONTAINER_ID with the actual container ID.
 
+To access the database in the postgres container
+
+`psql -U username databasename`
+
 ## Testing
 
 We are using [Node native test runner](https://nodejs.org/api/test.html)

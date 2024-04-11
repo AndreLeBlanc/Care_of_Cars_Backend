@@ -20,9 +20,6 @@ export const UserLastName = make<UserLastName>()
 export type UserEmail = Brand<string, ' userEmail'>
 export const UserEmail = make<UserEmail>()
 
-createdAt: Date
-updatedAt: Date
-
 type IsSuperAdmin = Brand<boolean | null, 'isSuperAdmin'>
 const IsSuperAdmin = make<IsSuperAdmin>()
 

@@ -201,6 +201,7 @@ export async function users(fastify: FastifyInstance) {
       return reply.status(200).send(user)
     },
   )
+
   fastify.patch<{ Body: PatchUserSchemaType; Reply: object; Params: getUserByIDType }>(
     '/:id',
     {
