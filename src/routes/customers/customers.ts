@@ -2,7 +2,13 @@ import { FastifyInstance } from 'fastify'
 import customersConfig from './customers.config.js'
 import { CreateCustomerType, addCustomerBody } from './customerSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
-import { createCompany } from '../../services/customerService.js'
+import { createCompany, CustomerOrgNumber,
+  CustomerCompanyName,
+  CompanyReference,
+  CompanyAddress,
+  CompanyZipCode,
+  CompanyAddressCity,
+  CompanyCountry } from '../../services/customerService.js',
 
 export const customers = async (fastify: FastifyInstance) => {
   //Create Customers
@@ -26,15 +32,13 @@ export const customers = async (fastify: FastifyInstance) => {
       const { body } = req
 
       const {
-        companyName,
-        companyOrgNumber,
+        customerOrgNumber,
+        customerCompanyName,
         companyAddress,
         companyAddressCity,
         companyCountry,
         companyZipCode,
         companyReference,
-        companyEmail,
-        companyPhoneNumber,
         driverExternalNumber,
         driverGDPRAccept,
         driverISWarrantyDriver,
@@ -56,16 +60,13 @@ export const customers = async (fastify: FastifyInstance) => {
       } = body
 
       const companyDetails = {
-        companyOrgNumber,
-        companyName,
-        companyReference,
-        companyEmail,
-        companyPhoneNumber,
-        companyAddress,
-        companyZipCode,
-        companyAddressCity,
-        companyCountry,
-      }
+        customerOrgNumber: CustomerOrgNumber(customerOrgNumber),
+        customerCompanyName: CustomerCompanyName(customerCompanyName),
+        companyReference: CompanyReference(companyReference),
+        companyAddress: CompanyAddress(companyAddress),
+        companyZipCode: CompanyZipCode(companyZipCode),
+        companyAddressCity: CompanyAddressCity(companyAddressCity),
+        companyCountry: CompanyCountry(companyCountry)}
 
       const driverDetails = {
         driverExternalNumber,
@@ -87,7 +88,7 @@ export const customers = async (fastify: FastifyInstance) => {
         driverNotesShared,
         driverNotes,
       }
-      const returnValue = await createCompany(companyDetails as any, driverDetails as any)
+      const returnValue = await createCompany(companyDetails, driverDetails)
       rep.status(201).send(returnValue)
     },
   )

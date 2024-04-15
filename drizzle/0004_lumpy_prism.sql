@@ -1,0 +1,1 @@
+ALTER TABLE "drivers" RENAME COLUMN "phone" TO "driverPhoneNumber";

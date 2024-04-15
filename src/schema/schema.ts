@@ -4,6 +4,7 @@ import {
   text,
   timestamp,
   pgTable,
+  date,
   varchar,
   integer,
   primaryKey,
@@ -162,22 +163,25 @@ export const companyCustomers = pgTable('companyCustomers', {
 })
 
 export const drivers = pgTable('drivers', {
-  customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).references(() => companyCustomers.customerOrgNumber),
+  customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).references(
+    () => companyCustomers.customerOrgNumber,
+  ),
   driverID: serial('driverID').primaryKey().unique(),
-  customerExternalNumber: varchar('customerExternalNumber', { length: 256 }),
+  driverExternalNumber: varchar('driverExternalNumber', { length: 256 }),
   driverGDPRAccept: boolean('driverGDPRAccept').default(false).notNull(),
-  isWarrantyCustomer: boolean('isWarrantyCustomer').default(false).notNull(),
+  driverISWarrantyDriver: boolean('driverISWarrantyDriver').default(false).notNull(),
   driverAcceptsMarketing: boolean('driverAcceptsMarketing').default(false).notNull(),
   driverFirstName: varchar('driverFirstName', { length: 128 }).notNull(),
   driverLastName: varchar('driverLastName', { length: 128 }).notNull(),
   driverEmail: varchar('driverEmail', { length: 256 }).notNull(),
-  driverPhoneNumber: varchar('phone', { length: 32 }).notNull(),
-  driverAddress: varchar('customerAddress', { length: 256 }),
-  driverZipCode: varchar('customerZipCode', { length: 16 }),
-  driverAddressCity: varchar('customerAddressCity', { length: 256 }),
-  driverCountry: varchar('customerCountry', { length: 256 }),
+  driverPhoneNumber: varchar('driverPhoneNumber', { length: 32 }).notNull(),
+  driverAddress: varchar('driverAddress', { length: 256 }).notNull(),
+  driverZipCode: varchar('driverZipCode', { length: 16 }).notNull(),
+  driverAddressCity: varchar('driverAddressCity', { length: 256 }).notNull(),
+  driverCountry: varchar('driverCountry', { length: 256 }).notNull(),
   driverHasCard: boolean('driverHasCard').default(false),
-  driverCardValidTo: timestamp('driverCardValidTo').defaultNow(),
+  driverCardValidTo: date('driverCardValidTo', { mode: 'date' }),
+  driverCardNumber: varchar('driverCardNumber', { length: 256 }),
   driverKeyNumber: varchar('driverKeyNumber', { length: 256 }),
   driverNotesShared: varchar('driverNotesShared'),
   driverNotes: varchar('driverNotes'),
@@ -186,9 +190,12 @@ export const drivers = pgTable('drivers', {
 })
 
 export const driverRelations = relations(drivers, ({ one }) => ({
-  companyCustomers: one(companyCustomers,{ fields: [drivers.customerOrgNumber], references: [companyCustomers.customerOrgNumber] }),
+  companyCustomers: one(companyCustomers, {
+    fields: [drivers.customerOrgNumber],
+    references: [companyCustomers.customerOrgNumber],
+  }),
 }))
 
-export const companyCustomersRelations =  relations(companyCustomers,({many}) => ({
-  drivers : many(drivers)
+export const companyCustomersRelations = relations(companyCustomers, ({ many }) => ({
+  drivers: many(drivers),
 }))

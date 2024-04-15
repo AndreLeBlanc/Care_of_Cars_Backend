@@ -15,6 +15,55 @@
       "when": 1713184416006,
       "tag": "0001_thin_redwing",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1713188670713,
+      "tag": "0002_lumpy_big_bertha",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1713188866821,
+      "tag": "0003_sloppy_norman_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1713188937095,
+      "tag": "0004_lumpy_prism",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1713188991854,
+      "tag": "0005_faulty_exiles",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1713189085465,
+      "tag": "0006_mixed_magus",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1713189946268,
+      "tag": "0007_good_fat_cobra",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1713190567333,
+      "tag": "0008_oval_magma",
+      "breakpoints": true
     }
   ]
 }

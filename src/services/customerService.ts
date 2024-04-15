@@ -1,9 +1,9 @@
 import { Brand, make } from 'ts-brand'
-import { companyCustomers } from '../schema/schema.js'
+import { companyCustomers, drivers } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
 import { eq } from 'drizzle-orm'
 
-export type DriverExternalNumber = Brand<string, 'driverExternalNumber'>
+export type DriverExternalNumber = Brand<string | null, 'driverExternalNumber'>
 export const DriverExternalNumber = make<DriverExternalNumber>()
 export type DriverGDPRAccept = Brand<boolean, 'driverGDPRAccept'>
 export const DriverGDPRAccept = make<DriverGDPRAccept>()
@@ -11,10 +11,10 @@ export type DriverISWarrantyCustomer = Brand<boolean, 'customerISWarrantyCustome
 export const DriverISWarrantyCustomer = make<DriverISWarrantyCustomer>()
 export type DriverAcceptsMarketing = Brand<boolean, 'driverAcceptsMarketing'>
 export const DriverAcceptsMarketing = make<DriverAcceptsMarketing>()
-export type CompanyName = Brand<string, 'companyName'>
-export const CompanyName = make<CompanyName>()
-export type CompanyOrgNumber = Brand<string, 'companyOrgNumber'>
-export const CompanyOrgNumber = make<CompanyOrgNumber>()
+export type CustomerCompanyName = Brand<string, 'customerCompanyName'>
+export const CustomerCompanyName = make<CustomerCompanyName>()
+export type CustomerOrgNumber = Brand<string | null, 'customerOrgNumber'>
+export const CustomerOrgNumber = make<CustomerOrgNumber>()
 export type DriverFirstName = Brand<string, 'driverFirstName'>
 export const DriverFirstName = make<DriverFirstName>()
 export type DriverLastName = Brand<string, 'driverLastName'>
@@ -25,43 +25,41 @@ export type CompanyEmail = Brand<string, 'companyEmail'>
 export const CompanyEmail = make<CompanyEmail>()
 export type DriverEmail = Brand<string, 'driverEmail'>
 export const DriverEmail = make<DriverEmail>()
-export type CompanyPhoneNumber = Brand<string, 'companyPhoneNumber'>
-export const CompanyPhoneNumber = make<CompanyPhoneNumber>()
-export type CompanyAddress = Brand<string, 'companyAddress'>
+export type DriverPhoneNumber = Brand<string, 'DriverPhoneNumber'>
+export const DriverPhoneNumber = make<DriverPhoneNumber>()
+export type CompanyAddress = Brand<string | null, 'companyAddress'>
 export const CompanyAddress = make<CompanyAddress>()
 export type DriverAddress = Brand<string, 'driverAddress'>
 export const DriverAddress = make<DriverAddress>()
-export type CompanyZipCode = Brand<string, 'companyZipCode'>
+export type CompanyZipCode = Brand<string | null, 'companyZipCode'>
 export const CompanyZipCode = make<CompanyZipCode>()
 export type DriverZipCode = Brand<string, 'driverZipCode'>
 export const DriverZipCode = make<DriverZipCode>()
-export type CompanyAddressCity = Brand<string, 'companyAddressCity'>
+export type CompanyAddressCity = Brand<string | null, 'companyAddressCity'>
 export const CompanyAddressCity = make<CompanyAddressCity>()
 export type DriverAddressCity = Brand<string, 'driverAddressCity'>
 export const DriverAddressCity = make<DriverAddressCity>()
-export type CompanyCountry = Brand<string, 'companyCountry'>
+export type CompanyCountry = Brand<string | null, 'companyCountry'>
 export const CompanyCountry = make<CompanyCountry>()
 export type DriverCountry = Brand<string, 'driverCountry'>
 export const DriverCountry = make<DriverCountry>()
-export type DriverHasCard = Brand<boolean, 'driverHasCard'>
+export type DriverHasCard = Brand<boolean | null, 'driverHasCard'>
 export const DriverHasCard = make<DriverHasCard>()
-export type CustomerCardNumber = Brand<string, 'customerCardNumber'>
+export type CustomerCardNumber = Brand<string | null, 'customerCardNumber'>
 export const CustomerCardNumber = make<CustomerCardNumber>()
-export type CustomerCardValid = Brand<string, 'customerdCarValid'>
-export const CustomerCardValid = make<CustomerCardValid>()
-export type DriverKeyNumber = Brand<string, 'driverKeyNumber'>
+export type DriverCardValidTo = Brand<Date | null, 'driverCardValidTo'>
+export const DriverCardValidTo = make<DriverCardValidTo>()
+export type DriverKeyNumber = Brand<string | null, 'driverKeyNumber'>
 export const DriverKeyNumber = make<DriverKeyNumber>()
-export type DriverNotesShared = Brand<string, 'driverNotesShared'>
+export type DriverNotesShared = Brand<string | null, 'driverNotesShared'>
 export const DriverNotesShared = make<DriverNotesShared>()
-export type DriverNotes = Brand<string, 'driverNotes'>
+export type DriverNotes = Brand<string | null, 'driverNotes'>
 export const DriverNotes = make<DriverNotes>()
 
-export type CompanyCreate = {
-  companyOrgNumber: CompanyOrgNumber
-  companyName: CompanyName
+export type CustomerCompanyCreate = {
+  customerOrgNumber: CustomerOrgNumber
+  customerCompanyName: CustomerCompanyName
   companyReference?: CompanyReference
-  companyEmail?: CompanyEmail
-  companyPhoneNumber?: CompanyPhoneNumber
   companyAddress?: CompanyAddress
   companyZipCode?: CompanyZipCode
   companyAddressCity?: CompanyAddressCity
@@ -69,6 +67,7 @@ export type CompanyCreate = {
 }
 
 export type DriverCreate = {
+  customerOrgNumber?: CustomerOrgNumber
   driverExternalNumber?: DriverExternalNumber
   driverGDPRAccept: DriverGDPRAccept
   driverISWarrantyDriver: DriverISWarrantyCustomer
@@ -76,20 +75,20 @@ export type DriverCreate = {
   driverFirstName: DriverFirstName
   driverLastName: DriverLastName
   driverEmail: DriverEmail
-  driverPhoneNumber: CompanyPhoneNumber
+  driverPhoneNumber: DriverPhoneNumber
   driverAddress: DriverAddress
-  driverZipCode?: DriverZipCode
+  driverZipCode: DriverZipCode
   driverAddressCity: DriverAddressCity
   driverCountry: DriverCountry
   driverHasCard: DriverHasCard
   driverCardNumber?: CustomerCardNumber
-  driverCardValidTo?: CustomerCardValid
+  driverCardValidTo?: DriverCardValidTo
   driverKeyNumber?: DriverKeyNumber
   driverNotesShared?: DriverNotesShared
   driverNotes?: DriverNotes
 }
 
-export type Company = CompanyCreate & {
+export type Company = CustomerCompanyCreate & {
   createdAt: Date
   updatedAt: Date
 }
@@ -100,36 +99,143 @@ export type Driver = DriverCreate & {
 
 //create compnay
 export async function createCompany(
-  company: CompanyCreate,
+  company: CustomerCompanyCreate,
   driver: DriverCreate,
-): Promise<{
-  company: CompanyCreate
-  driver: DriverCreate
-}> {
-  const existingCompany = await db
-    .select()
-    .from(companyCustomers)
-    .where(eq(companyCustomers.customerOrgNumber, company.companyOrgNumber))
-
-  if (existingCompany.length === 0) {
-    await db.insert(companyCustomers).values({
-      customerComapanyName: company.companyName,
-      customerOrgNumber: company.companyOrgNumber,
-      customerAddress: company.companyAddress,
-      customerAddressCity: company.companyAddressCity,
-      customerCountry: company.companyCountry,
-      customerZipCode: company.companyZipCode,
+): Promise<
+  | {
+      company: CustomerCompanyCreate
+      driver: DriverCreate
+    }
+  | undefined
+> {
+  let [existingCompany] = await db
+    .select({
+      customerOrgNumber: companyCustomers.customerOrgNumber,
+      customerComapanyName: companyCustomers.customerComapanyName,
+      companyAddress: companyCustomers.customerAddress,
+      companyZipCode: companyCustomers.customerZipCode,
+      companyAddressCity: companyCustomers.customerAddressCity,
+      customerCompanyCountry: companyCustomers.customerCountry,
+      createdAt: companyCustomers.createdAt,
+      updatedAt: companyCustomers.updatedAt,
     })
+    .from(companyCustomers)
+    .where(eq(companyCustomers.customerOrgNumber, company.customerOrgNumber))
+
+  if (existingCompany == null) {
+    ;[existingCompany] = await db
+      .insert(companyCustomers)
+      .values({
+        customerComapanyName: company.customerCompanyName,
+        customerOrgNumber: company.customerOrgNumber,
+        customerAddress: company.companyAddress,
+        customerAddressCity: company.companyAddressCity,
+        customerCountry: company.companyCountry,
+        customerZipCode: company.companyZipCode,
+      })
+      .returning({
+        customerOrgNumber: companyCustomers.customerOrgNumber,
+        customerComapanyName: companyCustomers.customerComapanyName,
+        companyAddress: companyCustomers.customerAddress,
+        companyZipCode: companyCustomers.customerZipCode,
+        companyAddressCity: companyCustomers.customerAddressCity,
+        customerCompanyCountry: companyCustomers.customerCountry,
+        createdAt: companyCustomers.createdAt,
+        updatedAt: companyCustomers.updatedAt,
+      })
   }
-  const createdDriver = await createCompanyDriver(company.companyOrgNumber, driver)
-  return { company, ...createdDriver }
+  const existingCompanyBranded: Company = {
+    customerOrgNumber: CustomerOrgNumber(existingCompany.customerOrgNumber),
+    customerCompanyName: CustomerCompanyName(existingCompany.customerComapanyName),
+    companyAddress: CompanyAddress(existingCompany.companyAddress),
+    companyZipCode: CompanyZipCode(existingCompany.companyZipCode),
+    companyAddressCity: CompanyAddressCity(existingCompany.companyAddressCity),
+    companyCountry: CompanyCountry(existingCompany.customerCompanyCountry),
+    createdAt: existingCompany.createdAt,
+    updatedAt: existingCompany.updatedAt,
+  }
+  const createdDriver: DriverCreate | undefined = await createCompanyDriver(
+    company.customerOrgNumber,
+    driver,
+  )
+  if (company == null || createdDriver == null) {
+    return undefined
+  } else {
+    return { company: existingCompanyBranded, driver: createdDriver }
+  }
 }
 
 export async function createCompanyDriver(
-  companyOrgNumber: string,
+  customerOrgNumber: CustomerOrgNumber,
   driver: DriverCreate,
-): Promise<{ companyOrgNumber: string; driver: DriverCreate }> {
-  return Promise.resolve({ companyOrgNumber, driver })
+): Promise<DriverCreate | undefined> {
+  const [newDriver] = await db
+    .insert(drivers)
+    .values({
+      customerOrgNumber: customerOrgNumber,
+      driverExternalNumber: driver.driverExternalNumber,
+      driverGDPRAccept: driver.driverGDPRAccept,
+      driverISWarrantyDriver: driver.driverISWarrantyDriver,
+      driverAcceptsMarketing: driver.driverAcceptsMarketing,
+      driverFirstName: driver.driverFirstName,
+      driverLastName: driver.driverLastName,
+      driverEmail: driver.driverEmail,
+      driverPhoneNumber: driver.driverPhoneNumber,
+      driverAddress: driver.driverAddress,
+      driverZipCode: driver.driverZipCode,
+      driverAddressCity: driver.driverAddressCity,
+      driverCountry: driver.driverCountry,
+      driverHasCard: driver.driverHasCard,
+      driverCardValidTo: driver.driverCardValidTo,
+      driverCardNumber: driver.driverCardNumber,
+      driverKeyNumber: driver.driverKeyNumber,
+      driverNotesShared: driver.driverNotesShared,
+      driverNotes: driver.driverNotes,
+    })
+    .returning({
+      customerOrgNumber: drivers.customerOrgNumber,
+      driverExternalNumber: drivers.driverExternalNumber,
+      driverGDPRAccept: drivers.driverGDPRAccept,
+      driverISWarrantyDriver: drivers.driverISWarrantyDriver,
+      driverAcceptsMarketing: drivers.driverAcceptsMarketing,
+      driverFirstName: drivers.driverFirstName,
+      driverLastName: drivers.driverLastName,
+      driverEmail: drivers.driverEmail,
+      driverPhoneNumber: drivers.driverPhoneNumber,
+      driverAddress: drivers.driverAddress,
+      driverZipCode: drivers.driverZipCode,
+      driverAddressCity: drivers.driverAddressCity,
+      driverCountry: drivers.driverCountry,
+      driverHasCard: drivers.driverHasCard,
+      driverCardValidTo: drivers.driverCardValidTo,
+      driverCardNumber: drivers.driverCardNumber,
+      driverKeyNumber: drivers.driverKeyNumber,
+      driverNotesShared: drivers.driverNotesShared,
+      driverNotes: drivers.driverNotes,
+    })
+  return newDriver
+    ? {
+        customerOrgNumber: CustomerOrgNumber(newDriver.customerOrgNumber),
+        driverExternalNumber: DriverExternalNumber(newDriver.driverExternalNumber),
+        driverGDPRAccept: DriverGDPRAccept(newDriver.driverGDPRAccept),
+        driverISWarrantyDriver: DriverISWarrantyCustomer(newDriver.driverISWarrantyDriver),
+        driverAcceptsMarketing: DriverAcceptsMarketing(newDriver.driverAcceptsMarketing),
+        driverFirstName: DriverFirstName(newDriver.driverFirstName),
+        driverLastName: DriverLastName(newDriver.driverLastName),
+        driverEmail: DriverEmail(newDriver.driverEmail),
+        driverPhoneNumber: DriverPhoneNumber(newDriver.driverPhoneNumber),
+        driverAddress: DriverAddress(newDriver.driverAddress),
+        driverZipCode: DriverZipCode(newDriver.driverZipCode),
+        driverAddressCity: DriverAddressCity(newDriver.driverAddressCity),
+        driverCountry: DriverCountry(newDriver.driverCountry),
+        driverHasCard: DriverHasCard(newDriver.driverHasCard),
+        driverCardValidTo: DriverCardValidTo(newDriver.driverCardValidTo),
+        driverCardNumber: CustomerCardNumber(newDriver.driverCardNumber),
+        driverKeyNumber: DriverKeyNumber(newDriver.driverKeyNumber),
+        driverNotesShared: DriverNotesShared(newDriver.driverNotesShared),
+        driverNotes: DriverNotes(newDriver.driverNotes),
+      }
+    : undefined
 }
 
 export async function createPrivateDriver(driver: DriverCreate): Promise<DriverCreate> {
