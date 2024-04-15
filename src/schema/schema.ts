@@ -149,3 +149,42 @@ export const servicesRelations = relations(services, ({ many }) => ({
 export const serviceVariantsRelations = relations(serviceVariants, ({ one }) => ({
   service: one(services, { fields: [serviceVariants.serviceID], references: [services.serviceID] }),
 }))
+
+export const companyCustomer = pgTable('companyCustomer', {
+  customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).primaryKey().unique(),
+  customerComapanyName: varchar('customerComapanyName', { length: 255 }).notNull(),
+  customerAddress: varchar('customerAddress', { length: 256 }),
+  customerZipCode: varchar('customerZipCode', { length: 16 }),
+  customerAddressCity: varchar('customerAddressCity', { length: 256 }),
+  customerCountry: varchar('customerCountry', { length: 256 }),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const drivers = pgTable('drivers', {
+  companyID: integer('companyID').references(() => companyCustomer.customerOrgNumber),
+  driverID: serial('driverID').primaryKey().unique(),
+  customerExternalNumber: varchar('customerExternalNumber', { length: 256 }),
+  driverGDPRAccept: boolean('driverGDPRAccept').default(false).notNull(),
+  isWarrantyCustomer: boolean('isWarrantyCustomer').default(false).notNull(),
+  driverAcceptsMarketing: boolean('driverAcceptsMarketing').default(false).notNull(),
+  driverFirstName: varchar('driverFirstName', { length: 128 }).notNull(),
+  driverLastName: varchar('driverLastName', { length: 128 }).notNull(),
+  driverEmail: varchar('driverEmail', { length: 256 }).notNull(),
+  driverPhoneNumber: varchar('phone', { length: 32 }).notNull(),
+  driverAddress: varchar('customerAddress', { length: 256 }),
+  driverZipCode: varchar('customerZipCode', { length: 16 }),
+  driverAddressCity: varchar('customerAddressCity', { length: 256 }),
+  driverCountry: varchar('customerCountry', { length: 256 }),
+  driverHasCard: boolean('driverHasCard').default(false),
+  driverCardValidTo: timestamp('driverCardValidTo').defaultNow(),
+  driverKeyNumber: varchar('driverKeyNumber', { length: 256 }),
+  driverNotesShared: varchar('driverNotesShared'),
+  driverNotes: varchar('driverNotes'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const companyCustomerRelations = relations(companyCustomer, ({ many }) => ({
+  drivers: many(drivers),
+}))
