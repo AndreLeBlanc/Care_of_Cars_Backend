@@ -150,7 +150,7 @@ export const serviceVariantsRelations = relations(serviceVariants, ({ one }) => 
   service: one(services, { fields: [serviceVariants.serviceID], references: [services.serviceID] }),
 }))
 
-export const companyCustomer = pgTable('companyCustomer', {
+export const companyCustomers = pgTable('companyCustomers', {
   customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).primaryKey().unique(),
   customerComapanyName: varchar('customerComapanyName', { length: 255 }).notNull(),
   customerAddress: varchar('customerAddress', { length: 256 }),
@@ -162,7 +162,7 @@ export const companyCustomer = pgTable('companyCustomer', {
 })
 
 export const drivers = pgTable('drivers', {
-  companyID: integer('companyID').references(() => companyCustomer.customerOrgNumber),
+  customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).references(() => companyCustomers.customerOrgNumber),
   driverID: serial('driverID').primaryKey().unique(),
   customerExternalNumber: varchar('customerExternalNumber', { length: 256 }),
   driverGDPRAccept: boolean('driverGDPRAccept').default(false).notNull(),
@@ -185,6 +185,10 @@ export const drivers = pgTable('drivers', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
-export const companyCustomerRelations = relations(companyCustomer, ({ many }) => ({
-  drivers: many(drivers),
+export const driverRelations = relations(drivers, ({ one }) => ({
+  companyCustomers: one(companyCustomers,{ fields: [drivers.customerOrgNumber], references: [companyCustomers.customerOrgNumber] }),
+}))
+
+export const companyCustomersRelations =  relations(companyCustomers,({many}) => ({
+  drivers : many(drivers)
 }))

@@ -14,6 +14,7 @@ import { services } from './routes/services/services.js'
 import { users } from './routes/users/users.js'
 import { root } from './routes/root.js'
 import seedSuperAdmin from './plugins/seed.js'
+import { customers } from './routes/customers/customers.js'
 
 const defaultOptions = {
   logger: true,
@@ -72,6 +73,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
   app.register(services, { prefix: 'services' })
   app.register(users, { prefix: '/users' })
   app.register(root, { prefix: '/' })
+  app.register(customers, { prefix: '/customers' })
 
   app.register(pagination)
   if (typeof process.env.JWT_SECRET === 'string') {

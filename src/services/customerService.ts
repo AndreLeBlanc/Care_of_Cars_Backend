@@ -1,61 +1,64 @@
 import { Brand, make } from 'ts-brand'
+import { companyCustomers } from '../schema/schema.js'
+import { db } from '../config/db-connect.js'
+import { eq } from 'drizzle-orm'
 
-export type DriverExternalNumber = Brand<string, 'DriverExternalNumber'>
+export type DriverExternalNumber = Brand<string, 'driverExternalNumber'>
 export const DriverExternalNumber = make<DriverExternalNumber>()
-export type DriverGDPRAccept = Brand<boolean, 'DriverGDPRAccept'>
+export type DriverGDPRAccept = Brand<boolean, 'driverGDPRAccept'>
 export const DriverGDPRAccept = make<DriverGDPRAccept>()
-export type DriverISWarrantyCustomer = Brand<boolean, 'CustomerISWarrantyCustomer'>
+export type DriverISWarrantyCustomer = Brand<boolean, 'customerISWarrantyCustomer'>
 export const DriverISWarrantyCustomer = make<DriverISWarrantyCustomer>()
-export type DriverAcceptsMarketing = Brand<boolean, 'DriverAcceptsMarketing'>
+export type DriverAcceptsMarketing = Brand<boolean, 'driverAcceptsMarketing'>
 export const DriverAcceptsMarketing = make<DriverAcceptsMarketing>()
-export type ComapanyName = Brand<string, 'ComapanyName'>
-export const ComapanyName = make<ComapanyName>()
-export type CompanyOrgNumber = Brand<string, 'CompanyOrgNumber'>
+export type CompanyName = Brand<string, 'companyName'>
+export const CompanyName = make<CompanyName>()
+export type CompanyOrgNumber = Brand<string, 'companyOrgNumber'>
 export const CompanyOrgNumber = make<CompanyOrgNumber>()
-export type DriverFirstName = Brand<string, 'DriverFirstName'>
+export type DriverFirstName = Brand<string, 'driverFirstName'>
 export const DriverFirstName = make<DriverFirstName>()
-export type DriverLastName = Brand<string, 'DriverLastName'>
+export type DriverLastName = Brand<string, 'driverLastName'>
 export const DriverLastName = make<DriverLastName>()
-export type CompanyReference = Brand<string, 'CompanyReference'>
+export type CompanyReference = Brand<string, 'companyReference'>
 export const CompanyReference = make<CompanyReference>()
-export type CompanyEmail = Brand<string, 'CompanyEmail'>
+export type CompanyEmail = Brand<string, 'companyEmail'>
 export const CompanyEmail = make<CompanyEmail>()
-export type DriverEmail = Brand<string, 'DriverEmail'>
+export type DriverEmail = Brand<string, 'driverEmail'>
 export const DriverEmail = make<DriverEmail>()
-export type CompanyPhoneNumber = Brand<string, 'CompanyPhoneNumber'>
+export type CompanyPhoneNumber = Brand<string, 'companyPhoneNumber'>
 export const CompanyPhoneNumber = make<CompanyPhoneNumber>()
-export type CompanyAddress = Brand<string, 'CompanyAddress'>
+export type CompanyAddress = Brand<string, 'companyAddress'>
 export const CompanyAddress = make<CompanyAddress>()
-export type DriverAddress = Brand<string, 'DriverAddress'>
+export type DriverAddress = Brand<string, 'driverAddress'>
 export const DriverAddress = make<DriverAddress>()
-export type CompanyZipCode = Brand<string, 'CompanyZipCode'>
+export type CompanyZipCode = Brand<string, 'companyZipCode'>
 export const CompanyZipCode = make<CompanyZipCode>()
-export type DriverZipCode = Brand<string, 'DriverZipCode'>
+export type DriverZipCode = Brand<string, 'driverZipCode'>
 export const DriverZipCode = make<DriverZipCode>()
-export type CompanyAddressCity = Brand<string, 'CompanyAddressCity'>
+export type CompanyAddressCity = Brand<string, 'companyAddressCity'>
 export const CompanyAddressCity = make<CompanyAddressCity>()
-export type DriverAddressCity = Brand<string, 'DriverAddressCity'>
+export type DriverAddressCity = Brand<string, 'driverAddressCity'>
 export const DriverAddressCity = make<DriverAddressCity>()
-export type CompanyCountry = Brand<string, 'CompanyCountry'>
+export type CompanyCountry = Brand<string, 'companyCountry'>
 export const CompanyCountry = make<CompanyCountry>()
-export type DriverCountry = Brand<string, 'DriverCountry'>
+export type DriverCountry = Brand<string, 'driverCountry'>
 export const DriverCountry = make<DriverCountry>()
-export type DriverHasCard = Brand<boolean, 'DriverHasCard'>
+export type DriverHasCard = Brand<boolean, 'driverHasCard'>
 export const DriverHasCard = make<DriverHasCard>()
-export type CustomerCardNumber = Brand<string, 'CustomerCardNumber'>
+export type CustomerCardNumber = Brand<string, 'customerCardNumber'>
 export const CustomerCardNumber = make<CustomerCardNumber>()
-export type CustomerCardValid = Brand<string, 'CustomerdCarValid'>
+export type CustomerCardValid = Brand<string, 'customerdCarValid'>
 export const CustomerCardValid = make<CustomerCardValid>()
-export type DriverKeyNumber = Brand<string, 'DriverKeyNumber'>
+export type DriverKeyNumber = Brand<string, 'driverKeyNumber'>
 export const DriverKeyNumber = make<DriverKeyNumber>()
-export type DriverNotesShared = Brand<string, 'DriverNotesShared'>
+export type DriverNotesShared = Brand<string, 'driverNotesShared'>
 export const DriverNotesShared = make<DriverNotesShared>()
-export type DriverNotes = Brand<string, 'DriverNotes'>
+export type DriverNotes = Brand<string, 'driverNotes'>
 export const DriverNotes = make<DriverNotes>()
 
 export type CompanyCreate = {
   companyOrgNumber: CompanyOrgNumber
-  ComapanyName: ComapanyName
+  companyName: CompanyName
   companyReference?: CompanyReference
   companyEmail?: CompanyEmail
   companyPhoneNumber?: CompanyPhoneNumber
@@ -95,11 +98,40 @@ export type Driver = DriverCreate & {
   updatedAt: Date
 }
 
-export function createCompany(company: Company, driver: Driver) {
-  //: Promise<{ company: Company; driver: Driver }>
-  //  check if company exists, if not create it. Add driver to driver
+//create compnay
+export async function createCompany(
+  company: CompanyCreate,
+  driver: DriverCreate,
+): Promise<{
+  company: CompanyCreate
+  driver: DriverCreate
+}> {
+  const existingCompany = await db
+    .select()
+    .from(companyCustomers)
+    .where(eq(companyCustomers.customerOrgNumber, company.companyOrgNumber))
+
+  if (existingCompany.length === 0) {
+    await db.insert(companyCustomers).values({
+      customerComapanyName: company.companyName,
+      customerOrgNumber: company.companyOrgNumber,
+      customerAddress: company.companyAddress,
+      customerAddressCity: company.companyAddressCity,
+      customerCountry: company.companyCountry,
+      customerZipCode: company.companyZipCode,
+    })
+  }
+  const createdDriver = await createCompanyDriver(company.companyOrgNumber, driver)
+  return { company, ...createdDriver }
 }
 
-export function createDriver(companyOrgNumber: CompanyOrgNumber, driver: DriverCreate) {
-  //: Promise<{  company: Company  driver: Driver}>
+export async function createCompanyDriver(
+  companyOrgNumber: string,
+  driver: DriverCreate,
+): Promise<{ companyOrgNumber: string; driver: DriverCreate }> {
+  return Promise.resolve({ companyOrgNumber, driver })
+}
+
+export async function createPrivateDriver(driver: DriverCreate): Promise<DriverCreate> {
+  return Promise.resolve(driver)
 }

@@ -1,6 +1,6 @@
 {
-  "id": "20686698-6541-4793-b5fa-5b1b01de37b2",
-  "prevId": "847962eb-404d-4b7a-932a-73a9bec2ebb1",
+  "id": "53bbb681-fb52-4fcc-b279-9a1d0a8e1cc7",
+  "prevId": "7b302e49-c8f3-4eed-af97-f174634444e9",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -76,9 +76,9 @@
       "name": "drivers",
       "schema": "",
       "columns": {
-        "companyID": {
-          "name": "companyID",
-          "type": "integer",
+        "customerOrgNumber": {
+          "name": "customerOrgNumber",
+          "type": "varchar(11)",
           "primaryKey": false,
           "notNull": false
         },
@@ -212,12 +212,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "drivers_companyID_companyCustomer_customerOrgNumber_fk": {
-          "name": "drivers_companyID_companyCustomer_customerOrgNumber_fk",
+        "drivers_customerOrgNumber_companyCustomer_customerOrgNumber_fk": {
+          "name": "drivers_customerOrgNumber_companyCustomer_customerOrgNumber_fk",
           "tableFrom": "drivers",
           "tableTo": "companyCustomer",
           "columnsFrom": [
-            "companyID"
+            "customerOrgNumber"
           ],
           "columnsTo": [
             "customerOrgNumber"
