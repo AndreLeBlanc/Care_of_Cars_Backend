@@ -30,7 +30,4 @@ export const addCustomerBody = Type.Object({
   driverNotes: Type.String(),
 })
 
-export type createCustomerReply = {}
-export type customerServiceCreate = {}
-
 export type CreateCustomerType = Static<typeof addCustomerBody>

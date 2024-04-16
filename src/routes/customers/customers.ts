@@ -43,9 +43,6 @@ export const customers = async (fastify: FastifyInstance) => {
       },
       schema: {
         body: addCustomerBody,
-        response: {
-          201: {},
-        },
       },
     },
     async (req, rep) => {
@@ -110,7 +107,10 @@ export const customers = async (fastify: FastifyInstance) => {
         driverCountry: DriverCountry(driverCountry),
       }
       const returnValue = await createCompany(companyDetails, driverDetails)
-      rep.status(201).send(returnValue)
+      return rep.status(201).send({
+        message: 'company added',
+        ...returnValue,
+      })
     },
   )
 }
