@@ -113,9 +113,6 @@ export const customers = async (fastify: FastifyInstance) => {
       //Add a type to return value
       const returnValue = await createCompany(companyDetails, driverDetails)
 
-      console.log(returnValue)
-      console.log('returnValue')
-      console.log('returnValue')
       //Check users.ts for the post. This is currently returning {}.
       rep.status(201).send(returnValue)
     },
