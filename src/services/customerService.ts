@@ -1,5 +1,5 @@
 import { Brand, make } from 'ts-brand'
-import { companyCustomers, drivers } from '../schema/schema.js'
+import { companycustomers, drivers } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
 import { eq } from 'drizzle-orm'
 
@@ -110,21 +110,21 @@ export async function createCompany(
 > {
   let [existingCompany] = await db
     .select({
-      customerOrgNumber: companyCustomers.customerOrgNumber,
-      customerComapanyName: companyCustomers.customerComapanyName,
-      companyAddress: companyCustomers.customerAddress,
-      companyZipCode: companyCustomers.customerZipCode,
-      companyAddressCity: companyCustomers.customerAddressCity,
-      customerCompanyCountry: companyCustomers.customerCountry,
-      createdAt: companyCustomers.createdAt,
-      updatedAt: companyCustomers.updatedAt,
+      customerOrgNumber: companycustomers.customerOrgNumber,
+      customerComapanyName: companycustomers.customerComapanyName,
+      companyAddress: companycustomers.customerAddress,
+      companyZipCode: companycustomers.customerZipCode,
+      companyAddressCity: companycustomers.customerAddressCity,
+      customerCompanyCountry: companycustomers.customerCountry,
+      createdAt: companycustomers.createdAt,
+      updatedAt: companycustomers.updatedAt,
     })
-    .from(companyCustomers)
-    .where(eq(companyCustomers.customerOrgNumber, company.customerOrgNumber))
+    .from(companycustomers)
+    .where(eq(companycustomers.customerOrgNumber, company.customerOrgNumber))
 
   if (existingCompany == null) {
     ;[existingCompany] = await db
-      .insert(companyCustomers)
+      .insert(companycustomers)
       .values({
         customerComapanyName: company.customerCompanyName,
         customerOrgNumber: company.customerOrgNumber,
@@ -134,14 +134,14 @@ export async function createCompany(
         customerZipCode: company.companyZipCode,
       })
       .returning({
-        customerOrgNumber: companyCustomers.customerOrgNumber,
-        customerComapanyName: companyCustomers.customerComapanyName,
-        companyAddress: companyCustomers.customerAddress,
-        companyZipCode: companyCustomers.customerZipCode,
-        companyAddressCity: companyCustomers.customerAddressCity,
-        customerCompanyCountry: companyCustomers.customerCountry,
-        createdAt: companyCustomers.createdAt,
-        updatedAt: companyCustomers.updatedAt,
+        customerOrgNumber: companycustomers.customerOrgNumber,
+        customerComapanyName: companycustomers.customerComapanyName,
+        companyAddress: companycustomers.customerAddress,
+        companyZipCode: companycustomers.customerZipCode,
+        companyAddressCity: companycustomers.customerAddressCity,
+        customerCompanyCountry: companycustomers.customerCountry,
+        createdAt: companycustomers.createdAt,
+        updatedAt: companycustomers.updatedAt,
       })
   }
   const existingCompanyBranded: Company = {
@@ -186,7 +186,7 @@ export async function createCompanyDriver(
       driverAddressCity: driver.driverAddressCity,
       driverCountry: driver.driverCountry,
       driverHasCard: driver.driverHasCard,
-      driverCardValidTo: new Date(driver.driverCardValidTo),
+      driverCardValidTo: driver.driverCardValidTo,
       driverCardNumber: driver.driverCardNumber,
       driverKeyNumber: driver.driverKeyNumber,
       driverNotesShared: driver.driverNotesShared,
@@ -240,4 +240,39 @@ export async function createCompanyDriver(
 
 export async function createPrivateDriver(driver: DriverCreate): Promise<DriverCreate> {
   return Promise.resolve(driver)
+}
+
+export async function editCompanyDetails(
+  company: CustomerCompanyCreate,
+): Promise<CustomerCompanyCreate | undefined> {
+  const [updatedCompany] = await db
+    .update(companycustomers)
+    .set({
+      customerAddress: company.companyAddress,
+      customerAddressCity: company.companyAddressCity,
+      customerComapanyName: company.customerCompanyName,
+      customerCountry: company.companyCountry,
+      customerZipCode: company.companyZipCode,
+      updatedAt: new Date(),
+    })
+    .where(eq(companycustomers.customerOrgNumber, company.customerOrgNumber))
+    .returning({
+      customerAddress: companycustomers.customerAddress,
+      customerAddressCity: companycustomers.customerAddressCity,
+      customerComapanyName: companycustomers.customerComapanyName,
+      customerCountry: companycustomers.customerCountry,
+      customerZipCode: companycustomers.customerZipCode,
+      customerOrgNumber: companycustomers.customerOrgNumber,
+    })
+
+  return updatedCompany
+    ? {
+        companyAddress: CompanyAddress(updatedCompany.customerAddress),
+        companyAddressCity: CompanyAddressCity(updatedCompany.customerAddressCity),
+        customerCompanyName: CustomerCompanyName(updatedCompany.customerComapanyName),
+        companyCountry: CompanyCountry(updatedCompany.customerCountry),
+        companyZipCode: CompanyZipCode(updatedCompany.customerZipCode),
+        customerOrgNumber: CustomerOrgNumber(updatedCompany.customerOrgNumber),
+      }
+    : undefined
 }

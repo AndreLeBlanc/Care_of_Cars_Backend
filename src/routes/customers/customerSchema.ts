@@ -30,4 +30,17 @@ export const addCustomerBody = Type.Object({
   driverNotes: Type.String(),
 })
 
+export const patchCompanyBody = Type.Object({
+  companyOrgNumber: Type.String(),
+  companyName: Type.String(),
+  companyReference: Type.String(),
+  companyEmail: Type.String(),
+  companyPhoneNumber: Type.String(),
+  companyAddress: Type.String(),
+  companyZipCode: Type.String(),
+  companyAddressCity: Type.String(),
+  companyCountry: Type.String(),
+})
+
 export type CreateCustomerType = Static<typeof addCustomerBody>
+export type PatchCompanyType = Static<typeof patchCompanyBody>

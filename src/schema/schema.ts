@@ -151,7 +151,7 @@ export const serviceVariantsRelations = relations(serviceVariants, ({ one }) => 
   service: one(services, { fields: [serviceVariants.serviceID], references: [services.serviceID] }),
 }))
 
-export const companyCustomers = pgTable('companyCustomers', {
+export const companycustomers = pgTable('companycustomers', {
   customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).primaryKey().unique(),
   customerComapanyName: varchar('customerComapanyName', { length: 255 }).notNull(),
   customerAddress: varchar('customerAddress', { length: 256 }),
@@ -164,17 +164,16 @@ export const companyCustomers = pgTable('companyCustomers', {
 
 export const drivers = pgTable('drivers', {
   customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).references(
-    () => companyCustomers.customerOrgNumber,
+    () => companycustomers.customerOrgNumber,
     { onDelete: 'cascade' },
   ),
-  driverID: serial('driverID').primaryKey().unique(),
   driverExternalNumber: varchar('driverExternalNumber', { length: 256 }),
   driverGDPRAccept: boolean('driverGDPRAccept').default(false).notNull(),
   driverISWarrantyDriver: boolean('driverISWarrantyDriver').default(false).notNull(),
   driverAcceptsMarketing: boolean('driverAcceptsMarketing').default(false).notNull(),
   driverFirstName: varchar('driverFirstName', { length: 128 }).notNull(),
   driverLastName: varchar('driverLastName', { length: 128 }).notNull(),
-  driverEmail: varchar('driverEmail', { length: 256 }).notNull(),
+  driverEmail: varchar('driverEmail', { length: 256 }).primaryKey().unique(),
   driverPhoneNumber: varchar('driverPhoneNumber', { length: 32 }).notNull(),
   driverAddress: varchar('driverAddress', { length: 256 }).notNull(),
   driverZipCode: varchar('driverZipCode', { length: 16 }).notNull(),
@@ -191,12 +190,12 @@ export const drivers = pgTable('drivers', {
 })
 
 export const driverRelations = relations(drivers, ({ one }) => ({
-  companyCustomers: one(companyCustomers, {
+  companycustomers: one(companycustomers, {
     fields: [drivers.customerOrgNumber],
-    references: [companyCustomers.customerOrgNumber],
+    references: [companycustomers.customerOrgNumber],
   }),
 }))
 
-export const companyCustomersRelations = relations(companyCustomers, ({ many }) => ({
+export const companycustomersRelations = relations(companycustomers, ({ many }) => ({
   drivers: many(drivers),
 }))

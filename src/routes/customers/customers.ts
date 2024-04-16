@@ -1,5 +1,10 @@
 import { FastifyInstance } from 'fastify'
-import { CreateCustomerType, addCustomerBody } from './customerSchema.js'
+import {
+  CreateCustomerType,
+  PatchCompanyType,
+  addCustomerBody,
+  patchCompanyBody,
+} from './customerSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
 import {
   createCompany,
@@ -28,7 +33,11 @@ import {
   DriverKeyNumber,
   DriverNotesShared,
   DriverNotes,
+  CustomerCompanyCreate,
+  DriverCreate,
+  editCompanyDetails,
 } from '../../services/customerService.js'
+import { isDataUpdated } from '../../utils/helper.js'
 
 export const customers = async (fastify: FastifyInstance) => {
   //Create Customers
@@ -99,17 +108,68 @@ export const customers = async (fastify: FastifyInstance) => {
         driverZipCode: DriverZipCode(driverZipCode),
         driverAddressCity: DriverAddressCity(driverAddressCity),
         driverHasCard: DriverHasCard(driverHasCard),
-        driverCardValidTo: DriverCardValidTo(driverCardValidTo as any),
+        driverCardValidTo: DriverCardValidTo(new Date(driverCardValidTo)),
         driverCardNumber: CustomerCardNumber(driverCardNumber),
         driverKeyNumber: DriverKeyNumber(driverKeyNumber),
         driverNotesShared: DriverNotesShared(driverNotesShared),
         driverNotes: DriverNotes(driverNotes),
         driverCountry: DriverCountry(driverCountry),
       }
-      const returnValue = await createCompany(companyDetails, driverDetails)
+
+      const returnValue:
+        | {
+            company: CustomerCompanyCreate
+            driver: DriverCreate
+          }
+        | undefined = await createCompany(companyDetails, driverDetails)
       return rep.status(201).send({
-        message: 'company added',
-        ...returnValue,
+        message: 'company / driver created',
+        data: returnValue,
+        ...isDataUpdated(returnValue),
+      })
+    },
+  )
+
+  //edit company
+  fastify.patch<{ Body: PatchCompanyType; Reply: object }>(
+    '/',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('update_permission')
+        fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        body: patchCompanyBody,
+      },
+    },
+    async (request, reply) => {
+      const { body } = request
+      const {
+        companyOrgNumber,
+        companyName,
+        companyAddress,
+        companyAddressCity,
+        companyCountry,
+        companyZipCode,
+        companyReference,
+      } = body
+      const companyDetails = {
+        customerOrgNumber: CustomerOrgNumber(companyOrgNumber),
+        customerCompanyName: CustomerCompanyName(companyName),
+        companyReference: CompanyReference(companyReference),
+        companyAddress: CompanyAddress(companyAddress),
+        companyZipCode: CompanyZipCode(companyZipCode),
+        companyAddressCity: CompanyAddressCity(companyAddressCity),
+        companyCountry: CompanyCountry(companyCountry),
+      }
+      const returnData = await editCompanyDetails(companyDetails)
+
+      reply.status(201).send({
+        message: 'Company details edited',
+        newData: returnData,
+        ...isDataUpdated(returnData),
       })
     },
   )
