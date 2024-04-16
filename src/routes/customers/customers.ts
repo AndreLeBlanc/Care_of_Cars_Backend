@@ -102,14 +102,21 @@ export const customers = async (fastify: FastifyInstance) => {
         driverZipCode: DriverZipCode(driverZipCode),
         driverAddressCity: DriverAddressCity(driverAddressCity),
         driverHasCard: DriverHasCard(driverHasCard),
-        driverCardValidTo: DriverCardValidTo(driverCardValidTo as any),
+        driverCardValidTo: DriverCardValidTo(new Date(driverCardValidTo)),
         driverCardNumber: CustomerCardNumber(driverCardNumber),
         driverKeyNumber: DriverKeyNumber(driverKeyNumber),
         driverNotesShared: DriverNotesShared(driverNotesShared),
         driverNotes: DriverNotes(driverNotes),
         driverCountry: DriverCountry(driverCountry),
       }
+
+      //Add a type to return value
       const returnValue = await createCompany(companyDetails, driverDetails)
+
+      console.log(returnValue)
+      console.log('returnValue')
+      console.log('returnValue')
+      //Check users.ts for the post. This is currently returning {}.
       rep.status(201).send(returnValue)
     },
   )

@@ -1,6 +1,6 @@
 {
-  "id": "43fbb7c7-2291-42b6-ae33-a829a1528720",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "77dbc691-f427-49b4-a168-753c4ef5064e",
+  "prevId": "43fbb7c7-2291-42b6-ae33-a829a1528720",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -82,12 +82,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "driverID": {
-          "name": "driverID",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "driverExternalNumber": {
           "name": "driverExternalNumber",
           "type": "varchar(256)",
@@ -130,7 +124,7 @@
         "driverEmail": {
           "name": "driverEmail",
           "type": "varchar(256)",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true
         },
         "driverPhoneNumber": {
@@ -233,11 +227,11 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "drivers_driverID_unique": {
-          "name": "drivers_driverID_unique",
+        "drivers_driverEmail_unique": {
+          "name": "drivers_driverEmail_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "driverID"
+            "driverEmail"
           ]
         }
       }

@@ -1,5 +1,5 @@
 import { Brand, make } from 'ts-brand'
-import { companyCustomers, drivers } from '../schema/schema.js'
+import { companycustomers, drivers } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
 import { eq } from 'drizzle-orm'
 
@@ -110,21 +110,21 @@ export async function createCompany(
 > {
   let [existingCompany] = await db
     .select({
-      customerOrgNumber: companyCustomers.customerOrgNumber,
-      customerComapanyName: companyCustomers.customerComapanyName,
-      companyAddress: companyCustomers.customerAddress,
-      companyZipCode: companyCustomers.customerZipCode,
-      companyAddressCity: companyCustomers.customerAddressCity,
-      customerCompanyCountry: companyCustomers.customerCountry,
-      createdAt: companyCustomers.createdAt,
-      updatedAt: companyCustomers.updatedAt,
+      customerOrgNumber: companycustomers.customerOrgNumber,
+      customerComapanyName: companycustomers.customerComapanyName,
+      companyAddress: companycustomers.customerAddress,
+      companyZipCode: companycustomers.customerZipCode,
+      companyAddressCity: companycustomers.customerAddressCity,
+      customerCompanyCountry: companycustomers.customerCountry,
+      createdAt: companycustomers.createdAt,
+      updatedAt: companycustomers.updatedAt,
     })
-    .from(companyCustomers)
-    .where(eq(companyCustomers.customerOrgNumber, company.customerOrgNumber))
+    .from(companycustomers)
+    .where(eq(companycustomers.customerOrgNumber, company.customerOrgNumber))
 
   if (existingCompany == null) {
     ;[existingCompany] = await db
-      .insert(companyCustomers)
+      .insert(companycustomers)
       .values({
         customerComapanyName: company.customerCompanyName,
         customerOrgNumber: company.customerOrgNumber,
@@ -134,14 +134,14 @@ export async function createCompany(
         customerZipCode: company.companyZipCode,
       })
       .returning({
-        customerOrgNumber: companyCustomers.customerOrgNumber,
-        customerComapanyName: companyCustomers.customerComapanyName,
-        companyAddress: companyCustomers.customerAddress,
-        companyZipCode: companyCustomers.customerZipCode,
-        companyAddressCity: companyCustomers.customerAddressCity,
-        customerCompanyCountry: companyCustomers.customerCountry,
-        createdAt: companyCustomers.createdAt,
-        updatedAt: companyCustomers.updatedAt,
+        customerOrgNumber: companycustomers.customerOrgNumber,
+        customerComapanyName: companycustomers.customerComapanyName,
+        companyAddress: companycustomers.customerAddress,
+        companyZipCode: companycustomers.customerZipCode,
+        companyAddressCity: companycustomers.customerAddressCity,
+        customerCompanyCountry: companycustomers.customerCountry,
+        createdAt: companycustomers.createdAt,
+        updatedAt: companycustomers.updatedAt,
       })
   }
   const existingCompanyBranded: Company = {
@@ -186,7 +186,7 @@ export async function createCompanyDriver(
       driverAddressCity: driver.driverAddressCity,
       driverCountry: driver.driverCountry,
       driverHasCard: driver.driverHasCard,
-      driverCardValidTo: new Date(driver.driverCardValidTo),
+      driverCardValidTo: driver.driverCardValidTo,
       driverCardNumber: driver.driverCardNumber,
       driverKeyNumber: driver.driverKeyNumber,
       driverNotesShared: driver.driverNotesShared,
