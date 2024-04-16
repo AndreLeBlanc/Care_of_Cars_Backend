@@ -89,8 +89,8 @@ export type DriverCreate = {
 }
 
 export type Company = CustomerCompanyCreate & {
-  createdAt: Date
-  updatedAt: Date
+  createdAt?: Date
+  updatedAt?: Date
 }
 export type Driver = DriverCreate & {
   createdAt: Date
@@ -242,9 +242,7 @@ export async function createPrivateDriver(driver: DriverCreate): Promise<DriverC
   return Promise.resolve(driver)
 }
 
-export async function editCompanyDetails(
-  company: CustomerCompanyCreate,
-): Promise<CustomerCompanyCreate | undefined> {
+export async function editCompanyDetails(company: Company): Promise<Company | undefined> {
   const [updatedCompany] = await db
     .update(companycustomers)
     .set({
@@ -263,6 +261,8 @@ export async function editCompanyDetails(
       customerCountry: companycustomers.customerCountry,
       customerZipCode: companycustomers.customerZipCode,
       customerOrgNumber: companycustomers.customerOrgNumber,
+      createdAt: companycustomers.createdAt,
+      updatedAt: companycustomers.updatedAt,
     })
 
   return updatedCompany
@@ -273,6 +273,8 @@ export async function editCompanyDetails(
         companyCountry: CompanyCountry(updatedCompany.customerCountry),
         companyZipCode: CompanyZipCode(updatedCompany.customerZipCode),
         customerOrgNumber: CustomerOrgNumber(updatedCompany.customerOrgNumber),
+        createdAt: updatedCompany.createdAt,
+        updatedAt: updatedCompany.updatedAt,
       }
     : undefined
 }

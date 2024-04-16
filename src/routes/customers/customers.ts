@@ -55,8 +55,6 @@ export const customers = async (fastify: FastifyInstance) => {
       },
     },
     async (req, rep) => {
-      const { body } = req
-
       const {
         companyOrgNumber,
         companyName,
@@ -83,7 +81,7 @@ export const customers = async (fastify: FastifyInstance) => {
         driverKeyNumber,
         driverNotesShared,
         driverNotes,
-      } = body
+      } = req.body
 
       const companyDetails = {
         customerOrgNumber: CustomerOrgNumber(companyOrgNumber),
@@ -116,7 +114,7 @@ export const customers = async (fastify: FastifyInstance) => {
         driverCountry: DriverCountry(driverCountry),
       }
 
-      const returnValue:
+      const createdData:
         | {
             company: CustomerCompanyCreate
             driver: DriverCreate
@@ -124,8 +122,8 @@ export const customers = async (fastify: FastifyInstance) => {
         | undefined = await createCompany(companyDetails, driverDetails)
       return rep.status(201).send({
         message: 'company / driver created',
-        data: returnValue,
-        ...isDataUpdated(returnValue),
+        data: createdData,
+        ...isDataUpdated(createdData),
       })
     },
   )
@@ -145,7 +143,6 @@ export const customers = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const { body } = request
       const {
         companyOrgNumber,
         companyName,
@@ -154,22 +151,22 @@ export const customers = async (fastify: FastifyInstance) => {
         companyCountry,
         companyZipCode,
         companyReference,
-      } = body
+      } = request.body
       const companyDetails = {
         customerOrgNumber: CustomerOrgNumber(companyOrgNumber),
-        customerCompanyName: CustomerCompanyName(companyName),
-        companyReference: CompanyReference(companyReference),
-        companyAddress: CompanyAddress(companyAddress),
-        companyZipCode: CompanyZipCode(companyZipCode),
-        companyAddressCity: CompanyAddressCity(companyAddressCity),
-        companyCountry: CompanyCountry(companyCountry),
+        customerCompanyName: CustomerCompanyName(companyName as string),
+        companyReference: CompanyReference(companyReference as string),
+        companyAddress: CompanyAddress(companyAddress as string),
+        companyZipCode: CompanyZipCode(companyZipCode as string),
+        companyAddressCity: CompanyAddressCity(companyAddressCity as string),
+        companyCountry: CompanyCountry(companyCountry as string),
       }
-      const returnData = await editCompanyDetails(companyDetails)
+      const editedData = await editCompanyDetails(companyDetails)
 
       reply.status(201).send({
         message: 'Company details edited',
-        newData: returnData,
-        ...isDataUpdated(returnData),
+        newData: editedData,
+        ...isDataUpdated(editedData),
       })
     },
   )
