@@ -34,4 +34,3 @@ export type createCustomerReply = {}
 export type customerServiceCreate = {}
 
 export type CreateCustomerType = Static<typeof addCustomerBody>
-

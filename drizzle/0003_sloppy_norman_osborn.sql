@@ -1,1 +1,0 @@
-ALTER TABLE "drivers" RENAME COLUMN "isWarrantyCustomer" TO "driverISWarrantyDriver";

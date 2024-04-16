@@ -1,11 +1,11 @@
 {
-  "id": "7b302e49-c8f3-4eed-af97-f174634444e9",
+  "id": "119a8a86-7c1c-4919-b514-2620afad3899",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
   "tables": {
-    "companyCustomer": {
-      "name": "companyCustomer",
+    "companyCustomers": {
+      "name": "companyCustomers",
       "schema": "",
       "columns": {
         "customerOrgNumber": {
@@ -63,8 +63,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "companyCustomer_customerOrgNumber_unique": {
-          "name": "companyCustomer_customerOrgNumber_unique",
+        "companyCustomers_customerOrgNumber_unique": {
+          "name": "companyCustomers_customerOrgNumber_unique",
           "nullsNotDistinct": false,
           "columns": [
             "customerOrgNumber"
@@ -76,8 +76,8 @@
       "name": "drivers",
       "schema": "",
       "columns": {
-        "companyID": {
-          "name": "companyID",
+        "customerOrgNumber": {
+          "name": "customerOrgNumber",
           "type": "varchar(11)",
           "primaryKey": false,
           "notNull": false
@@ -88,8 +88,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "customerExternalNumber": {
-          "name": "customerExternalNumber",
+        "driverExternalNumber": {
+          "name": "driverExternalNumber",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false
@@ -101,8 +101,8 @@
           "notNull": true,
           "default": false
         },
-        "isWarrantyCustomer": {
-          "name": "isWarrantyCustomer",
+        "driverISWarrantyDriver": {
+          "name": "driverISWarrantyDriver",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -133,35 +133,35 @@
           "primaryKey": false,
           "notNull": true
         },
-        "phone": {
-          "name": "phone",
+        "driverPhoneNumber": {
+          "name": "driverPhoneNumber",
           "type": "varchar(32)",
           "primaryKey": false,
           "notNull": true
         },
-        "customerAddress": {
-          "name": "customerAddress",
+        "driverAddress": {
+          "name": "driverAddress",
           "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "customerZipCode": {
-          "name": "customerZipCode",
+        "driverZipCode": {
+          "name": "driverZipCode",
           "type": "varchar(16)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "customerAddressCity": {
-          "name": "customerAddressCity",
+        "driverAddressCity": {
+          "name": "driverAddressCity",
           "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "customerCountry": {
-          "name": "customerCountry",
+        "driverCountry": {
+          "name": "driverCountry",
           "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "driverHasCard": {
           "name": "driverHasCard",
@@ -172,10 +172,15 @@
         },
         "driverCardValidTo": {
           "name": "driverCardValidTo",
-          "type": "timestamp",
+          "type": "date",
           "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
+          "notNull": false
+        },
+        "driverCardNumber": {
+          "name": "driverCardNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
         },
         "driverKeyNumber": {
           "name": "driverKeyNumber",
@@ -212,17 +217,17 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "drivers_companyID_companyCustomer_customerOrgNumber_fk": {
-          "name": "drivers_companyID_companyCustomer_customerOrgNumber_fk",
+        "drivers_customerOrgNumber_companyCustomers_customerOrgNumber_fk": {
+          "name": "drivers_customerOrgNumber_companyCustomers_customerOrgNumber_fk",
           "tableFrom": "drivers",
-          "tableTo": "companyCustomer",
+          "tableTo": "companyCustomers",
           "columnsFrom": [
-            "companyID"
+            "customerOrgNumber"
           ],
           "columnsTo": [
             "customerOrgNumber"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

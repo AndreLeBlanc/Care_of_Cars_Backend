@@ -2,13 +2,34 @@ import { FastifyInstance } from 'fastify'
 import customersConfig from './customers.config.js'
 import { CreateCustomerType, addCustomerBody } from './customerSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
-import { createCompany, CustomerOrgNumber,
+import {
+  createCompany,
+  CustomerOrgNumber,
   CustomerCompanyName,
   CompanyReference,
   CompanyAddress,
   CompanyZipCode,
   CompanyAddressCity,
-  CompanyCountry } from '../../services/customerService.js',
+  CompanyCountry,
+  DriverExternalNumber,
+  DriverGDPRAccept,
+  DriverISWarrantyCustomer,
+  DriverAcceptsMarketing,
+  DriverFirstName,
+  DriverLastName,
+  DriverEmail,
+  DriverPhoneNumber,
+  DriverAddress,
+  DriverZipCode,
+  DriverAddressCity,
+  DriverCountry,
+  DriverHasCard,
+  DriverCardValidTo,
+  CustomerCardNumber,
+  DriverKeyNumber,
+  DriverNotesShared,
+  DriverNotes,
+} from '../../services/customerService.js'
 
 export const customers = async (fastify: FastifyInstance) => {
   //Create Customers
@@ -32,8 +53,8 @@ export const customers = async (fastify: FastifyInstance) => {
       const { body } = req
 
       const {
-        customerOrgNumber,
-        customerCompanyName,
+        companyOrgNumber,
+        companyName,
         companyAddress,
         companyAddressCity,
         companyCountry,
@@ -60,33 +81,34 @@ export const customers = async (fastify: FastifyInstance) => {
       } = body
 
       const companyDetails = {
-        customerOrgNumber: CustomerOrgNumber(customerOrgNumber),
-        customerCompanyName: CustomerCompanyName(customerCompanyName),
+        customerOrgNumber: CustomerOrgNumber(companyOrgNumber),
+        customerCompanyName: CustomerCompanyName(companyName),
         companyReference: CompanyReference(companyReference),
         companyAddress: CompanyAddress(companyAddress),
         companyZipCode: CompanyZipCode(companyZipCode),
         companyAddressCity: CompanyAddressCity(companyAddressCity),
-        companyCountry: CompanyCountry(companyCountry)}
+        companyCountry: CompanyCountry(companyCountry),
+      }
 
       const driverDetails = {
-        driverExternalNumber,
-        driverGDPRAccept,
-        driverISWarrantyDriver,
-        driverAcceptsMarketing,
-        driverFirstName,
-        driverLastName,
-        driverEmail,
-        driverPhoneNumber,
-        driverAddress,
-        driverZipCode,
-        driverAddressCity,
-        driverCountry,
-        driverHasCard,
-        driverCardNumber,
-        driverCardValidTo,
-        driverKeyNumber,
-        driverNotesShared,
-        driverNotes,
+        driverExternalNumber: DriverExternalNumber(driverExternalNumber),
+        driverGDPRAccept: DriverGDPRAccept(driverGDPRAccept),
+        driverISWarrantyDriver: DriverISWarrantyCustomer(driverISWarrantyDriver),
+        driverAcceptsMarketing: DriverAcceptsMarketing(driverAcceptsMarketing),
+        driverFirstName: DriverFirstName(driverFirstName),
+        driverLastName: DriverLastName(driverLastName),
+        driverEmail: DriverEmail(driverEmail),
+        driverPhoneNumber: DriverPhoneNumber(driverPhoneNumber),
+        driverAddress: DriverAddress(driverAddress),
+        driverZipCode: DriverZipCode(driverZipCode),
+        driverAddressCity: DriverAddressCity(driverAddressCity),
+        driverHasCard: DriverHasCard(driverHasCard),
+        driverCardValidTo: DriverCardValidTo(driverCardValidTo as any),
+        driverCardNumber: CustomerCardNumber(driverCardNumber),
+        driverKeyNumber: DriverKeyNumber(driverKeyNumber),
+        driverNotesShared: DriverNotesShared(driverNotesShared),
+        driverNotes: DriverNotes(driverNotes),
+        driverCountry: DriverCountry(driverCountry),
       }
       const returnValue = await createCompany(companyDetails, driverDetails)
       rep.status(201).send(returnValue)

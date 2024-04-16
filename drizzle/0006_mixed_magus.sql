@@ -1,1 +1,0 @@
-ALTER TABLE "drivers" ADD COLUMN "driverCardNumber" varchar(256);

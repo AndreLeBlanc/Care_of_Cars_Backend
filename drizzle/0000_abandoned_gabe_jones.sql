@@ -4,7 +4,7 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "companyCustomer" (
+CREATE TABLE IF NOT EXISTS "companyCustomers" (
 	"customerOrgNumber" varchar(11) PRIMARY KEY NOT NULL,
 	"customerComapanyName" varchar(255) NOT NULL,
 	"customerAddress" varchar(256),
@@ -13,26 +13,27 @@ CREATE TABLE IF NOT EXISTS "companyCustomer" (
 	"customerCountry" varchar(256),
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "companyCustomer_customerOrgNumber_unique" UNIQUE("customerOrgNumber")
+	CONSTRAINT "companyCustomers_customerOrgNumber_unique" UNIQUE("customerOrgNumber")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "drivers" (
-	"companyID" varchar(11),
+	"customerOrgNumber" varchar(11),
 	"driverID" serial PRIMARY KEY NOT NULL,
-	"customerExternalNumber" varchar(256),
+	"driverExternalNumber" varchar(256),
 	"driverGDPRAccept" boolean DEFAULT false NOT NULL,
-	"isWarrantyCustomer" boolean DEFAULT false NOT NULL,
+	"driverISWarrantyDriver" boolean DEFAULT false NOT NULL,
 	"driverAcceptsMarketing" boolean DEFAULT false NOT NULL,
 	"driverFirstName" varchar(128) NOT NULL,
 	"driverLastName" varchar(128) NOT NULL,
 	"driverEmail" varchar(256) NOT NULL,
-	"phone" varchar(32) NOT NULL,
-	"customerAddress" varchar(256),
-	"customerZipCode" varchar(16),
-	"customerAddressCity" varchar(256),
-	"customerCountry" varchar(256),
+	"driverPhoneNumber" varchar(32) NOT NULL,
+	"driverAddress" varchar(256) NOT NULL,
+	"driverZipCode" varchar(16) NOT NULL,
+	"driverAddressCity" varchar(256) NOT NULL,
+	"driverCountry" varchar(256) NOT NULL,
 	"driverHasCard" boolean DEFAULT false,
-	"driverCardValidTo" timestamp DEFAULT now(),
+	"driverCardValidTo" date,
+	"driverCardNumber" varchar(256),
 	"driverKeyNumber" varchar(256),
 	"driverNotesShared" varchar,
 	"driverNotes" varchar,
@@ -128,7 +129,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "drivers" ADD CONSTRAINT "drivers_companyID_companyCustomer_customerOrgNumber_fk" FOREIGN KEY ("companyID") REFERENCES "companyCustomer"("customerOrgNumber") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "drivers" ADD CONSTRAINT "drivers_customerOrgNumber_companyCustomers_customerOrgNumber_fk" FOREIGN KEY ("customerOrgNumber") REFERENCES "companyCustomers"("customerOrgNumber") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

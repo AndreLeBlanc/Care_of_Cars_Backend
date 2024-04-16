@@ -165,6 +165,7 @@ export const companyCustomers = pgTable('companyCustomers', {
 export const drivers = pgTable('drivers', {
   customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).references(
     () => companyCustomers.customerOrgNumber,
+    { onDelete: 'cascade' },
   ),
   driverID: serial('driverID').primaryKey().unique(),
   driverExternalNumber: varchar('driverExternalNumber', { length: 256 }),
