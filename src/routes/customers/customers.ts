@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify'
-import customersConfig from './customers.config.js'
 import { CreateCustomerType, addCustomerBody } from './customerSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
 import {
@@ -34,7 +33,7 @@ import {
 export const customers = async (fastify: FastifyInstance) => {
   //Create Customers
   fastify.post<{ Body: CreateCustomerType; Reply: object }>(
-    customersConfig.endpoints.v1.createCustomer,
+    '/',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)

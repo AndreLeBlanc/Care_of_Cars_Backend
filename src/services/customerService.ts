@@ -186,7 +186,7 @@ export async function createCompanyDriver(
       driverAddressCity: driver.driverAddressCity,
       driverCountry: driver.driverCountry,
       driverHasCard: driver.driverHasCard,
-      driverCardValidTo: driver.driverCardValidTo,
+      driverCardValidTo: new Date(driver.driverCardValidTo),
       driverCardNumber: driver.driverCardNumber,
       driverKeyNumber: driver.driverKeyNumber,
       driverNotesShared: driver.driverNotesShared,
