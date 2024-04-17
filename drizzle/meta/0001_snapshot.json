@@ -1,6 +1,6 @@
 {
-  "id": "77dbc691-f427-49b4-a168-753c4ef5064e",
-  "prevId": "43fbb7c7-2291-42b6-ae33-a829a1528720",
+  "id": "bde25e2f-f7e9-448a-b5d0-03af9f461a16",
+  "prevId": "949d0f25-3b5b-43d6-8441-9caabb0b7c81",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -81,6 +81,12 @@
           "type": "varchar(11)",
           "primaryKey": false,
           "notNull": false
+        },
+        "driverId": {
+          "name": "driverId",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
         },
         "driverExternalNumber": {
           "name": "driverExternalNumber",
@@ -227,6 +233,13 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "drivers_driverId_unique": {
+          "name": "drivers_driverId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "driverId"
+          ]
+        },
         "drivers_driverEmail_unique": {
           "name": "drivers_driverEmail_unique",
           "nullsNotDistinct": false,

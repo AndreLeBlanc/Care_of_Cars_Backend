@@ -278,3 +278,13 @@ export async function editCompanyDetails(company: Company): Promise<Company | un
       }
     : undefined
 }
+
+export async function deleteCompany(
+  orgNumber: CustomerOrgNumber,
+): Promise<CustomerOrgNumber | undefined> {
+  const [deletedData] = await db
+    .delete(companycustomers)
+    .where(eq(companycustomers.customerOrgNumber, orgNumber))
+    .returning({ deletedOrgNumber: companycustomers.customerOrgNumber })
+  return deletedData ? CustomerOrgNumber(deletedData.deletedOrgNumber) : undefined
+}

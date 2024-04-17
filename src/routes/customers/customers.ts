@@ -3,6 +3,8 @@ import {
   CreateCustomerType,
   PatchCompanyType,
   addCustomerBody,
+  getCompanyByOrgNumber,
+  getCompanyByOrgNumberType,
   patchCompanyBody,
 } from './customerSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
@@ -36,8 +38,8 @@ import {
   CustomerCompanyCreate,
   DriverCreate,
   editCompanyDetails,
+  deleteCompany,
 } from '../../services/customerService.js'
-import { isDataUpdated } from '../../utils/helper.js'
 
 export const customers = async (fastify: FastifyInstance) => {
   //Create Customers
@@ -123,7 +125,6 @@ export const customers = async (fastify: FastifyInstance) => {
       return rep.status(201).send({
         message: 'company / driver created',
         data: createdData,
-        ...isDataUpdated(createdData),
       })
     },
   )
@@ -133,7 +134,7 @@ export const customers = async (fastify: FastifyInstance) => {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = PermissionTitle('update_permission')
+        const permissionName: PermissionTitle = PermissionTitle('update_company')
         fastify.authorize(request, reply, permissionName)
         done()
         return reply
@@ -166,8 +167,33 @@ export const customers = async (fastify: FastifyInstance) => {
       reply.status(201).send({
         message: 'Company details edited',
         newData: editedData,
-        ...isDataUpdated(editedData),
       })
+    },
+  )
+
+  //Delete Company and drivers
+  fastify.delete<{ Params: getCompanyByOrgNumberType }>(
+    '/:orgNumber',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('delete_company')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: getCompanyByOrgNumber,
+      },
+    },
+    async (request, reply) => {
+      const { orgNumber } = request.params
+      const deletedCompany: CustomerOrgNumber | undefined = await deleteCompany(
+        CustomerOrgNumber(orgNumber),
+      )
+      if (deletedCompany == null) {
+        return reply.status(404).send({ message: "Company doesn't exist!" })
+      }
+      return reply.status(200).send({ message: 'Company deleted', orgNumber: deletedCompany })
     },
   )
 }

@@ -24,7 +24,7 @@ export const addCustomerBody = Type.Object({
   driverCountry: Type.String(),
   driverHasCard: Type.Boolean(),
   driverCardNumber: Type.String(),
-  driverCardValidTo: Type.Date(),
+  driverCardValidTo: Type.String(),
   driverKeyNumber: Type.String(),
   driverNotesShared: Type.String(),
   driverNotes: Type.String(),
@@ -42,5 +42,9 @@ export const patchCompanyBody = Type.Object({
   companyCountry: Type.Optional(Type.String()),
 })
 
+export const getCompanyByOrgNumber = Type.Object({
+  orgNumber: Type.String(),
+})
+export type getCompanyByOrgNumberType = Static<typeof getCompanyByOrgNumber>
 export type CreateCustomerType = Static<typeof addCustomerBody>
 export type PatchCompanyType = Static<typeof patchCompanyBody>
