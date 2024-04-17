@@ -7,10 +7,10 @@ END $$;
 CREATE TABLE IF NOT EXISTS "companycustomers" (
 	"customerOrgNumber" varchar(11) PRIMARY KEY NOT NULL,
 	"customerComapanyName" varchar(255) NOT NULL,
-	"customerAddress" varchar(256),
-	"customerZipCode" varchar(16),
-	"customerAddressCity" varchar(256),
-	"customerCountry" varchar(256),
+	"companyAddress" varchar(256),
+	"companyZipCode" varchar(16),
+	"companyAddressCity" varchar(256),
+	"companyCountry" varchar(256),
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "companycustomers_customerOrgNumber_unique" UNIQUE("customerOrgNumber")
@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS "companycustomers" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "drivers" (
 	"customerOrgNumber" varchar(11),
-	"driverId" serial PRIMARY KEY NOT NULL,
 	"driverExternalNumber" varchar(256),
+	"companyReference" varchar(256),
 	"driverGDPRAccept" boolean DEFAULT false NOT NULL,
 	"driverISWarrantyDriver" boolean DEFAULT false NOT NULL,
 	"driverAcceptsMarketing" boolean DEFAULT false NOT NULL,
@@ -39,7 +39,6 @@ CREATE TABLE IF NOT EXISTS "drivers" (
 	"driverNotes" varchar,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "drivers_driverId_unique" UNIQUE("driverId"),
 	CONSTRAINT "drivers_driverEmail_unique" UNIQUE("driverEmail")
 );
 --> statement-breakpoint
@@ -52,7 +51,6 @@ CREATE TABLE IF NOT EXISTS "permissions" (
 	CONSTRAINT "permissions_permissionID_unique" UNIQUE("permissionID"),
 	CONSTRAINT "permissions_permissionName_unique" UNIQUE("permissionName")
 );
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "roleToPermissions" (
 	"roleID" integer,
 	"permissionID" integer,

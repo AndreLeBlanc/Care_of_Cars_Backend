@@ -154,10 +154,10 @@ export const serviceVariantsRelations = relations(serviceVariants, ({ one }) => 
 export const companycustomers = pgTable('companycustomers', {
   customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).primaryKey().unique(),
   customerComapanyName: varchar('customerComapanyName', { length: 255 }).notNull(),
-  customerAddress: varchar('customerAddress', { length: 256 }),
-  customerZipCode: varchar('customerZipCode', { length: 16 }),
-  customerAddressCity: varchar('customerAddressCity', { length: 256 }),
-  customerCountry: varchar('customerCountry', { length: 256 }),
+  companyAddress: varchar('companyAddress', { length: 256 }),
+  companyZipCode: varchar('companyZipCode', { length: 16 }),
+  companyAddressCity: varchar('companyAddressCity', { length: 256 }),
+  companyCountry: varchar('companyCountry', { length: 256 }),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
@@ -168,6 +168,7 @@ export const drivers = pgTable('drivers', {
     { onDelete: 'cascade' },
   ),
   driverExternalNumber: varchar('driverExternalNumber', { length: 256 }),
+  companyReference: varchar('companyReference', { length: 256 }),
   driverGDPRAccept: boolean('driverGDPRAccept').default(false).notNull(),
   driverISWarrantyDriver: boolean('driverISWarrantyDriver').default(false).notNull(),
   driverAcceptsMarketing: boolean('driverAcceptsMarketing').default(false).notNull(),

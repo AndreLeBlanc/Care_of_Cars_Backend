@@ -13,7 +13,7 @@ export type DriverAcceptsMarketing = Brand<boolean, 'driverAcceptsMarketing'>
 export const DriverAcceptsMarketing = make<DriverAcceptsMarketing>()
 export type CustomerCompanyName = Brand<string, 'customerCompanyName'>
 export const CustomerCompanyName = make<CustomerCompanyName>()
-export type CustomerOrgNumber = Brand<string | null, 'customerOrgNumber'>
+export type CustomerOrgNumber = Brand<string, 'customerOrgNumber'>
 export const CustomerOrgNumber = make<CustomerOrgNumber>()
 export type DriverFirstName = Brand<string, 'driverFirstName'>
 export const DriverFirstName = make<DriverFirstName>()
@@ -27,19 +27,19 @@ export type DriverEmail = Brand<string, 'driverEmail'>
 export const DriverEmail = make<DriverEmail>()
 export type DriverPhoneNumber = Brand<string, 'DriverPhoneNumber'>
 export const DriverPhoneNumber = make<DriverPhoneNumber>()
-export type CompanyAddress = Brand<string | null, 'companyAddress'>
+export type CompanyAddress = Brand<string, 'companyAddress'>
 export const CompanyAddress = make<CompanyAddress>()
 export type DriverAddress = Brand<string, 'driverAddress'>
 export const DriverAddress = make<DriverAddress>()
-export type CompanyZipCode = Brand<string | null, 'companyZipCode'>
+export type CompanyZipCode = Brand<string, 'companyZipCode'>
 export const CompanyZipCode = make<CompanyZipCode>()
 export type DriverZipCode = Brand<string, 'driverZipCode'>
 export const DriverZipCode = make<DriverZipCode>()
-export type CompanyAddressCity = Brand<string | null, 'companyAddressCity'>
+export type CompanyAddressCity = Brand<string, 'companyAddressCity'>
 export const CompanyAddressCity = make<CompanyAddressCity>()
 export type DriverAddressCity = Brand<string, 'driverAddressCity'>
 export const DriverAddressCity = make<DriverAddressCity>()
-export type CompanyCountry = Brand<string | null, 'companyCountry'>
+export type CompanyCountry = Brand<string, 'companyCountry'>
 export const CompanyCountry = make<CompanyCountry>()
 export type DriverCountry = Brand<string, 'driverCountry'>
 export const DriverCountry = make<DriverCountry>()
@@ -59,7 +59,6 @@ export const DriverNotes = make<DriverNotes>()
 export type CustomerCompanyCreate = {
   customerOrgNumber: CustomerOrgNumber
   customerCompanyName: CustomerCompanyName
-  companyReference?: CompanyReference
   companyAddress?: CompanyAddress
   companyZipCode?: CompanyZipCode
   companyAddressCity?: CompanyAddressCity
@@ -69,6 +68,7 @@ export type CustomerCompanyCreate = {
 export type DriverCreate = {
   customerOrgNumber?: CustomerOrgNumber
   driverExternalNumber?: DriverExternalNumber
+  companyReference?: CompanyReference
   driverGDPRAccept: DriverGDPRAccept
   driverISWarrantyDriver: DriverISWarrantyCustomer
   driverAcceptsMarketing: DriverAcceptsMarketing
@@ -112,10 +112,10 @@ export async function createCompany(
     .select({
       customerOrgNumber: companycustomers.customerOrgNumber,
       customerComapanyName: companycustomers.customerComapanyName,
-      companyAddress: companycustomers.customerAddress,
-      companyZipCode: companycustomers.customerZipCode,
-      companyAddressCity: companycustomers.customerAddressCity,
-      customerCompanyCountry: companycustomers.customerCountry,
+      companyAddress: companycustomers.companyAddress,
+      companyZipCode: companycustomers.companyZipCode,
+      companyAddressCity: companycustomers.companyAddressCity,
+      companyCountry: companycustomers.companyCountry,
       createdAt: companycustomers.createdAt,
       updatedAt: companycustomers.updatedAt,
     })
@@ -126,20 +126,20 @@ export async function createCompany(
     ;[existingCompany] = await db
       .insert(companycustomers)
       .values({
-        customerComapanyName: company.customerCompanyName,
         customerOrgNumber: company.customerOrgNumber,
-        customerAddress: company.companyAddress,
-        customerAddressCity: company.companyAddressCity,
-        customerCountry: company.companyCountry,
-        customerZipCode: company.companyZipCode,
+        customerComapanyName: company.customerCompanyName,
+        companyAddress: company.companyAddress,
+        companyAddressCity: company.companyAddressCity,
+        companyCountry: company.companyCountry,
+        companyZipCode: company.companyZipCode,
       })
       .returning({
         customerOrgNumber: companycustomers.customerOrgNumber,
         customerComapanyName: companycustomers.customerComapanyName,
-        companyAddress: companycustomers.customerAddress,
-        companyZipCode: companycustomers.customerZipCode,
-        companyAddressCity: companycustomers.customerAddressCity,
-        customerCompanyCountry: companycustomers.customerCountry,
+        companyAddress: companycustomers.companyAddress,
+        companyZipCode: companycustomers.companyZipCode,
+        companyAddressCity: companycustomers.companyAddressCity,
+        companyCountry: companycustomers.companyCountry,
         createdAt: companycustomers.createdAt,
         updatedAt: companycustomers.updatedAt,
       })
@@ -147,10 +147,18 @@ export async function createCompany(
   const existingCompanyBranded: Company = {
     customerOrgNumber: CustomerOrgNumber(existingCompany.customerOrgNumber),
     customerCompanyName: CustomerCompanyName(existingCompany.customerComapanyName),
-    companyAddress: CompanyAddress(existingCompany.companyAddress),
-    companyZipCode: CompanyZipCode(existingCompany.companyZipCode),
-    companyAddressCity: CompanyAddressCity(existingCompany.companyAddressCity),
-    companyCountry: CompanyCountry(existingCompany.customerCompanyCountry),
+    companyAddress: existingCompany.companyAddress
+      ? CompanyAddress(existingCompany.companyAddress)
+      : undefined,
+    companyAddressCity: existingCompany.companyAddressCity
+      ? CompanyAddressCity(existingCompany.companyAddressCity)
+      : undefined,
+    companyCountry: existingCompany.companyCountry
+      ? CompanyCountry(existingCompany.companyCountry)
+      : undefined,
+    companyZipCode: existingCompany.companyZipCode
+      ? CompanyZipCode(existingCompany.companyZipCode)
+      : undefined,
     createdAt: existingCompany.createdAt,
     updatedAt: existingCompany.updatedAt,
   }
@@ -215,7 +223,9 @@ export async function createCompanyDriver(
     })
   return newDriver
     ? {
-        customerOrgNumber: CustomerOrgNumber(newDriver.customerOrgNumber),
+        customerOrgNumber: newDriver.customerOrgNumber
+          ? CustomerOrgNumber(newDriver.customerOrgNumber)
+          : undefined,
         driverExternalNumber: DriverExternalNumber(newDriver.driverExternalNumber),
         driverGDPRAccept: DriverGDPRAccept(newDriver.driverGDPRAccept),
         driverISWarrantyDriver: DriverISWarrantyCustomer(newDriver.driverISWarrantyDriver),
@@ -246,33 +256,41 @@ export async function editCompanyDetails(company: Company): Promise<Company | un
   const [updatedCompany] = await db
     .update(companycustomers)
     .set({
-      customerAddress: company.companyAddress,
-      customerAddressCity: company.companyAddressCity,
+      companyAddress: company.companyAddress,
+      companyAddressCity: company.companyAddressCity,
       customerComapanyName: company.customerCompanyName,
-      customerCountry: company.companyCountry,
-      customerZipCode: company.companyZipCode,
+      companyCountry: company.companyCountry,
+      companyZipCode: company.companyZipCode,
       updatedAt: new Date(),
     })
     .where(eq(companycustomers.customerOrgNumber, company.customerOrgNumber))
     .returning({
-      customerAddress: companycustomers.customerAddress,
-      customerAddressCity: companycustomers.customerAddressCity,
-      customerComapanyName: companycustomers.customerComapanyName,
-      customerCountry: companycustomers.customerCountry,
-      customerZipCode: companycustomers.customerZipCode,
       customerOrgNumber: companycustomers.customerOrgNumber,
+      customerComapanyName: companycustomers.customerComapanyName,
+      customerAddress: companycustomers.companyAddress,
+      customerZipCode: companycustomers.companyZipCode,
+      customerAddressCity: companycustomers.companyAddressCity,
+      customerCountry: companycustomers.companyCountry,
       createdAt: companycustomers.createdAt,
       updatedAt: companycustomers.updatedAt,
     })
 
   return updatedCompany
     ? {
-        companyAddress: CompanyAddress(updatedCompany.customerAddress),
-        companyAddressCity: CompanyAddressCity(updatedCompany.customerAddressCity),
-        customerCompanyName: CustomerCompanyName(updatedCompany.customerComapanyName),
-        companyCountry: CompanyCountry(updatedCompany.customerCountry),
-        companyZipCode: CompanyZipCode(updatedCompany.customerZipCode),
         customerOrgNumber: CustomerOrgNumber(updatedCompany.customerOrgNumber),
+        customerCompanyName: CustomerCompanyName(updatedCompany.customerComapanyName),
+        companyAddress: updatedCompany.customerAddress
+          ? CompanyAddress(updatedCompany.customerAddress)
+          : undefined,
+        companyAddressCity: updatedCompany.customerAddressCity
+          ? CompanyAddressCity(updatedCompany.customerAddressCity)
+          : undefined,
+        companyCountry: updatedCompany.customerCountry
+          ? CompanyCountry(updatedCompany.customerCountry)
+          : undefined,
+        companyZipCode: updatedCompany.customerZipCode
+          ? CompanyZipCode(updatedCompany.customerZipCode)
+          : undefined,
         createdAt: updatedCompany.createdAt,
         updatedAt: updatedCompany.updatedAt,
       }

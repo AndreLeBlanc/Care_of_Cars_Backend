@@ -24,18 +24,15 @@ export const addCustomerBody = Type.Object({
   driverCountry: Type.String(),
   driverHasCard: Type.Boolean(),
   driverCardNumber: Type.String(),
-  driverCardValidTo: Type.String(),
+  driverCardValidTo: Type.String({ format: 'date' }),
   driverKeyNumber: Type.String(),
   driverNotesShared: Type.String(),
   driverNotes: Type.String(),
 })
 
 export const patchCompanyBody = Type.Object({
-  companyOrgNumber: Type.String(),
-  companyName: Type.Optional(Type.String()),
-  companyReference: Type.Optional(Type.String()),
-  companyEmail: Type.Optional(Type.String({ format: 'email' })),
-  companyPhoneNumber: Type.Optional(Type.String()),
+  customerOrgNumber: Type.String(),
+  customerCompanyName: Type.String(),
   companyAddress: Type.Optional(Type.String()),
   companyZipCode: Type.Optional(Type.String()),
   companyAddressCity: Type.Optional(Type.String()),
