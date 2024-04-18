@@ -161,11 +161,11 @@ export const customers = async (fastify: FastifyInstance) => {
         companyAddressCity: companyAddressCity ? CompanyAddressCity(companyAddressCity) : undefined,
         companyCountry: companyCountry ? CompanyCountry(companyCountry) : undefined,
       }
-      const editedDriver = await editCompanyDetails(companyDetails)
+      const editedCompany: Company | undefined = await editCompanyDetails(companyDetails)
 
       reply.status(201).send({
         message: 'Company details edited',
-        editedDriver,
+        editedCompany,
       })
     },
   )
