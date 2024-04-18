@@ -90,7 +90,7 @@ export type DriverCreate = {
 
 export type Company = CustomerCompanyCreate & {
   createdAt: Date
-  updatedAt?: Date
+  updatedAt: Date
 }
 export type Driver = DriverCreate & {
   createdAt: Date
