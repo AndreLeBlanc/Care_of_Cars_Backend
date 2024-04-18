@@ -116,7 +116,7 @@ export const customers = async (fastify: FastifyInstance) => {
         driverCountry: DriverCountry(driverCountry),
       }
 
-      const createdData:
+      const createdDriver:
         | {
             company: CustomerCompanyCreate
             driver: DriverCreate
@@ -124,7 +124,7 @@ export const customers = async (fastify: FastifyInstance) => {
         | undefined = await createCompany(companyDetails, driverDetails)
       return rep.status(201).send({
         message: 'company / driver created',
-        data: createdData,
+        data: createdDriver,
       })
     },
   )
@@ -162,11 +162,11 @@ export const customers = async (fastify: FastifyInstance) => {
         companyAddressCity: CompanyAddressCity(companyAddressCity as string),
         companyCountry: CompanyCountry(companyCountry as string),
       }
-      const editedData = await editCompanyDetails(companyDetails)
+      const editedDriver = await editCompanyDetails(companyDetails)
 
       reply.status(201).send({
         message: 'Company details edited',
-        newData: editedData,
+        editedDriver,
       })
     },
   )

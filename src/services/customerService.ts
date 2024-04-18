@@ -89,7 +89,7 @@ export type DriverCreate = {
 }
 
 export type Company = CustomerCompanyCreate & {
-  createdAt?: Date
+  createdAt: Date
   updatedAt?: Date
 }
 export type Driver = DriverCreate & {
@@ -103,8 +103,8 @@ export async function createCompany(
   driver: DriverCreate,
 ): Promise<
   | {
-      company: CustomerCompanyCreate
-      driver: DriverCreate
+      company: Company
+      driver: Driver
     }
   | undefined
 > {
@@ -154,7 +154,7 @@ export async function createCompany(
     createdAt: existingCompany.createdAt,
     updatedAt: existingCompany.updatedAt,
   }
-  const createdDriver: DriverCreate | undefined = await createCompanyDriver(
+  const createdDriver: Driver | undefined = await createCompanyDriver(
     company.customerOrgNumber,
     driver,
   )
@@ -168,7 +168,7 @@ export async function createCompany(
 export async function createCompanyDriver(
   customerOrgNumber: CustomerOrgNumber,
   driver: DriverCreate,
-): Promise<DriverCreate | undefined> {
+): Promise<Driver | undefined> {
   const [newDriver] = await db
     .insert(drivers)
     .values({
@@ -212,6 +212,8 @@ export async function createCompanyDriver(
       driverKeyNumber: drivers.driverKeyNumber,
       driverNotesShared: drivers.driverNotesShared,
       driverNotes: drivers.driverNotes,
+      createdAt: drivers.createdAt,
+      updatedAt: drivers.updatedAt,
     })
   return newDriver
     ? {
@@ -234,6 +236,8 @@ export async function createCompanyDriver(
         driverKeyNumber: DriverKeyNumber(newDriver.driverKeyNumber),
         driverNotesShared: DriverNotesShared(newDriver.driverNotesShared),
         driverNotes: DriverNotes(newDriver.driverNotes),
+        createdAt: newDriver.createdAt,
+        updatedAt: newDriver.updatedAt,
       }
     : undefined
 }
@@ -242,7 +246,9 @@ export async function createPrivateDriver(driver: DriverCreate): Promise<DriverC
   return Promise.resolve(driver)
 }
 
-export async function editCompanyDetails(company: Company): Promise<Company | undefined> {
+export async function editCompanyDetails(
+  company: CustomerCompanyCreate,
+): Promise<Company | undefined> {
   const [updatedCompany] = await db
     .update(companycustomers)
     .set({
