@@ -1,9 +1,247 @@
 {
-  "id": "847962eb-404d-4b7a-932a-73a9bec2ebb1",
+  "id": "85bc2904-2ad2-471d-90b0-62ae08af2f5a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
   "tables": {
+    "companycustomers": {
+      "name": "companycustomers",
+      "schema": "",
+      "columns": {
+        "customerOrgNumber": {
+          "name": "customerOrgNumber",
+          "type": "varchar(11)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "customerComapanyName": {
+          "name": "customerComapanyName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "companyAddress": {
+          "name": "companyAddress",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "companyZipCode": {
+          "name": "companyZipCode",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "companyAddressCity": {
+          "name": "companyAddressCity",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "companyCountry": {
+          "name": "companyCountry",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "companycustomers_customerOrgNumber_unique": {
+          "name": "companycustomers_customerOrgNumber_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "customerOrgNumber"
+          ]
+        }
+      }
+    },
+    "drivers": {
+      "name": "drivers",
+      "schema": "",
+      "columns": {
+        "customerOrgNumber": {
+          "name": "customerOrgNumber",
+          "type": "varchar(11)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverExternalNumber": {
+          "name": "driverExternalNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "companyReference": {
+          "name": "companyReference",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverGDPRAccept": {
+          "name": "driverGDPRAccept",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "driverISWarrantyDriver": {
+          "name": "driverISWarrantyDriver",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "driverAcceptsMarketing": {
+          "name": "driverAcceptsMarketing",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "driverFirstName": {
+          "name": "driverFirstName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverLastName": {
+          "name": "driverLastName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverEmail": {
+          "name": "driverEmail",
+          "type": "varchar(256)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "driverPhoneNumber": {
+          "name": "driverPhoneNumber",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverAddress": {
+          "name": "driverAddress",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverZipCode": {
+          "name": "driverZipCode",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverAddressCity": {
+          "name": "driverAddressCity",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverCountry": {
+          "name": "driverCountry",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverHasCard": {
+          "name": "driverHasCard",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "driverCardValidTo": {
+          "name": "driverCardValidTo",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverCardNumber": {
+          "name": "driverCardNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverKeyNumber": {
+          "name": "driverKeyNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverNotesShared": {
+          "name": "driverNotesShared",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverNotes": {
+          "name": "driverNotes",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "drivers_customerOrgNumber_companycustomers_customerOrgNumber_fk": {
+          "name": "drivers_customerOrgNumber_companycustomers_customerOrgNumber_fk",
+          "tableFrom": "drivers",
+          "tableTo": "companycustomers",
+          "columnsFrom": [
+            "customerOrgNumber"
+          ],
+          "columnsTo": [
+            "customerOrgNumber"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "drivers_driverEmail_unique": {
+          "name": "drivers_driverEmail_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "driverEmail"
+          ]
+        }
+      }
+    },
     "permissions": {
       "name": "permissions",
       "schema": "",

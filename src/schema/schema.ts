@@ -4,6 +4,7 @@ import {
   text,
   timestamp,
   pgTable,
+  date,
   varchar,
   integer,
   primaryKey,
@@ -150,34 +151,38 @@ export const serviceVariantsRelations = relations(serviceVariants, ({ one }) => 
   service: one(services, { fields: [serviceVariants.serviceID], references: [services.serviceID] }),
 }))
 
-export const companyCustomer = pgTable('companyCustomer', {
+export const companycustomers = pgTable('companycustomers', {
   customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).primaryKey().unique(),
   customerComapanyName: varchar('customerComapanyName', { length: 255 }).notNull(),
-  customerAddress: varchar('customerAddress', { length: 256 }),
-  customerZipCode: varchar('customerZipCode', { length: 16 }),
-  customerAddressCity: varchar('customerAddressCity', { length: 256 }),
-  customerCountry: varchar('customerCountry', { length: 256 }),
+  companyAddress: varchar('companyAddress', { length: 256 }),
+  companyZipCode: varchar('companyZipCode', { length: 16 }),
+  companyAddressCity: varchar('companyAddressCity', { length: 256 }),
+  companyCountry: varchar('companyCountry', { length: 256 }),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
 export const drivers = pgTable('drivers', {
-  companyID: integer('companyID').references(() => companyCustomer.customerOrgNumber),
-  driverID: serial('driverID').primaryKey().unique(),
-  customerExternalNumber: varchar('customerExternalNumber', { length: 256 }),
+  customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).references(
+    () => companycustomers.customerOrgNumber,
+    { onDelete: 'cascade' },
+  ),
+  driverExternalNumber: varchar('driverExternalNumber', { length: 256 }),
+  companyReference: varchar('companyReference', { length: 256 }),
   driverGDPRAccept: boolean('driverGDPRAccept').default(false).notNull(),
-  isWarrantyCustomer: boolean('isWarrantyCustomer').default(false).notNull(),
+  driverISWarrantyDriver: boolean('driverISWarrantyDriver').default(false).notNull(),
   driverAcceptsMarketing: boolean('driverAcceptsMarketing').default(false).notNull(),
   driverFirstName: varchar('driverFirstName', { length: 128 }).notNull(),
   driverLastName: varchar('driverLastName', { length: 128 }).notNull(),
-  driverEmail: varchar('driverEmail', { length: 256 }).notNull(),
-  driverPhoneNumber: varchar('phone', { length: 32 }).notNull(),
-  driverAddress: varchar('customerAddress', { length: 256 }),
-  driverZipCode: varchar('customerZipCode', { length: 16 }),
-  driverAddressCity: varchar('customerAddressCity', { length: 256 }),
-  driverCountry: varchar('customerCountry', { length: 256 }),
+  driverEmail: varchar('driverEmail', { length: 256 }).primaryKey().unique(),
+  driverPhoneNumber: varchar('driverPhoneNumber', { length: 32 }).notNull(),
+  driverAddress: varchar('driverAddress', { length: 256 }).notNull(),
+  driverZipCode: varchar('driverZipCode', { length: 16 }).notNull(),
+  driverAddressCity: varchar('driverAddressCity', { length: 256 }).notNull(),
+  driverCountry: varchar('driverCountry', { length: 256 }).notNull(),
   driverHasCard: boolean('driverHasCard').default(false),
-  driverCardValidTo: timestamp('driverCardValidTo').defaultNow(),
+  driverCardValidTo: date('driverCardValidTo', { mode: 'date' }),
+  driverCardNumber: varchar('driverCardNumber', { length: 256 }),
   driverKeyNumber: varchar('driverKeyNumber', { length: 256 }),
   driverNotesShared: varchar('driverNotesShared'),
   driverNotes: varchar('driverNotes'),
@@ -185,6 +190,13 @@ export const drivers = pgTable('drivers', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
-export const companyCustomerRelations = relations(companyCustomer, ({ many }) => ({
+export const driverRelations = relations(drivers, ({ one }) => ({
+  companycustomers: one(companycustomers, {
+    fields: [drivers.customerOrgNumber],
+    references: [companycustomers.customerOrgNumber],
+  }),
+}))
+
+export const companycustomersRelations = relations(companycustomers, ({ many }) => ({
   drivers: many(drivers),
 }))
