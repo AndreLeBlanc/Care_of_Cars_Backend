@@ -1,5 +1,5 @@
 {
-  "id": "949d0f25-3b5b-43d6-8441-9caabb0b7c81",
+  "id": "85bc2904-2ad2-471d-90b0-62ae08af2f5a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -20,26 +20,26 @@
           "primaryKey": false,
           "notNull": true
         },
-        "customerAddress": {
-          "name": "customerAddress",
+        "companyAddress": {
+          "name": "companyAddress",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false
         },
-        "customerZipCode": {
-          "name": "customerZipCode",
+        "companyZipCode": {
+          "name": "companyZipCode",
           "type": "varchar(16)",
           "primaryKey": false,
           "notNull": false
         },
-        "customerAddressCity": {
-          "name": "customerAddressCity",
+        "companyAddressCity": {
+          "name": "companyAddressCity",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false
         },
-        "customerCountry": {
-          "name": "customerCountry",
+        "companyCountry": {
+          "name": "companyCountry",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false
@@ -82,14 +82,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "driverId": {
-          "name": "driverId",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "driverExternalNumber": {
           "name": "driverExternalNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "companyReference": {
+          "name": "companyReference",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false
@@ -233,13 +233,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "drivers_driverId_unique": {
-          "name": "drivers_driverId_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "driverId"
-          ]
-        },
         "drivers_driverEmail_unique": {
           "name": "drivers_driverEmail_unique",
           "nullsNotDistinct": false,

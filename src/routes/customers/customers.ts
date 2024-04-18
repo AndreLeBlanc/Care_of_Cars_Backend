@@ -145,22 +145,20 @@ export const customers = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const {
-        companyOrgNumber,
-        companyName,
+        customerOrgNumber,
+        customerCompanyName,
         companyAddress,
         companyAddressCity,
         companyCountry,
         companyZipCode,
-        companyReference,
       } = request.body
-      const companyDetails = {
-        customerOrgNumber: CustomerOrgNumber(companyOrgNumber),
-        customerCompanyName: CustomerCompanyName(companyName as string),
-        companyReference: CompanyReference(companyReference as string),
-        companyAddress: CompanyAddress(companyAddress as string),
-        companyZipCode: CompanyZipCode(companyZipCode as string),
-        companyAddressCity: CompanyAddressCity(companyAddressCity as string),
-        companyCountry: CompanyCountry(companyCountry as string),
+      const companyDetails: CustomerCompanyCreate = {
+        customerOrgNumber: CustomerOrgNumber(customerOrgNumber),
+        customerCompanyName: CustomerCompanyName(customerCompanyName),
+        companyAddress: companyAddress ? CompanyAddress(companyAddress) : undefined,
+        companyZipCode: companyZipCode ? CompanyZipCode(companyZipCode) : undefined,
+        companyAddressCity: companyAddressCity ? CompanyAddressCity(companyAddressCity) : undefined,
+        companyCountry: companyCountry ? CompanyCountry(companyCountry) : undefined,
       }
       const editedDriver = await editCompanyDetails(companyDetails)
 
