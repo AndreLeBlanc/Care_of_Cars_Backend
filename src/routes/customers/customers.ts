@@ -36,9 +36,10 @@ import {
   DriverNotesShared,
   DriverNotes,
   CustomerCompanyCreate,
-  DriverCreate,
   editCompanyDetails,
   deleteCompany,
+  Driver,
+  Company,
 } from '../../services/customerService.js'
 
 export const customers = async (fastify: FastifyInstance) => {
@@ -118,8 +119,8 @@ export const customers = async (fastify: FastifyInstance) => {
 
       const createdDriver:
         | {
-            company: CustomerCompanyCreate
-            driver: DriverCreate
+            company: Company
+            driver: Driver
           }
         | undefined = await createCompany(companyDetails, driverDetails)
       return rep.status(201).send({
