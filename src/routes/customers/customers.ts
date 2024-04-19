@@ -47,9 +47,9 @@ import {
   Driver,
   Company,
   deleteDriver,
-  // DriverCreate,
   editDriverDetails,
   createNewDriver,
+  DriverCreate,
 } from '../../services/customerService.js'
 
 export const customers = async (fastify: FastifyInstance) => {
@@ -315,42 +315,43 @@ export const customers = async (fastify: FastifyInstance) => {
         driverNotes,
       } = request.body
 
-      const driverDetails = {
+      const driverDetails: DriverCreate = {
         driverExternalNumber: driverExternalNumber
           ? DriverExternalNumber(driverExternalNumber)
           : undefined,
-        driverGDPRAccept: driverGDPRAccept ? DriverGDPRAccept(driverGDPRAccept) : undefined,
-        driverISWarrantyDriver: driverISWarrantyDriver
-          ? DriverISWarrantyCustomer(driverISWarrantyDriver)
-          : undefined,
-        driverAcceptsMarketing: driverAcceptsMarketing
-          ? DriverAcceptsMarketing(driverAcceptsMarketing)
-          : undefined,
-        driverFirstName: driverFirstName ? DriverFirstName(driverFirstName) : undefined,
-        driverLastName: driverLastName ? DriverLastName(driverLastName) : undefined,
-        driverEmail: driverLastName ? DriverEmail(driverEmail) : undefined,
-        driverPhoneNumber: driverPhoneNumber ? DriverPhoneNumber(driverPhoneNumber) : undefined,
-        driverAddress: driverAddress ? DriverAddress(driverAddress) : undefined,
-        driverZipCode: driverZipCode ? DriverZipCode(driverZipCode) : undefined,
-        driverAddressCity: driverAddressCity ? DriverAddressCity(driverAddressCity) : undefined,
-        driverHasCard: driverHasCard ? DriverHasCard(driverHasCard) : undefined,
+        driverGDPRAccept: DriverGDPRAccept(driverGDPRAccept),
+        driverISWarrantyDriver: DriverISWarrantyCustomer(driverISWarrantyDriver),
+        driverAcceptsMarketing: DriverAcceptsMarketing(driverAcceptsMarketing),
+        driverFirstName: DriverFirstName(driverFirstName),
+        driverLastName: DriverLastName(driverLastName),
+        driverEmail: DriverEmail(driverEmail),
+        driverPhoneNumber: DriverPhoneNumber(driverPhoneNumber),
+        driverAddress: DriverAddress(driverAddress),
+        driverZipCode: DriverZipCode(driverZipCode),
+        driverAddressCity: DriverAddressCity(driverAddressCity),
+        driverHasCard: DriverHasCard(driverHasCard),
+        driverNotes: DriverNotes(driverNotes),
+        driverCountry: DriverCountry(driverCountry),
         driverCardValidTo: driverCardValidTo
           ? DriverCardValidTo(new Date(driverCardValidTo))
           : undefined,
         driverCardNumber: driverCardNumber ? CustomerCardNumber(driverCardNumber) : undefined,
         driverKeyNumber: driverKeyNumber ? DriverKeyNumber(driverKeyNumber) : undefined,
         driverNotesShared: driverNotesShared ? DriverNotesShared(driverNotesShared) : undefined,
-        driverNotes: driverNotes ? DriverNotes(driverNotes) : undefined,
-        driverCountry: driverCountry ? DriverCountry(driverCountry) : undefined,
       }
-      const editedCompany: Driver | undefined =
-        //@ts-ignore //@Andre Please check
-        await editDriverDetails(driverDetails)
+      const editedCompany: Driver | undefined = await editDriverDetails(driverDetails)
 
-      reply.status(201).send({
-        message: 'Driver details edited',
-        editedCompany,
-      })
+      if (editedCompany) {
+        reply.status(201).send({
+          message: 'Driver details edited',
+          editedCompany,
+        })
+      } else {
+        reply.status(201).send({
+          message: 'Failed to edit drivers details',
+          editedCompany,
+        })
+      }
     },
   )
 
