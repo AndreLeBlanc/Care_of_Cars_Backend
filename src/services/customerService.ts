@@ -252,8 +252,81 @@ export async function createCompanyDriver(
     : undefined
 }
 
-export async function createPrivateDriver(driver: DriverCreate): Promise<DriverCreate> {
-  return Promise.resolve(driver)
+export async function createNewDriver(driver: DriverCreate): Promise<Driver | undefined> {
+  const [newDriver] = await db
+    .insert(drivers)
+    .values({
+      customerOrgNumber: driver.customerOrgNumber,
+      driverExternalNumber: driver.driverExternalNumber,
+      driverGDPRAccept: driver.driverGDPRAccept,
+      driverISWarrantyDriver: driver.driverISWarrantyDriver,
+      driverAcceptsMarketing: driver.driverAcceptsMarketing,
+      driverFirstName: driver.driverFirstName,
+      driverLastName: driver.driverLastName,
+      driverEmail: driver.driverEmail,
+      driverPhoneNumber: driver.driverPhoneNumber,
+      driverAddress: driver.driverAddress,
+      driverZipCode: driver.driverZipCode,
+      driverAddressCity: driver.driverAddressCity,
+      driverCountry: driver.driverCountry,
+      driverHasCard: driver.driverHasCard,
+      driverCardValidTo: driver.driverCardValidTo,
+      driverCardNumber: driver.driverCardNumber,
+      driverKeyNumber: driver.driverKeyNumber,
+      driverNotesShared: driver.driverNotesShared,
+      driverNotes: driver.driverNotes,
+    })
+    .returning({
+      customerOrgNumber: drivers.customerOrgNumber,
+      driverExternalNumber: drivers.driverExternalNumber,
+      driverGDPRAccept: drivers.driverGDPRAccept,
+      driverISWarrantyDriver: drivers.driverISWarrantyDriver,
+      driverAcceptsMarketing: drivers.driverAcceptsMarketing,
+      driverFirstName: drivers.driverFirstName,
+      driverLastName: drivers.driverLastName,
+      driverEmail: drivers.driverEmail,
+      driverPhoneNumber: drivers.driverPhoneNumber,
+      driverAddress: drivers.driverAddress,
+      driverZipCode: drivers.driverZipCode,
+      driverAddressCity: drivers.driverAddressCity,
+      driverCountry: drivers.driverCountry,
+      driverHasCard: drivers.driverHasCard,
+      driverCardValidTo: drivers.driverCardValidTo,
+      driverCardNumber: drivers.driverCardNumber,
+      driverKeyNumber: drivers.driverKeyNumber,
+      driverNotesShared: drivers.driverNotesShared,
+      driverNotes: drivers.driverNotes,
+      createdAt: drivers.createdAt,
+      updatedAt: drivers.updatedAt,
+    })
+
+  return newDriver
+    ? {
+        customerOrgNumber: newDriver.customerOrgNumber
+          ? CustomerOrgNumber(newDriver.customerOrgNumber)
+          : undefined,
+        driverExternalNumber: DriverExternalNumber(newDriver.driverExternalNumber),
+        driverGDPRAccept: DriverGDPRAccept(newDriver.driverGDPRAccept),
+        driverISWarrantyDriver: DriverISWarrantyCustomer(newDriver.driverISWarrantyDriver),
+        driverAcceptsMarketing: DriverAcceptsMarketing(newDriver.driverAcceptsMarketing),
+        driverFirstName: DriverFirstName(newDriver.driverFirstName),
+        driverLastName: DriverLastName(newDriver.driverLastName),
+        driverEmail: DriverEmail(newDriver.driverEmail),
+        driverPhoneNumber: DriverPhoneNumber(newDriver.driverPhoneNumber),
+        driverAddress: DriverAddress(newDriver.driverAddress),
+        driverZipCode: DriverZipCode(newDriver.driverZipCode),
+        driverAddressCity: DriverAddressCity(newDriver.driverAddressCity),
+        driverCountry: DriverCountry(newDriver.driverCountry),
+        driverHasCard: DriverHasCard(newDriver.driverHasCard),
+        driverCardValidTo: DriverCardValidTo(newDriver.driverCardValidTo),
+        driverCardNumber: CustomerCardNumber(newDriver.driverCardNumber),
+        driverKeyNumber: DriverKeyNumber(newDriver.driverKeyNumber),
+        driverNotesShared: DriverNotesShared(newDriver.driverNotesShared),
+        driverNotes: DriverNotes(newDriver.driverNotes),
+        createdAt: newDriver.createdAt,
+        updatedAt: newDriver.updatedAt,
+      }
+    : undefined
 }
 
 export async function editCompanyDetails(
@@ -311,4 +384,87 @@ export async function deleteCompany(
     .where(eq(companycustomers.customerOrgNumber, orgNumber))
     .returning({ deletedOrgNumber: companycustomers.customerOrgNumber })
   return deletedData ? CustomerOrgNumber(deletedData.deletedOrgNumber) : undefined
+}
+
+//drivers
+export async function editDriverDetails(driver: DriverCreate): Promise<Driver | undefined> {
+  const [updatedDriver] = await db
+    .update(drivers)
+    .set({
+      driverExternalNumber: driver.driverExternalNumber,
+      driverGDPRAccept: driver.driverGDPRAccept,
+      driverISWarrantyDriver: driver.driverISWarrantyDriver,
+      driverAcceptsMarketing: driver.driverAcceptsMarketing,
+      driverFirstName: driver.driverFirstName,
+      driverLastName: driver.driverLastName,
+      driverEmail: driver.driverEmail,
+      driverPhoneNumber: driver.driverPhoneNumber,
+      driverAddress: driver.driverAddress,
+      driverZipCode: driver.driverZipCode,
+      driverAddressCity: driver.driverAddressCity,
+      driverHasCard: driver.driverHasCard,
+      driverCardValidTo: driver.driverCardValidTo,
+      driverCardNumber: driver.driverCardNumber,
+      driverKeyNumber: driver.driverKeyNumber,
+      driverNotesShared: driver.driverNotesShared,
+      driverNotes: driver.driverNotes,
+      driverCountry: driver.driverCountry,
+      updatedAt: new Date(),
+    })
+    .where(eq(drivers.driverEmail, driver.driverEmail))
+    .returning({
+      driverExternalNumber: drivers.driverExternalNumber,
+      driverGDPRAccept: drivers.driverGDPRAccept,
+      driverISWarrantyDriver: drivers.driverISWarrantyDriver,
+      driverAcceptsMarketing: drivers.driverAcceptsMarketing,
+      driverFirstName: drivers.driverFirstName,
+      driverLastName: drivers.driverLastName,
+      driverEmail: drivers.driverEmail,
+      driverPhoneNumber: drivers.driverPhoneNumber,
+      driverAddress: drivers.driverAddress,
+      driverZipCode: drivers.driverZipCode,
+      driverAddressCity: drivers.driverAddressCity,
+      driverHasCard: drivers.driverHasCard,
+      driverCardValidTo: drivers.driverCardValidTo,
+      driverCardNumber: drivers.driverCardNumber,
+      driverKeyNumber: drivers.driverKeyNumber,
+      driverNotesShared: drivers.driverNotesShared,
+      driverNotes: drivers.driverNotes,
+      driverCountry: drivers.driverCountry,
+      createdAt: drivers.createdAt,
+      updatedAt: drivers.updatedAt,
+    })
+
+  return updatedDriver
+    ? {
+        driverExternalNumber: DriverExternalNumber(updatedDriver.driverExternalNumber),
+        driverGDPRAccept: DriverGDPRAccept(updatedDriver.driverGDPRAccept),
+        driverISWarrantyDriver: DriverISWarrantyCustomer(updatedDriver.driverISWarrantyDriver),
+        driverAcceptsMarketing: DriverAcceptsMarketing(updatedDriver.driverAcceptsMarketing),
+        driverFirstName: DriverFirstName(updatedDriver.driverFirstName),
+        driverLastName: DriverLastName(updatedDriver.driverLastName),
+        driverEmail: DriverEmail(updatedDriver.driverEmail),
+        driverPhoneNumber: DriverPhoneNumber(updatedDriver.driverPhoneNumber),
+        driverAddress: DriverAddress(updatedDriver.driverAddress),
+        driverZipCode: DriverZipCode(updatedDriver.driverZipCode),
+        driverAddressCity: DriverAddressCity(updatedDriver.driverAddressCity),
+        driverHasCard: DriverHasCard(updatedDriver.driverHasCard),
+        driverCardValidTo: DriverCardValidTo(updatedDriver.driverCardValidTo),
+        driverCardNumber: CustomerCardNumber(updatedDriver.driverCardNumber),
+        driverKeyNumber: DriverKeyNumber(updatedDriver.driverKeyNumber),
+        driverNotesShared: DriverNotesShared(updatedDriver.driverNotesShared),
+        driverNotes: DriverNotes(updatedDriver.driverNotes),
+        driverCountry: DriverCountry(updatedDriver.driverCountry),
+        createdAt: updatedDriver.createdAt,
+        updatedAt: updatedDriver.updatedAt,
+      }
+    : undefined
+}
+
+export async function deleteDriver(driverEmail: DriverEmail): Promise<DriverEmail | undefined> {
+  const [deletedDriver] = await db
+    .delete(drivers)
+    .where(eq(drivers.driverEmail, driverEmail))
+    .returning({ deletedEmail: drivers.driverEmail })
+  return deletedDriver ? DriverEmail(deletedDriver.deletedEmail) : undefined
 }
