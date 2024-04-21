@@ -11,11 +11,10 @@ const pool = new Pool({
 })
 
 export async function initDrizzle() {
-  //const sql = postgres(connectionString, { max: 1 })
   const db = drizzle(pool)
-  await migrate(db, { migrationsFolder: 'drizzle' }).then(() => console.log('Migrations complete'))
-
-  // await sql.end()
+  await migrate(db, { migrationsFolder: './drizzle' }).then(() =>
+    console.log('Migrations complete'),
+  )
 }
 
 export const db = drizzle(pool, { schema })

@@ -200,3 +200,25 @@ export const driverRelations = relations(drivers, ({ one }) => ({
 export const companycustomersRelations = relations(companycustomers, ({ many }) => ({
   drivers: many(drivers),
 }))
+
+export const stores = pgTable('stores', {
+  storeOrgNumber: varchar('storeOrgNumber', { length: 11 }).primaryKey().unique(),
+  storeName: varchar('storeName').notNull(),
+  storeStatus: boolean('storeStatus').notNull(),
+  storeEmail: varchar('storeEmail').notNull(),
+  storePhone: varchar('storePhone').notNull(),
+  storeAddress: varchar('storeAddress').notNull(),
+  storeZipCode: varchar('storeZipCode', { length: 16 }).notNull(),
+  storeCity: varchar('storeCity').notNull(),
+  storeCountry: varchar('storeCountry').notNull(),
+  storeDescription: varchar('storeDescription'),
+  storeContactPerson: varchar('storeContactPerson', { length: 64 }),
+  storeMaxUsers: integer('storeMaxUsers'),
+  storeAllowCarAPI: boolean('storeAllowCarAPI').default(true),
+  storeAllowSendSMS: boolean('storeAllowSendSMS').default(true),
+  storeSendSMS: boolean('storeSendSMS').default(true),
+  storeUsesCheckin: boolean('storeUsesCheckin').default(true),
+  storeUsesPIN: boolean('storeUsesPIN').default(true),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
