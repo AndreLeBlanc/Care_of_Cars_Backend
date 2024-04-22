@@ -12,9 +12,11 @@ import { roles } from './routes/roles/roles.js'
 import { serviceCategory } from './routes/service-category/serviceCategory.js'
 import { services } from './routes/services/services.js'
 import { users } from './routes/users/users.js'
+import { stores } from './routes/stores/stores.js'
 import { root } from './routes/root.js'
 import seedSuperAdmin from './plugins/seed.js'
 import { customers } from './routes/customers/customers.js'
+import { initDrizzle } from './config/db-connect.js'
 
 const defaultOptions = {
   logger: true,
@@ -25,6 +27,8 @@ export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPlugin
 // Pass --options via CLI arguments in command to enable these options.
 
 export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
+  await initDrizzle()
+
   const app: FastifyInstance = fastify({ ...defaultOptions, ...options })
 
   // Place here your custom code!
@@ -70,6 +74,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
   app.register(roleToPermissions, { prefix: '/roleToPermissions' })
   app.register(roles, { prefix: '/roles' })
   app.register(serviceCategory, { prefix: '/service-category' })
+  app.register(stores, { prefix: 'stores' })
   app.register(services, { prefix: 'services' })
   app.register(users, { prefix: '/users' })
   app.register(root, { prefix: '/' })
