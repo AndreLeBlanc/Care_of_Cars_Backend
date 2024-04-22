@@ -1,6 +1,6 @@
 {
-  "id": "f0f96dfc-3265-46ad-a4f5-59fa0b42829a",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "83caf75d-936a-487b-a125-a5013e9ed483",
+  "prevId": "f0f96dfc-3265-46ad-a4f5-59fa0b42829a",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -747,6 +747,59 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
+        },
+        "storeDescription": {
+          "name": "storeDescription",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storeContactPerson": {
+          "name": "storeContactPerson",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storeMaxUsers": {
+          "name": "storeMaxUsers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storeAllowCarAPI": {
+          "name": "storeAllowCarAPI",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "storeAllowSendSMS": {
+          "name": "storeAllowSendSMS",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "storeSendSMS": {
+          "name": "storeSendSMS",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "storeUsesCheckin": {
+          "name": "storeUsesCheckin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "storeUsesPIN": {
+          "name": "storeUsesPIN",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
         },
         "createdAt": {
           "name": "createdAt",

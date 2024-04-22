@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS "permissions" (
 	CONSTRAINT "permissions_permissionID_unique" UNIQUE("permissionID"),
 	CONSTRAINT "permissions_permissionName_unique" UNIQUE("permissionName")
 );
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "roleToPermissions" (
 	"roleID" integer,
 	"permissionID" integer,
@@ -111,6 +112,21 @@ CREATE TABLE IF NOT EXISTS "services" (
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "services_serviceID_unique" UNIQUE("serviceID"),
 	CONSTRAINT "services_name_unique" UNIQUE("name")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "stores" (
+	"storeOrgNumber" varchar(11) PRIMARY KEY NOT NULL,
+	"storeName" varchar NOT NULL,
+	"storeStatus" boolean NOT NULL,
+	"storeEmail" varchar NOT NULL,
+	"storePhone" varchar NOT NULL,
+	"storeAddress" varchar NOT NULL,
+	"storeZipCode" varchar(16) NOT NULL,
+	"storeCity" varchar NOT NULL,
+	"storeCountry" varchar NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "stores_storeOrgNumber_unique" UNIQUE("storeOrgNumber")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (

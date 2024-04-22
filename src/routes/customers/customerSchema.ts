@@ -5,7 +5,9 @@ export const addCustomerBody = Type.Object({
   companyName: Type.String(),
   companyReference: Type.String(),
   companyEmail: Type.String({ format: 'email' }),
-  companyPhoneNumber: Type.String(),
+  companyPhoneNumber: Type.String({
+    pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
+  }),
   companyAddress: Type.String(),
   companyZipCode: Type.String(),
   companyAddressCity: Type.String(),
@@ -17,7 +19,9 @@ export const addCustomerBody = Type.Object({
   driverFirstName: Type.String(),
   driverLastName: Type.String(),
   driverEmail: Type.String({ format: 'email' }),
-  driverPhoneNumber: Type.String(),
+  driverPhoneNumber: Type.String({
+    pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
+  }),
   driverAddress: Type.String(),
   driverZipCode: Type.String(),
   driverAddressCity: Type.String(),
