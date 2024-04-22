@@ -2,6 +2,10 @@ import { FastifyInstance } from 'fastify'
 import {
   CreateCustomerType,
   CreateDriverType,
+  ListCustomersQueryParamSchema,
+  ListCustomersQueryParamSchemaType,
+  ListDriversQueryParamSchema,
+  ListDriversQueryParamSchemaType,
   PatchCompanyType,
   PatchDriverType,
   addCustomerBody,
@@ -50,9 +54,63 @@ import {
   editDriverDetails,
   createNewDriver,
   DriverCreate,
+  getCustomersPaginate,
+  CustomersPaginate,
+  DriversPaginate,
+  getDriversPaginate,
 } from '../../services/customerService.js'
+import { NextPageUrl, Offset, PreviousPageUrl, ResponseMessage } from '../../plugins/pagination.js'
 
 export const customers = async (fastify: FastifyInstance) => {
+  //Get customers
+  fastify.get<{ Querystring: ListCustomersQueryParamSchemaType }>(
+    '/',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('list_users')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: ListCustomersQueryParamSchema,
+      },
+    },
+    async function (request, _) {
+      let { search = '', limit = 10, page = 1 } = request.query
+      const offset: Offset = fastify.findOffset(limit, page)
+      const result: CustomersPaginate = await getCustomersPaginate(search, limit, page, offset)
+      let message: ResponseMessage = fastify.responseMessage('Customers', result.data.length)
+      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+        requestUrl,
+        result.totalPage,
+        page,
+      )
+      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+        requestUrl,
+        result.totalPage,
+        page,
+      )
+
+      return {
+        message: message.responseMessage,
+        totalItems: result.totalItems,
+        nextUrl: nextUrl,
+        previousUrl: previousUrl?.previousPageUrl,
+        totalPage: result.totalPage,
+        page: page,
+        limit: limit,
+        data: result.data,
+      }
+    },
+  )
+
   //Create Customers
   fastify.post<{ Body: CreateCustomerType; Reply: object }>(
     '/',
@@ -211,6 +269,55 @@ export const customers = async (fastify: FastifyInstance) => {
    * DRIVERS
    * -----------------
    * */
+
+  //Get drivers
+  fastify.get<{ Querystring: ListDriversQueryParamSchemaType }>(
+    '/all-drivers',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('list_drivers')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: ListDriversQueryParamSchema,
+      },
+    },
+    async function (request, _) {
+      let { search = '', limit = 10, page = 1 } = request.query
+      const offset: Offset = fastify.findOffset(limit, page)
+      const result: DriversPaginate = await getDriversPaginate(search, limit, page, offset)
+      let message: ResponseMessage = fastify.responseMessage('Drivers', result.data.length)
+      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+        requestUrl,
+        result.totalPage,
+        page,
+      )
+      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+        requestUrl,
+        result.totalPage,
+        page,
+      )
+
+      return {
+        message: message.responseMessage,
+        totalItems: result.totalItems,
+        nextUrl: nextUrl,
+        previousUrl: previousUrl?.previousPageUrl,
+        totalPage: result.totalPage,
+        page: page,
+        limit: limit,
+        data: result.data,
+      }
+    },
+  )
 
   //Create Private Driver
   fastify.post<{ Body: CreateDriverType; Reply: object }>(

@@ -1,7 +1,8 @@
 import { Brand, make } from 'ts-brand'
 import { companycustomers, drivers } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
-import { eq } from 'drizzle-orm'
+import { desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { Offset } from '../plugins/pagination.js'
 
 export type DriverExternalNumber = Brand<string | null, 'driverExternalNumber'>
 export const DriverExternalNumber = make<DriverExternalNumber>()
@@ -95,6 +96,30 @@ export type Company = CustomerCompanyCreate & {
 export type Driver = DriverCreate & {
   createdAt: Date
   updatedAt: Date
+}
+
+export type CustomersPaginate = {
+  totalItems: number
+  totalPage: number
+  perPage: number
+  data: Company[]
+}
+
+export type paginateDriverList = {
+  driverFirstName: DriverFirstName
+  driverLastName: DriverLastName
+  driverEmail: DriverEmail
+  driverPhoneNumber: DriverPhoneNumber
+  driverAddress: DriverAddress
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type DriversPaginate = {
+  totalItems: number
+  totalPage: number
+  perPage: number
+  data: paginateDriverList[]
 }
 
 //create compnay
@@ -467,4 +492,119 @@ export async function deleteDriver(driverEmail: DriverEmail): Promise<DriverEmai
     .where(eq(drivers.driverEmail, driverEmail))
     .returning({ deletedEmail: drivers.driverEmail })
   return deletedDriver ? DriverEmail(deletedDriver.deletedEmail) : undefined
+}
+
+//Customer Paginate
+export async function getCustomersPaginate(
+  search: string,
+  limit = 10,
+  page = 1,
+  offset: Offset = { offset: 0 },
+): Promise<CustomersPaginate> {
+  const condition = or(
+    ilike(companycustomers.customerComapanyName, '%' + search + '%'),
+    ilike(companycustomers.customerOrgNumber, '%' + search + '%'),
+  )
+
+  const [totalItems] = await db
+    .select({
+      count: sql`count(*)`.mapWith(Number).as('count'),
+    })
+    .from(companycustomers)
+    .where(condition)
+
+  const customersList = await db
+    .select({
+      customerOrgNumber: companycustomers.customerOrgNumber,
+      customerComapanyName: companycustomers.customerComapanyName,
+      customerAddress: companycustomers.companyAddress,
+      customerZipCode: companycustomers.companyZipCode,
+      customerAddressCity: companycustomers.companyAddressCity,
+      customerCountry: companycustomers.companyCountry,
+      createdAt: companycustomers.createdAt,
+      updatedAt: companycustomers.updatedAt,
+    })
+    .from(companycustomers)
+    .where(condition)
+    .orderBy(desc(companycustomers.createdAt))
+    .limit(limit || 10)
+    .offset(offset.offset || 0)
+
+  const customersBrandedList = customersList.map((item) => {
+    return {
+      customerOrgNumber: CustomerOrgNumber(item.customerOrgNumber),
+      customerCompanyName: CustomerCompanyName(item.customerComapanyName),
+      companyAddress: item.customerAddress ? CompanyAddress(item.customerAddress) : undefined,
+      companyAddressCity: item.customerAddressCity
+        ? CompanyAddressCity(item.customerAddressCity)
+        : undefined,
+      companyCountry: item.customerCountry ? CompanyCountry(item.customerCountry) : undefined,
+      companyZipCode: item.customerZipCode ? CompanyZipCode(item.customerZipCode) : undefined,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    }
+  })
+
+  const totalPage = Math.ceil(totalItems.count / limit)
+
+  return {
+    totalItems: totalItems.count,
+    totalPage,
+    perPage: page,
+    data: customersBrandedList,
+  }
+}
+
+//Drivers Paginate
+export async function getDriversPaginate(
+  search: string,
+  limit = 10,
+  page = 1,
+  offset: Offset = { offset: 0 },
+): Promise<DriversPaginate> {
+  const condition = or(ilike(drivers.driverEmail, '%' + search + '%'))
+
+  const [totalItems] = await db
+    .select({
+      count: sql`count(*)`.mapWith(Number).as('count'),
+    })
+    .from(drivers)
+    .where(condition)
+
+  const driverList = await db
+    .select({
+      driverFirstName: drivers.driverFirstName,
+      driverLastName: drivers.driverLastName,
+      driverEmail: drivers.driverEmail,
+      driverPhoneNumber: drivers.driverPhoneNumber,
+      driverAddress: drivers.driverAddress,
+      createdAt: drivers.createdAt,
+      updatedAt: drivers.updatedAt,
+    })
+    .from(drivers)
+    .where(condition)
+    .orderBy(desc(drivers.createdAt))
+    .limit(limit || 10)
+    .offset(offset.offset || 0)
+
+  const driversBrandedList = driverList.map((item) => {
+    return {
+      driverFirstName: DriverFirstName(item.driverFirstName),
+      driverLastName: DriverLastName(item.driverLastName),
+      driverEmail: DriverEmail(item.driverEmail),
+      driverPhoneNumber: DriverPhoneNumber(item.driverPhoneNumber),
+      driverAddress: DriverAddress(item.driverAddress),
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    }
+  })
+
+  const totalPage = Math.ceil(totalItems.count / limit)
+
+  return {
+    totalItems: totalItems.count,
+    totalPage,
+    perPage: page,
+    data: driversBrandedList,
+  }
 }
