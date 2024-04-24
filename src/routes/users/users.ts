@@ -13,6 +13,8 @@ import {
   PatchUserSchemaType,
   getUserByIDSchema,
   getUserByIDType,
+  PatchUserPasswordType,
+  PatchUserPassword,
 } from './userSchema.js'
 import {
   createUser,
@@ -33,6 +35,7 @@ import {
   UserLastName,
   UserEmail,
   UserPassword,
+  userInfoPassword,
 } from '../../services/userService.js'
 import { RoleID } from '../../services/roleService.js'
 import { PermissionTitle } from '../../services/permissionService.js'
@@ -236,6 +239,50 @@ export async function users(fastify: FastifyInstance) {
       reply.status(201).send({ message: 'User Updated', data: user })
     },
   )
+
+  //Update Password
+  fastify.patch<{ Body: PatchUserPasswordType; Reply: object }>(
+    '/update-password',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, PermissionTitle('update_user_password'))
+        done()
+        return reply
+      },
+      schema: {
+        body: PatchUserPassword,
+      },
+    },
+    async (request, reply) => {
+      const userData = request.body
+      const id = UserID(request.body.userId)
+      const userDetails = await getUserByID(id, true)
+
+      if (userDetails !== undefined) {
+        const isPassword = await bcrypt.compare(
+          request.body.oldPassword,
+          (userDetails as userInfoPassword).password,
+        )
+        if (isPassword) {
+          if (userData?.newPassword) {
+            const isStrongPass: boolean = await isStrongPassword(UserPassword(userData.newPassword))
+            if (!isStrongPass) {
+              return reply.status(422).send({ message: 'Provide a strong password' })
+            }
+            const passwordHash = await generatePasswordHash(UserPassword(userData.newPassword))
+            const user: UserInfo = await updateUserByID(id, { password: passwordHash })
+            reply.status(201).send({ message: 'User Updated', data: user })
+          }
+        } else {
+          return reply.status(400).send({ message: 'user password not matching' })
+        }
+      } else {
+        return reply.status(404).send({ message: 'user not found' })
+      }
+    },
+  )
+
   fastify.delete<{ Params: getUserByIDType }>(
     '/:id',
     {

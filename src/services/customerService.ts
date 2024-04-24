@@ -1,7 +1,7 @@
 import { Brand, make } from 'ts-brand'
 import { companycustomers, drivers } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
-import { desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { Offset } from '../plugins/pagination.js'
 
 export type DriverExternalNumber = Brand<string | null, 'driverExternalNumber'>
@@ -561,8 +561,30 @@ export async function getDriversPaginate(
   limit = 10,
   page = 1,
   offset: Offset = { offset: 0 },
+  isCompany?: string,
 ): Promise<DriversPaginate> {
-  const condition = or(ilike(drivers.driverEmail, '%' + search + '%'))
+  let condition
+
+  if (isCompany) {
+    condition = and(
+      isCompany ? eq(drivers.customerOrgNumber, isCompany) : undefined,
+      or(
+        ilike(drivers.driverEmail, '%' + search + '%'),
+        ilike(drivers.driverPhoneNumber, '%' + search + '%'),
+        ilike(drivers.driverFirstName, '%' + search + '%'),
+        ilike(drivers.driverLastName, '%' + search + '%'),
+        ilike(drivers.customerOrgNumber, '%' + search + '%'),
+      ),
+    )
+  } else {
+    condition = or(
+      ilike(drivers.driverEmail, '%' + search + '%'),
+      ilike(drivers.driverPhoneNumber, '%' + search + '%'),
+      ilike(drivers.driverFirstName, '%' + search + '%'),
+      ilike(drivers.driverLastName, '%' + search + '%'),
+      ilike(drivers.customerOrgNumber, '%' + search + '%'),
+    )
+  }
 
   const [totalItems] = await db
     .select({

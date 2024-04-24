@@ -31,6 +31,11 @@ export type UserInfo = {
   createdAt: Date
   updatedAt: Date
 }
+
+export type userInfoPassword = UserInfo & {
+  password: UserPassword
+}
+
 export type UserWithSuperAdmin = { isSuperAdmin: IsSuperAdmin } & UserInfo
 
 export type CreatedUser = UserInfo & { roleID: RoleID }
@@ -182,7 +187,10 @@ export async function verifyUser(email: UserEmail): Promise<VerifyUser | undefin
     : undefined
 }
 
-export async function getUserByID(id: UserID): Promise<UserInfo | undefined> {
+export async function getUserByID(
+  id: UserID,
+  checkPassword?: boolean,
+): Promise<UserInfo | undefined> {
   const [user] = await db
     .select({
       userID: users.userID,
@@ -191,6 +199,7 @@ export async function getUserByID(id: UserID): Promise<UserInfo | undefined> {
       userEmail: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
+      ...(checkPassword ? { password: users.password } : {}),
     })
     .from(users)
     .where(eq(users.userID, id))
@@ -202,6 +211,9 @@ export async function getUserByID(id: UserID): Promise<UserInfo | undefined> {
         userEmail: UserEmail(user.userEmail),
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        ...(checkPassword
+          ? { password: user.password ? UserPassword(user.password) : undefined }
+          : {}),
       }
     : undefined
 }

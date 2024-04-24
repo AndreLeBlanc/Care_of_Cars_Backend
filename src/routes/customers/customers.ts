@@ -4,6 +4,8 @@ import {
   CreateDriverType,
   ListCustomersQueryParamSchema,
   ListCustomersQueryParamSchemaType,
+  ListDriversCompanyQueryParamSchema,
+  ListDriversCompanyQueryParamSchemaType,
   ListDriversQueryParamSchema,
   ListDriversQueryParamSchemaType,
   PatchCompanyType,
@@ -294,6 +296,61 @@ export const customers = async (fastify: FastifyInstance) => {
       const offset: Offset = fastify.findOffset(limit, page)
       const result: DriversPaginate = await getDriversPaginate(search, limit, page, offset)
       let message: ResponseMessage = fastify.responseMessage('Drivers', result.data.length)
+      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+        requestUrl,
+        result.totalPage,
+        page,
+      )
+      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+        requestUrl,
+        result.totalPage,
+        page,
+      )
+
+      return {
+        message: message.responseMessage,
+        totalItems: result.totalItems,
+        nextUrl: nextUrl,
+        previousUrl: previousUrl?.previousPageUrl,
+        totalPage: result.totalPage,
+        page: page,
+        limit: limit,
+        data: result.data,
+      }
+    },
+  )
+
+  //Get drivers by orgNumber
+  fastify.get<{ Querystring: ListDriversCompanyQueryParamSchemaType }>(
+    '/company-drivers',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('list_company_drivers')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: ListDriversCompanyQueryParamSchema,
+      },
+    },
+    async function (request, _) {
+      let { search = '', limit = 10, page = 1, companyOrgNumber } = request.query
+      const offset: Offset = fastify.findOffset(limit, page)
+      const result: DriversPaginate = await getDriversPaginate(
+        search,
+        limit,
+        page,
+        offset,
+        companyOrgNumber,
+      )
+      let message: ResponseMessage = fastify.responseMessage('Company Drivers', result.data.length)
       let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,

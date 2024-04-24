@@ -106,8 +106,18 @@ export const ListDriversQueryParamSchema = Type.Object({
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
 })
 
+export const ListDriversCompanyQueryParamSchema = Type.Object({
+  search: Type.Optional(Type.String()),
+  limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+  companyOrgNumber: Type.String(),
+})
+
 export type ListCustomersQueryParamSchemaType = Static<typeof ListCustomersQueryParamSchema>
 export type ListDriversQueryParamSchemaType = Static<typeof ListDriversQueryParamSchema>
+export type ListDriversCompanyQueryParamSchemaType = Static<
+  typeof ListDriversCompanyQueryParamSchema
+>
 export type getDriverByEmailType = Static<typeof getDriverByEmail>
 export type getCompanyByOrgNumberType = Static<typeof getCompanyByOrgNumber>
 export type CreateCustomerType = Static<typeof addCustomerBody>
