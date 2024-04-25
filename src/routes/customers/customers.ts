@@ -196,6 +196,7 @@ export const customers = async (fastify: FastifyInstance) => {
       return rep.status(201).send({
         message: 'company / driver created',
         data: createdDriver,
+        customerAdded: true,
       })
     },
   )
@@ -236,6 +237,7 @@ export const customers = async (fastify: FastifyInstance) => {
       reply.status(201).send({
         message: 'Company details edited',
         editedCompany,
+        customerEdited: true,
       })
     },
   )
@@ -439,6 +441,7 @@ export const customers = async (fastify: FastifyInstance) => {
       return rep.status(201).send({
         message: 'Driver Created',
         data: createdDriver,
+        driverCreated: true,
       })
     },
   )
@@ -509,6 +512,7 @@ export const customers = async (fastify: FastifyInstance) => {
         reply.status(201).send({
           message: 'Driver details edited',
           editedCompany,
+          driverEdited: true,
         })
       } else {
         reply.status(201).send({

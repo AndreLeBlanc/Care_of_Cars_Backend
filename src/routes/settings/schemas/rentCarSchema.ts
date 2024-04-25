@@ -4,7 +4,7 @@ export const addRentBody = Type.Object({
   rentCarRegistrationNumber: Type.String(),
   rentCarModel: Type.String(),
   rentCarColor: Type.String(),
-  rentCarYear: Type.String(),
+  rentCarYear: Type.Number(),
   rentCarNotes: Type.Optional(Type.String()),
   rentCarNumber: Type.Optional(Type.Number()),
 })
@@ -23,7 +23,7 @@ export const patchRentCarBody = Type.Object({
   rentCarRegistrationNumber: Type.String(),
   rentCarModel: Type.String(),
   rentCarColor: Type.String(),
-  rentCarYear: Type.String(),
+  rentCarYear: Type.Number(),
   rentCarNotes: Type.Optional(Type.String()),
   rentCarNumber: Type.Optional(Type.Number()),
 })

@@ -59,7 +59,9 @@ export const patchDriverBody = Type.Object({
   driverFirstName: Type.String(),
   driverLastName: Type.String(),
   driverEmail: Type.String({ format: 'email' }),
-  driverPhoneNumber: Type.String(),
+  driverPhoneNumber: Type.String({
+    pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
+  }),
   driverAddress: Type.String(),
   driverZipCode: Type.String(),
   driverAddressCity: Type.String(),
@@ -81,7 +83,9 @@ export const addDriverBody = Type.Object({
   driverFirstName: Type.String(),
   driverLastName: Type.String(),
   driverEmail: Type.String({ format: 'email' }),
-  driverPhoneNumber: Type.String(),
+  driverPhoneNumber: Type.String({
+    pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
+  }),
   driverAddress: Type.String(),
   driverZipCode: Type.String(),
   driverAddressCity: Type.String(),

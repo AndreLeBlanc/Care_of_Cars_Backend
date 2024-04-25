@@ -10,7 +10,7 @@ export type RentCarModel = Brand<string, 'rentCarModel'>
 export const RentCarModel = make<RentCarModel>()
 export type RentCarColor = Brand<string, 'rentCarColor'>
 export const RentCarColor = make<RentCarColor>()
-export type RentCarYear = Brand<string, 'rentCarYear'>
+export type RentCarYear = Brand<number, 'rentCarYear'>
 export const RentCarYear = make<RentCarYear>()
 export type RentCarNotes = Brand<string | null, 'rentCarNotes'>
 export const RentCarNotes = make<RentCarNotes>()
@@ -39,70 +39,17 @@ export type RentCarsPaginate = {
 }
 
 export const createRentCar = async (carData: RentCarCreateType): Promise<RentCar | undefined> => {
-  const isRentCar = await db
-    .select()
-    .from(rentcars)
-    .where(eq(rentcars.rentCarRegistrationNumber, carData.rentCarRegistrationNumber))
-
-  if (isRentCar.length) {
-    return undefined
-  } else {
-    const [newCar] = await db
-      .insert(rentcars)
-      .values({
-        rentCarRegistrationNumber: carData.rentCarRegistrationNumber,
-        rentCarModel: carData.rentCarModel,
-        rentCarColor: carData.rentCarColor,
-        rentCarYear: carData.rentCarYear,
-        rentCarNotes: carData.rentCarNotes,
-        rentCarNumber: carData.rentCarNumber,
-      })
-      .returning({
-        rentCarRegistrationNumber: rentcars.rentCarRegistrationNumber,
-        rentCarModel: rentcars.rentCarModel,
-        rentCarColor: rentcars.rentCarColor,
-        rentCarYear: rentcars.rentCarYear,
-        rentCarNotes: rentcars.rentCarNotes,
-        rentCarNumber: rentcars.rentCarNumber,
-        createdAt: rentcars.createdAt,
-        updatedAt: rentcars.updatedAt,
-      })
-    return newCar
-      ? {
-          rentCarRegistrationNumber: RentCarRegistrationNumber(newCar.rentCarRegistrationNumber),
-          rentCarModel: RentCarModel(newCar.rentCarModel),
-          rentCarColor: RentCarColor(newCar.rentCarColor),
-          rentCarYear: RentCarYear(newCar.rentCarYear),
-          rentCarNotes: RentCarNotes(newCar.rentCarNotes),
-          rentCarNumber: RentCarNumber(newCar.rentCarNumber),
-          createdAt: newCar.createdAt,
-          updatedAt: newCar.updatedAt,
-        }
-      : undefined
-  }
-}
-
-export async function getRentCarPaginate(
-  search: string,
-  limit = 10,
-  page = 1,
-  offset: Offset = { offset: 0 },
-): Promise<RentCarsPaginate> {
-  const condition = or(
-    ilike(rentcars.rentCarRegistrationNumber, '%' + search + '%'),
-    ilike(rentcars.rentCarModel, '%' + search + '%'),
-    ilike(rentcars.rentCarNotes, '%' + search + '%'),
-  )
-
-  const [totalItems] = await db
-    .select({
-      count: sql`count(*)`.mapWith(Number).as('count'),
+  const [newCar] = await db
+    .insert(rentcars)
+    .values({
+      rentCarRegistrationNumber: carData.rentCarRegistrationNumber,
+      rentCarModel: carData.rentCarModel,
+      rentCarColor: carData.rentCarColor,
+      rentCarYear: carData.rentCarYear,
+      rentCarNotes: carData.rentCarNotes,
+      rentCarNumber: carData.rentCarNumber,
     })
-    .from(rentcars)
-    .where(condition)
-
-  const rentCarList = await db
-    .select({
+    .returning({
       rentCarRegistrationNumber: rentcars.rentCarRegistrationNumber,
       rentCarModel: rentcars.rentCarModel,
       rentCarColor: rentcars.rentCarColor,
@@ -112,13 +59,61 @@ export async function getRentCarPaginate(
       createdAt: rentcars.createdAt,
       updatedAt: rentcars.updatedAt,
     })
-    .from(rentcars)
-    .where(condition)
-    .orderBy(desc(rentcars.createdAt))
-    .limit(limit || 10)
-    .offset(offset.offset || 0)
+  return newCar
+    ? {
+        rentCarRegistrationNumber: RentCarRegistrationNumber(newCar.rentCarRegistrationNumber),
+        rentCarModel: RentCarModel(newCar.rentCarModel),
+        rentCarColor: RentCarColor(newCar.rentCarColor),
+        rentCarYear: RentCarYear(newCar.rentCarYear),
+        rentCarNotes: RentCarNotes(newCar.rentCarNotes),
+        rentCarNumber: RentCarNumber(newCar.rentCarNumber),
+        createdAt: newCar.createdAt,
+        updatedAt: newCar.updatedAt,
+      }
+    : undefined
+}
 
-  const rentCarBrandedList = rentCarList.map((item) => {
+export async function getRentCarPaginate(
+  search: string,
+  limit = 10,
+  page = 1,
+  offset: Offset = { offset: 0 },
+): Promise<RentCarsPaginate> {
+  const returnData = await db.transaction(async (tx) => {
+    const condition = or(
+      ilike(rentcars.rentCarRegistrationNumber, '%' + search + '%'),
+      ilike(rentcars.rentCarModel, '%' + search + '%'),
+      ilike(rentcars.rentCarNotes, '%' + search + '%'),
+    )
+
+    const [totalItems] = await tx
+      .select({
+        count: sql`count(*)`.mapWith(Number).as('count'),
+      })
+      .from(rentcars)
+      .where(condition)
+
+    const rentCarList = await tx
+      .select({
+        rentCarRegistrationNumber: rentcars.rentCarRegistrationNumber,
+        rentCarModel: rentcars.rentCarModel,
+        rentCarColor: rentcars.rentCarColor,
+        rentCarYear: rentcars.rentCarYear,
+        rentCarNotes: rentcars.rentCarNotes,
+        rentCarNumber: rentcars.rentCarNumber,
+        createdAt: rentcars.createdAt,
+        updatedAt: rentcars.updatedAt,
+      })
+      .from(rentcars)
+      .where(condition)
+      .orderBy(desc(rentcars.createdAt))
+      .limit(limit || 10)
+      .offset(offset.offset || 0)
+
+    return { totalItems, rentCarList }
+  })
+
+  const rentCarBrandedList = returnData.rentCarList.map((item) => {
     return {
       rentCarRegistrationNumber: RentCarRegistrationNumber(item.rentCarRegistrationNumber),
       rentCarModel: RentCarModel(item.rentCarModel),
@@ -131,10 +126,10 @@ export async function getRentCarPaginate(
     }
   })
 
-  const totalPage = Math.ceil(totalItems.count / limit)
+  const totalPage = Math.ceil(returnData.totalItems.count / limit)
 
   return {
-    totalItems: totalItems.count,
+    totalItems: returnData.totalItems.count,
     totalPage,
     perPage: page,
     data: rentCarBrandedList,

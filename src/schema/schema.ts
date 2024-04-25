@@ -232,7 +232,7 @@ export const rentcars = pgTable('rentcars', {
   rentCarRegistrationNumber: varchar('rentCarRegistrationNumber').primaryKey().unique(),
   rentCarModel: varchar('rentCarModel').notNull(),
   rentCarColor: varchar('rentCarColor').notNull(),
-  rentCarYear: varchar('rentCarYear').notNull(),
+  rentCarYear: integer('rentCarYear').notNull(),
   rentCarNotes: varchar('rentCarNotes'),
   rentCarNumber: integer('rentCarNumber'),
   ...dbDates,
