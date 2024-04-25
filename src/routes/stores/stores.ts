@@ -38,12 +38,14 @@ import {
   StoreReplySchemaType,
   StoreUpdateReplySchema,
   StoreUpdateReplySchemaType,
+  storeReplyMessageType,
+  storeReplyMessage,
 } from './storesSchema..js'
 
 export async function stores(fastify: FastifyInstance) {
   fastify.post<{
     Body: CreateStoreSchemaType
-    Reply: { message: string; store: StoreReplySchemaType } | { message: string }
+    Reply: { message: storeReplyMessageType; store: StoreReplySchemaType } | storeReplyMessageType
   }>(
     '/',
     {
@@ -61,7 +63,7 @@ export async function stores(fastify: FastifyInstance) {
       schema: {
         body: CreateStoreSchema,
         response: {
-          201: { message: String, store: StoreReplySchema },
+          201: { storeReplyMessage, store: StoreReplySchema },
         },
       },
     },
@@ -113,7 +115,7 @@ export async function stores(fastify: FastifyInstance) {
       schema: {
         params: StoreIDSchema,
         response: {
-          200: { message: String, store: StoreReplySchema },
+          200: { storeReplyMessage, store: StoreReplySchema },
         },
       },
     },
@@ -138,13 +140,13 @@ export async function stores(fastify: FastifyInstance) {
   fastify.patch<{
     Params: StoreIDSchemaType
     Body: StoreUpdateSchemaType
-    Reply: { message: string; store: StoreUpdateReplySchemaType } | { message: String }
+    Reply: (storeReplyMessageType & { store: StoreUpdateReplySchemaType }) | storeReplyMessageType
   }>(
     '/:storeID',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
-        const permissionName = PermissionTitle('update_service_category')
+        const permissionName = PermissionTitle('update_store')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply
@@ -158,7 +160,7 @@ export async function stores(fastify: FastifyInstance) {
         params: StoreIDSchema,
         body: StoreUpdateSchema,
         response: {
-          201: { message: String, StoreUpdateReplySchema },
+          201: { storeReplyMessage, store: StoreUpdateReplySchema },
         },
       },
     },
@@ -208,6 +210,7 @@ export async function stores(fastify: FastifyInstance) {
               | undefined
           }
         | undefined = await updateStoreByStoreID(storeID, store)
+
       if (updatedStore == null) {
         return reply.status(417).send({ message: "couldn't create store" })
       }

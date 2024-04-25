@@ -1,1 +1,0 @@
-ALTER TABLE "storepaymentinfo" ALTER COLUMN "storeOrgNumber" SET NOT NULL;

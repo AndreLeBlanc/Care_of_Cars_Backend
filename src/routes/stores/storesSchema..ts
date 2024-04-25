@@ -131,3 +131,8 @@ export const StoreUpdateReplySchema = Type.Object({
 })
 
 export type StoreUpdateReplySchemaType = Static<typeof StoreUpdateReplySchema>
+export const storeReplyMessage = Type.Object({
+  message: Type.String(),
+})
+
+export type storeReplyMessageType = Static<typeof storeReplyMessage>

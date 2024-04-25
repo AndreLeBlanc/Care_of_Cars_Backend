@@ -207,8 +207,8 @@ export const stores = pgTable('stores', {
   storeOrgNumber: varchar('storeOrgNumber', { length: 11 }).unique().notNull(),
   storeName: varchar('storeName').notNull().unique(),
   storeStatus: boolean('storeStatus').notNull(),
-  storeEmail: varchar('storeEmail').unique().notNull(),
-  storePhone: varchar('storePhone').unique().notNull(),
+  storeEmail: varchar('storeEmail').notNull(),
+  storePhone: varchar('storePhone').notNull(),
   storeAddress: varchar('storeAddress').unique().notNull(),
   storeZipCode: varchar('storeZipCode', { length: 16 }).notNull(),
   storeCity: varchar('storeCity').notNull(),
@@ -228,7 +228,7 @@ export const stores = pgTable('stores', {
 export const storepaymentinfo = pgTable('storepaymentinfo', {
   storePaymentOption: serial('storePaymentOption').primaryKey().unique(),
   storeID: integer('storeID')
-    .references(() => companycustomers.customerOrgNumber, { onDelete: 'cascade' })
+    .references(() => stores.storeID, { onDelete: 'cascade' })
     .notNull(),
   bankgiro: varchar('bankgiro', { length: 16 }),
   plusgiro: varchar('plusgiro', { length: 16 }),
@@ -245,8 +245,8 @@ export const storepaymentinfoRelations = relations(storepaymentinfo, ({ one }) =
 }))
 
 export const storeopeninghours = pgTable('storeopeninghours', {
-  storeID: varchar('storeID', { length: 11 })
-    .references(() => companycustomers.customerOrgNumber, { onDelete: 'cascade' })
+  storeID: integer('storeID')
+    .references(() => stores.storeID, { onDelete: 'cascade' })
     .primaryKey(),
   mondayopen: time('mondayopen'),
   mondayclose: time('mondayclose'),
@@ -274,8 +274,8 @@ export const storeopeninghouRselations = relations(storeopeninghours, ({ one }) 
 }))
 
 export const storespecialhours = pgTable('storespecialhours', {
-  specialDate: serial('specialDate').primaryKey(),
-  storeID: varchar('storeID', { length: 11 })
+  specialDateID: serial('specialDateID').primaryKey(),
+  storeID: integer('storeID')
     .references(() => stores.storeID, { onDelete: 'cascade' })
     .notNull(),
   day: date('stores'),

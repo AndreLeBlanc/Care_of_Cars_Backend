@@ -1,1 +1,0 @@
-ALTER TABLE "stores" DROP CONSTRAINT "stores_storeID_unique";

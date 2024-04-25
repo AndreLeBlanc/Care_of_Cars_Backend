@@ -114,8 +114,40 @@ CREATE TABLE IF NOT EXISTS "services" (
 	CONSTRAINT "services_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "storeopeninghours" (
+	"storeID" integer PRIMARY KEY NOT NULL,
+	"mondayopen" time,
+	"mondayclose" time,
+	"tuesdayopen" time,
+	"tuesdayclose" time,
+	"wednesdayopen" time,
+	"wednesdayclose" time,
+	"thursdayopen" time,
+	"thursdayclose" time,
+	"fridayopen" time,
+	"fridayclose" time,
+	"saturdayopen" time,
+	"saturdayclose" time,
+	"sundayopen" time,
+	"sundayclose" time,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "storepaymentinfo" (
+	"storePaymentOption" serial PRIMARY KEY NOT NULL,
+	"storeID" integer NOT NULL,
+	"bankgiro" varchar(16),
+	"plusgiro" varchar(16),
+	"paymentdays" smallint DEFAULT 30 NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "storepaymentinfo_storePaymentOption_unique" UNIQUE("storePaymentOption")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "stores" (
-	"storeOrgNumber" varchar(11) PRIMARY KEY NOT NULL,
+	"storeID" serial PRIMARY KEY NOT NULL,
+	"storeOrgNumber" varchar(11) NOT NULL,
 	"storeName" varchar NOT NULL,
 	"storeStatus" boolean NOT NULL,
 	"storeEmail" varchar NOT NULL,
@@ -124,9 +156,29 @@ CREATE TABLE IF NOT EXISTS "stores" (
 	"storeZipCode" varchar(16) NOT NULL,
 	"storeCity" varchar NOT NULL,
 	"storeCountry" varchar NOT NULL,
+	"storeDescription" varchar,
+	"storeContactPerson" varchar(64),
+	"storeMaxUsers" integer,
+	"storeAllowCarAPI" boolean DEFAULT true,
+	"storeAllowSendSMS" boolean DEFAULT true,
+	"storeSendSMS" boolean DEFAULT true,
+	"storeUsesCheckin" boolean DEFAULT true,
+	"storeUsesPIN" boolean DEFAULT true,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "stores_storeOrgNumber_unique" UNIQUE("storeOrgNumber")
+	CONSTRAINT "stores_storeOrgNumber_unique" UNIQUE("storeOrgNumber"),
+	CONSTRAINT "stores_storeName_unique" UNIQUE("storeName"),
+	CONSTRAINT "stores_storeEmail_unique" UNIQUE("storeEmail"),
+	CONSTRAINT "stores_storePhone_unique" UNIQUE("storePhone"),
+	CONSTRAINT "stores_storeAddress_unique" UNIQUE("storeAddress")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "storespecialhours" (
+	"specialDateID" serial PRIMARY KEY NOT NULL,
+	"storeID" integer NOT NULL,
+	"stores" date,
+	"dayopen" time,
+	"dayclose" time
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
@@ -157,6 +209,24 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "services" ADD CONSTRAINT "services_serviceCategoryID_serviceCategories_serviceCategoryID_fk" FOREIGN KEY ("serviceCategoryID") REFERENCES "serviceCategories"("serviceCategoryID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "storeopeninghours" ADD CONSTRAINT "storeopeninghours_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "stores"("storeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "storepaymentinfo" ADD CONSTRAINT "storepaymentinfo_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "stores"("storeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "storespecialhours" ADD CONSTRAINT "storespecialhours_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "stores"("storeID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
