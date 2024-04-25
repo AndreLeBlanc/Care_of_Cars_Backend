@@ -79,7 +79,7 @@ export async function users(fastify: FastifyInstance) {
 
       return {
         message: message,
-        totalItems: result.totalItems,
+        totalItems: result.totalUsers,
         nextUrl: nextUrl?.nextPageUrl,
         previousUrl: previousUrl?.previousPageUrl,
         totalPage: result.totalPage,

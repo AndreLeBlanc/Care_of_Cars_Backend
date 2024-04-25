@@ -2,6 +2,7 @@ import { relations } from 'drizzle-orm'
 import {
   serial,
   text,
+  smallint,
   timestamp,
   pgTable,
   date,
@@ -202,12 +203,13 @@ export const companycustomersRelations = relations(companycustomers, ({ many }) 
 }))
 
 export const stores = pgTable('stores', {
-  storeOrgNumber: varchar('storeOrgNumber', { length: 11 }).primaryKey().unique(),
-  storeName: varchar('storeName').notNull(),
+  storeID: serial('storeID').primaryKey(),
+  storeOrgNumber: varchar('storeOrgNumber', { length: 11 }).unique().notNull(),
+  storeName: varchar('storeName').notNull().unique(),
   storeStatus: boolean('storeStatus').notNull(),
-  storeEmail: varchar('storeEmail').notNull(),
-  storePhone: varchar('storePhone').notNull(),
-  storeAddress: varchar('storeAddress').notNull(),
+  storeEmail: varchar('storeEmail').unique().notNull(),
+  storePhone: varchar('storePhone').unique().notNull(),
+  storeAddress: varchar('storeAddress').unique().notNull(),
   storeZipCode: varchar('storeZipCode', { length: 16 }).notNull(),
   storeCity: varchar('storeCity').notNull(),
   storeCountry: varchar('storeCountry').notNull(),
@@ -222,3 +224,68 @@ export const stores = pgTable('stores', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
+
+export const storepaymentinfo = pgTable('storepaymentinfo', {
+  storePaymentOption: serial('storePaymentOption').primaryKey().unique(),
+  storeID: integer('storeID')
+    .references(() => companycustomers.customerOrgNumber, { onDelete: 'cascade' })
+    .notNull(),
+  bankgiro: varchar('bankgiro', { length: 16 }),
+  plusgiro: varchar('plusgiro', { length: 16 }),
+  paymentdays: smallint('paymentdays').default(30).notNull(),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const storepaymentinfoRelations = relations(storepaymentinfo, ({ one }) => ({
+  stores: one(stores, {
+    fields: [storepaymentinfo.storeID],
+    references: [stores.storeID],
+  }),
+}))
+
+export const storeopeninghours = pgTable('storeopeninghours', {
+  storeID: varchar('storeID', { length: 11 })
+    .references(() => companycustomers.customerOrgNumber, { onDelete: 'cascade' })
+    .primaryKey(),
+  mondayopen: time('mondayopen'),
+  mondayclose: time('mondayclose'),
+  tuesdayopen: time('tuesdayopen'),
+  tuesdayclose: time('tuesdayclose'),
+  wednesdayopen: time('wednesdayopen'),
+  wednesdayclose: time('wednesdayclose'),
+  thursdayopen: time('thursdayopen'),
+  thursdayclose: time('thursdayclose'),
+  fridayopen: time('fridayopen'),
+  fridayclose: time('fridayclose'),
+  saturdayopen: time('saturdayopen'),
+  saturdayclose: time('saturdayclose'),
+  sundayopen: time('sundayopen'),
+  sundayclose: time('sundayclose'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const storeopeninghouRselations = relations(storeopeninghours, ({ one }) => ({
+  stores: one(stores, {
+    fields: [storeopeninghours.storeID],
+    references: [stores.storeID],
+  }),
+}))
+
+export const storespecialhours = pgTable('storespecialhours', {
+  specialDate: serial('specialDate').primaryKey(),
+  storeID: varchar('storeID', { length: 11 })
+    .references(() => stores.storeID, { onDelete: 'cascade' })
+    .notNull(),
+  day: date('stores'),
+  dayopen: time('dayopen'),
+  dayclose: time('dayclose'),
+})
+
+export const storespecialhoursRelations = relations(storespecialhours, ({ one }) => ({
+  stores: one(stores, {
+    fields: [storespecialhours.storeID],
+    references: [stores.storeID],
+  }),
+}))

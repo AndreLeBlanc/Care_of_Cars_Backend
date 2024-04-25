@@ -15,6 +15,41 @@
       "when": 1713728776049,
       "tag": "0001_safe_sinister_six",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1713903417361,
+      "tag": "0002_low_raider",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1713903942946,
+      "tag": "0003_abandoned_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1713907261838,
+      "tag": "0004_narrow_smiling_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1713989575157,
+      "tag": "0005_funny_odin",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1713990025357,
+      "tag": "0006_funny_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

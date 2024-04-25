@@ -46,7 +46,7 @@ export type VerifyUser = {
 }
 
 export type UsersPaginated = {
-  totalItems: number
+  totalUsers: number
   totalPage: number
   perPage: number
   data: UserInfo[]
@@ -101,35 +101,37 @@ export async function getUsersPaginate(
     ilike(users.lastName, '%' + search + '%'),
     ilike(users.email, '%' + search + '%'),
   )
+  const { totalUsers, usersList } = await db.transaction(async (tx) => {
+    const [totalUsers] = await tx
+      .select({
+        count: sql`count(*)`.mapWith(Number).as('count'),
+      })
+      .from(users)
+      .where(condition)
 
-  const [totalItems] = await db
-    .select({
-      count: sql`count(*)`.mapWith(Number).as('count'),
-    })
-    .from(users)
-    .where(condition)
-
-  const usersList = await db
-    .select({
-      userID: users.userID,
-      userFirstName: users.firstName,
-      userLastName: users.lastName,
-      userEmail: users.email,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt,
-    })
-    .from(users)
-    .where(
-      or(
-        ilike(users.firstName, '%' + search + '%'),
-        ilike(users.lastName, '%' + search + '%'),
-        ilike(users.email, '%' + search + '%'),
-      ),
-    )
-    .orderBy(desc(users.userID))
-    .limit(limit || 10)
-    .offset(offset.offset || 0)
-  const totalPage = Math.ceil(totalItems.count / limit)
+    const usersList = await tx
+      .select({
+        userID: users.userID,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+        userEmail: users.email,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .where(
+        or(
+          ilike(users.firstName, '%' + search + '%'),
+          ilike(users.lastName, '%' + search + '%'),
+          ilike(users.email, '%' + search + '%'),
+        ),
+      )
+      .orderBy(desc(users.userID))
+      .limit(limit || 10)
+      .offset(offset.offset || 0)
+    return { totalUsers: totalUsers, usersList: usersList }
+  })
+  const totalPage = Math.ceil(totalUsers.count / limit)
 
   const brandedUserList = usersList.map((user) => {
     return {
@@ -142,7 +144,7 @@ export async function getUsersPaginate(
     }
   })
   return {
-    totalItems: totalItems.count,
+    totalUsers: totalUsers.count,
     totalPage,
     perPage: page,
     data: brandedUserList,
