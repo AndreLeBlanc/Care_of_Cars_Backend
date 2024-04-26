@@ -1,7 +1,5 @@
 sudo docker-compose build test postgres
 
-echo "lllllllllllllllllllllllllllllllllllll"
-
 # Run tests
 docker-compose up --abort-on-container-exit test postgres 
 

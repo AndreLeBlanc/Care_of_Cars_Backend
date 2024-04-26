@@ -287,4 +287,4 @@ is easier to understand and more difficult to confuse than
 function example(id: number)
 ´´´
 
-## Don't Panic. It's the first helpful or intelligible thing anybody's said to me all day.
+## Don't Panic. It's the first helpful or intelligible thing anybody's said to me all day
