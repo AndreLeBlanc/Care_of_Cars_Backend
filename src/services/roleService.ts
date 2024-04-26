@@ -5,7 +5,7 @@ import { permissions, roleToPermissions, roles } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchRoleSchemaType } from '../routes/roles/roleSchema.js'
 import { PermissionTitle, PermissionID } from './permissionService.js'
-import { Offset } from '../plugins/pagination.js'
+import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
 import { Brand, make } from 'ts-brand'
 
 export type RoleName = Brand<string, 'roleName'>
@@ -43,10 +43,10 @@ export type RolesPaginated = {
 }
 
 export async function getRolesPaginate(
-  search: string,
-  limit = 10,
-  page = 1,
-  offset: Offset = { offset: 0 },
+  search: Search,
+  limit = Limit(10),
+  page = Page(1),
+  offset = Offset(0),
 ): Promise<RolesPaginated> {
   const condition = or(
     ilike(roles.roleName, '%' + search + '%'),
@@ -72,7 +72,7 @@ export async function getRolesPaginate(
     .where(condition)
     .orderBy(desc(roles.roleID))
     .limit(limit || 10)
-    .offset(offset.offset || 0)
+    .offset(offset || 0)
   const totalPage = Math.ceil(totalItems.count / limit)
 
   const brandedRoleList: RolesList[] = rolesList.map((role) => {

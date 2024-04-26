@@ -24,8 +24,18 @@ import {
 } from './roleSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
 import { RolesPaginated } from '../../services/roleService.js'
-import { NextPageUrl, Offset, PreviousPageUrl, ResponseMessage } from '../../plugins/pagination.js'
-
+import {
+  NextPageUrl,
+  PreviousPageUrl,
+  ResponseMessage,
+  Offset,
+  Search,
+  Limit,
+  Page,
+  ResultCount,
+  RequestUrl,
+  ModelName,
+} from '../../plugins/pagination.js'
 export async function roles(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: ListRoleQueryParamSchemaType }>(
     '/',
@@ -47,26 +57,39 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     },
     async function (request, _) {
       let { search = '', limit = 10, page = 1 } = request.query
-      const offset: Offset = fastify.findOffset(limit, page)
-      const rolePaginated: RolesPaginated = await getRolesPaginate(search, limit, page, offset)
-      let message: ResponseMessage = fastify.responseMessage('roles', rolePaginated.data.length)
-      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const brandedSearch = Search(search)
+      const brandedLimit = Limit(limit)
+      const brandedPage = Page(page)
+      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
+      const rolePaginated: RolesPaginated = await getRolesPaginate(
+        brandedSearch,
+        brandedLimit,
+        brandedPage,
+        offset,
+      )
+      let message: ResponseMessage = fastify.responseMessage(
+        ModelName('roles'),
+        ResultCount(rolePaginated.data.length),
+      )
+      let requestUrl: RequestUrl = RequestUrl(
+        request.protocol + '://' + request.hostname + request.url,
+      )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
-        rolePaginated.totalPage,
-        page,
+        Page(rolePaginated.totalPage),
+        Page(page),
       )
       const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
-        rolePaginated.totalPage,
-        page,
+        Page(rolePaginated.totalPage),
+        Page(page),
       )
 
       return {
         message: message,
         totalItems: rolePaginated.totalItems,
-        nextUrl: nextUrl?.nextPageUrl,
-        previousUrl: previousUrl?.previousPageUrl,
+        nextUrl: nextUrl,
+        previousUrl: previousUrl,
         totalPage: rolePaginated.totalPage,
         page: page,
         limit: limit,

@@ -136,3 +136,28 @@ export const storeReplyMessage = Type.Object({
 })
 
 export type storeReplyMessageType = Static<typeof storeReplyMessage>
+
+export const ListStoresQueryParam = Type.Object({
+  search: Type.Optional(Type.String()),
+  limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+})
+
+export type ListStoresQueryParamType = Static<typeof ListStoresQueryParam>
+
+export const StorePaginateReply = Type.Object({
+  message: Type.String(),
+  totalStores: Type.Integer(),
+  nextUrl: Type.Optional(Type.String()),
+  previousUrl: Type.Optional(Type.String()),
+  totalPage: Type.Integer(),
+  page: Type.Integer(),
+  limit: Type.Integer(),
+  data: Type.Array(
+    Type.Object({
+      storeName: Type.String(),
+      storeOrgNumber: Type.String(),
+      storeID: Type.Integer(),
+    }),
+  ),
+})

@@ -1,6 +1,19 @@
 import { FastifyInstance } from 'fastify'
 import { PermissionTitle } from '../../services/permissionService.js'
 import {
+  NextPageUrl,
+  PreviousPageUrl,
+  ResponseMessage,
+  Offset,
+  Search,
+  Limit,
+  Page,
+  ResultCount,
+  RequestUrl,
+  ModelName,
+} from '../../plugins/pagination.js'
+
+import {
   createStore,
   deleteStore,
   Store,
@@ -22,10 +35,18 @@ import {
   StoreMaxUsers,
   StoreAllowCarAPI,
   StoreAllowSendSMS,
+  StoreBankgiro,
+  StoreMaybePaymentOptions,
+  StorePlusgiro,
+  StorePaymentdays,
   StoreSendSMS,
   StoreUsesCheckin,
   StoreUsesPIN,
+  StoreWithSeparateDates,
   updateStoreByStoreID,
+  getStoreByID,
+  getStoresPaginate,
+  StoresPaginated,
 } from '../../services/storeService.js'
 import {
   CreateStoreSchema,
@@ -39,6 +60,8 @@ import {
   StoreUpdateReplySchema,
   StoreUpdateReplySchemaType,
   storeReplyMessageType,
+  ListStoresQueryParam,
+  ListStoresQueryParamType,
   storeReplyMessage,
 } from './storesSchema..js'
 
@@ -202,14 +225,27 @@ export async function stores(fastify: FastifyInstance) {
           ? StoreUsesPIN(request.body.storeUsesPIN)
           : undefined,
       }
-      const updatedStore:
-        | {
-            store: { store: Store; createdAt: Date; updatedAt: Date } | undefined
-            paymentInfo:
-              | { storePaymentOptions: StorePaymentOptions; createdAt: Date; updatedAt: Date }
-              | undefined
+      const paymentPatch: StoreMaybePaymentOptions = request.body.storePaymentOptions
+        ? {
+            bankgiro: request.body.storePaymentOptions.bankgiro
+              ? StoreBankgiro(request.body.storePaymentOptions.bankgiro)
+              : undefined,
+            plusgiro: request.body.storePaymentOptions.plusgiro
+              ? StorePlusgiro(request.body.storePaymentOptions.plusgiro)
+              : undefined,
+            paymentdays: request.body.storePaymentOptions.paymentdays
+              ? StorePaymentdays(request.body.storePaymentOptions.paymentdays)
+              : undefined,
           }
-        | undefined = await updateStoreByStoreID(storeID, store)
+        : undefined
+
+      let updatedStore: StoreWithSeparateDates | undefined
+      if (paymentPatch == null) {
+        updatedStore = await updateStoreByStoreID(storeID, store)
+      } else {
+        updatedStore = await updateStoreByStoreID(storeID, store, paymentPatch)
+      }
+      console.log(updatedStore)
 
       if (updatedStore == null) {
         return reply.status(417).send({ message: "couldn't create store" })
@@ -232,6 +268,117 @@ export async function stores(fastify: FastifyInstance) {
               }
             : undefined,
         },
+      })
+    },
+  )
+
+  fastify.get<{
+    Params: StoreIDSchemaType
+    Reply: (storeReplyMessageType & { store: StoreUpdateReplySchemaType }) | storeReplyMessageType
+  }>(
+    '/:storeID',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, PermissionTitle('view_store'))
+        done()
+        return reply
+      },
+
+      schema: {
+        params: StoreIDSchema,
+        response: {
+          200: { storeReplyMessage, store: StoreUpdateReplySchema },
+        },
+      },
+    },
+    async (request, reply) => {
+      const storeID: StoreID = StoreID(request.params.storeID)
+      const fetchedStore: StoreWithSeparateDates = await getStoreByID(storeID)
+      if (fetchedStore == null) {
+        return reply.status(404).send({ message: 'store not found' })
+      }
+      return reply.status(200).send({
+        message: 'store  found',
+
+        store: {
+          store: fetchedStore.store
+            ? {
+                ...fetchedStore.store.store,
+                createdAt: fetchedStore.store.createdAt.toISOString(),
+                updatedAt: fetchedStore.store.updatedAt.toISOString(),
+              }
+            : undefined,
+          storePaymentOptions: fetchedStore.paymentInfo
+            ? {
+                ...fetchedStore.paymentInfo.storePaymentOptions,
+                createdAt: fetchedStore.paymentInfo.createdAt.toISOString(),
+                updatedAt: fetchedStore.paymentInfo.updatedAt.toISOString(),
+              }
+            : undefined,
+        },
+      })
+    },
+  )
+
+  fastify.get<{ Querystring: ListStoresQueryParamType }>(
+    '/',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('list_stores')
+        if (!(await fastify.authorize(request, reply, permissionName))) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+
+      schema: {
+        querystring: ListStoresQueryParam,
+        response: {
+          200: { storeReplyMessage, store: StoreUpdateReplySchema },
+        },
+      },
+    },
+    async (request, reply) => {
+      let { search = '', limit = 10, page = 1 } = request.query
+      const offset: Offset = fastify.findOffset(Limit(limit), Page(page))
+
+      const stores: StoresPaginated = await getStoresPaginate(
+        Search(search),
+        Limit(limit),
+        Page(page),
+        offset,
+      )
+      let message: ResponseMessage = fastify.responseMessage(
+        ModelName('stores'),
+        ResultCount(stores.data.length),
+      )
+      let requestUrl: RequestUrl = RequestUrl(
+        request.protocol + '://' + request.hostname + request.url,
+      )
+      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+        requestUrl,
+        Page(stores.totalPage),
+        Page(page),
+      )
+      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+        requestUrl,
+        Page(stores.totalPage),
+        Page(page),
+      )
+
+      return reply.status(200).send({
+        message: message,
+        totalStores: stores.totalStores,
+        nextUrl: nextUrl,
+        previousUrl: previousUrl,
+        totalPage: stores.totalPage,
+        page: page,
+        limit: limit,
+        data: stores.data,
       })
     },
   )

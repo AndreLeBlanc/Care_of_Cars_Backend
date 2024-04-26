@@ -1,12 +1,11 @@
-import { desc, or, sql, and, eq } from 'drizzle-orm'
+import { desc, or, sql, and, eq, ilike } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
 import { db } from '../config/db-connect.js'
 import { roles, users } from '../schema/schema.js'
-import { ilike } from 'drizzle-orm'
 import { PatchUserSchemaType } from '../routes/users/userSchema.js'
 import { RoleID, RoleName } from './roleService.js'
-import { Offset } from '../plugins/pagination.js'
+import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
 import { Brand, make } from 'ts-brand'
 
 export type UserID = Brand<number, 'userID'>
@@ -91,10 +90,10 @@ export async function createUser(
 }
 
 export async function getUsersPaginate(
-  search: string,
-  limit = 10,
-  page = 1,
-  offset: Offset = { offset: 0 },
+  search: Search,
+  limit = Limit(10),
+  page = Page(1),
+  offset = Offset(0),
 ): Promise<UsersPaginated> {
   const condition = or(
     ilike(users.firstName, '%' + search + '%'),
@@ -119,16 +118,10 @@ export async function getUsersPaginate(
         updatedAt: users.updatedAt,
       })
       .from(users)
-      .where(
-        or(
-          ilike(users.firstName, '%' + search + '%'),
-          ilike(users.lastName, '%' + search + '%'),
-          ilike(users.email, '%' + search + '%'),
-        ),
-      )
+      .where(or(condition))
       .orderBy(desc(users.userID))
       .limit(limit || 10)
-      .offset(offset.offset || 0)
+      .offset(offset || 0)
     return { totalUsers: totalUsers, usersList: usersList }
   })
   const totalPage = Math.ceil(totalUsers.count / limit)

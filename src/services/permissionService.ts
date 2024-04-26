@@ -4,7 +4,7 @@ import { db } from '../config/db-connect.js'
 import { permissions } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchPermissionSchemaType } from '../routes/permissions/permissionSchema.js'
-import { Offset } from '../plugins/pagination.js'
+import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
 
 import { Brand, make } from 'ts-brand'
 
@@ -36,10 +36,10 @@ export type PermissionsPaginate = {
 }
 
 export async function getPermissionsPaginate(
-  search: string,
-  limit = 10,
-  page = 1,
-  offset: Offset = { offset: 0 },
+  search: Search,
+  limit = Limit(10),
+  page = Page(1),
+  offset = Offset(0),
 ): Promise<PermissionsPaginate> {
   const condition = or(
     ilike(permissions.permissionName, '%' + search + '%'),
@@ -65,7 +65,7 @@ export async function getPermissionsPaginate(
     .where(condition)
     .orderBy(desc(permissions.permissionID))
     .limit(limit || 10)
-    .offset(offset.offset || 0)
+    .offset(offset || 0)
 
   const permissionsBrandedList = permissionsList.map((permList) => {
     return {

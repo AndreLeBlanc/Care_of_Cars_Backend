@@ -23,8 +23,18 @@ import {
   getPermissionByIDSchema,
   getPermissionByIDType,
 } from './permissionSchema.js'
-import { ResponseMessage, Offset, NextPageUrl, PreviousPageUrl } from '../../plugins/pagination.js'
-
+import {
+  NextPageUrl,
+  PreviousPageUrl,
+  ResponseMessage,
+  Offset,
+  Search,
+  Limit,
+  Page,
+  ResultCount,
+  RequestUrl,
+  ModelName,
+} from '../../plugins/pagination.js'
 export async function permissions(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(
     '/',
@@ -46,26 +56,39 @@ export async function permissions(fastify: FastifyInstance) {
     },
     async function (request, _) {
       let { search = '', limit = 10, page = 1 } = request.query
-      const offset: Offset = fastify.findOffset(limit, page)
-      const result: PermissionsPaginate = await getPermissionsPaginate(search, limit, page, offset)
-      let message: ResponseMessage = fastify.responseMessage('Permissions', result.data.length)
-      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const brandedSearch = Search(search)
+      const brandedLimit = Limit(limit)
+      const brandedPage = Page(page)
+      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
+      const result: PermissionsPaginate = await getPermissionsPaginate(
+        brandedSearch,
+        brandedLimit,
+        brandedPage,
+        offset,
+      )
+      let message: ResponseMessage = fastify.responseMessage(
+        ModelName('Permissions'),
+        ResultCount(result.data.length),
+      )
+      let requestUrl: RequestUrl = RequestUrl(
+        request.protocol + '://' + request.hostname + request.url,
+      )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
-        result.totalPage,
-        page,
+        Page(result.totalPage),
+        Page(page),
       )
       const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
-        result.totalPage,
-        page,
+        Page(result.totalPage),
+        Page(page),
       )
 
       return {
         message: message.responseMessage,
         totalItems: result.totalItems,
         nextUrl: nextUrl,
-        previousUrl: previousUrl?.previousPageUrl,
+        previousUrl: previousUrl,
         totalPage: result.totalPage,
         page: page,
         limit: limit,

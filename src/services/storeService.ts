@@ -1,8 +1,8 @@
 import { Brand, make } from 'ts-brand'
 import { stores, storepaymentinfo } from '../schema/schema.js'
-import { Offset } from '../plugins/pagination.js'
+import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
 import { db } from '../config/db-connect.js'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, ilike, or } from 'drizzle-orm'
 
 type PositiveInteger<T extends number> = `${T}` extends '0' | `-${any}` | `${any}.${any}`
   ? never
@@ -97,11 +97,26 @@ export type StorePaymentOptions = {
   paymentdays: StorePaymentdays
 }
 
+export type StoreMaybePaymentOptions =
+  | {
+      bankgiro?: StoreBankgiro
+      plusgiro?: StorePlusgiro
+      paymentdays?: StorePaymentdays
+    }
+  | undefined
+
 export type StoresPaginated = {
   totalStores: number
   totalPage: number
   perPage: number
   data: { storeName: StoreName; storeID: StoreID; storeOrgNumber: StoreOrgNumber }[]
+}
+
+export type StoreWithSeparateDates = {
+  store: { store: Store; createdAt: Date; updatedAt: Date } | undefined
+  paymentInfo:
+    | { storePaymentOptions: StorePaymentOptions; createdAt: Date; updatedAt: Date }
+    | undefined
 }
 
 export type Store = StoreCreate & { storeID: StoreID }
@@ -305,13 +320,8 @@ export async function deleteStore(
 export async function updateStoreByStoreID(
   storeID: StoreID,
   storePatch?: StoreUpdateCreate,
-  storePaymentPatch?: StoreUpdateCreate,
-): Promise<{
-  store: { store: Store; createdAt: Date; updatedAt: Date } | undefined
-  paymentInfo:
-    | { storePaymentOptions: StorePaymentOptions; createdAt: Date; updatedAt: Date }
-    | undefined
-}> {
+  storePaymentPatch?: StoreMaybePaymentOptions,
+): Promise<StoreWithSeparateDates> {
   const updatedAt: Date = new Date()
 
   const { updatedStore, updatedPaymentInfo } = await db.transaction(async (tx) => {
@@ -348,11 +358,14 @@ export async function updateStoreByStoreID(
     let updatedPaymentInfo = undefined
     if (storePaymentPatch != null && updatedStore != null) {
       const storePaymentPatchWithUpdatedAt = { ...storePaymentPatch, updatedAt: updatedAt }
-
+      console.log('updating payment info')
       ;[updatedPaymentInfo] = await tx
-        .update(storepaymentinfo)
-        .set(storePaymentPatchWithUpdatedAt)
-        .where(eq(storepaymentinfo.storeID, updatedStore.storeID))
+        .insert(storepaymentinfo)
+        .values({ ...storePaymentPatchWithUpdatedAt, storeID: updatedStore.storeID })
+        .onConflictDoUpdate({
+          target: storepaymentinfo.storeID,
+          set: storePaymentPatchWithUpdatedAt,
+        })
         .returning({
           bankgiro: storepaymentinfo.bankgiro,
           plusgiro: storepaymentinfo.plusgiro,
@@ -361,6 +374,7 @@ export async function updateStoreByStoreID(
           updatedAt: storepaymentinfo.updatedAt,
         })
     }
+    console.log(updatedPaymentInfo)
     return { updatedStore, updatedPaymentInfo }
   })
   return {
@@ -424,12 +438,7 @@ export async function updateStoreByStoreID(
   }
 }
 
-export async function getStoreByID(storeID: StoreID): Promise<{
-  store: { store: Store; createdAt: Date; updatedAt: Date } | undefined
-  paymentInfo:
-    | { storePaymentOptions: StorePaymentOptions; createdAt: Date; updatedAt: Date }
-    | undefined
-}> {
+export async function getStoreByID(storeID: StoreID): Promise<StoreWithSeparateDates> {
   const { getStore, paymentInfo } = await db.transaction(async (tx) => {
     let paymentInfo = undefined
     const [getStore] = await tx.select().from(stores).where(eq(stores.storeID, storeID))
@@ -496,16 +505,23 @@ export async function getStoreByID(storeID: StoreID): Promise<{
 }
 
 export async function getStoresPaginate(
-  limit = 10,
-  page = 1,
-  offset: Offset = { offset: 0 },
+  search: Search,
+  limit = Limit(10),
+  page = Page(1),
+  offset = Offset(0),
 ): Promise<StoresPaginated> {
   const { totalStores, storesList } = await db.transaction(async (tx) => {
+    const condition = or(
+      ilike(stores.storeName, '%' + search + '%'),
+      ilike(stores.storeOrgNumber, '%' + search + '%'),
+      ilike(stores.storeAddress, '%' + search + '%'),
+    )
     const [totalStores] = await tx
       .select({
         count: sql`count(*)`.mapWith(Number).as('count'),
       })
       .from(stores)
+      .where(condition)
 
     const storesList = await tx
       .select({
@@ -514,8 +530,9 @@ export async function getStoresPaginate(
         storeOrgNumber: stores.storeOrgNumber,
       })
       .from(stores)
+      .where(condition)
       .limit(limit || 10)
-      .offset(offset.offset || 0)
+      .offset(offset || 0)
     return { totalStores, storesList }
   })
   const totalPage = Math.ceil(totalStores.count / limit)
