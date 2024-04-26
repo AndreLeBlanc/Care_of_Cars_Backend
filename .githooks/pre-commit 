@@ -1,0 +1,16 @@
+sudo docker-compose build test postgres
+
+echo "lllllllllllllllllllllllllllllllllllll"
+
+# Run tests
+docker-compose up --abort-on-container-exit test postgres 
+
+# Stop and remove containers
+docker-compose down
+
+if [ $test_status -ne 0 ]; then
+    echo "Tests failed. Commit aborted."
+    exit 1
+fi
+
+exit 0
