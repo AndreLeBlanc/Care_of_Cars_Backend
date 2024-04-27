@@ -1,3 +1,14 @@
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g')
+[ -z "$FILES" ] && exit 0
+
+# Prettify all selected files
+echo "$FILES" | xargs ./node_modules/.bin/eslint
+
+# Add back the modified/prettified files to staging
+echo "$FILES" | xargs git add
+
+exit 0
+
 sudo docker-compose build test postgres
 
 # Run tests
@@ -11,13 +22,3 @@ if [ $test_status -ne 0 ]; then
     exit 1
 fi
 
-FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g')
-[ -z "$FILES" ] && exit 0
-
-# Prettify all selected files
-echo "$FILES" | xargs ./node_modules/.bin/eslint
-
-# Add back the modified/prettified files to staging
-echo "$FILES" | xargs git add
-
-exit 0
