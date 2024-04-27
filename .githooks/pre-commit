@@ -7,8 +7,6 @@ echo "$FILES" | xargs ./node_modules/.bin/eslint
 # Add back the modified/prettified files to staging
 echo "$FILES" | xargs git add
 
-exit 0
-
 sudo docker-compose build test postgres
 
 # Run tests
@@ -22,3 +20,4 @@ if [ $test_status -ne 0 ]; then
     exit 1
 fi
 
+exit 0
