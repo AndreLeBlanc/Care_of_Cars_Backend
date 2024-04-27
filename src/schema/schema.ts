@@ -48,19 +48,19 @@ export const permissions = pgTable('permissions', {
 export const roleToPermissions = pgTable(
   'roleToPermissions',
   {
-    roleID: integer('roleID'),
-    permissionID: integer('permissionID'),
+    roleID: integer('roleID').notNull(),
+    permissionID: integer('permissionID').notNull(),
     createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
   },
-  (table) => {
+  (roleToPermissions) => {
     return {
       pk: primaryKey({
-        columns: [table.roleID, table.permissionID],
+        columns: [roleToPermissions.roleID, roleToPermissions.permissionID],
       }),
       pkWithCustomName: primaryKey({
         name: 'roleToPermissionID',
-        columns: [table.roleID, table.permissionID],
+        columns: [roleToPermissions.roleID, roleToPermissions.permissionID],
       }),
     }
   },

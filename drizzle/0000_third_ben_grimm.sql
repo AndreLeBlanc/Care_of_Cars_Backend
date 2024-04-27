@@ -53,8 +53,8 @@ CREATE TABLE IF NOT EXISTS "permissions" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "roleToPermissions" (
-	"roleID" integer,
-	"permissionID" integer,
+	"roleID" integer NOT NULL,
+	"permissionID" integer NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "roleToPermissions_roleID_permissionID_pk" PRIMARY KEY("roleID","permissionID")
@@ -116,20 +116,20 @@ CREATE TABLE IF NOT EXISTS "services" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "storeopeninghours" (
 	"storeID" integer PRIMARY KEY NOT NULL,
-	"mondayopen" time,
-	"mondayclose" time,
-	"tuesdayopen" time,
-	"tuesdayclose" time,
-	"wednesdayopen" time,
-	"wednesdayclose" time,
-	"thursdayopen" time,
-	"thursdayclose" time,
-	"fridayopen" time,
-	"fridayclose" time,
-	"saturdayopen" time,
-	"saturdayclose" time,
-	"sundayopen" time,
-	"sundayclose" time,
+	"mondayOpen" time,
+	"mondayClose" time,
+	"tuesdayOpen" time,
+	"tuesdayClose" time,
+	"wednesdayOpen" time,
+	"wednesdayClose" time,
+	"thursdayOpen" time,
+	"thursdayClose" time,
+	"fridayOpen" time,
+	"fridayClose" time,
+	"saturdayOpen" time,
+	"saturdayClose" time,
+	"sundayOpen" time,
+	"sundayClose" time,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
@@ -168,17 +168,15 @@ CREATE TABLE IF NOT EXISTS "stores" (
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "stores_storeOrgNumber_unique" UNIQUE("storeOrgNumber"),
 	CONSTRAINT "stores_storeName_unique" UNIQUE("storeName"),
-	CONSTRAINT "stores_storeEmail_unique" UNIQUE("storeEmail"),
-	CONSTRAINT "stores_storePhone_unique" UNIQUE("storePhone"),
 	CONSTRAINT "stores_storeAddress_unique" UNIQUE("storeAddress")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "storespecialhours" (
 	"specialDateID" serial PRIMARY KEY NOT NULL,
 	"storeID" integer NOT NULL,
-	"stores" date,
-	"dayopen" time,
-	"dayclose" time
+	"day" date NOT NULL,
+	"dayOpen" time NOT NULL,
+	"dayClose" time NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (

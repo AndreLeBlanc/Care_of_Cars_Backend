@@ -30,6 +30,13 @@ export type Role = { roleName: RoleName } & RoleDate
 
 type RolesList = Role & { roleDescription: RoleDescription }
 
+export type RoleHasPermission = {
+  permissionID: PermissionID
+  permissionName: PermissionTitle
+  createdAt: Date
+  updatedAt: Date
+}
+
 type PermissionStatus = {
   permissionID: PermissionID
   permissionName: PermissionTitle
@@ -85,7 +92,7 @@ export async function getRolesPaginate(
     }
   })
   return {
-    totalItems: totalItems.count,adfsdfsdfsdfsdf
+    totalItems: totalItems.count,
     totalPage,
     perPage: page,
     data: brandedRoleList,
@@ -153,8 +160,8 @@ export async function deleteRole(id: RoleID): Promise<Role | undefined> {
     : undefined
 }
 
-export async function getRoleWithPermissions(roleID: RoleID): Promise<any> {
-  const roleWithPermissions = db
+export async function getRoleWithPermissions(roleID: RoleID): Promise<RoleHasPermission[]> {
+  const roleWithPermissions = await db
     .select({
       permissionID: permissions.permissionID,
       permissionName: permissions.permissionName,
@@ -165,7 +172,27 @@ export async function getRoleWithPermissions(roleID: RoleID): Promise<any> {
     .leftJoin(roles, eq(roleToPermissions.roleID, roles.roleID))
     .leftJoin(permissions, eq(roleToPermissions.permissionID, permissions.permissionID))
     .where(eq(roles.roleID, roleID))
-  return roleWithPermissions
+
+  const brandedRoleWithPermissions: RoleHasPermission[] = roleWithPermissions.reduce(
+    (acc, roleWPerm) => {
+      if (
+        roleWPerm.permissionID != null &&
+        roleWPerm.permissionName != null &&
+        roleWPerm.createdAt != null &&
+        roleWPerm.updatedAt != null
+      ) {
+        acc.push({
+          permissionID: PermissionID(roleWPerm.permissionID),
+          permissionName: PermissionTitle(roleWPerm.permissionName),
+          createdAt: roleWPerm.createdAt,
+          updatedAt: roleWPerm.updatedAt,
+        })
+      }
+      return acc
+    },
+    new Array<RoleHasPermission>(),
+  )
+  return brandedRoleWithPermissions
 }
 
 export async function getAllPermissionStatus(roleID: RoleID): Promise<PermissionStatus[]> {

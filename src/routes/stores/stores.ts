@@ -63,6 +63,7 @@ import {
   ListStoresQueryParam,
   ListStoresQueryParamType,
   storeReplyMessage,
+  StorePaginateReply,
 } from './storesSchema..js'
 
 export async function stores(fastify: FastifyInstance) {
@@ -338,12 +339,12 @@ export async function stores(fastify: FastifyInstance) {
       schema: {
         querystring: ListStoresQueryParam,
         response: {
-          200: { storeReplyMessage, store: StoreUpdateReplySchema },
+          200: StorePaginateReply,
         },
       },
     },
     async (request, reply) => {
-      let { search = '', limit = 10, page = 1 } = request.query
+      const { search = '', limit = 10, page = 1 } = request.query
       const offset: Offset = fastify.findOffset(Limit(limit), Page(page))
 
       const stores: StoresPaginated = await getStoresPaginate(
@@ -352,11 +353,11 @@ export async function stores(fastify: FastifyInstance) {
         Page(page),
         offset,
       )
-      let message: ResponseMessage = fastify.responseMessage(
+      const message: ResponseMessage = fastify.responseMessage(
         ModelName('stores'),
         ResultCount(stores.data.length),
       )
-      let requestUrl: RequestUrl = RequestUrl(
+      const requestUrl: RequestUrl = RequestUrl(
         request.protocol + '://' + request.hostname + request.url,
       )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(

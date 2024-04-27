@@ -9,7 +9,8 @@ export type NextPageUrl = Brand<string, 'nextPageUrl'>
 export const NextPageUrl = make<NextPageUrl>()
 export type PreviousPageUrl = Brand<string, 'previousPageUrl'>
 export const PreviousPageUrl = make<PreviousPageUrl>()
-export type ResponseMessage = { responseMessage: string }
+export type ResponseMessage = Brand<string, 'responseMessage'>
+export const ResponseMessage = make<ResponseMessage>()
 export type Offset = Brand<number, 'offset'>
 export const Offset = make<Offset>()
 export type Limit = Brand<number, 'limit'>
@@ -27,7 +28,7 @@ export const RequestUrl = make<RequestUrl>()
 
 // The use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
-export default fp<SupportPluginOptions>(async (fastify, _) => {
+export default fp<SupportPluginOptions>(async (fastify) => {
   fastify.decorate('findOffset', function (limit: Limit, page: Page): Offset {
     return Offset((page - 1) * limit)
   })
@@ -36,9 +37,9 @@ export default fp<SupportPluginOptions>(async (fastify, _) => {
     'responseMessage',
     function (modelName: ModelName, resultCount: ResultCount): ResponseMessage {
       if (resultCount > 0) {
-        return { responseMessage: `${resultCount} ${modelName} found` }
+        return ResponseMessage(`${resultCount} ${modelName} found`)
       }
-      return { responseMessage: `No ${modelName} found!` }
+      return ResponseMessage(`No ${modelName} found!`)
     },
   )
   fastify.decorate('findNextPageUrl', function (requestUrl: string, totalPage: Page, page: Page):

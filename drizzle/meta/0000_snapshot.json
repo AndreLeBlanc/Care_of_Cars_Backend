@@ -1,5 +1,5 @@
 {
-  "id": "3744f97f-9f4a-4b07-a2f2-086427cf104e",
+  "id": "586d88f9-b993-4039-92f8-ddba93a821a8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -307,13 +307,13 @@
           "name": "roleID",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "permissionID": {
           "name": "permissionID",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "createdAt": {
           "name": "createdAt",
@@ -700,86 +700,86 @@
           "primaryKey": true,
           "notNull": true
         },
-        "mondayopen": {
-          "name": "mondayopen",
+        "mondayOpen": {
+          "name": "mondayOpen",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "mondayclose": {
-          "name": "mondayclose",
+        "mondayClose": {
+          "name": "mondayClose",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "tuesdayopen": {
-          "name": "tuesdayopen",
+        "tuesdayOpen": {
+          "name": "tuesdayOpen",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "tuesdayclose": {
-          "name": "tuesdayclose",
+        "tuesdayClose": {
+          "name": "tuesdayClose",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "wednesdayopen": {
-          "name": "wednesdayopen",
+        "wednesdayOpen": {
+          "name": "wednesdayOpen",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "wednesdayclose": {
-          "name": "wednesdayclose",
+        "wednesdayClose": {
+          "name": "wednesdayClose",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "thursdayopen": {
-          "name": "thursdayopen",
+        "thursdayOpen": {
+          "name": "thursdayOpen",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "thursdayclose": {
-          "name": "thursdayclose",
+        "thursdayClose": {
+          "name": "thursdayClose",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "fridayopen": {
-          "name": "fridayopen",
+        "fridayOpen": {
+          "name": "fridayOpen",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "fridayclose": {
-          "name": "fridayclose",
+        "fridayClose": {
+          "name": "fridayClose",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "saturdayopen": {
-          "name": "saturdayopen",
+        "saturdayOpen": {
+          "name": "saturdayOpen",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "saturdayclose": {
-          "name": "saturdayclose",
+        "saturdayClose": {
+          "name": "saturdayClose",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "sundayopen": {
-          "name": "sundayopen",
+        "sundayOpen": {
+          "name": "sundayOpen",
           "type": "time",
           "primaryKey": false,
           "notNull": false
         },
-        "sundayclose": {
-          "name": "sundayclose",
+        "sundayClose": {
+          "name": "sundayClose",
           "type": "time",
           "primaryKey": false,
           "notNull": false
@@ -1045,20 +1045,6 @@
             "storeName"
           ]
         },
-        "stores_storeEmail_unique": {
-          "name": "stores_storeEmail_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "storeEmail"
-          ]
-        },
-        "stores_storePhone_unique": {
-          "name": "stores_storePhone_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "storePhone"
-          ]
-        },
         "stores_storeAddress_unique": {
           "name": "stores_storeAddress_unique",
           "nullsNotDistinct": false,
@@ -1084,23 +1070,23 @@
           "primaryKey": false,
           "notNull": true
         },
-        "stores": {
-          "name": "stores",
+        "day": {
+          "name": "day",
           "type": "date",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "dayopen": {
-          "name": "dayopen",
+        "dayOpen": {
+          "name": "dayOpen",
           "type": "time",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "dayclose": {
-          "name": "dayclose",
+        "dayClose": {
+          "name": "dayClose",
           "type": "time",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {},

@@ -54,8 +54,8 @@ export async function permissions(fastify: FastifyInstance) {
         querystring: ListPermissionQueryParamSchema,
       },
     },
-    async function (request, _) {
-      let { search = '', limit = 10, page = 1 } = request.query
+    async function (request) {
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -66,11 +66,11 @@ export async function permissions(fastify: FastifyInstance) {
         brandedPage,
         offset,
       )
-      let message: ResponseMessage = fastify.responseMessage(
+      const message: ResponseMessage = fastify.responseMessage(
         ModelName('Permissions'),
         ResultCount(result.data.length),
       )
-      let requestUrl: RequestUrl = RequestUrl(
+      const requestUrl: RequestUrl = RequestUrl(
         request.protocol + '://' + request.hostname + request.url,
       )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
@@ -85,7 +85,7 @@ export async function permissions(fastify: FastifyInstance) {
       )
 
       return {
-        message: message.responseMessage,
+        message: message,
         totalItems: result.totalItems,
         nextUrl: nextUrl,
         previousUrl: previousUrl,

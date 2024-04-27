@@ -161,3 +161,5 @@ export const StorePaginateReply = Type.Object({
     }),
   ),
 })
+
+export type StorePaginateReplyType = Static<typeof StorePaginateReply>
