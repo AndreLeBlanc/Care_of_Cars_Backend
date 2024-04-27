@@ -87,6 +87,10 @@ export type DayOpen = Brand<string, 'dayOpen'>
 export const DayOpen = make<DayOpen>()
 export type DayClose = Brand<string, 'dayClose'>
 export const DayClose = make<DayClose>()
+export type FromDate = Brand<Date, 'fromDate'>
+export const FromDate = make<FromDate>()
+export type ToDate = Brand<Date, 'toDate'>
+export const ToDate = make<ToDate>()
 
 export type StoreSpecialHours = {
   storeID: StoreID
@@ -297,11 +301,15 @@ export async function deleteSpecialOpeningHoursByID(
 }
 
 export async function deleteSpecialOpeningHoursDates(
-  specialDateID: SpecialDateID,
+  fromDate: FromDate,
+  toDate: ToDate,
+  storeID: StoreID,
 ): Promise<StoreSpecialHours | undefined> {
   const [storeHours] = await db
     .delete(storespecialhours)
-    .where(eq(storespecialhours.specialDateID, specialDateID))
+    .where(
+      and(eq(storespecialhours.storeID, storeID), between(storespecialhours.day, fromDate, toDate)),
+    )
     .returning({
       specialDateID: storespecialhours.specialDateID,
       storeID: storespecialhours.storeID,
@@ -370,8 +378,8 @@ export async function deleteWeeklyOpeningHours(
 
 export async function getOpeningHours(
   storeID: StoreID,
-  from: Date,
-  to: Date,
+  from: FromDate,
+  to: ToDate,
 ): Promise<OpeningHours | undefined> {
   const { weeklyOpeningHours, specialOpeningHours } = await db.transaction(async (tx) => {
     const weeklyOpeningHours = await tx.query.storeopeninghours.findFirst({
