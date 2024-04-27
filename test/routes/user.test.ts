@@ -12,7 +12,7 @@ describe('POST /users/login HTTP', () => {
 
   after(async () => {
     await app.close()
-  })sdfsdfsd
+  })sdfsdfsdddd
 
   it('POST /users/login returns status 200', async () => {
     const response = await app.inject({
