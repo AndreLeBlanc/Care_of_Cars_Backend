@@ -91,7 +91,7 @@ export type FromDate = Brand<Date, 'fromDate'>
 export const FromDate = make<FromDate>()
 export type ToDate = Brand<Date, 'toDate'>
 export const ToDate = make<ToDate>()
-
+km
 export type StoreSpecialHours = {
   storeID: StoreID
   specialDateID: SpecialDateID
