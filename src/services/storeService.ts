@@ -1,8 +1,8 @@
 import { Brand, make } from 'ts-brand'
-import { stores, storepaymentinfo } from '../schema/schema.js'
+import { stores, storepaymentinfo, storeopeninghours, storespecialhours } from '../schema/schema.js'
 import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
 import { db } from '../config/db-connect.js'
-import { eq, sql, ilike, or } from 'drizzle-orm'
+import { eq, sql, ilike, or, and, between } from 'drizzle-orm'
 
 type PositiveInteger<T extends number> = `${T}` extends '0' | `-${any}` | `${any}.${any}`
   ? never
@@ -50,6 +50,75 @@ export type StorePlusgiro = Brand<string, 'storePlusgiro'>
 export const StorePlusgiro = make<StorePlusgiro>()
 export type StorePaymentdays = Brand<PositiveInteger<number>, 'storePaymentdays'>
 export const StorePaymentdays = make<StorePaymentdays>()
+
+export type MondayOpen = Brand<string | null, 'mondayOpen'>
+export const MondayOpen = make<MondayOpen>()
+export type MondayClose = Brand<string | null, 'mondayClose'>
+export const MondayClose = make<MondayClose>()
+export type TuesdayOpen = Brand<string | null, 'tuesdayOpen'>
+export const TuesdayOpen = make<TuesdayOpen>()
+export type TuesdayClose = Brand<string | null, 'tuesdayClose'>
+export const TuesdayClose = make<TuesdayClose>()
+export type WednesdayOpen = Brand<string | null, 'wednesdayOpen'>
+export const WednesdayOpen = make<WednesdayOpen>()
+export type WednesdayClose = Brand<string | null, 'wednesdayClose'>
+export const WednesdayClose = make<WednesdayClose>()
+export type ThursdayOpen = Brand<string | null, 'thursdayOpen'>
+export const ThursdayOpen = make<ThursdayOpen>()
+export type ThursdayClose = Brand<string | null, 'thursdayClose'>
+export const ThursdayClose = make<ThursdayClose>()
+export type FridayOpen = Brand<string | null, 'fridayOpen'>
+export const FridayOpen = make<FridayOpen>()
+export type FridayClose = Brand<string | null, 'fridayClose'>
+export const FridayClose = make<FridayClose>()
+export type SaturdayOpen = Brand<string | null, 'saturdayOpen'>
+export const SaturdayOpen = make<SaturdayOpen>()
+export type SaturdayClose = Brand<string | null, 'saturdayClose'>
+export const SaturdayClose = make<SaturdayClose>()
+export type SundayOpen = Brand<string | null, 'sundayOpen'>
+export const SundayOpen = make<SundayOpen>()
+export type SundayClose = Brand<string | null, 'sundayClose'>
+export const SundayClose = make<SundayClose>()
+export type SpecialDateID = Brand<number, 'specialDateID'>
+export const SpecialDateID = make<SpecialDateID>()
+export type Day = Brand<Date, 'day'>
+export const Day = make<Day>()
+export type DayOpen = Brand<string, 'dayOpen'>
+export const DayOpen = make<DayOpen>()
+export type DayClose = Brand<string, 'dayClose'>
+export const DayClose = make<DayClose>()
+
+export type StoreSpecialHours = {
+  storeID: StoreID
+  specialDateID: SpecialDateID
+  day: Day
+  dayOpen: DayOpen
+  dayClose: DayClose
+}
+
+export type WeekOpeningHoursCreate = {
+  mondayOpen: MondayOpen
+  mondayClose: MondayClose
+  tuesdayOpen: TuesdayOpen
+  tuesdayClose: TuesdayClose
+  wednesdayOpen: WednesdayOpen
+  wednesdayClose: WednesdayClose
+  thursdayOpen: ThursdayOpen
+  thursdayClose: ThursdayClose
+  fridayOpen: FridayOpen
+  fridayClose: FridayClose
+  saturdayOpen: SaturdayOpen
+  saturdayClose: SaturdayClose
+  sundayOpen: SundayOpen
+  sundayClose: SundayClose
+}
+
+export type WeekOpeningHours = WeekOpeningHoursCreate & { updatedAt: Date; createdAt: Date }
+
+export type OpeningHours = {
+  weekyOpeningHours?: WeekOpeningHours
+  specialOpeningHours: StoreSpecialHours[]
+}
 
 export type StoreCreate = {
   storeName: StoreName
@@ -120,6 +189,244 @@ export type StoreWithSeparateDates = {
 }
 
 export type Store = StoreCreate & { storeID: StoreID }
+
+export async function updateWeeklyOpeningHours(
+  storeID: StoreID,
+  openingHours: WeekOpeningHoursCreate,
+): Promise<WeekOpeningHours | undefined> {
+  const [storeHours] = await db
+    .insert(storeopeninghours)
+    .values({ ...openingHours, storeID: storeID })
+    .onConflictDoUpdate({
+      target: storepaymentinfo.storeID,
+      set: openingHours,
+    })
+    .returning({
+      mondayOpen: storeopeninghours.mondayOpen,
+      mondayClose: storeopeninghours.mondayClose,
+      tuesdayopen: storeopeninghours.tuesdayOpen,
+      tuesdayClose: storeopeninghours.tuesdayClose,
+      wednesdayopen: storeopeninghours.wednesdayOpen,
+      wednesdayClose: storeopeninghours.wednesdayClose,
+      thursdayopen: storeopeninghours.thursdayOpen,
+      thursdayClose: storeopeninghours.thursdayClose,
+      fridayopen: storeopeninghours.fridayOpen,
+      fridayClose: storeopeninghours.fridayClose,
+      saturdayopen: storeopeninghours.saturdayOpen,
+      saturdayClose: storeopeninghours.saturdayClose,
+      sundayopen: storeopeninghours.sundayOpen,
+      sundayClose: storeopeninghours.sundayClose,
+      updatedAt: storeopeninghours.updatedAt,
+      createdAt: storeopeninghours.createdAt,
+    })
+
+  return storeHours
+    ? {
+        mondayOpen: MondayOpen(storeHours.mondayOpen),
+        mondayClose: MondayClose(storeHours.mondayClose),
+        tuesdayOpen: TuesdayOpen(storeHours.tuesdayopen),
+        tuesdayClose: TuesdayClose(storeHours.tuesdayClose),
+        wednesdayOpen: WednesdayOpen(storeHours.wednesdayopen),
+        wednesdayClose: WednesdayClose(storeHours.wednesdayClose),
+        thursdayOpen: ThursdayOpen(storeHours.thursdayopen),
+        thursdayClose: ThursdayClose(storeHours.thursdayClose),
+        fridayOpen: FridayOpen(storeHours.fridayopen),
+        fridayClose: FridayClose(storeHours.fridayClose),
+        saturdayOpen: SaturdayOpen(storeHours.saturdayopen),
+        saturdayClose: SaturdayClose(storeHours.saturdayClose),
+        sundayOpen: SundayOpen(storeHours.sundayopen),
+        sundayClose: SundayClose(storeHours.sundayClose),
+        updatedAt: storeHours.updatedAt,
+        createdAt: storeHours.createdAt,
+      }
+    : undefined
+}
+
+export async function updateSpecialOpeningHours(
+  openingHours: StoreSpecialHours,
+): Promise<StoreSpecialHours | undefined> {
+  const [storeHours] = await db
+    .insert(storespecialhours)
+    .values(openingHours)
+    .onConflictDoUpdate({
+      target: storepaymentinfo.storeID,
+      set: openingHours,
+    })
+    .returning({
+      specialDateID: storespecialhours.specialDateID,
+      storeID: storespecialhours.storeID,
+      day: storespecialhours.day,
+      dayOpen: storespecialhours.dayOpen,
+      dayClose: storespecialhours.dayClose,
+    })
+
+  return storeHours
+    ? {
+        specialDateID: SpecialDateID(storeHours.specialDateID),
+        storeID: StoreID(storeHours.storeID),
+        day: Day(storeHours.day),
+        dayOpen: DayOpen(storeHours.dayOpen),
+        dayClose: DayClose(storeHours.dayClose),
+      }
+    : undefined
+}
+
+export async function deleteSpecialOpeningHoursByID(
+  specialDateID: SpecialDateID,
+): Promise<StoreSpecialHours | undefined> {
+  const [storeHours] = await db
+    .delete(storespecialhours)
+    .where(eq(storespecialhours.specialDateID, specialDateID))
+    .returning({
+      specialDateID: storespecialhours.specialDateID,
+      storeID: storespecialhours.storeID,
+      day: storespecialhours.day,
+      dayOpen: storespecialhours.dayOpen,
+      dayClose: storespecialhours.dayClose,
+    })
+
+  return storeHours
+    ? {
+        specialDateID: SpecialDateID(storeHours.specialDateID),
+        storeID: StoreID(storeHours.storeID),
+        day: Day(storeHours.day),
+        dayOpen: DayOpen(storeHours.dayOpen),
+        dayClose: DayClose(storeHours.dayClose),
+      }
+    : undefined
+}
+
+export async function deleteSpecialOpeningHoursDates(
+  specialDateID: SpecialDateID,
+): Promise<StoreSpecialHours | undefined> {
+  const [storeHours] = await db
+    .delete(storespecialhours)
+    .where(eq(storespecialhours.specialDateID, specialDateID))
+    .returning({
+      specialDateID: storespecialhours.specialDateID,
+      storeID: storespecialhours.storeID,
+      day: storespecialhours.day,
+      dayOpen: storespecialhours.dayOpen,
+      dayClose: storespecialhours.dayClose,
+    })
+
+  return storeHours
+    ? {
+        specialDateID: SpecialDateID(storeHours.specialDateID),
+        storeID: StoreID(storeHours.storeID),
+        day: Day(storeHours.day),
+        dayOpen: DayOpen(storeHours.dayOpen),
+        dayClose: DayClose(storeHours.dayClose),
+      }
+    : undefined
+}
+
+export async function deleteWeeklyOpeningHours(
+  storeID: StoreID,
+): Promise<WeekOpeningHours | undefined> {
+  const [storeHours] = await db
+    .delete(storeopeninghours)
+    .where(eq(storeopeninghours.storeID, storeID))
+    .returning({
+      mondayOpen: storeopeninghours.mondayOpen,
+      mondayClose: storeopeninghours.mondayClose,
+      tuesdayOpen: storeopeninghours.tuesdayOpen,
+      tuesdayClose: storeopeninghours.tuesdayClose,
+      wednesdayOpen: storeopeninghours.wednesdayOpen,
+      wednesdayClose: storeopeninghours.wednesdayClose,
+      thursdayOpen: storeopeninghours.thursdayOpen,
+      thursdayClose: storeopeninghours.thursdayClose,
+      fridayOpen: storeopeninghours.fridayOpen,
+      fridayClose: storeopeninghours.fridayClose,
+      saturdayOpen: storeopeninghours.saturdayOpen,
+      saturdayClose: storeopeninghours.saturdayClose,
+      sundayOpen: storeopeninghours.sundayOpen,
+      sundayClose: storeopeninghours.sundayClose,
+      updatedAt: storeopeninghours.updatedAt,
+      createdAt: storeopeninghours.createdAt,
+    })
+
+  return storeHours
+    ? {
+        mondayOpen: MondayOpen(storeHours.mondayOpen),
+        mondayClose: MondayClose(storeHours.mondayClose),
+        tuesdayOpen: TuesdayOpen(storeHours.tuesdayOpen),
+        tuesdayClose: TuesdayClose(storeHours.tuesdayClose),
+        wednesdayOpen: WednesdayOpen(storeHours.wednesdayOpen),
+        wednesdayClose: WednesdayClose(storeHours.wednesdayClose),
+        thursdayOpen: ThursdayOpen(storeHours.thursdayOpen),
+        thursdayClose: ThursdayClose(storeHours.thursdayClose),
+        fridayOpen: FridayOpen(storeHours.fridayOpen),
+        fridayClose: FridayClose(storeHours.fridayClose),
+        saturdayOpen: SaturdayOpen(storeHours.saturdayOpen),
+        saturdayClose: SaturdayClose(storeHours.saturdayClose),
+        sundayOpen: SundayOpen(storeHours.sundayOpen),
+        sundayClose: SundayClose(storeHours.sundayClose),
+        updatedAt: storeHours.updatedAt,
+        createdAt: storeHours.createdAt,
+      }
+    : undefined
+}
+
+export async function getOpeningHours(
+  storeID: StoreID,
+  from: Date,
+  to: Date,
+): Promise<OpeningHours | undefined> {
+  const { weeklyOpeningHours, specialOpeningHours } = await db.transaction(async (tx) => {
+    const weeklyOpeningHours = await tx.query.storeopeninghours.findFirst({
+      where: eq(storeopeninghours.storeID, storeID),
+    })
+
+    const specialOpeningHours = await tx
+      .select({
+        specialDateID: storespecialhours.specialDateID,
+        storeID: storespecialhours.storeID,
+        day: storespecialhours.day,
+        dayOpen: storespecialhours.dayOpen,
+        dayClose: storespecialhours.dayClose,
+      })
+      .from(storespecialhours)
+      .where(and(eq(storespecialhours.storeID, storeID), between(storespecialhours.day, to, from)))
+
+    return { weeklyOpeningHours, specialOpeningHours }
+  })
+
+  const brandedWeeklyOpeningHours: WeekOpeningHours | undefined = weeklyOpeningHours
+    ? {
+        mondayOpen: MondayOpen(weeklyOpeningHours.mondayOpen),
+        mondayClose: MondayClose(weeklyOpeningHours.mondayClose),
+        tuesdayOpen: TuesdayOpen(weeklyOpeningHours.tuesdayOpen),
+        tuesdayClose: TuesdayClose(weeklyOpeningHours.tuesdayClose),
+        wednesdayOpen: WednesdayOpen(weeklyOpeningHours.wednesdayOpen),
+        wednesdayClose: WednesdayClose(weeklyOpeningHours.wednesdayClose),
+        thursdayOpen: ThursdayOpen(weeklyOpeningHours.thursdayOpen),
+        thursdayClose: ThursdayClose(weeklyOpeningHours.thursdayClose),
+        fridayOpen: FridayOpen(weeklyOpeningHours.fridayOpen),
+        fridayClose: FridayClose(weeklyOpeningHours.fridayClose),
+        saturdayOpen: SaturdayOpen(weeklyOpeningHours.saturdayOpen),
+        saturdayClose: SaturdayClose(weeklyOpeningHours.saturdayClose),
+        sundayOpen: SundayOpen(weeklyOpeningHours.sundayOpen),
+        sundayClose: SundayClose(weeklyOpeningHours.sundayClose),
+        updatedAt: weeklyOpeningHours.updatedAt,
+        createdAt: weeklyOpeningHours.createdAt,
+      }
+    : undefined
+
+  const brandedSpecialOpeningHours = specialOpeningHours.map((openingHour) => {
+    return {
+      specialDateID: SpecialDateID(openingHour.specialDateID),
+      storeID: StoreID(openingHour.storeID),
+      day: Day(openingHour.day),
+      dayOpen: DayOpen(openingHour.dayOpen),
+      dayClose: DayClose(openingHour.dayClose),
+    }
+  })
+  return {
+    weekyOpeningHours: brandedWeeklyOpeningHours,
+    specialOpeningHours: brandedSpecialOpeningHours,
+  }
+}
 
 export async function createStore(
   store: StoreCreate,
