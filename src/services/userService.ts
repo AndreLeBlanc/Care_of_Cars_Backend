@@ -1,12 +1,11 @@
-import { desc, or, sql, and, eq } from 'drizzle-orm'
+import { desc, or, sql, and, eq, ilike } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
 import { db } from '../config/db-connect.js'
 import { roles, users } from '../schema/schema.js'
-import { ilike } from 'drizzle-orm'
 import { PatchUserSchemaType } from '../routes/users/userSchema.js'
 import { RoleID, RoleName } from './roleService.js'
-import { Offset } from '../plugins/pagination.js'
+import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
 import { Brand, make } from 'ts-brand'
 
 export type UserID = Brand<number, 'userID'>
@@ -51,7 +50,7 @@ export type VerifyUser = {
 }
 
 export type UsersPaginated = {
-  totalItems: number
+  totalUsers: number
   totalPage: number
   perPage: number
   data: UserInfo[]
@@ -96,45 +95,41 @@ export async function createUser(
 }
 
 export async function getUsersPaginate(
-  search: string,
-  limit = 10,
-  page = 1,
-  offset: Offset = { offset: 0 },
+  search: Search,
+  limit = Limit(10),
+  page = Page(1),
+  offset = Offset(0),
 ): Promise<UsersPaginated> {
   const condition = or(
     ilike(users.firstName, '%' + search + '%'),
     ilike(users.lastName, '%' + search + '%'),
     ilike(users.email, '%' + search + '%'),
   )
+  const { totalUsers, usersList } = await db.transaction(async (tx) => {
+    const [totalUsers] = await tx
+      .select({
+        count: sql`count(*)`.mapWith(Number).as('count'),
+      })
+      .from(users)
+      .where(condition)
 
-  const [totalItems] = await db
-    .select({
-      count: sql`count(*)`.mapWith(Number).as('count'),
-    })
-    .from(users)
-    .where(condition)
-
-  const usersList = await db
-    .select({
-      userID: users.userID,
-      userFirstName: users.firstName,
-      userLastName: users.lastName,
-      userEmail: users.email,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt,
-    })
-    .from(users)
-    .where(
-      or(
-        ilike(users.firstName, '%' + search + '%'),
-        ilike(users.lastName, '%' + search + '%'),
-        ilike(users.email, '%' + search + '%'),
-      ),
-    )
-    .orderBy(desc(users.userID))
-    .limit(limit || 10)
-    .offset(offset.offset || 0)
-  const totalPage = Math.ceil(totalItems.count / limit)
+    const usersList = await tx
+      .select({
+        userID: users.userID,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+        userEmail: users.email,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .where(or(condition))
+      .orderBy(desc(users.userID))
+      .limit(limit || 10)
+      .offset(offset || 0)
+    return { totalUsers: totalUsers, usersList: usersList }
+  })
+  const totalPage = Math.ceil(totalUsers.count / limit)
 
   const brandedUserList = usersList.map((user) => {
     return {
@@ -147,7 +142,7 @@ export async function getUsersPaginate(
     }
   })
   return {
-    totalItems: totalItems.count,
+    totalUsers: totalUsers.count,
     totalPage,
     perPage: page,
     data: brandedUserList,

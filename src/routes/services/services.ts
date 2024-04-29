@@ -20,8 +20,18 @@ import {
   ServiceNoVariant,
 } from '../../services/serviceService.js'
 import { PermissionTitle } from '../../services/permissionService.js'
-import { NextPageUrl, PreviousPageUrl, ResponseMessage } from '../../plugins/pagination.js'
-
+import {
+  NextPageUrl,
+  PreviousPageUrl,
+  ResponseMessage,
+  Offset,
+  Search,
+  Limit,
+  Page,
+  ResultCount,
+  RequestUrl,
+  ModelName,
+} from '../../plugins/pagination.js'
 export async function services(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceQueryParamSchemaType }>(
     '/',
@@ -50,28 +60,45 @@ export async function services(fastify: FastifyInstance) {
         order = serviceOrderEnum.desc,
         hidden = true,
       } = request.query
-      const offset = fastify.findOffset(limit, page)
-      const result = await getServicesPaginate(search, limit, page, offset, orderBy, order, hidden)
-      let message: ResponseMessage = fastify.responseMessage('services', result.data.length)
-      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+
+      const brandedSearch = Search(search)
+      const brandedLimit = Limit(limit)
+      const brandedPage = Page(page)
+      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
+      const result = await getServicesPaginate(
+        brandedSearch,
+        brandedLimit,
+        brandedPage,
+        offset,
+        orderBy,
+        order,
+        hidden,
+      )
+      let message: ResponseMessage = fastify.responseMessage(
+        ModelName('services'),
+        ResultCount(result.data.length),
+      )
+      let requestUrl: RequestUrl = RequestUrl(
+        request.protocol + '://' + request.hostname + request.url,
+      )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
         result.totalPage,
-        page,
+        brandedPage,
       )
       const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
         result.totalPage,
-        page,
+        brandedPage,
       )
 
       return {
         message: message,
         totalItems: result.totalItems,
-        nextUrl: nextUrl?.nextPageUrl,
-        previousUrl: previousUrl?.previousPageUrl,
+        nextUrl: nextUrl,
+        previousUrl: previousUrl,
         totalPage: result.totalPage,
-        page: page,
+        page: brandedPage,
         limit: limit,
         data: result.data,
       }

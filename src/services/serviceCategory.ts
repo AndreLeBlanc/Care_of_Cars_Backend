@@ -4,7 +4,7 @@ import { db } from '../config/db-connect.js'
 import { serviceCategories } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { RoleName } from './roleService.js'
-import { Offset } from '../plugins/pagination.js'
+import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
 import { Brand, make } from 'ts-brand'
 
 export type ServiceCategoryID = Brand<number, 'serviceCategoryID'>
@@ -47,10 +47,10 @@ export type ServicesPaginated = {
 }
 
 export async function getServiceCategoriesPaginate(
-  search: string,
-  limit = 10,
-  page = 1,
-  offset: Offset = { offset: 0 },
+  search: Search,
+  limit = Limit(10),
+  page = Page(1),
+  offset = Offset(0),
 ): Promise<ServicesPaginated | undefined> {
   const condition = or(
     ilike(serviceCategories.name, '%' + search + '%'),
@@ -76,7 +76,7 @@ export async function getServiceCategoriesPaginate(
     .where(condition)
     .orderBy(desc(serviceCategories.serviceCategoryID))
     .limit(limit || 10)
-    .offset(offset.offset || 0)
+    .offset(offset || 0)
 
   const serviceCategorysListBranded: ServiceCategory[] = serviceCategorysList.map(
     (serviceCategory) => {

@@ -1,5 +1,5 @@
 {
-  "id": "f0f96dfc-3265-46ad-a4f5-59fa0b42829a",
+  "id": "586d88f9-b993-4039-92f8-ddba93a821a8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -307,13 +307,13 @@
           "name": "roleID",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "permissionID": {
           "name": "permissionID",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "createdAt": {
           "name": "createdAt",
@@ -690,14 +690,225 @@
         }
       }
     },
+    "storeopeninghours": {
+      "name": "storeopeninghours",
+      "schema": "",
+      "columns": {
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mondayOpen": {
+          "name": "mondayOpen",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mondayClose": {
+          "name": "mondayClose",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tuesdayOpen": {
+          "name": "tuesdayOpen",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tuesdayClose": {
+          "name": "tuesdayClose",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wednesdayOpen": {
+          "name": "wednesdayOpen",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wednesdayClose": {
+          "name": "wednesdayClose",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "thursdayOpen": {
+          "name": "thursdayOpen",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "thursdayClose": {
+          "name": "thursdayClose",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fridayOpen": {
+          "name": "fridayOpen",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fridayClose": {
+          "name": "fridayClose",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "saturdayOpen": {
+          "name": "saturdayOpen",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "saturdayClose": {
+          "name": "saturdayClose",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sundayOpen": {
+          "name": "sundayOpen",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sundayClose": {
+          "name": "sundayClose",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "storeopeninghours_storeID_stores_storeID_fk": {
+          "name": "storeopeninghours_storeID_stores_storeID_fk",
+          "tableFrom": "storeopeninghours",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "storepaymentinfo": {
+      "name": "storepaymentinfo",
+      "schema": "",
+      "columns": {
+        "storePaymentOption": {
+          "name": "storePaymentOption",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bankgiro": {
+          "name": "bankgiro",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plusgiro": {
+          "name": "plusgiro",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "paymentdays": {
+          "name": "paymentdays",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 30
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "storepaymentinfo_storeID_stores_storeID_fk": {
+          "name": "storepaymentinfo_storeID_stores_storeID_fk",
+          "tableFrom": "storepaymentinfo",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "storepaymentinfo_storePaymentOption_unique": {
+          "name": "storepaymentinfo_storePaymentOption_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "storePaymentOption"
+          ]
+        }
+      }
+    },
     "stores": {
       "name": "stores",
       "schema": "",
       "columns": {
+        "storeID": {
+          "name": "storeID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "storeOrgNumber": {
           "name": "storeOrgNumber",
           "type": "varchar(11)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "storeName": {
@@ -748,6 +959,59 @@
           "primaryKey": false,
           "notNull": true
         },
+        "storeDescription": {
+          "name": "storeDescription",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storeContactPerson": {
+          "name": "storeContactPerson",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storeMaxUsers": {
+          "name": "storeMaxUsers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storeAllowCarAPI": {
+          "name": "storeAllowCarAPI",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "storeAllowSendSMS": {
+          "name": "storeAllowSendSMS",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "storeSendSMS": {
+          "name": "storeSendSMS",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "storeUsesCheckin": {
+          "name": "storeUsesCheckin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "storeUsesPIN": {
+          "name": "storeUsesPIN",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
@@ -773,8 +1037,76 @@
           "columns": [
             "storeOrgNumber"
           ]
+        },
+        "stores_storeName_unique": {
+          "name": "stores_storeName_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "storeName"
+          ]
+        },
+        "stores_storeAddress_unique": {
+          "name": "stores_storeAddress_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "storeAddress"
+          ]
         }
       }
+    },
+    "storespecialhours": {
+      "name": "storespecialhours",
+      "schema": "",
+      "columns": {
+        "specialDateID": {
+          "name": "specialDateID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "day": {
+          "name": "day",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dayOpen": {
+          "name": "dayOpen",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dayClose": {
+          "name": "dayClose",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "storespecialhours_storeID_stores_storeID_fk": {
+          "name": "storespecialhours_storeID_stores_storeID_fk",
+          "tableFrom": "storespecialhours",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     },
     "users": {
       "name": "users",
