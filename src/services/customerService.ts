@@ -500,7 +500,7 @@ export async function getCustomersPaginate(
   search: string,
   limit = 10,
   page = 1,
-  offset: Offset = { offset: 0 },
+  offset = Offset(0),
 ): Promise<CustomersPaginate> {
   const returnData = await db.transaction(async (tx) => {
     const condition = or(
@@ -530,7 +530,7 @@ export async function getCustomersPaginate(
       .where(condition)
       .orderBy(desc(companycustomers.createdAt))
       .limit(limit || 10)
-      .offset(offset.offset || 0)
+      .offset(offset || 0)
     return { totalItems, customersList }
   })
 
@@ -564,7 +564,7 @@ export async function getDriversPaginate(
   search: string,
   limit = 10,
   page = 1,
-  offset: Offset = { offset: 0 },
+  offset = Offset(0),
   isCompany?: string,
 ): Promise<DriversPaginate> {
   const returnData = await db.transaction(async (tx) => {
@@ -613,7 +613,7 @@ export async function getDriversPaginate(
       .where(condition)
       .orderBy(desc(drivers.createdAt))
       .limit(limit || 10)
-      .offset(offset.offset || 0)
+      .offset(offset || 0)
 
     return { driverList, totalItems }
   })

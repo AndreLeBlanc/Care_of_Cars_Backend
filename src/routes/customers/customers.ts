@@ -61,7 +61,18 @@ import {
   DriversPaginate,
   getDriversPaginate,
 } from '../../services/customerService.js'
-import { NextPageUrl, Offset, PreviousPageUrl, ResponseMessage } from '../../plugins/pagination.js'
+import {
+  Limit,
+  ModelName,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  ResponseMessage,
+  ResultCount,
+  Search,
+} from '../../plugins/pagination.js'
 
 export const customers = async (fastify: FastifyInstance) => {
   //Get customers
@@ -85,26 +96,40 @@ export const customers = async (fastify: FastifyInstance) => {
     },
     async function (request, _) {
       let { search = '', limit = 10, page = 1 } = request.query
-      const offset: Offset = fastify.findOffset(limit, page)
-      const result: CustomersPaginate = await getCustomersPaginate(search, limit, page, offset)
-      let message: ResponseMessage = fastify.responseMessage('Customers', result.data.length)
-      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const brandedSearch = Search(search)
+      const brandedLimit = Limit(limit)
+      const brandedPage = Page(page)
+      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
+      const result: CustomersPaginate = await getCustomersPaginate(
+        brandedSearch,
+        brandedLimit,
+        brandedPage,
+        offset,
+      )
+
+      const message: ResponseMessage = fastify.responseMessage(
+        ModelName('Customers'),
+        ResultCount(result.data.length),
+      )
+      const requestUrl: RequestUrl = RequestUrl(
+        request.protocol + '://' + request.hostname + request.url,
+      )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
-        result.totalPage,
-        page,
+        Page(result.totalPage),
+        Page(page),
       )
       const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
-        result.totalPage,
-        page,
+        Page(result.totalPage),
+        Page(page),
       )
 
       return {
-        message: message.responseMessage,
+        message: message,
         totalItems: result.totalItems,
         nextUrl: nextUrl,
-        previousUrl: previousUrl?.previousPageUrl,
+        previousUrl: previousUrl,
         totalPage: result.totalPage,
         page: page,
         limit: limit,
@@ -295,26 +320,41 @@ export const customers = async (fastify: FastifyInstance) => {
     },
     async function (request, _) {
       let { search = '', limit = 10, page = 1 } = request.query
-      const offset: Offset = fastify.findOffset(limit, page)
-      const result: DriversPaginate = await getDriversPaginate(search, limit, page, offset)
-      let message: ResponseMessage = fastify.responseMessage('Drivers', result.data.length)
-      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const brandedSearch = Search(search)
+      const brandedLimit = Limit(limit)
+      const brandedPage = Page(page)
+      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
+
+      const result: DriversPaginate = await getDriversPaginate(
+        brandedSearch,
+        brandedLimit,
+        brandedPage,
+        offset,
+      )
+
+      const message: ResponseMessage = fastify.responseMessage(
+        ModelName('Drivers'),
+        ResultCount(result.data.length),
+      )
+      const requestUrl: RequestUrl = RequestUrl(
+        request.protocol + '://' + request.hostname + request.url,
+      )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
-        result.totalPage,
-        page,
+        Page(result.totalPage),
+        Page(page),
       )
       const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
-        result.totalPage,
-        page,
+        Page(result.totalPage),
+        Page(page),
       )
 
       return {
-        message: message.responseMessage,
+        message: message,
         totalItems: result.totalItems,
         nextUrl: nextUrl,
-        previousUrl: previousUrl?.previousPageUrl,
+        previousUrl: previousUrl,
         totalPage: result.totalPage,
         page: page,
         limit: limit,
@@ -344,32 +384,41 @@ export const customers = async (fastify: FastifyInstance) => {
     },
     async function (request, _) {
       let { search = '', limit = 10, page = 1, companyOrgNumber } = request.query
-      const offset: Offset = fastify.findOffset(limit, page)
+      const brandedSearch = Search(search)
+      const brandedLimit = Limit(limit)
+      const brandedPage = Page(page)
+      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
       const result: DriversPaginate = await getDriversPaginate(
-        search,
-        limit,
-        page,
+        brandedSearch,
+        brandedLimit,
+        brandedPage,
         offset,
         companyOrgNumber,
       )
-      let message: ResponseMessage = fastify.responseMessage('Company Drivers', result.data.length)
-      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+
+      const message: ResponseMessage = fastify.responseMessage(
+        ModelName('Company Drivers'),
+        ResultCount(result.data.length),
+      )
+      const requestUrl: RequestUrl = RequestUrl(
+        request.protocol + '://' + request.hostname + request.url,
+      )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
-        result.totalPage,
-        page,
+        Page(result.totalPage),
+        Page(page),
       )
       const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
-        result.totalPage,
-        page,
+        Page(result.totalPage),
+        Page(page),
       )
 
       return {
-        message: message.responseMessage,
+        message: message,
         totalItems: result.totalItems,
         nextUrl: nextUrl,
-        previousUrl: previousUrl?.previousPageUrl,
+        previousUrl: previousUrl,
         totalPage: result.totalPage,
         page: page,
         limit: limit,

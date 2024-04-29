@@ -24,7 +24,18 @@ import {
   editRentCar,
   getRentCarPaginate,
 } from '../../services/rentCarService.js'
-import { NextPageUrl, Offset, PreviousPageUrl, ResponseMessage } from '../../plugins/pagination.js'
+import {
+  Limit,
+  ModelName,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  ResponseMessage,
+  ResultCount,
+  Search,
+} from '../../plugins/pagination.js'
 
 export const rentCar = async (fastify: FastifyInstance) => {
   //Create Rent Cars
@@ -96,26 +107,40 @@ export const rentCar = async (fastify: FastifyInstance) => {
     },
     async function (request, _) {
       let { search = '', limit = 10, page = 1 } = request.query
-      const offset: Offset = fastify.findOffset(limit, page)
-      const result: RentCarsPaginate = await getRentCarPaginate(search, limit, page, offset)
-      let message: ResponseMessage = fastify.responseMessage('Rent Cars', result.data.length)
-      let requestUrl: string | undefined = request.protocol + '://' + request.hostname + request.url
+      const brandedSearch = Search(search)
+      const brandedLimit = Limit(limit)
+      const brandedPage = Page(page)
+      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
+      const result: RentCarsPaginate = await getRentCarPaginate(
+        brandedSearch,
+        brandedLimit,
+        brandedPage,
+        offset,
+      )
+
+      const message: ResponseMessage = fastify.responseMessage(
+        ModelName('Company Drivers'),
+        ResultCount(result.data.length),
+      )
+      const requestUrl: RequestUrl = RequestUrl(
+        request.protocol + '://' + request.hostname + request.url,
+      )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
-        result.totalPage,
-        page,
+        Page(result.totalPage),
+        Page(page),
       )
       const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
-        result.totalPage,
-        page,
+        Page(result.totalPage),
+        Page(page),
       )
 
       return {
-        message: message.responseMessage,
+        message,
         totalItems: result.totalItems,
         nextUrl: nextUrl,
-        previousUrl: previousUrl?.previousPageUrl,
+        previousUrl,
         totalPage: result.totalPage,
         page: page,
         limit: limit,

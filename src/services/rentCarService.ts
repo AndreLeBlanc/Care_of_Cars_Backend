@@ -77,7 +77,7 @@ export async function getRentCarPaginate(
   search: string,
   limit = 10,
   page = 1,
-  offset: Offset = { offset: 0 },
+  offset = Offset(0),
 ): Promise<RentCarsPaginate> {
   const returnData = await db.transaction(async (tx) => {
     const condition = or(
@@ -108,7 +108,7 @@ export async function getRentCarPaginate(
       .where(condition)
       .orderBy(desc(rentcars.createdAt))
       .limit(limit || 10)
-      .offset(offset.offset || 0)
+      .offset(offset || 0)
 
     return { totalItems, rentCarList }
   })
