@@ -2,6 +2,7 @@ import { relations } from 'drizzle-orm'
 import {
   serial,
   text,
+  smallint,
   timestamp,
   pgTable,
   date,
@@ -24,42 +25,42 @@ export const users = pgTable('users', {
   roleID: integer('roleID')
     .references(() => roles.roleID)
     .notNull(),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
 export const roles = pgTable('roles', {
   roleID: serial('roleID').primaryKey().unique(),
   roleName: varchar('roleName', { length: 256 }).unique().notNull(),
   description: text('description'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
 export const permissions = pgTable('permissions', {
   permissionID: serial('permissionID').primaryKey().unique(),
   permissionName: varchar('permissionName', { length: 256 }).unique().notNull(),
   description: text('description'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
 export const roleToPermissions = pgTable(
   'roleToPermissions',
   {
-    roleID: integer('roleID'),
-    permissionID: integer('permissionID'),
-    createdAt: timestamp('createdAt').notNull().defaultNow(),
-    updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+    roleID: integer('roleID').notNull(),
+    permissionID: integer('permissionID').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
   },
-  (table) => {
+  (roleToPermissions) => {
     return {
       pk: primaryKey({
-        columns: [table.roleID, table.permissionID],
+        columns: [roleToPermissions.roleID, roleToPermissions.permissionID],
       }),
       pkWithCustomName: primaryKey({
         name: 'roleToPermissionID',
-        columns: [table.roleID, table.permissionID],
+        columns: [roleToPermissions.roleID, roleToPermissions.permissionID],
       }),
     }
   },
@@ -94,8 +95,8 @@ export const serviceCategories = pgTable('serviceCategories', {
   serviceCategoryID: serial('serviceCategoryID').primaryKey().unique(),
   name: varchar('name', { length: 256 }).unique().notNull(),
   description: text('description'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
 export const services = pgTable('services', {
@@ -112,8 +113,8 @@ export const services = pgTable('services', {
   itemNumber: varchar('itemNumber', { length: 256 }),
   suppliersArticleNumber: varchar('suppliersArticleNumber', { length: 256 }),
   externalArticleNumber: varchar('externalArticleNumber', { length: 256 }),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 export const servicesCategoryToServiceRelations = relations(serviceCategories, ({ many }) => ({
   services: many(services),
@@ -139,8 +140,8 @@ export const serviceVariants = pgTable('serviceVariants', {
   serviceID: integer('serviceID')
     .references(() => services.serviceID)
     .notNull(),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
 export const servicesRelations = relations(services, ({ many }) => ({
@@ -158,8 +159,8 @@ export const companycustomers = pgTable('companycustomers', {
   companyZipCode: varchar('companyZipCode', { length: 16 }),
   companyAddressCity: varchar('companyAddressCity', { length: 256 }),
   companyCountry: varchar('companyCountry', { length: 256 }),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
 export const drivers = pgTable('drivers', {
@@ -186,8 +187,8 @@ export const drivers = pgTable('drivers', {
   driverKeyNumber: varchar('driverKeyNumber', { length: 256 }),
   driverNotesShared: varchar('driverNotesShared'),
   driverNotes: varchar('driverNotes'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
 export const driverRelations = relations(drivers, ({ one }) => ({
@@ -202,12 +203,13 @@ export const companycustomersRelations = relations(companycustomers, ({ many }) 
 }))
 
 export const stores = pgTable('stores', {
-  storeOrgNumber: varchar('storeOrgNumber', { length: 11 }).primaryKey().unique(),
-  storeName: varchar('storeName').notNull(),
+  storeID: serial('storeID').primaryKey(),
+  storeOrgNumber: varchar('storeOrgNumber', { length: 11 }).unique().notNull(),
+  storeName: varchar('storeName').notNull().unique(),
   storeStatus: boolean('storeStatus').notNull(),
   storeEmail: varchar('storeEmail').notNull(),
   storePhone: varchar('storePhone').notNull(),
-  storeAddress: varchar('storeAddress').notNull(),
+  storeAddress: varchar('storeAddress').unique().notNull(),
   storeZipCode: varchar('storeZipCode', { length: 16 }).notNull(),
   storeCity: varchar('storeCity').notNull(),
   storeCountry: varchar('storeCountry').notNull(),
@@ -219,6 +221,71 @@ export const stores = pgTable('stores', {
   storeSendSMS: boolean('storeSendSMS').default(true),
   storeUsesCheckin: boolean('storeUsesCheckin').default(true),
   storeUsesPIN: boolean('storeUsesPIN').default(true),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
+
+export const storepaymentinfo = pgTable('storepaymentinfo', {
+  storePaymentOption: serial('storePaymentOption').primaryKey().unique(),
+  storeID: integer('storeID')
+    .references(() => stores.storeID, { onDelete: 'cascade' })
+    .notNull(),
+  bankgiro: varchar('bankgiro', { length: 16 }),
+  plusgiro: varchar('plusgiro', { length: 16 }),
+  paymentdays: smallint('paymentdays').default(30).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+})
+
+export const storepaymentinfoRelations = relations(storepaymentinfo, ({ one }) => ({
+  stores: one(stores, {
+    fields: [storepaymentinfo.storeID],
+    references: [stores.storeID],
+  }),
+}))
+
+export const storeopeninghours = pgTable('storeopeninghours', {
+  storeID: integer('storeID')
+    .references(() => stores.storeID, { onDelete: 'cascade' })
+    .primaryKey(),
+  mondayOpen: time('mondayOpen'),
+  mondayClose: time('mondayClose'),
+  tuesdayOpen: time('tuesdayOpen'),
+  tuesdayClose: time('tuesdayClose'),
+  wednesdayOpen: time('wednesdayOpen'),
+  wednesdayClose: time('wednesdayClose'),
+  thursdayOpen: time('thursdayOpen'),
+  thursdayClose: time('thursdayClose'),
+  fridayOpen: time('fridayOpen'),
+  fridayClose: time('fridayClose'),
+  saturdayOpen: time('saturdayOpen'),
+  saturdayClose: time('saturdayClose'),
+  sundayOpen: time('sundayOpen'),
+  sundayClose: time('sundayClose'),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+})
+
+export const storeopeninghouRselations = relations(storeopeninghours, ({ one }) => ({
+  stores: one(stores, {
+    fields: [storeopeninghours.storeID],
+    references: [stores.storeID],
+  }),
+}))
+
+export const storespecialhours = pgTable('storespecialhours', {
+  specialDateID: serial('specialDateID').primaryKey(),
+  storeID: integer('storeID')
+    .references(() => stores.storeID, { onDelete: 'cascade' })
+    .notNull(),
+  day: date('day', { mode: 'date' }).notNull(),
+  dayOpen: time('dayOpen').notNull(),
+  dayClose: time('dayClose').notNull(),
+})
+
+export const storespecialhoursRelations = relations(storespecialhours, ({ one }) => ({
+  stores: one(stores, {
+    fields: [storespecialhours.storeID],
+    references: [stores.storeID],
+  }),
+}))

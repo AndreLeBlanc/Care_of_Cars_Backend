@@ -23,8 +23,18 @@ import {
   getServiceCategoryByIDType,
 } from './serviceCategorySchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
-import { NextPageUrl, PreviousPageUrl, ResponseMessage, Offset } from '../../plugins/pagination.js'
-
+import {
+  NextPageUrl,
+  PreviousPageUrl,
+  ResponseMessage,
+  Offset,
+  Search,
+  Limit,
+  Page,
+  ResultCount,
+  RequestUrl,
+  ModelName,
+} from '../../plugins/pagination.js'
 export async function serviceCategory(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceCategoryQueryParamSchemaType }>(
     '/',
@@ -46,11 +56,14 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async function (request, reply) {
       let { search = '', limit = 10, page = 1 } = request.query
-      const offset: Offset = fastify.findOffset(limit, page)
+      const brandedSearch = Search(search)
+      const brandedLimit = Limit(limit)
+      const brandedPage = Page(page)
+      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
       const servicesPaginated: ServicesPaginated | undefined = await getServiceCategoriesPaginate(
-        search,
-        limit,
-        page,
+        brandedSearch,
+        brandedLimit,
+        brandedPage,
         offset,
       )
 
@@ -58,27 +71,28 @@ export async function serviceCategory(fastify: FastifyInstance) {
         return reply.status(403).send({ message: "Can't find service Categories" })
       } else {
         let message: ResponseMessage = fastify.responseMessage(
-          'service category',
-          servicesPaginated.data.length,
+          ModelName('service category'),
+          ResultCount(servicesPaginated.data.length),
         )
-        let requestUrl: string | undefined =
-          request.protocol + '://' + request.hostname + request.url
+        let requestUrl: RequestUrl = RequestUrl(
+          request.protocol + '://' + request.hostname + request.url,
+        )
         const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
           requestUrl,
-          servicesPaginated.totalPage,
-          page,
+          Page(servicesPaginated.totalPage),
+          Page(page),
         )
         const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
           requestUrl,
-          servicesPaginated.totalPage,
-          page,
+          Page(servicesPaginated.totalPage),
+          Page(page),
         )
 
         return reply.status(200).send({
           message: message,
           totalItems: servicesPaginated.totalItems,
-          nextUrl: nextUrl?.nextPageUrl,
-          previousUrl: previousUrl?.previousPageUrl,
+          nextUrl: nextUrl,
+          previousUrl: previousUrl,
           totalPage: servicesPaginated.totalPage,
           page: page,
           limit: limit,

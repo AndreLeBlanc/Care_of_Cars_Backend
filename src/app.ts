@@ -16,7 +16,6 @@ import { stores } from './routes/stores/stores.js'
 import { root } from './routes/root.js'
 import seedSuperAdmin from './plugins/seed.js'
 import { customers } from './routes/customers/customers.js'
-import { initDrizzle } from './config/db-connect.js'
 
 const defaultOptions = {
   logger: true,
@@ -27,8 +26,6 @@ export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPlugin
 // Pass --options via CLI arguments in command to enable these options.
 
 export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
-  await initDrizzle()
-
   const app: FastifyInstance = fastify({ ...defaultOptions, ...options })
 
   // Place here your custom code!

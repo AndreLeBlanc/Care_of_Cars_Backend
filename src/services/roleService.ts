@@ -5,7 +5,7 @@ import { permissions, roleToPermissions, roles } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
 import { PatchRoleSchemaType } from '../routes/roles/roleSchema.js'
 import { PermissionTitle, PermissionID } from './permissionService.js'
-import { Offset } from '../plugins/pagination.js'
+import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
 import { Brand, make } from 'ts-brand'
 
 export type RoleName = Brand<string, 'roleName'>
@@ -30,6 +30,13 @@ export type Role = { roleName: RoleName } & RoleDate
 
 type RolesList = Role & { roleDescription: RoleDescription }
 
+export type RoleHasPermission = {
+  permissionID: PermissionID
+  permissionName: PermissionTitle
+  createdAt: Date
+  updatedAt: Date
+}
+
 type PermissionStatus = {
   permissionID: PermissionID
   permissionName: PermissionTitle
@@ -43,10 +50,10 @@ export type RolesPaginated = {
 }
 
 export async function getRolesPaginate(
-  search: string,
-  limit = 10,
-  page = 1,
-  offset: Offset = { offset: 0 },
+  search: Search,
+  limit = Limit(10),
+  page = Page(1),
+  offset = Offset(0),
 ): Promise<RolesPaginated> {
   const condition = or(
     ilike(roles.roleName, '%' + search + '%'),
@@ -72,7 +79,7 @@ export async function getRolesPaginate(
     .where(condition)
     .orderBy(desc(roles.roleID))
     .limit(limit || 10)
-    .offset(offset.offset || 0)
+    .offset(offset || 0)
   const totalPage = Math.ceil(totalItems.count / limit)
 
   const brandedRoleList: RolesList[] = rolesList.map((role) => {
@@ -153,8 +160,8 @@ export async function deleteRole(id: RoleID): Promise<Role | undefined> {
     : undefined
 }
 
-export async function getRoleWithPermissions(roleID: RoleID): Promise<any> {
-  const roleWithPermissions = db
+export async function getRoleWithPermissions(roleID: RoleID): Promise<RoleHasPermission[]> {
+  const roleWithPermissions = await db
     .select({
       permissionID: permissions.permissionID,
       permissionName: permissions.permissionName,
@@ -165,7 +172,27 @@ export async function getRoleWithPermissions(roleID: RoleID): Promise<any> {
     .leftJoin(roles, eq(roleToPermissions.roleID, roles.roleID))
     .leftJoin(permissions, eq(roleToPermissions.permissionID, permissions.permissionID))
     .where(eq(roles.roleID, roleID))
-  return roleWithPermissions
+
+  const brandedRoleWithPermissions: RoleHasPermission[] = roleWithPermissions.reduce(
+    (acc, roleWPerm) => {
+      if (
+        roleWPerm.permissionID != null &&
+        roleWPerm.permissionName != null &&
+        roleWPerm.createdAt != null &&
+        roleWPerm.updatedAt != null
+      ) {
+        acc.push({
+          permissionID: PermissionID(roleWPerm.permissionID),
+          permissionName: PermissionTitle(roleWPerm.permissionName),
+          createdAt: roleWPerm.createdAt,
+          updatedAt: roleWPerm.updatedAt,
+        })
+      }
+      return acc
+    },
+    new Array<RoleHasPermission>(),
+  )
+  return brandedRoleWithPermissions
 }
 
 export async function getAllPermissionStatus(roleID: RoleID): Promise<PermissionStatus[]> {
