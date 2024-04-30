@@ -186,3 +186,35 @@ export async function editRentCar(carDetails: RentCarCreateType): Promise<RentCa
       }
     : undefined
 }
+
+export async function getRentCarById(
+  regNumber: RentCarRegistrationNumber,
+): Promise<RentCar | undefined> {
+  const [rentCarDetails] = await db
+    .select({
+      rentCarRegistrationNumber: rentcars.rentCarRegistrationNumber,
+      rentCarModel: rentcars.rentCarModel,
+      rentCarColor: rentcars.rentCarColor,
+      rentCarYear: rentcars.rentCarYear,
+      rentCarNotes: rentcars.rentCarNotes,
+      rentCarNumber: rentcars.rentCarNumber,
+      createdAt: rentcars.createdAt,
+      updatedAt: rentcars.updatedAt,
+    })
+    .from(rentcars)
+    .where(eq(rentcars.rentCarRegistrationNumber, regNumber))
+  return rentCarDetails
+    ? {
+        rentCarRegistrationNumber: RentCarRegistrationNumber(
+          rentCarDetails.rentCarRegistrationNumber,
+        ),
+        rentCarModel: RentCarModel(rentCarDetails.rentCarModel),
+        rentCarColor: RentCarColor(rentCarDetails.rentCarColor),
+        rentCarYear: RentCarYear(rentCarDetails.rentCarYear),
+        rentCarNotes: RentCarNotes(rentCarDetails.rentCarNotes),
+        rentCarNumber: RentCarNumber(rentCarDetails.rentCarNumber),
+        createdAt: rentCarDetails.createdAt,
+        updatedAt: rentCarDetails.updatedAt,
+      }
+    : undefined
+}

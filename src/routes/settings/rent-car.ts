@@ -7,6 +7,8 @@ import {
   addRentBody,
   deleteRentCar,
   deleteRentCarType,
+  getRentCarQueryParams,
+  getRentCarQueryParamsType,
   patchRentCarBody,
 } from './schemas/rentCarSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
@@ -22,6 +24,7 @@ import {
   createRentCar,
   deleteRentCarByRegNumber,
   editRentCar,
+  getRentCarById,
   getRentCarPaginate,
 } from '../../services/rentCarService.js'
 import {
@@ -223,6 +226,32 @@ export const rentCar = async (fastify: FastifyInstance) => {
       return reply
         .status(200)
         .send({ message: 'Rent Car deleted', deletedRegNumber: deletedRentCar })
+    },
+  )
+
+  //Get Rent Car by Id
+  fastify.get<{ Params: getRentCarQueryParamsType }>(
+    '/:regNumber',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('delete_rent_car')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: getRentCarQueryParams,
+      },
+    },
+    async (request, reply) => {
+      const { regNumber } = request.params
+      const rentCarDetails: RentCar | undefined = await getRentCarById(
+        RentCarRegistrationNumber(regNumber),
+      )
+      if (rentCarDetails == null) {
+        return reply.status(404).send({ message: "Rent Car doesn't exist!" })
+      }
+      return reply.status(200).send({ message: 'Rent Car found', rentCarDetails })
     },
   )
 }

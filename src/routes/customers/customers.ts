@@ -60,6 +60,8 @@ import {
   CustomersPaginate,
   DriversPaginate,
   getDriversPaginate,
+  getDriverById,
+  getCompanyById,
 } from '../../services/customerService.js'
 import {
   Limit,
@@ -267,12 +269,36 @@ export const customers = async (fastify: FastifyInstance) => {
     },
   )
 
+  //Get company by Id
+  fastify.get<{ Params: getCompanyByOrgNumberType }>(
+    '/:orgNumber',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_company_by_id')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: getCompanyByOrgNumber,
+      },
+    },
+    async (request, reply) => {
+      const { orgNumber } = request.params
+      const companyDetails: Company | undefined = await getCompanyById(CustomerOrgNumber(orgNumber))
+      if (companyDetails == null) {
+        return reply.status(404).send({ message: "Company doesn't exist!" })
+      }
+      return reply.status(200).send({ message: 'Company found', companyDetails })
+    },
+  )
+
   //Delete Company and drivers
   fastify.delete<{ Params: getCompanyByOrgNumberType }>(
     '/:orgNumber',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = PermissionTitle('delete_driver')
+        const permissionName: PermissionTitle = PermissionTitle('delete_company')
         await fastify.authorize(request, reply, permissionName)
         done()
         return reply
@@ -569,6 +595,30 @@ export const customers = async (fastify: FastifyInstance) => {
           editedCompany,
         })
       }
+    },
+  )
+
+  //Get by driver email
+  fastify.get<{ Params: getDriverByEmailType }>(
+    '/driver/:driverEmail',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_driver_by_id')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: getDriverByEmail,
+      },
+    },
+    async (request, reply) => {
+      const { driverEmail } = request.params
+      const driverDetails: Driver | undefined = await getDriverById(DriverEmail(driverEmail))
+      if (driverDetails == null) {
+        return reply.status(404).send({ message: "Driver doesn't exist!" })
+      }
+      return reply.status(200).send({ message: 'Drivers details found', driverDetails })
     },
   )
 

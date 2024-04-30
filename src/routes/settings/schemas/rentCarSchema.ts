@@ -28,7 +28,12 @@ export const patchRentCarBody = Type.Object({
   rentCarNumber: Type.Optional(Type.Number()),
 })
 
+export const getRentCarQueryParams = Type.Object({
+  regNumber: Type.String(),
+})
+
 export type PatchRentCarType = Static<typeof patchRentCarBody>
 export type deleteRentCarType = Static<typeof deleteRentCar>
+export type getRentCarQueryParamsType = Static<typeof getRentCarQueryParams>
 export type ListRentCarQueryParamSchemaType = Static<typeof ListRentCarQueryParamSchema>
 export type AddCustomerType = Static<typeof addRentBody>

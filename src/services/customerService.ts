@@ -639,3 +639,93 @@ export async function getDriversPaginate(
     data: driversBrandedList,
   }
 }
+
+//Get company by Id
+export async function getCompanyById(orgNumber: CustomerOrgNumber): Promise<Company | undefined> {
+  const [companyDetails] = await db
+    .select({
+      customerOrgNumber: companycustomers.customerOrgNumber,
+      customerComapanyName: companycustomers.customerComapanyName,
+      customerAddress: companycustomers.companyAddress,
+      customerZipCode: companycustomers.companyZipCode,
+      customerAddressCity: companycustomers.companyAddressCity,
+      customerCountry: companycustomers.companyCountry,
+      createdAt: companycustomers.createdAt,
+      updatedAt: companycustomers.updatedAt,
+    })
+    .from(companycustomers)
+    .where(eq(companycustomers.customerOrgNumber, orgNumber))
+
+  return companyDetails
+    ? {
+        customerOrgNumber: CustomerOrgNumber(companyDetails.customerOrgNumber),
+        customerCompanyName: CustomerCompanyName(companyDetails.customerComapanyName),
+        companyAddress: companyDetails.customerAddress
+          ? CompanyAddress(companyDetails.customerAddress)
+          : undefined,
+        companyAddressCity: companyDetails.customerAddressCity
+          ? CompanyAddressCity(companyDetails.customerAddressCity)
+          : undefined,
+        companyCountry: companyDetails.customerCountry
+          ? CompanyCountry(companyDetails.customerCountry)
+          : undefined,
+        companyZipCode: companyDetails.customerZipCode
+          ? CompanyZipCode(companyDetails.customerZipCode)
+          : undefined,
+        createdAt: companyDetails.createdAt,
+        updatedAt: companyDetails.updatedAt,
+      }
+    : undefined
+}
+
+export async function getDriverById(driverEmail: DriverEmail): Promise<Driver | undefined> {
+  const [driverDetails] = await db
+    .select({
+      driverExternalNumber: drivers.driverExternalNumber,
+      driverGDPRAccept: drivers.driverGDPRAccept,
+      driverISWarrantyDriver: drivers.driverISWarrantyDriver,
+      driverAcceptsMarketing: drivers.driverAcceptsMarketing,
+      driverFirstName: drivers.driverFirstName,
+      driverLastName: drivers.driverLastName,
+      driverEmail: drivers.driverEmail,
+      driverPhoneNumber: drivers.driverPhoneNumber,
+      driverAddress: drivers.driverAddress,
+      driverZipCode: drivers.driverZipCode,
+      driverAddressCity: drivers.driverAddressCity,
+      driverHasCard: drivers.driverHasCard,
+      driverCardValidTo: drivers.driverCardValidTo,
+      driverCardNumber: drivers.driverCardNumber,
+      driverKeyNumber: drivers.driverKeyNumber,
+      driverNotesShared: drivers.driverNotesShared,
+      driverNotes: drivers.driverNotes,
+      driverCountry: drivers.driverCountry,
+      createdAt: drivers.createdAt,
+      updatedAt: drivers.updatedAt,
+    })
+    .from(drivers)
+    .where(eq(drivers.driverEmail, driverEmail))
+  return driverDetails
+    ? {
+        driverExternalNumber: DriverExternalNumber(driverDetails.driverExternalNumber),
+        driverGDPRAccept: DriverGDPRAccept(driverDetails.driverGDPRAccept),
+        driverISWarrantyDriver: DriverISWarrantyCustomer(driverDetails.driverISWarrantyDriver),
+        driverAcceptsMarketing: DriverAcceptsMarketing(driverDetails.driverAcceptsMarketing),
+        driverFirstName: DriverFirstName(driverDetails.driverFirstName),
+        driverLastName: DriverLastName(driverDetails.driverLastName),
+        driverEmail: DriverEmail(driverDetails.driverEmail),
+        driverPhoneNumber: DriverPhoneNumber(driverDetails.driverPhoneNumber),
+        driverAddress: DriverAddress(driverDetails.driverAddress),
+        driverZipCode: DriverZipCode(driverDetails.driverZipCode),
+        driverAddressCity: DriverAddressCity(driverDetails.driverAddressCity),
+        driverHasCard: DriverHasCard(driverDetails.driverHasCard),
+        driverCardValidTo: DriverCardValidTo(driverDetails.driverCardValidTo),
+        driverCardNumber: CustomerCardNumber(driverDetails.driverCardNumber),
+        driverKeyNumber: DriverKeyNumber(driverDetails.driverKeyNumber),
+        driverNotesShared: DriverNotesShared(driverDetails.driverNotesShared),
+        driverNotes: DriverNotes(driverDetails.driverNotes),
+        driverCountry: DriverCountry(driverDetails.driverCountry),
+        createdAt: driverDetails.createdAt,
+        updatedAt: driverDetails.updatedAt,
+      }
+    : undefined
+}
