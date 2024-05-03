@@ -1,8 +1,7 @@
 import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { db } from '../config/db-connect.js'
 import {
-  CreateServiceSchemaType,
-  PatchServiceSchemaType,
+  ServiceSchemaType,
   colorForService,
   listServiceOrderByEnum,
   serviceOrderEnum,
@@ -76,7 +75,7 @@ export type ServiceNoVariant = {
 
 export type UpdateService = ServiceNoVariant & { serviceVariants: updateServiceVariant[] }
 
-export async function createService(service: CreateServiceSchemaType): Promise<ServiceID> {
+export async function createService(service: ServiceSchemaType): Promise<ServiceID> {
   return await db.transaction(async (tx) => {
     const [insertedService] = await tx
       .insert(services)
@@ -178,7 +177,7 @@ export async function getServicesPaginate(
   }
 }
 
-export async function updateServiceByID(id: ServiceID, service: PatchServiceSchemaType) {
+export async function updateServiceByID(id: ServiceID, service: ServiceSchemaType) {
   const serviceWithUpdatedAt = { ...service, updatedAt: new Date() }
   return await db.transaction(async (tx) => {
     const [updatedService] = await tx
@@ -262,7 +261,7 @@ export async function getServiceById(serviceID: ServiceID): Promise<ServiceNoVar
   }
 
   function convertToColorEnum(str: string): colorForService | undefined {
-    const colorValue = colorForService[str as keyof typeof colorForService]
+    const colorValue: colorForService = colorForService[str as keyof typeof colorForService]
     return colorValue
   }
 

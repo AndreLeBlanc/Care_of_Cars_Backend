@@ -1,14 +1,12 @@
 import { FastifyInstance } from 'fastify'
 import {
-  CreateServiceSchema,
-  CreateServiceSchemaType,
+  ServiceSchema,
+  ServiceSchemaType,
   ListServiceQueryParamSchema,
   ListServiceQueryParamSchemaType,
-  PatchServiceSchemaType,
   listServiceOrderByEnum,
   serviceOrderEnum,
   getServiceByIDSchemaType,
-  PatchServiceSchema,
   getServiceByIDSchema,
 } from './serviceSchema.js'
 import {
@@ -32,6 +30,7 @@ import {
   RequestUrl,
   ModelName,
 } from '../../plugins/pagination.js'
+
 export async function services(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceQueryParamSchemaType }>(
     '/',
@@ -51,8 +50,8 @@ export async function services(fastify: FastifyInstance) {
         querystring: ListServiceQueryParamSchema,
       },
     },
-    async function (request, _) {
-      let {
+    async function (request) {
+      const {
         search = '',
         limit = 10,
         page = 1,
@@ -74,11 +73,11 @@ export async function services(fastify: FastifyInstance) {
         order,
         hidden,
       )
-      let message: ResponseMessage = fastify.responseMessage(
+      const message: ResponseMessage = fastify.responseMessage(
         ModelName('services'),
         ResultCount(result.data.length),
       )
-      let requestUrl: RequestUrl = RequestUrl(
+      const requestUrl: RequestUrl = RequestUrl(
         request.protocol + '://' + request.hostname + request.url,
       )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
@@ -104,7 +103,7 @@ export async function services(fastify: FastifyInstance) {
       }
     },
   )
-  fastify.post<{ Body: CreateServiceSchemaType; Reply: object }>(
+  fastify.post<{ Body: ServiceSchemaType; Reply: object }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
@@ -119,7 +118,7 @@ export async function services(fastify: FastifyInstance) {
         return reply
       },
       schema: {
-        body: CreateServiceSchema,
+        body: ServiceSchema,
         response: {},
       },
     },
@@ -130,7 +129,7 @@ export async function services(fastify: FastifyInstance) {
     },
   )
   fastify.patch<{
-    Body: PatchServiceSchemaType
+    Body: ServiceSchemaType
     Reply: object
     Params: getServiceByIDSchemaType
   }>(
@@ -148,7 +147,7 @@ export async function services(fastify: FastifyInstance) {
         return reply
       },
       schema: {
-        body: PatchServiceSchema,
+        body: ServiceSchema,
         params: getServiceByIDSchema,
       },
     },

@@ -1,9 +1,5 @@
 import { Static, Type } from '@sinclair/typebox'
 
-// enum RoleEnum {
-//     Admin = "admin",
-//     Customer = "customer",
-// }
 export const CreateUser = Type.Object({
   firstName: Type.String(),
   lastName: Type.String(),
@@ -12,7 +8,6 @@ export const CreateUser = Type.Object({
   roleID: Type.Integer(),
 })
 export const CreateUserReply = Type.Object({
-  // id: Type.Number(),
   firstName: Type.String(),
   lastName: Type.String(),
   email: Type.String({ format: 'email' }),

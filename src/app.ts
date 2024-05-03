@@ -1,6 +1,5 @@
 import { fastifyJwt } from '@fastify/jwt'
 import * as dotenv from 'dotenv'
-import { AutoloadPluginOptions } from '@fastify/autoload'
 import { FastifyInstance, FastifyServerOptions, fastify } from 'fastify'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
@@ -22,7 +21,7 @@ const defaultOptions = {
   ignoreTrailingSlash: true,
 }
 dotenv.config()
-export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
+export interface AppOptions extends FastifyServerOptions {}
 // Pass --options via CLI arguments in command to enable these options.
 
 export async function buildApp(options: Partial<typeof defaultOptions> = {}) {

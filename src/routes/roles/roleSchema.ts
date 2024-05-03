@@ -7,19 +7,13 @@ export const ListRoleQueryParamSchema = Type.Object({
 })
 export type ListRoleQueryParamSchemaType = Static<typeof ListRoleQueryParamSchema>
 
-export const CreateRoleSchema = Type.Object({
+export const RoleSchema = Type.Object({
   roleName: Type.String(),
   description: Type.Optional(Type.String()),
 })
-export type CreateRoleSchemaType = Static<typeof CreateRoleSchema>
+export type RoleSchemaType = Static<typeof RoleSchema>
 
 export const getRoleByIDSchema = Type.Object({
   id: Type.Number(),
 })
 export type getRoleByIDType = Static<typeof getRoleByIDSchema>
-
-export const PatchRoleSchema = Type.Object({
-  roleName: Type.Optional(Type.String()),
-  description: Type.Optional(Type.String()),
-})
-export type PatchRoleSchemaType = Static<typeof PatchRoleSchema>
