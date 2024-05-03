@@ -45,6 +45,14 @@ export const PatchUserSchema = Type.Object({
   email: Type.Optional(Type.String({ format: 'email' })),
   password: Type.Optional(Type.String()),
 })
+
+export const PatchUserPassword = Type.Object({
+  oldPassword: Type.String(),
+  newPassword: Type.String(),
+  userId: Type.Number(),
+})
+export type PatchUserPasswordType = Static<typeof PatchUserPassword>
+
 export type PatchUserSchemaType = Static<typeof PatchUserSchema>
 
 export type ListUserQueryParamType = Static<typeof ListUserQueryParam>
