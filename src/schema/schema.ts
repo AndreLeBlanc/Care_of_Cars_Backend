@@ -15,6 +15,11 @@ import {
   time,
 } from 'drizzle-orm/pg-core'
 
+export type DbDateType = {
+  createdAt: Date
+  updatedAt: Date
+}
+
 const dbDates = {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
@@ -231,6 +236,7 @@ export const stores = pgTable('stores', {
 })
 
 export const rentcars = pgTable('rentcars', {
+  storeId: integer('storeId').notNull(),
   rentCarRegistrationNumber: varchar('rentCarRegistrationNumber').primaryKey().unique(),
   rentCarModel: varchar('rentCarModel').notNull(),
   rentCarColor: varchar('rentCarColor').notNull(),
@@ -304,3 +310,17 @@ export const storespecialhoursRelations = relations(storespecialhours, ({ one })
     references: [stores.storeID],
   }),
 }))
+
+export const products = pgTable('products', {
+  productId: serial('productId').primaryKey().unique(),
+  productItemNumber: varchar('productItemNumber').notNull(),
+  productCategory: varchar('productCategory').notNull(),
+  productDescription: varchar('productDescription', { length: 512 }),
+  productSupplierArticleNumber: varchar('productSupplierArticleNumber'),
+  productExternalArticleNumber: varchar('productExternalArticleNumber'),
+  productUpdateRelatedData: boolean('productUpdateRelatedData').default(false),
+  productInventoryBalance: integer('productInventoryBalance').notNull(),
+  productAward: integer('productAward').notNull(),
+  productCost: integer('productCost').notNull(),
+  ...dbDates,
+})

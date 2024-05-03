@@ -52,6 +52,35 @@ CREATE TABLE IF NOT EXISTS "permissions" (
 	CONSTRAINT "permissions_permissionName_unique" UNIQUE("permissionName")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "products" (
+	"productId" serial PRIMARY KEY NOT NULL,
+	"productItemNumber" varchar NOT NULL,
+	"productCategory" varchar NOT NULL,
+	"productDescription" varchar(512),
+	"productSupplierArticleNumber" varchar,
+	"productExternalArticleNumber" varchar,
+	"productUpdateRelatedData" boolean DEFAULT false,
+	"productInventoryBalance" integer NOT NULL,
+	"productAward" integer NOT NULL,
+	"productCost" integer NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "products_productId_unique" UNIQUE("productId")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "rentcars" (
+	"storeId" integer NOT NULL,
+	"rentCarRegistrationNumber" varchar PRIMARY KEY NOT NULL,
+	"rentCarModel" varchar NOT NULL,
+	"rentCarColor" varchar NOT NULL,
+	"rentCarYear" integer NOT NULL,
+	"rentCarNotes" varchar,
+	"rentCarNumber" integer,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "rentcars_rentCarRegistrationNumber_unique" UNIQUE("rentCarRegistrationNumber")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "roleToPermissions" (
 	"roleID" integer NOT NULL,
 	"permissionID" integer NOT NULL,
