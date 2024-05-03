@@ -21,7 +21,7 @@ const dbDates = {
 }
 
 export const users = pgTable('users', {
-  userID: serial('userID').primaryKey().unique(),
+  userID: serial('userID').primaryKey(),
   firstName: varchar('firstName').notNull(),
   lastName: varchar('lastName').notNull(),
   email: varchar('email').notNull().unique(),
@@ -35,7 +35,7 @@ export const users = pgTable('users', {
 })
 
 export const roles = pgTable('roles', {
-  roleID: serial('roleID').primaryKey().unique(),
+  roleID: serial('roleID').primaryKey(),
   roleName: varchar('roleName', { length: 256 }).unique().notNull(),
   description: text('description'),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
@@ -43,7 +43,7 @@ export const roles = pgTable('roles', {
 })
 
 export const permissions = pgTable('permissions', {
-  permissionID: serial('permissionID').primaryKey().unique(),
+  permissionID: serial('permissionID').primaryKey(),
   permissionName: varchar('permissionName', { length: 256 }).unique().notNull(),
   description: text('description'),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
@@ -97,7 +97,7 @@ export const colorForService = [
 
 export const colorForServicepgEnum = pgEnum('colorForService', colorForService)
 export const serviceCategories = pgTable('serviceCategories', {
-  serviceCategoryID: serial('serviceCategoryID').primaryKey().unique(),
+  serviceCategoryID: serial('serviceCategoryID').primaryKey(),
   name: varchar('name', { length: 256 }).unique().notNull(),
   description: text('description'),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
@@ -105,11 +105,11 @@ export const serviceCategories = pgTable('serviceCategories', {
 })
 
 export const services = pgTable('services', {
-  serviceID: serial('serviceID').primaryKey().unique(),
+  serviceID: serial('serviceID').primaryKey(),
   serviceCategoryID: integer('serviceCategoryID')
     .references(() => serviceCategories.serviceCategoryID)
     .notNull(),
-  name: varchar('name', { length: 256 }).unique().notNull(),
+  name: varchar('name', { length: 256 }).notNull(),
   includeInAutomaticSms: boolean('includeInAutomaticSms'),
   hidden: boolean('hidden'),
   callInterval: integer('callInterval'),
@@ -133,7 +133,7 @@ export const serviceToServiceCategoryRelations = relations(services, ({ one }) =
 }))
 
 export const serviceVariants = pgTable('serviceVariants', {
-  serviceVariantID: serial('serviceVariantID').primaryKey().unique(),
+  serviceVariantID: serial('serviceVariantID').primaryKey(),
   name: varchar('name', { length: 256 }),
   award: real('award').notNull(),
   cost: real('cost').notNull(),
@@ -158,7 +158,7 @@ export const serviceVariantsRelations = relations(serviceVariants, ({ one }) => 
 }))
 
 export const companycustomers = pgTable('companycustomers', {
-  customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).primaryKey().unique(),
+  customerOrgNumber: varchar('customerOrgNumber', { length: 11 }).primaryKey(),
   customerComapanyName: varchar('customerComapanyName', { length: 255 }).notNull(),
   companyAddress: varchar('companyAddress', { length: 256 }),
   companyZipCode: varchar('companyZipCode', { length: 16 }),
@@ -180,7 +180,7 @@ export const drivers = pgTable('drivers', {
   driverAcceptsMarketing: boolean('driverAcceptsMarketing').default(false).notNull(),
   driverFirstName: varchar('driverFirstName', { length: 128 }).notNull(),
   driverLastName: varchar('driverLastName', { length: 128 }).notNull(),
-  driverEmail: varchar('driverEmail', { length: 256 }).primaryKey().unique(),
+  driverEmail: varchar('driverEmail', { length: 256 }).primaryKey(),
   driverPhoneNumber: varchar('driverPhoneNumber', { length: 32 }).notNull(),
   driverAddress: varchar('driverAddress', { length: 256 }).notNull(),
   driverZipCode: varchar('driverZipCode', { length: 16 }).notNull(),
@@ -241,10 +241,10 @@ export const rentcars = pgTable('rentcars', {
 })
 
 export const storepaymentinfo = pgTable('storepaymentinfo', {
-  storePaymentOption: serial('storePaymentOption').primaryKey().unique(),
+  storePaymentOption: serial('storePaymentOption').primaryKey(),
   storeID: integer('storeID')
     .references(() => stores.storeID, { onDelete: 'cascade' })
-    .notNull(),
+    .unique(),
   bankgiro: varchar('bankgiro', { length: 16 }),
   plusgiro: varchar('plusgiro', { length: 16 }),
   paymentdays: smallint('paymentdays').default(30).notNull(),
@@ -288,15 +288,22 @@ export const storeopeninghouRselations = relations(storeopeninghours, ({ one }) 
   }),
 }))
 
-export const storespecialhours = pgTable('storespecialhours', {
-  specialDateID: serial('specialDateID').primaryKey(),
-  storeID: integer('storeID')
-    .references(() => stores.storeID, { onDelete: 'cascade' })
-    .notNull(),
-  day: date('day', { mode: 'date' }).notNull(),
-  dayOpen: time('dayOpen').notNull(),
-  dayClose: time('dayClose').notNull(),
-})
+export const storespecialhours = pgTable(
+  'storespecialhours',
+  {
+    storeID: integer('storeID')
+      .references(() => stores.storeID, { onDelete: 'cascade' })
+      .notNull(),
+    day: date('day', { mode: 'date' }).notNull(),
+    dayOpen: time('dayOpen').notNull(),
+    dayClose: time('dayClose').notNull(),
+  },
+  (storespecialhours) => {
+    return {
+      pk: primaryKey({ columns: [storespecialhours.storeID, storespecialhours.day] }),
+    }
+  },
+)
 
 export const storespecialhoursRelations = relations(storespecialhours, ({ one }) => ({
   stores: one(stores, {

@@ -1,5 +1,5 @@
 {
-  "id": "586d88f9-b993-4039-92f8-ddba93a821a8",
+  "id": "a6e39dc6-27de-4d2c-9d61-9bbb2f777c9a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -62,15 +62,7 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "companycustomers_customerOrgNumber_unique": {
-          "name": "companycustomers_customerOrgNumber_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "customerOrgNumber"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "drivers": {
       "name": "drivers",
@@ -232,15 +224,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "drivers_driverEmail_unique": {
-          "name": "drivers_driverEmail_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "driverEmail"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "permissions": {
       "name": "permissions",
@@ -283,13 +267,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "permissions_permissionID_unique": {
-          "name": "permissions_permissionID_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "permissionID"
-          ]
-        },
         "permissions_permissionName_unique": {
           "name": "permissions_permissionName_unique",
           "nullsNotDistinct": false,
@@ -391,13 +368,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "roles_roleID_unique": {
-          "name": "roles_roleID_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "roleID"
-          ]
-        },
         "roles_roleName_unique": {
           "name": "roles_roleName_unique",
           "nullsNotDistinct": false,
@@ -448,13 +418,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "serviceCategories_serviceCategoryID_unique": {
-          "name": "serviceCategories_serviceCategoryID_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "serviceCategoryID"
-          ]
-        },
         "serviceCategories_name_unique": {
           "name": "serviceCategories_name_unique",
           "nullsNotDistinct": false,
@@ -560,15 +523,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "serviceVariants_serviceVariantID_unique": {
-          "name": "serviceVariants_serviceVariantID_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "serviceVariantID"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "services": {
       "name": "services",
@@ -673,22 +628,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "services_serviceID_unique": {
-          "name": "services_serviceID_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "serviceID"
-          ]
-        },
-        "services_name_unique": {
-          "name": "services_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "storeopeninghours": {
       "name": "storeopeninghours",
@@ -832,7 +772,7 @@
           "name": "storeID",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "bankgiro": {
           "name": "bankgiro",
@@ -886,11 +826,11 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "storepaymentinfo_storePaymentOption_unique": {
-          "name": "storepaymentinfo_storePaymentOption_unique",
+        "storepaymentinfo_storeID_unique": {
+          "name": "storepaymentinfo_storeID_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "storePaymentOption"
+            "storeID"
           ]
         }
       }
@@ -1058,12 +998,6 @@
       "name": "storespecialhours",
       "schema": "",
       "columns": {
-        "specialDateID": {
-          "name": "specialDateID",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "storeID": {
           "name": "storeID",
           "type": "integer",
@@ -1105,7 +1039,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "storespecialhours_storeID_day_pk": {
+          "name": "storespecialhours_storeID_day_pk",
+          "columns": [
+            "storeID",
+            "day"
+          ]
+        }
+      },
       "uniqueConstraints": {}
     },
     "users": {
@@ -1188,13 +1130,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "users_userID_unique": {
-          "name": "users_userID_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "userID"
-          ]
-        },
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,

@@ -3,7 +3,7 @@ import { desc, eq, or, sql } from 'drizzle-orm'
 import { db } from '../config/db-connect.js'
 import { permissions, roleToPermissions, roles } from '../schema/schema.js'
 import { ilike } from 'drizzle-orm'
-import { PatchRoleSchemaType } from '../routes/roles/roleSchema.js'
+import { RoleSchemaType } from '../routes/roles/roleSchema.js'
 import { PermissionTitle, PermissionID } from './permissionService.js'
 import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
 import { Brand, make } from 'ts-brand'
@@ -129,7 +129,7 @@ export async function getRoleByID(id: RoleID): Promise<Role | undefined> {
     : undefined
 }
 
-export async function updateRoleByID(id: RoleID, role: PatchRoleSchemaType): Promise<Role> {
+export async function updateRoleByID(id: RoleID, role: RoleSchemaType): Promise<Role> {
   const roleWithUpdatedAt = { ...role, updatedAt: new Date() }
   const [updatedRole] = await db
     .update(roles)
