@@ -10,6 +10,7 @@ import {
   integer,
   primaryKey,
   boolean,
+  index,
   pgEnum,
   real,
   time,
@@ -287,6 +288,8 @@ export const storespecialhours = pgTable(
   (storespecialhours) => {
     return {
       pk: primaryKey({ columns: [storespecialhours.storeID, storespecialhours.day] }),
+      storeid_idx: index('storeid_idx').on(storespecialhours.storeID),
+      day_idx: index('day_idx').on(storespecialhours.day),
     }
   },
 )
