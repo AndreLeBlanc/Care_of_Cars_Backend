@@ -1,13 +1,13 @@
 import { Static, Type } from '@sinclair/typebox'
 
 export const addProductBody = Type.Object({
-  productCategory: Type.String(),
+  serviceCategoryID: Type.Number(),
   productItemNumber: Type.String(),
-  productAward: Type.Number(),
-  productCost: Type.Number(),
+  productAward: Type.Number({ minimum: 1 }),
+  productCost: Type.Number({ minimum: 1 }),
   productDescription: Type.Optional(Type.String()),
   productExternalArticleNumber: Type.Optional(Type.String()),
-  productInventoryBalance: Type.Number(),
+  productInventoryBalance: Type.Number({ minimum: 1 }),
   productSupplierArticleNumber: Type.Optional(Type.String()),
   productUpdateRelatedData: Type.Optional(Type.Boolean()),
 })

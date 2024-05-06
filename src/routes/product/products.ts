@@ -12,7 +12,6 @@ import {
   Product,
   ProductAddType,
   ProductAward,
-  ProductCategory,
   ProductCost,
   ProductDescription,
   ProductEdit,
@@ -40,6 +39,7 @@ import {
   ResultCount,
   Search,
 } from '../../plugins/pagination.js'
+import { ServiceCategoryID } from '../../services/serviceCategory.js'
 
 export const productsRoute = async (fastify: FastifyInstance) => {
   fastify.post<{ Body: AddProductType; Reply: object }>(
@@ -58,7 +58,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
     async (req, rep) => {
       const {
         productAward,
-        productCategory,
+        serviceCategoryID,
         productCost,
         productInventoryBalance,
         productItemNumber,
@@ -69,7 +69,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       } = req.body
 
       const productDetails: ProductAddType = {
-        productCategory: ProductCategory(productCategory),
+        serviceCategoryID: ServiceCategoryID(serviceCategoryID),
         productItemNumber: ProductItemNumber(productItemNumber),
         productAward: ProductAward(productAward),
         productCost: ProductCost(productCost),
@@ -91,11 +91,12 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         return rep.status(201).send({
           message: 'Product Created successfully',
           data: createdProduct,
+          productAdded: true,
         })
       } else {
-        return rep.status(201).send({
-          message: 'Product with item code already exist',
-          existingData: true,
+        return rep.status(504).send({
+          message: 'Fail to add product',
+          productAdded: false,
         })
       }
     },
@@ -118,7 +119,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
     async (req, reply) => {
       const {
         productAward,
-        productCategory,
+        serviceCategoryID,
         productCost,
         productInventoryBalance,
         productItemNumber,
@@ -129,7 +130,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       } = req.body
 
       const productDetails: ProductAddType = {
-        productCategory: ProductCategory(productCategory),
+        serviceCategoryID: ServiceCategoryID(serviceCategoryID),
         productItemNumber: ProductItemNumber(productItemNumber),
         productAward: ProductAward(productAward),
         productCost: ProductCost(productCost),

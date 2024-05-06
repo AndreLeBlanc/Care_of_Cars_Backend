@@ -13,12 +13,10 @@ import {
   RoleName,
 } from '../../services/roleService.js'
 import {
-  CreateRoleSchema,
-  CreateRoleSchemaType,
   ListRoleQueryParamSchema,
   ListRoleQueryParamSchemaType,
-  PatchRoleSchema,
-  PatchRoleSchemaType,
+  RoleSchema,
+  RoleSchemaType,
   getRoleByIDSchema,
   getRoleByIDType,
 } from './roleSchema.js'
@@ -55,8 +53,8 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
         querystring: ListRoleQueryParamSchema,
       },
     },
-    async function (request, _) {
-      let { search = '', limit = 10, page = 1 } = request.query
+    async function (request) {
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -67,11 +65,11 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
         brandedPage,
         offset,
       )
-      let message: ResponseMessage = fastify.responseMessage(
+      const message: ResponseMessage = fastify.responseMessage(
         ModelName('roles'),
         ResultCount(rolePaginated.data.length),
       )
-      let requestUrl: RequestUrl = RequestUrl(
+      const requestUrl: RequestUrl = RequestUrl(
         request.protocol + '://' + request.hostname + request.url,
       )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
@@ -97,7 +95,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       }
     },
   )
-  fastify.post<{ Body: CreateRoleSchemaType; Reply: object }>(
+  fastify.post<{ Body: RoleSchemaType; Reply: object }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
@@ -112,7 +110,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
         return reply
       },
       schema: {
-        body: CreateRoleSchema,
+        body: RoleSchema,
         response: {},
       },
     },
@@ -151,7 +149,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     },
   )
   fastify.patch<{
-    Body: PatchRoleSchemaType
+    Body: RoleSchemaType
     Reply: object
     Params: getRoleByIDType
   }>(
@@ -169,7 +167,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
         return reply
       },
       schema: {
-        body: PatchRoleSchema,
+        body: RoleSchema,
         params: getRoleByIDSchema,
       },
     },

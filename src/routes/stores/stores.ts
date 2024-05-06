@@ -47,6 +47,36 @@ import {
   getStoreByID,
   getStoresPaginate,
   StoresPaginated,
+  WeekOpeningHoursCreate,
+  WeekOpeningHours,
+  MondayOpen,
+  MondayClose,
+  TuesdayOpen,
+  TuesdayClose,
+  WednesdayOpen,
+  WednesdayClose,
+  ThursdayOpen,
+  ThursdayClose,
+  FridayOpen,
+  FridayClose,
+  SaturdayOpen,
+  SaturdayClose,
+  SundayOpen,
+  SundayClose,
+  updateWeeklyOpeningHours,
+  deleteWeeklyOpeningHours,
+  Day,
+  DayOpen,
+  updateSpecialOpeningHours,
+  createSpecialOpeningHours,
+  DayClose,
+  FromDate,
+  ToDate,
+  StoreSpecialHours,
+  deleteSpecialOpeningHoursByDayAndStore,
+  getOpeningHours,
+  StoreSpecialHoursCreate,
+  OpeningHours,
 } from '../../services/storeService.js'
 import {
   CreateStoreSchema,
@@ -54,8 +84,10 @@ import {
   StoreReplySchema,
   StoreUpdateSchema,
   StoreUpdateSchemaType,
-  StoreIDSchema,
-  StoreIDSchemaType,
+  StoreSpecialHoursSchemaCreate,
+  StoreSpecialHoursSchemaCreateType,
+  StoreIDAndDaySchema,
+  StoreIDAndDaySchemaType,
   StoreReplySchemaType,
   StoreUpdateReplySchema,
   StoreUpdateReplySchemaType,
@@ -64,6 +96,17 @@ import {
   ListStoresQueryParamType,
   storeReplyMessage,
   StorePaginateReply,
+  StoreOpeningHoursCreateType,
+  StoreOpeningHoursCreate,
+  StoreOpeningHours,
+  StoreOpeningHoursType,
+  StoreSpecialHoursSchema,
+  StoreSpecialHoursSchemaType,
+  StoreIDSchemaType,
+  StoreIDSchema,
+  StoreOpeningHoursWithSpecial,
+  GetOpeningHours,
+  GetOpeningHoursType,
 } from './storesSchema..js'
 
 export async function stores(fastify: FastifyInstance) {
@@ -102,6 +145,9 @@ export async function stores(fastify: FastifyInstance) {
         storeZipCode: StoreZipCode(request.body.storeZipCode),
         storeCity: StoreCity(request.body.storeCity),
         storeCountry: StoreCountry(request.body.storeCountry),
+        storeDescription: request.body.storeDescription
+          ? StoreDescription(request.body.storeDescription)
+          : undefined,
       }
       const createdStore:
         | {
@@ -169,7 +215,6 @@ export async function stores(fastify: FastifyInstance) {
     '/:storeID',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         const permissionName = PermissionTitle('update_store')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
@@ -381,6 +426,258 @@ export async function stores(fastify: FastifyInstance) {
         limit: limit,
         data: stores.data,
       })
+    },
+  )
+
+  fastify.post<{
+    Body: StoreOpeningHoursCreateType
+    Reply: StoreOpeningHoursType | storeReplyMessageType
+  }>(
+    '/store-opening-hours',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName = PermissionTitle('set_store_opening_hours')
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        body: StoreOpeningHoursCreate,
+        response: {
+          201: StoreOpeningHours,
+        },
+      },
+    },
+    async (request, reply) => {
+      const storeID = StoreID(request.body.storeID)
+      const store: WeekOpeningHoursCreate = {
+        mondayOpen: MondayOpen(request.body.mondayOpen ? request.body.mondayOpen : null),
+        mondayClose: MondayClose(request.body.mondayClose ? request.body.mondayClose : null),
+        tuesdayOpen: TuesdayOpen(request.body.tuesdayOpen ? request.body.tuesdayOpen : null),
+        tuesdayClose: TuesdayClose(request.body.tuesdayClose ? request.body.tuesdayClose : null),
+        wednesdayOpen: WednesdayOpen(
+          request.body.wednesdayOpen ? request.body.wednesdayOpen : null,
+        ),
+        wednesdayClose: WednesdayClose(
+          request.body.wednesdayClose ? request.body.wednesdayClose : null,
+        ),
+        thursdayOpen: ThursdayOpen(request.body.thursdayOpen ? request.body.thursdayOpen : null),
+        thursdayClose: ThursdayClose(
+          request.body.thursdayClose ? request.body.thursdayClose : null,
+        ),
+        fridayOpen: FridayOpen(request.body.fridayOpen ? request.body.fridayOpen : null),
+        fridayClose: FridayClose(request.body.fridayClose ? request.body.fridayClose : null),
+        saturdayOpen: SaturdayOpen(request.body.saturdayOpen ? request.body.saturdayOpen : null),
+        saturdayClose: SaturdayClose(
+          request.body.saturdayClose ? request.body.saturdayClose : null,
+        ),
+        sundayOpen: SundayOpen(request.body.sundayOpen ? request.body.sundayOpen : null),
+        sundayClose: SundayClose(request.body.sundayClose ? request.body.sundayClose : null),
+      }
+
+      const updatedHours: WeekOpeningHours | undefined = await updateWeeklyOpeningHours(
+        storeID,
+        store,
+      )
+      if (updatedHours == null) {
+        return reply.status(417).send({ message: "couldn't create store opening hours" })
+      }
+      reply.status(201).send({ message: 'store opening hours updated', ...updatedHours })
+    },
+  )
+
+  fastify.delete<{ Params: StoreIDSchemaType }>(
+    '/store-opening-hours:storeID',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, PermissionTitle('delete_store_opening_hours'))
+        done()
+        return reply
+      },
+      schema: {
+        params: StoreIDSchema,
+        response: {
+          200: StoreOpeningHours,
+        },
+      },
+    },
+    async (request, reply) => {
+      const storeID = StoreID(request.params.storeID)
+      const deletedStore: WeekOpeningHours | undefined = await deleteWeeklyOpeningHours(storeID)
+      if (deletedStore == undefined || deletedStore == null) {
+        return reply.status(404).send({ message: "Store doesn't exist!" })
+      }
+      return reply.status(200).send({
+        message: 'Store deleted',
+
+        ...deletedStore,
+      })
+    },
+  )
+
+  fastify.post<{
+    Body: StoreSpecialHoursSchemaCreateType
+    Reply: StoreSpecialHoursSchemaType | storeReplyMessageType
+  }>(
+    '/store-special-opening-hours',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName = PermissionTitle('create_store_special_opening_hours')
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        body: StoreSpecialHoursSchemaCreate,
+        response: {
+          201: StoreSpecialHoursSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const storeSpecialHours: StoreSpecialHoursCreate = {
+        storeID: StoreID(request.body.storeID),
+        day: Day(new Date(request.body.day)),
+        dayOpen: DayOpen(request.body.dayOpen),
+        dayClose: DayClose(request.body.dayClose),
+      }
+
+      const updatedHours: StoreSpecialHours | undefined = await createSpecialOpeningHours(
+        storeSpecialHours,
+      )
+      if (updatedHours == null) {
+        return reply.status(417).send({ message: "couldn't create store opening hours" })
+      }
+      reply.status(201).send({ message: 'store opening hours created', ...updatedHours })
+    },
+  )
+
+  fastify.patch<{
+    Body: StoreSpecialHoursSchemaType
+    Reply: StoreSpecialHoursSchemaType | storeReplyMessageType
+  }>(
+    '/store-special-opening-hours',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName = PermissionTitle('update_store_special_opening_hours')
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        body: StoreSpecialHoursSchema,
+        response: {
+          201: StoreSpecialHoursSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const storeSpecialHours: StoreSpecialHours = {
+        storeID: StoreID(request.body.storeID),
+        day: Day(new Date(request.body.day)),
+        dayOpen: DayOpen(request.body.dayOpen),
+        dayClose: DayClose(request.body.dayClose),
+      }
+
+      const updatedHours: StoreSpecialHours | undefined = await updateSpecialOpeningHours(
+        storeSpecialHours,
+      )
+      if (updatedHours == null) {
+        return reply.status(417).send({ message: "couldn't create store opening hours" })
+      }
+      reply.status(201).send({ message: 'store opening hours updated', ...updatedHours })
+    },
+  )
+
+  fastify.delete<{
+    Params: StoreIDAndDaySchemaType
+    Reply: StoreSpecialHoursSchemaType | storeReplyMessageType
+  }>(
+    '/store-special-opening-hours:storeID:day',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName = PermissionTitle('delete_store_special_opening_hours')
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        params: StoreIDAndDaySchema,
+        response: {
+          200: StoreSpecialHoursSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const storeID: StoreID = StoreID(request.params.storeID)
+      const day: Day = Day(new Date(request.params.day))
+
+      const deletedHours: StoreSpecialHours | undefined =
+        await deleteSpecialOpeningHoursByDayAndStore(day, storeID)
+      if (deletedHours == null) {
+        return reply.status(417).send({ message: "couldn't delete store opening hours" })
+      }
+      reply.status(200).send({ message: 'store opening hours deleted', ...deletedHours })
+    },
+  )
+
+  fastify.get<{
+    Querystring: GetOpeningHoursType
+    Reply: StoreSpecialHoursSchemaType | storeReplyMessageType
+  }>(
+    '/store-opening-hours',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName = PermissionTitle('get_store_opening_hours')
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: GetOpeningHours,
+        response: {
+          200: StoreOpeningHoursWithSpecial,
+        },
+      },
+    },
+    async (request, reply) => {
+      const storeID: StoreID = StoreID(request.query.storeID)
+      const from: FromDate = FromDate(new Date(request.query.from))
+      const to: ToDate = ToDate(new Date(request.query.to))
+
+      const openingHours: OpeningHours | undefined = await getOpeningHours(storeID, from, to)
+      if (openingHours == null) {
+        return reply.status(417).send({ message: "couldn't get store opening hours" })
+      }
+      reply
+        .status(200)
+        .send({ message: 'store opening hours fetched', storeID: storeID, ...openingHours })
     },
   )
 }

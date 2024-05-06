@@ -12,8 +12,7 @@ CREATE TABLE IF NOT EXISTS "companycustomers" (
 	"companyAddressCity" varchar(256),
 	"companyCountry" varchar(256),
 	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "companycustomers_customerOrgNumber_unique" UNIQUE("customerOrgNumber")
+	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "drivers" (
@@ -38,8 +37,7 @@ CREATE TABLE IF NOT EXISTS "drivers" (
 	"driverNotesShared" varchar,
 	"driverNotes" varchar,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "drivers_driverEmail_unique" UNIQUE("driverEmail")
+	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "permissions" (
@@ -48,14 +46,13 @@ CREATE TABLE IF NOT EXISTS "permissions" (
 	"description" text,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "permissions_permissionID_unique" UNIQUE("permissionID"),
 	CONSTRAINT "permissions_permissionName_unique" UNIQUE("permissionName")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "products" (
 	"productId" serial PRIMARY KEY NOT NULL,
 	"productItemNumber" varchar NOT NULL,
-	"productCategory" varchar NOT NULL,
+	"serviceCategoryID" integer NOT NULL,
 	"productDescription" varchar(512),
 	"productSupplierArticleNumber" varchar,
 	"productExternalArticleNumber" varchar,
@@ -95,7 +92,6 @@ CREATE TABLE IF NOT EXISTS "roles" (
 	"description" text,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "roles_roleID_unique" UNIQUE("roleID"),
 	CONSTRAINT "roles_roleName_unique" UNIQUE("roleName")
 );
 --> statement-breakpoint
@@ -105,7 +101,6 @@ CREATE TABLE IF NOT EXISTS "serviceCategories" (
 	"description" text,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "serviceCategories_serviceCategoryID_unique" UNIQUE("serviceCategoryID"),
 	CONSTRAINT "serviceCategories_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
@@ -121,8 +116,7 @@ CREATE TABLE IF NOT EXISTS "serviceVariants" (
 	"day5" time,
 	"serviceID" integer NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "serviceVariants_serviceVariantID_unique" UNIQUE("serviceVariantID")
+	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "services" (
@@ -138,9 +132,7 @@ CREATE TABLE IF NOT EXISTS "services" (
 	"suppliersArticleNumber" varchar(256),
 	"externalArticleNumber" varchar(256),
 	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "services_serviceID_unique" UNIQUE("serviceID"),
-	CONSTRAINT "services_name_unique" UNIQUE("name")
+	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "storeopeninghours" (
@@ -165,13 +157,13 @@ CREATE TABLE IF NOT EXISTS "storeopeninghours" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "storepaymentinfo" (
 	"storePaymentOption" serial PRIMARY KEY NOT NULL,
-	"storeID" integer NOT NULL,
+	"storeID" integer,
 	"bankgiro" varchar(16),
 	"plusgiro" varchar(16),
 	"paymentdays" smallint DEFAULT 30 NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "storepaymentinfo_storePaymentOption_unique" UNIQUE("storePaymentOption")
+	CONSTRAINT "storepaymentinfo_storeID_unique" UNIQUE("storeID")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "stores" (
@@ -201,11 +193,11 @@ CREATE TABLE IF NOT EXISTS "stores" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "storespecialhours" (
-	"specialDateID" serial PRIMARY KEY NOT NULL,
 	"storeID" integer NOT NULL,
 	"day" date NOT NULL,
 	"dayOpen" time NOT NULL,
-	"dayClose" time NOT NULL
+	"dayClose" time NOT NULL,
+	CONSTRAINT "storespecialhours_storeID_day_pk" PRIMARY KEY("storeID","day")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
@@ -218,12 +210,17 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"roleID" integer NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "users_userID_unique" UNIQUE("userID"),
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "drivers" ADD CONSTRAINT "drivers_customerOrgNumber_companycustomers_customerOrgNumber_fk" FOREIGN KEY ("customerOrgNumber") REFERENCES "companycustomers"("customerOrgNumber") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "products" ADD CONSTRAINT "products_serviceCategoryID_serviceCategories_serviceCategoryID_fk" FOREIGN KEY ("serviceCategoryID") REFERENCES "serviceCategories"("serviceCategoryID") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
