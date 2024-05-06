@@ -8,7 +8,7 @@ export const ListPermissionQueryParamSchema = Type.Object({
 export type ListPermissionQueryParamSchemaType = Static<typeof ListPermissionQueryParamSchema>
 
 export const CreatePermissionSchema = Type.Object({
-  PermissionName: Type.String(),
+  PermissionName: Type.String({ minLength: 3, maxLength: 256 }),
   description: Type.Optional(Type.String()),
 })
 export type CreatePermissionSchemaType = Static<typeof CreatePermissionSchema>
