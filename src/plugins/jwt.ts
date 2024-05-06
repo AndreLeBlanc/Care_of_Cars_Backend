@@ -14,7 +14,6 @@ export default fp<SupportPluginOptions>(async (fastify) => {
     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
       try {
         const requestPath = request.routeOptions.url
-        //console.log(requestPath, requestPath?.startsWith('/docs'))
 
         if (
           !requestPath?.startsWith('/users/login') &&
@@ -38,12 +37,12 @@ export default fp<SupportPluginOptions>(async (fastify) => {
       permissionName: PermissionTitle,
     ): Promise<boolean> {
       try {
-        const userData: any = request.user
+        const userData = request.user
         const hasPermission: boolean = await roleHasPermission(
-          RoleID(userData.user.role.roleID),
+          RoleID(userData?.user.role.roleID),
           permissionName,
         )
-        if (userData.user) {
+        if (userData?.user) {
           return true
         }
         if (!hasPermission) {

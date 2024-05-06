@@ -47,7 +47,6 @@ export const customers = async (fastify: FastifyInstance) => {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('create_customer'))
         done()
         return reply

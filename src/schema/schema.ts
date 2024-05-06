@@ -17,8 +17,8 @@ import {
 
 export const users = pgTable('users', {
   userID: serial('userID').primaryKey(),
-  firstName: varchar('firstName').notNull(),
-  lastName: varchar('lastName').notNull(),
+  firstName: varchar('firstName', { length: 128 }).notNull(),
+  lastName: varchar('lastName', { length: 128 }).notNull(),
   email: varchar('email').notNull().unique(),
   password: text('password').notNull(),
   isSuperAdmin: boolean('isSuperAdmin').default(false),
@@ -91,6 +91,7 @@ export const colorForService = [
 ] as const
 
 export const colorForServicepgEnum = pgEnum('colorForService', colorForService)
+
 export const serviceCategories = pgTable('serviceCategories', {
   serviceCategoryID: serial('serviceCategoryID').primaryKey(),
   name: varchar('name', { length: 256 }).unique().notNull(),
