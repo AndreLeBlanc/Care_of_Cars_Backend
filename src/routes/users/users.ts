@@ -203,7 +203,7 @@ export async function users(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        fastify.authorize(request, reply, PermissionTitle('view_user'))
+        fastify.authorize(request.user, reply, PermissionTitle('view_user'))
         done()
         return reply
       },
