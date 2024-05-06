@@ -8,9 +8,9 @@ import { initDrizzle } from '../../src/config/db-connect.js'
 const jwt =
   'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJmaXJzdE5hbWUiOiJTdXBlckFkbWluIiwiZW1haWwiOiJzdXBlcmFkbWluQHRlc3QuY29tIiwiaXNTdXBlckFkbWluIjp0cnVlLCJyb2xlIjp7ImlkIjoxLCJyb2xlTmFtZSI6IlN1cGVyQWRtaW4ifX0sImlhdCI6MTcxMDk0MzA5N30.sFrI-MOfltQXJrbAudYNjsTpzDm1OqAAwNM_5dPzxPU'
 
-describe('permissions', async () => {
+describe('roles', async () => {
   let app: FastifyInstance
-  const permissionIDs: number[] = []
+  const roleIDs: number[] = []
 
   before(async () => {
     await initDrizzle()
@@ -21,7 +21,7 @@ describe('permissions', async () => {
     await app.close()
   })
 
-  it('permissions create and get fast-check', async () => {
+  it('roles create and get fast-check', async () => {
     await fc.assert(
       fc.asyncProperty(
         fc.string({ minLength: 3, maxLength: 128 }).noShrink(),
@@ -29,58 +29,57 @@ describe('permissions', async () => {
         async (name, description) => {
           const response = await app.inject({
             method: 'POST',
-            url: '/permissions',
+            url: '/roles',
             headers: {
               Authorization: jwt,
             },
-            payload: { PermissionName: name, description: description },
+            payload: { roleName: name, description: description },
           })
 
           const parsedResponse = JSON.parse(response.body)
           console.log(parsedResponse)
-          permissionIDs.push(parsedResponse.data.permissionID)
-          assert.deepStrictEqual(parsedResponse.data.permissionName, name)
-          assert.deepStrictEqual(parsedResponse.data.permissionDescription, description)
-          assert.deepStrictEqual(parsedResponse.message, 'Permission created')
+          roleIDs.push(parsedResponse.data.roleID)
+          assert.deepStrictEqual(parsedResponse.data.roleName, name)
+          assert.deepStrictEqual(parsedResponse.data.roleDescription, description)
+          assert.deepStrictEqual(parsedResponse.message, 'Role created')
           assert.strictEqual(response.statusCode, 201)
 
           const getResponse = await app.inject({
             method: 'GET',
-            url: '/permissions/' + parsedResponse.data.permissionID,
+            url: '/roles/' + parsedResponse.data.roleID,
             headers: {
               Authorization: jwt,
             },
           })
           const parsedGetResponse = JSON.parse(getResponse.body)
-          assert.deepStrictEqual(parsedGetResponse.permissionName, name)
-          assert.deepStrictEqual(parsedGetResponse.permissionDescription, description)
+          assert.deepStrictEqual(parsedGetResponse.role.roleName, name)
           assert.strictEqual(getResponse.statusCode, 200)
         },
       ),
     )
   })
-  it('permissions delete and get fast-check', async () => {
-    for (const permissionID of permissionIDs) {
+  it('roles delete and get fast-check', async () => {
+    for (const roleID of roleIDs) {
       const deleteResponse = await app.inject({
         method: 'DELETE',
-        url: '/permissions/' + permissionID,
+        url: '/roles/' + roleID,
         headers: {
           Authorization: jwt,
         },
       })
       const parsedDeleteResponse = JSON.parse(deleteResponse.body)
-      assert.deepStrictEqual(parsedDeleteResponse.message, 'Permission deleted')
+      assert.deepStrictEqual(parsedDeleteResponse.message, 'Role deleted')
       assert.deepStrictEqual(deleteResponse.statusCode, 200)
 
       const getResponse = await app.inject({
         method: 'GET',
-        url: '/permissions/' + permissionID,
+        url: '/roles/' + roleID,
         headers: {
           Authorization: jwt,
         },
       })
       const parsedGetResponse = JSON.parse(getResponse.body)
-      assert.deepStrictEqual(parsedGetResponse.message, 'Permission not found')
+      assert.deepStrictEqual(parsedGetResponse.message, 'role not found')
       assert.strictEqual(getResponse.statusCode, 404)
     }
   })
