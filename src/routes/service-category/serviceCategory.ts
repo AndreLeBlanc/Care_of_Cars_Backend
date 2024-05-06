@@ -1,17 +1,19 @@
 import { FastifyInstance } from 'fastify'
+
 import {
+  ServiceCategory,
+  ServiceCategoryDescription,
+  ServiceCategoryID,
+  ServiceCategoryName,
+  ServicesPaginated,
+  UpdatedServiceCategory,
   createServiceCategory,
   deleteServiceCategory,
   getServiceCategoriesPaginate,
   getServiceCategoryByID,
-  UpdatedServiceCategory,
   updateServiceCategoryByID,
-  ServiceCategoryID,
-  ServiceCategory,
-  ServiceCategoryDescription,
-  ServiceCategoryName,
-  ServicesPaginated,
 } from '../../services/serviceCategory.js'
+
 import {
   CreateServiceCategorySchema,
   CreateServiceCategorySchemaType,
@@ -23,17 +25,18 @@ import {
   getServiceCategoryByIDType,
 } from './serviceCategorySchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
+
 import {
-  NextPageUrl,
-  PreviousPageUrl,
-  ResponseMessage,
-  Offset,
-  Search,
   Limit,
-  Page,
-  ResultCount,
-  RequestUrl,
   ModelName,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  ResponseMessage,
+  ResultCount,
+  Search,
 } from '../../plugins/pagination.js'
 export async function serviceCategory(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceCategoryQueryParamSchemaType }>(
@@ -55,7 +58,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
     },
     async function (request, reply) {
-      let { search = '', limit = 10, page = 1 } = request.query
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -70,11 +73,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       if (servicesPaginated == null) {
         return reply.status(403).send({ message: "Can't find service Categories" })
       } else {
-        let message: ResponseMessage = fastify.responseMessage(
+        const message: ResponseMessage = fastify.responseMessage(
           ModelName('service category'),
           ResultCount(servicesPaginated.data.length),
         )
-        let requestUrl: RequestUrl = RequestUrl(
+        const requestUrl: RequestUrl = RequestUrl(
           request.protocol + '://' + request.hostname + request.url,
         )
         const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(

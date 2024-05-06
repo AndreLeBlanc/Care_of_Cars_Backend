@@ -1,8 +1,11 @@
 import fp from 'fastify-plugin'
+
 import { FastifyReply } from 'fastify/types/reply'
 import { FastifyRequest } from 'fastify/types/request'
 import { roleHasPermission } from '../services/roleService.js'
+
 import { PermissionTitle } from '../services/permissionService.js'
+
 import { FastifyJwtNamespace } from '@fastify/jwt'
 import { RoleID } from '../services/roleService.js'
 

@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import fc from 'fast-check'
-import { describe, it, before, after } from 'node:test'
+
+import { after, before, describe, it } from 'node:test'
 import assert from 'assert'
 import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
@@ -37,7 +38,6 @@ describe('permissions', async () => {
           })
 
           const parsedResponse = JSON.parse(response.body)
-          console.log(parsedResponse)
           permissionIDs.push(parsedResponse.data.permissionID)
           assert.deepStrictEqual(parsedResponse.data.permissionName, name)
           assert.deepStrictEqual(parsedResponse.data.permissionDescription, description)

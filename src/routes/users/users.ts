@@ -3,8 +3,8 @@ import bcrypt from 'bcryptjs'
 
 import {
   CreateUser,
-  CreateUserType,
   CreateUserReply,
+  CreateUserType,
   ListUserQueryParam,
   ListUserQueryParamType,
   LoginUser,
@@ -15,40 +15,42 @@ import {
   getUserByIDType,
 } from './userSchema.js'
 import {
-  createUser,
   CreatedUser,
-  getUsersPaginate,
-  UserID,
-  UsersPaginated,
-  verifyUser,
-  getUserByID,
-  updateUserByID,
-  generatePasswordHash,
-  isStrongPassword,
   DeleteUser,
-  UserWithSuperAdmin,
-  UserInfo,
-  VerifyUser,
-  UserFirstName,
-  UserLastName,
   UserEmail,
+  UserFirstName,
+  UserID,
+  UserInfo,
+  UserLastName,
   UserPassword,
+  UserWithSuperAdmin,
+  UsersPaginated,
+  VerifyUser,
+  createUser,
+  generatePasswordHash,
+  getUserByID,
+  getUsersPaginate,
+  isStrongPassword,
+  updateUserByID,
+  verifyUser,
 } from '../../services/userService.js'
 import { RoleID } from '../../services/roleService.js'
+
 import { PermissionTitle } from '../../services/permissionService.js'
 
 import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
+
 import {
-  NextPageUrl,
-  PreviousPageUrl,
-  ResponseMessage,
-  Offset,
-  Search,
   Limit,
-  Page,
-  ResultCount,
-  RequestUrl,
   ModelName,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  ResponseMessage,
+  ResultCount,
+  Search,
 } from '../../plugins/pagination.js'
 
 export async function users(fastify: FastifyInstance) {

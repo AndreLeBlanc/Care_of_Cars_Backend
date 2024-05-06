@@ -1,18 +1,19 @@
 import { FastifyInstance } from 'fastify'
 
 import {
-  createPermission,
-  getPermissionsPaginate,
-  getPermissionByID,
-  updatePermissionByID,
-  deletePermission,
   Permission,
-  PermissionsPaginate,
-  PermissionIDDescName,
-  PermissionID,
-  PermissionTitle,
   PermissionDescription,
+  PermissionID,
+  PermissionIDDescName,
+  PermissionTitle,
+  PermissionsPaginate,
+  createPermission,
+  deletePermission,
+  getPermissionByID,
+  getPermissionsPaginate,
+  updatePermissionByID,
 } from '../../services/permissionService.js'
+
 import {
   CreatePermissionSchema,
   CreatePermissionSchemaType,
@@ -24,16 +25,16 @@ import {
   getPermissionByIDType,
 } from './permissionSchema.js'
 import {
-  NextPageUrl,
-  PreviousPageUrl,
-  ResponseMessage,
-  Offset,
-  Search,
   Limit,
-  Page,
-  ResultCount,
-  RequestUrl,
   ModelName,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  ResponseMessage,
+  ResultCount,
+  Search,
 } from '../../plugins/pagination.js'
 export async function permissions(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(

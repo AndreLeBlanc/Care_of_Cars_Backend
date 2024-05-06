@@ -1,11 +1,16 @@
-import { desc, or, sql, and, eq, ilike } from 'drizzle-orm'
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
 import { db } from '../config/db-connect.js'
+
 import { roles, users } from '../schema/schema.js'
+
 import { PatchUserSchemaType } from '../routes/users/userSchema.js'
+
 import { RoleID, RoleName } from './roleService.js'
-import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
+
+import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
+
 import { Brand, make } from 'ts-brand'
 
 export type UserID = Brand<number, 'userID'>

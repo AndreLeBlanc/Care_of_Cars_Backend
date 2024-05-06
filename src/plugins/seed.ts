@@ -1,16 +1,16 @@
 import fp from 'fastify-plugin'
 import * as dotenv from 'dotenv'
-import { createRole, CreatedRole } from '../services/roleService.js'
+import { CreatedRole, createRole } from '../services/roleService.js'
 import {
-  createUser,
   CreatedUser,
-  generatePasswordHash,
+  UserEmail,
   UserFirstName,
   UserLastName,
-  UserEmail,
   UserPassword,
+  createUser,
+  generatePasswordHash,
 } from '../services/userService.js'
-import { RoleID, RoleName, RoleDescription } from '../services/roleService.js'
+import { RoleDescription, RoleID, RoleName } from '../services/roleService.js'
 dotenv.config()
 
 export interface SupportPluginOptions {
@@ -24,7 +24,7 @@ export enum seedResult {
   AlreadySeeded,
 }
 
-export default fp<SupportPluginOptions>(async (_) => {
+export default fp<SupportPluginOptions>(async () => {
   async function seedSuperAdmin(): Promise<seedResult> {
     try {
       if (
