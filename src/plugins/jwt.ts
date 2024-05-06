@@ -37,12 +37,12 @@ export default fp<SupportPluginOptions>(async (fastify) => {
       permissionName: PermissionTitle,
     ): Promise<boolean> {
       try {
-        const userData = request.user
+        const userData: any = request.user
         const hasPermission: boolean = await roleHasPermission(
-          RoleID(userData?.user.role.roleID),
+          RoleID(userData.user.role.roleID),
           permissionName,
         )
-        if (userData?.user) {
+        if (userData.user) {
           return true
         }
         if (!hasPermission) {
