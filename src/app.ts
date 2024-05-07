@@ -8,7 +8,7 @@ import jwt from './plugins/jwt.js'
 import { permissions } from './routes/permissions/permissions.js'
 import { roleToPermissions } from './routes/role-to-permission/roleToPermissons.js'
 import { roles } from './routes/roles/roles.js'
-import { serviceCategory } from './routes/service-category/serviceCategory.js'
+import { serviceCategory } from './routes/category/category.js'
 import { services } from './routes/services/services.js'
 import { users } from './routes/users/users.js'
 import { stores } from './routes/stores/stores.js'
@@ -71,7 +71,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
   app.register(permissions, { prefix: '/permissions' })
   app.register(roleToPermissions, { prefix: '/roleToPermissions' })
   app.register(roles, { prefix: '/roles' })
-  app.register(serviceCategory, { prefix: '/service-category' })
+  app.register(serviceCategory, { prefix: '/category' })
   app.register(stores, { prefix: 'stores' })
   app.register(services, { prefix: 'services' })
   app.register(users, { prefix: '/users' })

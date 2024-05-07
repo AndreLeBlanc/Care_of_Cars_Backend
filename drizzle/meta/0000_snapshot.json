@@ -1,5 +1,5 @@
 {
-  "id": "1aaee589-387d-4d6c-b40f-5c41dadf3b7b",
+  "id": "07c23724-e35c-4218-a8bb-41468ea17a57",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -276,6 +276,56 @@
         }
       }
     },
+    "productCategories": {
+      "name": "productCategories",
+      "schema": "",
+      "columns": {
+        "productCategoryID": {
+          "name": "productCategoryID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "productCategories_name_unique": {
+          "name": "productCategories_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      }
+    },
     "products": {
       "name": "products",
       "schema": "",
@@ -292,8 +342,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "serviceCategoryID": {
-          "name": "serviceCategoryID",
+        "productCategoryID": {
+          "name": "productCategoryID",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -358,15 +408,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "products_serviceCategoryID_serviceCategories_serviceCategoryID_fk": {
-          "name": "products_serviceCategoryID_serviceCategories_serviceCategoryID_fk",
+        "products_productCategoryID_productCategories_productCategoryID_fk": {
+          "name": "products_productCategoryID_productCategories_productCategoryID_fk",
           "tableFrom": "products",
-          "tableTo": "serviceCategories",
+          "tableTo": "productCategories",
           "columnsFrom": [
-            "serviceCategoryID"
+            "productCategoryID"
           ],
           "columnsTo": [
-            "serviceCategoryID"
+            "productCategoryID"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"

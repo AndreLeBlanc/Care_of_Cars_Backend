@@ -3,7 +3,7 @@ import { DbDateType, products } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
 import { desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { Offset } from '../plugins/pagination.js'
-import { ServiceCategoryID } from './serviceCategory.js'
+import { ServiceCategoryID } from './CategoryService.js'
 
 export type ProductItemNumber = Brand<string, 'productItemNumber'>
 export const ProductItemNumber = make<ProductItemNumber>()
@@ -24,7 +24,7 @@ export const ProductCost = make<ProductCost>()
 
 export type ProductAddType = {
   productItemNumber: ProductItemNumber
-  serviceCategoryID: ServiceCategoryID
+  productCategoryID: ServiceCategoryID
   productDescription?: ProductDescription
   productSupplierArticleNumber?: ProductSupplierArticleNumber
   productExternalArticleNumber?: ProductExternalArticleNumber
@@ -51,7 +51,7 @@ export async function addProduct(data: ProductAddType): Promise<Product | undefi
   const [newProduct] = await db
     .insert(products)
     .values({
-      serviceCategoryID: data.serviceCategoryID,
+      productCategoryID: data.productCategoryID,
       productItemNumber: data.productItemNumber,
       productAward: data.productAward,
       productCost: data.productCost,
@@ -62,7 +62,7 @@ export async function addProduct(data: ProductAddType): Promise<Product | undefi
       productUpdateRelatedData: data.productUpdateRelatedData,
     })
     .returning({
-      serviceCategoryID: products.serviceCategoryID,
+      productCategoryID: products.productCategoryID,
       productItemNumber: products.productItemNumber,
       productAward: products.productAward,
       productCost: products.productCost,
@@ -76,7 +76,7 @@ export async function addProduct(data: ProductAddType): Promise<Product | undefi
     })
   return newProduct
     ? {
-        serviceCategoryID: ServiceCategoryID(newProduct.serviceCategoryID),
+        productCategoryID: ServiceCategoryID(newProduct.productCategoryID),
         productItemNumber: ProductItemNumber(newProduct.productItemNumber),
         productAward: ProductAward(newProduct.productAward),
         productCost: ProductCost(newProduct.productCost),
@@ -100,7 +100,7 @@ export async function editProduct(data: ProductAddType): Promise<ProductEdit | u
   const [editProduct] = await db
     .update(products)
     .set({
-      serviceCategoryID: data.serviceCategoryID,
+      productCategoryID: data.productCategoryID,
       productAward: data.productAward,
       productCost: data.productCost,
       productDescription: data.productDescription,
@@ -111,7 +111,7 @@ export async function editProduct(data: ProductAddType): Promise<ProductEdit | u
     })
     .where(eq(products.productItemNumber, data.productItemNumber))
     .returning({
-      serviceCategoryID: products.serviceCategoryID,
+      productCategoryID: products.productCategoryID,
       productItemNumber: products.productItemNumber,
       productAward: products.productAward,
       productCost: products.productCost,
@@ -124,7 +124,7 @@ export async function editProduct(data: ProductAddType): Promise<ProductEdit | u
 
   return editProduct
     ? {
-        serviceCategoryID: ServiceCategoryID(editProduct.serviceCategoryID),
+        productCategoryID: ServiceCategoryID(editProduct.productCategoryID),
         productItemNumber: ProductItemNumber(editProduct.productItemNumber),
         productAward: ProductAward(editProduct.productAward),
         productCost: ProductCost(editProduct.productCost),
@@ -156,7 +156,7 @@ export async function deleteProductByItemNumber(
 export async function getProductById(productItemNumber: ProductItemNumber) {
   const [productData] = await db
     .select({
-      serviceCategoryID: products.serviceCategoryID,
+      productCategoryID: products.productCategoryID,
       productItemNumber: products.productItemNumber,
       productAward: products.productAward,
       productCost: products.productCost,
@@ -172,7 +172,7 @@ export async function getProductById(productItemNumber: ProductItemNumber) {
     .where(eq(products.productItemNumber, productItemNumber))
   return productData
     ? {
-        serviceCategoryID: ServiceCategoryID(productData.serviceCategoryID),
+        productCategoryID: ServiceCategoryID(productData.productCategoryID),
         productItemNumber: ProductItemNumber(productData.productItemNumber),
         productAward: ProductAward(productData.productAward),
         productCost: ProductCost(productData.productCost),
@@ -201,7 +201,7 @@ export async function getProductsPaginated(
   const returnData = await db.transaction(async (tx) => {
     const condition = or(
       ilike(products.productItemNumber, '%' + search + '%'),
-      ilike(products.serviceCategoryID, '%' + search + '%'),
+      ilike(products.productCategoryID, '%' + search + '%'),
       ilike(products.productExternalArticleNumber, '%' + search + '%'),
       ilike(products.productDescription, '%' + search + '%'),
       ilike(products.productSupplierArticleNumber, '%' + search + '%'),
@@ -217,7 +217,7 @@ export async function getProductsPaginated(
     const productList = await tx
       .select({
         productId: products.productId,
-        serviceCategoryID: products.serviceCategoryID,
+        serviceCategoryID: products.productCategoryID,
         productItemNumber: products.productItemNumber,
         productAward: products.productAward,
         productCost: products.productCost,
@@ -241,7 +241,7 @@ export async function getProductsPaginated(
   const ProductsBrandedList = returnData.productList.map((item) => {
     return {
       productId: item.productId,
-      serviceCategoryID: ServiceCategoryID(item.serviceCategoryID),
+      productCategoryID: ServiceCategoryID(item.serviceCategoryID),
       productItemNumber: ProductItemNumber(item.productItemNumber),
       productAward: ProductAward(item.productAward),
       productCost: ProductCost(item.productCost),

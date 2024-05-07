@@ -39,7 +39,7 @@ import {
   ResultCount,
   Search,
 } from '../../plugins/pagination.js'
-import { ServiceCategoryID } from '../../services/serviceCategory.js'
+import { ServiceCategoryID } from '../../services/CategoryService.js'
 
 export const productsRoute = async (fastify: FastifyInstance) => {
   fastify.post<{ Body: AddProductType; Reply: object }>(
@@ -58,7 +58,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
     async (req, rep) => {
       const {
         productAward,
-        serviceCategoryID,
+        productCategoryID,
         productCost,
         productInventoryBalance,
         productItemNumber,
@@ -69,7 +69,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       } = req.body
 
       const productDetails: ProductAddType = {
-        serviceCategoryID: ServiceCategoryID(serviceCategoryID),
+        productCategoryID: ServiceCategoryID(productCategoryID),
         productItemNumber: ProductItemNumber(productItemNumber),
         productAward: ProductAward(productAward),
         productCost: ProductCost(productCost),
@@ -119,7 +119,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
     async (req, reply) => {
       const {
         productAward,
-        serviceCategoryID,
+        productCategoryID,
         productCost,
         productInventoryBalance,
         productItemNumber,
@@ -130,7 +130,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       } = req.body
 
       const productDetails: ProductAddType = {
-        serviceCategoryID: ServiceCategoryID(serviceCategoryID),
+        productCategoryID: ServiceCategoryID(productCategoryID),
         productItemNumber: ProductItemNumber(productItemNumber),
         productAward: ProductAward(productAward),
         productCost: ProductCost(productCost),
@@ -222,7 +222,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
   //List products
 
   fastify.get<{ Querystring: ListProductsQueryParamSchemaType }>(
-    '/rent-cars-list',
+    '/product-list',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('list_company_drivers')

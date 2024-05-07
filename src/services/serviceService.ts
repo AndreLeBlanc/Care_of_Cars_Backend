@@ -7,7 +7,7 @@ import {
   serviceOrderEnum,
 } from '../routes/services/serviceSchema.js'
 import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
-import { ServiceCategoryID } from './serviceCategory.js'
+import { ServiceCategoryID } from './CategoryService.js'
 import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
 import { Brand, make } from 'ts-brand'
 

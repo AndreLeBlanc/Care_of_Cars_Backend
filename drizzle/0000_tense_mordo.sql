@@ -49,10 +49,19 @@ CREATE TABLE IF NOT EXISTS "permissions" (
 	CONSTRAINT "permissions_permissionName_unique" UNIQUE("permissionName")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "productCategories" (
+	"productCategoryID" serial PRIMARY KEY NOT NULL,
+	"name" varchar(256) NOT NULL,
+	"description" text,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "productCategories_name_unique" UNIQUE("name")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "products" (
 	"productId" serial PRIMARY KEY NOT NULL,
 	"productItemNumber" varchar NOT NULL,
-	"serviceCategoryID" integer NOT NULL,
+	"productCategoryID" integer NOT NULL,
 	"productDescription" varchar(512),
 	"productSupplierArticleNumber" varchar,
 	"productExternalArticleNumber" varchar,
@@ -220,7 +229,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "products" ADD CONSTRAINT "products_serviceCategoryID_serviceCategories_serviceCategoryID_fk" FOREIGN KEY ("serviceCategoryID") REFERENCES "serviceCategories"("serviceCategoryID") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "products" ADD CONSTRAINT "products_productCategoryID_productCategories_productCategoryID_fk" FOREIGN KEY ("productCategoryID") REFERENCES "productCategories"("productCategoryID") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

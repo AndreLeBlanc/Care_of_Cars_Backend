@@ -318,11 +318,19 @@ export const storespecialhoursRelations = relations(storespecialhours, ({ one })
   }),
 }))
 
+export const productCategories = pgTable('productCategories', {
+  productCategoryID: serial('productCategoryID').primaryKey(),
+  name: varchar('name', { length: 256 }).unique().notNull(),
+  description: text('description'),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+})
+
 export const products = pgTable('products', {
   productId: serial('productId').primaryKey().unique(),
   productItemNumber: varchar('productItemNumber').notNull(),
-  serviceCategoryID: integer('serviceCategoryID')
-    .references(() => serviceCategories.serviceCategoryID)
+  productCategoryID: integer('productCategoryID')
+    .references(() => productCategories.productCategoryID)
     .notNull(),
   productDescription: varchar('productDescription', { length: 512 }),
   productSupplierArticleNumber: varchar('productSupplierArticleNumber'),
@@ -334,13 +342,13 @@ export const products = pgTable('products', {
   ...dbDates,
 })
 
-export const servicesCategoryToProductRelations = relations(serviceCategories, ({ one }) => ({
-  services: one(products),
+export const productCategoryToProductRelations = relations(productCategories, ({ many }) => ({
+  services: many(products),
 }))
 
-export const productToServiceCategoryRelations = relations(products, ({ one }) => ({
-  serviceCategories: one(serviceCategories, {
-    fields: [products.serviceCategoryID],
-    references: [serviceCategories.serviceCategoryID],
+export const productToCategoryRelations = relations(products, ({ one }) => ({
+  productCategories: one(productCategories, {
+    fields: [products.productCategoryID],
+    references: [productCategories.productCategoryID],
   }),
 }))

@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 
 export const addProductBody = Type.Object({
-  serviceCategoryID: Type.Number(),
+  productCategoryID: Type.Number(),
   productItemNumber: Type.String(),
   productAward: Type.Number({ minimum: 1 }),
   productCost: Type.Number({ minimum: 1 }),
