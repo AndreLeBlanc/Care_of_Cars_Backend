@@ -64,3 +64,6 @@ services:
       - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD}
     depends_on:
       - postgres
+    volumes:
+      - ./dist:/usr/app/dist
+      - ./test:/usr/app/test

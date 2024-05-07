@@ -14,7 +14,6 @@ export default fp<SupportPluginOptions>(async (fastify) => {
     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
       try {
         const requestPath = request.routeOptions.url
-        //console.log(requestPath, requestPath?.startsWith('/docs'))
 
         if (
           !requestPath?.startsWith('/users/login') &&

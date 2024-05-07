@@ -1,5 +1,5 @@
 {
-  "id": "a6e39dc6-27de-4d2c-9d61-9bbb2f777c9a",
+  "id": "7bb44387-ca3a-4225-aca9-8ba0cf3ee106",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -1062,13 +1062,13 @@
         },
         "firstName": {
           "name": "firstName",
-          "type": "varchar",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
         },
         "lastName": {
           "name": "lastName",
-          "type": "varchar",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
         },

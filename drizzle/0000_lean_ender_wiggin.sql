@@ -173,8 +173,8 @@ CREATE TABLE IF NOT EXISTS "storespecialhours" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"userID" serial PRIMARY KEY NOT NULL,
-	"firstName" varchar NOT NULL,
-	"lastName" varchar NOT NULL,
+	"firstName" varchar(128) NOT NULL,
+	"lastName" varchar(128) NOT NULL,
 	"email" varchar NOT NULL,
 	"password" text NOT NULL,
 	"isSuperAdmin" boolean DEFAULT false,

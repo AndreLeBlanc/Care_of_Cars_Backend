@@ -10,6 +10,7 @@ import {
   integer,
   primaryKey,
   boolean,
+  index,
   pgEnum,
   real,
   time,
@@ -22,8 +23,8 @@ const dbDates = {
 
 export const users = pgTable('users', {
   userID: serial('userID').primaryKey(),
-  firstName: varchar('firstName').notNull(),
-  lastName: varchar('lastName').notNull(),
+  firstName: varchar('firstName', { length: 128 }).notNull(),
+  lastName: varchar('lastName', { length: 128 }).notNull(),
   email: varchar('email').notNull().unique(),
   password: text('password').notNull(),
   isSuperAdmin: boolean('isSuperAdmin').default(false),
@@ -96,6 +97,7 @@ export const colorForService = [
 ] as const
 
 export const colorForServicepgEnum = pgEnum('colorForService', colorForService)
+
 export const serviceCategories = pgTable('serviceCategories', {
   serviceCategoryID: serial('serviceCategoryID').primaryKey(),
   name: varchar('name', { length: 256 }).unique().notNull(),
@@ -301,6 +303,8 @@ export const storespecialhours = pgTable(
   (storespecialhours) => {
     return {
       pk: primaryKey({ columns: [storespecialhours.storeID, storespecialhours.day] }),
+      storeid_idx: index('storeid_idx').on(storespecialhours.storeID),
+      day_idx: index('day_idx').on(storespecialhours.day),
     }
   },
 )
