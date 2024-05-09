@@ -59,6 +59,19 @@ export const StoreIDSchema = Type.Object({
 
 export type StoreIDSchemaType = Static<typeof StoreIDSchema>
 
+export const StoreIDWeekSchema = Type.Object({
+  storeID: Type.Integer(),
+  week: Type.String(),
+})
+
+export type StoreIDWeekSchemaType = Static<typeof StoreIDWeekSchema>
+
+export const WeekSchema = Type.Object({
+  week: Type.String(),
+})
+
+export type WeekSchemaType = Static<typeof WeekSchema>
+
 export const StoreUpdateSchema = Type.Composite([
   CreateStoreSchema,
   Type.Object({
@@ -197,14 +210,28 @@ export type StoreOpeningHoursWithSpecialType = Static<typeof StoreOpeningHoursWi
 export const StoreWeeklyNotes = Type.Object({
   storeID: Type.Integer(),
   week: Type.String({ format: 'date' }),
-  weekNote: Type.String({ format: 'date' }),
-  mondayNote: Type.String({ format: 'date' }),
-  tuesdayNote: Type.String({ format: 'date' }),
-  wednesdayNote: Type.String({ format: 'date' }),
-  thursdayNote: Type.String({ format: 'date' }),
-  fridayNote: Type.String({ format: 'date' }),
-  saturdayNote: Type.String({ format: 'date' }),
-  sundayNote: Type.String({ format: 'date' }),
+  weekNote: Type.String(),
+  mondayNote: Type.String(),
+  tuesdayNote: Type.String(),
+  wednesdayNote: Type.String(),
+  thursdayNote: Type.String(),
+  fridayNote: Type.String(),
+  saturdayNote: Type.String(),
+  sundayNote: Type.String(),
 })
 
 export type StoreWeeklyNotesType = Static<typeof StoreWeeklyNotes>
+
+export const StoreNotes = Type.Object({
+  storeID: Type.Integer(),
+  weekNote: Type.String(),
+  mondayNote: Type.String(),
+  tuesdayNote: Type.String(),
+  wednesdayNote: Type.String(),
+  thursdayNote: Type.String(),
+  fridayNote: Type.String(),
+  saturdayNote: Type.String(),
+  sundayNote: Type.String(),
+})
+
+export type StoreNotesType = Static<typeof StoreNotes>

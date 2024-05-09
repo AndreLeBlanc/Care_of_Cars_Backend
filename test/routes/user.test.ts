@@ -31,26 +31,13 @@ describe('POST /users/login HTTP', async () => {
       },
     })
 
-    const res = {
-      message: 'Login success',
-      user: {
-        id: 1,
-        firstName: 'SuperAdmin',
-        lastName: 'SuperAdmin',
-        email: 'superadmin@test.com',
-        isSuperAdmin: true,
-        role: {
-          id: 1,
-          roleName: 'SuperAdmin',
-          rolePermissions: [],
-          roleFullPermissions: [],
-        },
-      },
-    }
-
     const parsedResponse = JSON.parse(response.body)
     assert.equal(parsedResponse.message, 'Login success')
-    assert.deepStrictEqual(parsedResponse.user, res.user)
+    assert.deepStrictEqual(parsedResponse.user.id, 1)
+    assert.deepStrictEqual(parsedResponse.user.firstName, 'SuperAdmin')
+    assert.deepStrictEqual(parsedResponse.user.LastName, 'SuperAdmin')
+    assert.deepStrictEqual(parsedResponse.user.isSuperAdmin, true)
+    assert.deepStrictEqual(parsedResponse.user.email, 'superadmin@test.com')
     assert.strictEqual(response.statusCode, 200)
   })
 

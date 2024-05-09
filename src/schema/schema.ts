@@ -383,7 +383,7 @@ export const storeweeklynotes = pgTable(
   },
 )
 
-export const storeweeklynotesRselations = relations(storeweeklynotes, ({ one }) => ({
+export const storeweeklynotesRelations = relations(storeweeklynotes, ({ one }) => ({
   stores: one(stores, {
     fields: [storeweeklynotes.storeID],
     references: [stores.storeID],
