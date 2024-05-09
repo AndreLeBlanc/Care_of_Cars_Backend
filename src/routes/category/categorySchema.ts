@@ -1,10 +1,5 @@
 import { Static, Type } from '@sinclair/typebox'
 
-export enum categoryTypes {
-  SERVICE = 'SERVICE',
-  PRODUCT = 'PRODUCT',
-}
-
 export const ListServiceCategoryQueryParamSchema = Type.Object({
   search: Type.Optional(Type.String()),
   limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),

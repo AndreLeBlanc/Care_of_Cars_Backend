@@ -21,17 +21,15 @@ export const ProductCategoryName = make<ProductCategoryName>()
 export type ProductCategoryDescription = Brand<string | null, 'productCategoryDescription'>
 export const ProductCategoryDescription = make<ProductCategoryDescription>()
 
-export type ServiceCategory = {
-  serviceCategoryID: ServiceCategoryID
-  serviceCategoryName: ServiceCategoryName
-  ServiceCategoryDescription: ServiceCategoryDescription
-  createdAt: Date
-  updatedAt: Date
-}
 export type CreateServiceCategory = {
   serviceCategoryID: ServiceCategoryID
   serviceCategoryName: ServiceCategoryName
   ServiceCategoryDescription: ServiceCategoryDescription
+}
+
+export type ServiceCategory = CreateServiceCategory & {
+  createdAt: Date
+  updatedAt: Date
 }
 
 export type ProductCategory = CreateProductCategory & {
