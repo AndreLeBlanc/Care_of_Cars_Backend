@@ -18,6 +18,11 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 
+const dbDates = {
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+}
+
 export const users = pgTable('users', {
   userID: serial('userID').primaryKey(),
   firstName: varchar('firstName', { length: 128 }).notNull(),
@@ -227,6 +232,16 @@ export const stores = pgTable('stores', {
   storeUsesPIN: boolean('storeUsesPIN').default(true),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+})
+
+export const rentcars = pgTable('rentcars', {
+  rentCarRegistrationNumber: varchar('rentCarRegistrationNumber').primaryKey().unique(),
+  rentCarModel: varchar('rentCarModel').notNull(),
+  rentCarColor: varchar('rentCarColor').notNull(),
+  rentCarYear: integer('rentCarYear').notNull(),
+  rentCarNotes: varchar('rentCarNotes'),
+  rentCarNumber: integer('rentCarNumber'),
+  ...dbDates,
 })
 
 export const storepaymentinfo = pgTable('storepaymentinfo', {
