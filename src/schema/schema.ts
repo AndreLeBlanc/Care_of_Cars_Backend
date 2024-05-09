@@ -1,18 +1,21 @@
 import { relations } from 'drizzle-orm'
+
 import {
-  serial,
-  text,
-  smallint,
-  timestamp,
-  pgTable,
-  date,
-  varchar,
-  integer,
-  primaryKey,
   boolean,
+  date,
+  index,
+  integer,
   pgEnum,
+  pgTable,
+  primaryKey,
   real,
+  serial,
+  smallint,
+  text,
   time,
+  timestamp,
+  unique,
+  varchar,
 } from 'drizzle-orm/pg-core'
 
 export type DbDateType = {
@@ -27,8 +30,8 @@ const dbDates = {
 
 export const users = pgTable('users', {
   userID: serial('userID').primaryKey(),
-  firstName: varchar('firstName').notNull(),
-  lastName: varchar('lastName').notNull(),
+  firstName: varchar('firstName', { length: 128 }).notNull(),
+  lastName: varchar('lastName', { length: 128 }).notNull(),
   email: varchar('email').notNull().unique(),
   password: text('password').notNull(),
   isSuperAdmin: boolean('isSuperAdmin').default(false),
@@ -101,6 +104,7 @@ export const colorForService = [
 ] as const
 
 export const colorForServicepgEnum = pgEnum('colorForService', colorForService)
+
 export const serviceCategories = pgTable('serviceCategories', {
   serviceCategoryID: serial('serviceCategoryID').primaryKey(),
   name: varchar('name', { length: 256 }).unique().notNull(),
@@ -287,7 +291,7 @@ export const storeopeninghours = pgTable('storeopeninghours', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
-export const storeopeninghouRselations = relations(storeopeninghours, ({ one }) => ({
+export const storeopeninghoursRelations = relations(storeopeninghours, ({ one }) => ({
   stores: one(stores, {
     fields: [storeopeninghours.storeID],
     references: [stores.storeID],
@@ -307,6 +311,8 @@ export const storespecialhours = pgTable(
   (storespecialhours) => {
     return {
       pk: primaryKey({ columns: [storespecialhours.storeID, storespecialhours.day] }),
+      storeid_idx: index('storeid_idx').on(storespecialhours.storeID),
+      day_idx: index('day_idx').on(storespecialhours.day),
     }
   },
 )
@@ -350,5 +356,36 @@ export const productToCategoryRelations = relations(products, ({ one }) => ({
   productCategories: one(productCategories, {
     fields: [products.productCategoryID],
     references: [productCategories.productCategoryID],
+  }),
+}))
+
+export const storeweeklynotes = pgTable(
+  'storeweeklynotes',
+  {
+    storeID: integer('storeID')
+      .references(() => stores.storeID, { onDelete: 'cascade' })
+      .notNull(),
+    week: date('week', { mode: 'date' }).notNull(),
+    weekNote: varchar('weekNote'),
+    mondayNote: varchar('mondayNote'),
+    tuesdayNote: varchar('tuesdayNote'),
+    wednesdayNote: varchar('wednesdayNote'),
+    thursdayNote: varchar('thursdayNote'),
+    fridayNote: varchar('fridayNote'),
+    saturdayNote: varchar('saturdayNote'),
+    sundayNote: varchar('sundayNote'),
+  },
+  (storeweeklynotes) => {
+    return {
+      pk: primaryKey({ columns: [storeweeklynotes.storeID, storeweeklynotes.week] }),
+      unq: unique().on(storeweeklynotes.storeID, storeweeklynotes.week),
+    }
+  },
+)
+
+export const storeweeklynotesRselations = relations(storeweeklynotes, ({ one }) => ({
+  stores: one(stores, {
+    fields: [storeweeklynotes.storeID],
+    references: [stores.storeID],
   }),
 }))

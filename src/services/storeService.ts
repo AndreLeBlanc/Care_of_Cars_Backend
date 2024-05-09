@@ -1,8 +1,17 @@
 import { Brand, make } from 'ts-brand'
-import { stores, storepaymentinfo, storeopeninghours, storespecialhours } from '../schema/schema.js'
-import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
+import {
+  storeopeninghours,
+  storepaymentinfo,
+  stores,
+  storespecialhours,
+  storeweeklynotes,
+} from '../schema/schema.js'
+
+import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
+
 import { db } from '../config/db-connect.js'
-import { eq, sql, ilike, or, and, between } from 'drizzle-orm'
+
+import { and, between, eq, ilike, or, sql } from 'drizzle-orm'
 
 type PositiveInteger<T extends number> = `${T}` extends '0' | `-${any}` | `${any}.${any}`
   ? never
@@ -79,6 +88,26 @@ export type SundayOpen = Brand<string | null, 'sundayOpen'>
 export const SundayOpen = make<SundayOpen>()
 export type SundayClose = Brand<string | null, 'sundayClose'>
 export const SundayClose = make<SundayClose>()
+
+export type WeekNote = Brand<string | null, 'weekNote'>
+export const WeekNote = make<WeekNote>()
+export type MondayNote = Brand<string | null, 'mondayNote'>
+export const MondayNote = make<MondayNote>()
+export type TuesdayNote = Brand<string | null, 'tuesdayNote'>
+export const TuesdayNote = make<TuesdayNote>()
+export type WednesdayNote = Brand<string | null, 'wednesdayNote'>
+export const WednesdayNote = make<WednesdayNote>()
+export type ThursdayNote = Brand<string | null, 'thursdayNote'>
+export const ThursdayNote = make<ThursdayNote>()
+export type FridayNote = Brand<string | null, 'fridayNote'>
+export const FridayNote = make<FridayNote>()
+export type SaturdayNote = Brand<string | null, 'saturdayNote'>
+export const SaturdayNote = make<SaturdayNote>()
+export type SundayNote = Brand<string | null, 'sundayNote'>
+export const SundayNote = make<SundayNote>()
+export type Week = Brand<Date, 'week'>
+export const Week = make<Week>()
+
 export type Day = Brand<Date, 'day'>
 export const Day = make<Day>()
 export type DayOpen = Brand<string, 'dayOpen'>
@@ -102,6 +131,19 @@ export type StoreSpecialHours = {
   day: Day
   dayOpen: DayOpen
   dayClose: DayClose
+}
+
+export type WeeklyNotes = {
+  storeID: StoreID
+  week: Week
+  weekNote: WeekNote
+  mondayNote: MondayNote
+  tuesdayNote: TuesdayNote
+  wednesdayNote: WednesdayNote
+  thursdayNote: ThursdayNote
+  fridayNote: FridayNote
+  saturdayNote: SaturdayNote
+  sundayNote: SundayNote
 }
 
 export type WeekOpeningHoursCreate = {
@@ -199,6 +241,88 @@ export type StoreWithSeparateDates = {
 }
 
 export type Store = StoreCreate & { storeID: StoreID }
+function startOfWeek(date: Date): Week {
+  date = new Date(date.toLocaleDateString())
+  const diff = date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1)
+
+  return Week(new Date(date.setDate(diff)))
+}
+export async function updateWeeklyNotes(weekNote: WeeklyNotes): Promise<WeeklyNotes | undefined> {
+  weekNote.week = startOfWeek(weekNote.week)
+  const [storeNotes] = await db
+    .insert(storeweeklynotes)
+    .values(weekNote)
+    .onConflictDoUpdate({
+      target: [storeweeklynotes.storeID, storeweeklynotes.week],
+      set: weekNote,
+    })
+    .returning()
+  console.log(storeNotes)
+  return storeNotes
+    ? {
+        storeID: StoreID(storeNotes.storeID),
+        week: startOfWeek(storeNotes.week),
+        weekNote: WeekNote(storeNotes.weekNote),
+        mondayNote: MondayNote(storeNotes.mondayNote),
+        tuesdayNote: TuesdayNote(storeNotes.tuesdayNote),
+        wednesdayNote: WednesdayNote(storeNotes.wednesdayNote),
+        thursdayNote: ThursdayNote(storeNotes.thursdayNote),
+        fridayNote: FridayNote(storeNotes.fridayNote),
+        saturdayNote: SaturdayNote(storeNotes.saturdayNote),
+        sundayNote: SundayNote(storeNotes.sundayNote),
+      }
+    : undefined
+}
+
+export async function getWeeklyNotes(
+  storeID: StoreID,
+  week: Week,
+): Promise<WeeklyNotes | undefined> {
+  week = startOfWeek(week)
+  const [storeNotes] = await db
+    .select()
+    .from(storeweeklynotes)
+    .where(and(eq(storeweeklynotes.storeID, storeID), eq(storeweeklynotes.week, week)))
+  return storeNotes
+    ? {
+        storeID: StoreID(storeNotes.storeID),
+        week: startOfWeek(storeNotes.week),
+        weekNote: WeekNote(storeNotes.weekNote),
+        mondayNote: MondayNote(storeNotes.mondayNote),
+        tuesdayNote: TuesdayNote(storeNotes.tuesdayNote),
+        wednesdayNote: WednesdayNote(storeNotes.wednesdayNote),
+        thursdayNote: ThursdayNote(storeNotes.thursdayNote),
+        fridayNote: FridayNote(storeNotes.fridayNote),
+        saturdayNote: SaturdayNote(storeNotes.saturdayNote),
+        sundayNote: SundayNote(storeNotes.sundayNote),
+      }
+    : undefined
+}
+
+export async function deleteWeeklyNotes(
+  storeID: StoreID,
+  week: Week,
+): Promise<WeeklyNotes | undefined> {
+  week = startOfWeek(week)
+  const [storeNotes] = await db
+    .delete(storeweeklynotes)
+    .where(and(eq(storeweeklynotes.storeID, storeID), eq(storeweeklynotes.week, week)))
+    .returning()
+  return storeNotes
+    ? {
+        storeID: StoreID(storeNotes.storeID),
+        week: startOfWeek(storeNotes.week),
+        weekNote: WeekNote(storeNotes.weekNote),
+        mondayNote: MondayNote(storeNotes.mondayNote),
+        tuesdayNote: TuesdayNote(storeNotes.tuesdayNote),
+        wednesdayNote: WednesdayNote(storeNotes.wednesdayNote),
+        thursdayNote: ThursdayNote(storeNotes.thursdayNote),
+        fridayNote: FridayNote(storeNotes.fridayNote),
+        saturdayNote: SaturdayNote(storeNotes.saturdayNote),
+        sundayNote: SundayNote(storeNotes.sundayNote),
+      }
+    : undefined
+}
 
 export async function updateWeeklyOpeningHours(
   storeID: StoreID,
@@ -316,7 +440,6 @@ export async function deleteSpecialOpeningHoursByDayAndStore(
       dayOpen: storespecialhours.dayOpen,
       dayClose: storespecialhours.dayClose,
     })
-
   return storeHours
     ? {
         storeID: StoreID(storeHours.storeID),

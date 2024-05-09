@@ -8,12 +8,12 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node   --loader ts-node/esm --test test/**/*.test.ts",
+    "test": "node --loader ts-node/esm --test test/**/*.test.ts",
     "start": "npm run build:ts && node dist/index.js",
     "build:ts": "tsc",
     "dockerDev": "nodemon dist/index.js",
     "generate": "drizzle-kit generate:pg --config=src/config/drizzle.config.ts",
-    "deployDocker": "npm run build:ts &&  node dist/index.js",
+    "deployDocker": "npm run build:ts && node dist/index.js",
     "drizzle-studio": "npx drizzle-kit studio --config=src/config/drizzle.config.ts"
   },
   "keywords": [],
@@ -32,6 +32,7 @@
     "drizzle-orm": "^0.30.9",
     "drizzle-typebox": "^0.1.1",
     "eslint": "^8.57.0",
+    "fast-check": "^3.18.0",
     "fastify": "^4.26.1",
     "fastify-cli": "^6.1.1",
     "fastify-plugin": "^4.0.0",

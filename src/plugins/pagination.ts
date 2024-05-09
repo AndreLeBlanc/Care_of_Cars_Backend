@@ -1,4 +1,5 @@
 import fp from 'fastify-plugin'
+
 import { Brand, make } from 'ts-brand'
 
 export interface SupportPluginOptions {

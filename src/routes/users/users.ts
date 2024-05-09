@@ -3,8 +3,8 @@ import bcrypt from 'bcryptjs'
 
 import {
   CreateUser,
-  CreateUserType,
   CreateUserReply,
+  CreateUserType,
   ListUserQueryParam,
   ListUserQueryParamType,
   LoginUser,
@@ -17,41 +17,43 @@ import {
   PatchUserPassword,
 } from './userSchema.js'
 import {
-  createUser,
   CreatedUser,
-  getUsersPaginate,
-  UserID,
-  UsersPaginated,
-  verifyUser,
-  getUserByID,
-  updateUserByID,
-  generatePasswordHash,
-  isStrongPassword,
   DeleteUser,
-  UserWithSuperAdmin,
-  UserInfo,
-  VerifyUser,
-  UserFirstName,
-  UserLastName,
   UserEmail,
+  UserFirstName,
+  UserID,
+  UserInfo,
+  UserLastName,
   UserPassword,
+  UserWithSuperAdmin,
+  UsersPaginated,
+  VerifyUser,
+  createUser,
+  generatePasswordHash,
+  getUserByID,
+  getUsersPaginate,
+  isStrongPassword,
+  updateUserByID,
+  verifyUser,
   userInfoPassword,
 } from '../../services/userService.js'
 import { RoleID } from '../../services/roleService.js'
+
 import { PermissionTitle } from '../../services/permissionService.js'
 
 import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
+
 import {
-  NextPageUrl,
-  PreviousPageUrl,
-  ResponseMessage,
-  Offset,
-  Search,
   Limit,
-  Page,
-  ResultCount,
-  RequestUrl,
   ModelName,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  ResponseMessage,
+  ResultCount,
+  Search,
 } from '../../plugins/pagination.js'
 
 export async function users(fastify: FastifyInstance) {
@@ -73,8 +75,8 @@ export async function users(fastify: FastifyInstance) {
         querystring: ListUserQueryParam,
       },
     },
-    async (request, _) => {
-      let { search = '', limit = 10, page = 1 } = request.query
+    async (request) => {
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -85,11 +87,11 @@ export async function users(fastify: FastifyInstance) {
         brandedPage,
         offset,
       )
-      let message: ResponseMessage = fastify.responseMessage(
+      const message: ResponseMessage = fastify.responseMessage(
         ModelName('users'),
         ResultCount(result.data.length),
       )
-      let requestUrl: RequestUrl = RequestUrl(
+      const requestUrl: RequestUrl = RequestUrl(
         request.protocol + '://' + request.hostname + request.url,
       )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
@@ -119,7 +121,6 @@ export async function users(fastify: FastifyInstance) {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('create_user'))
         done()
         return reply
@@ -153,6 +154,7 @@ export async function users(fastify: FastifyInstance) {
             firstName: createdUser.userFirstName,
             lastName: createdUser.userLastName,
             email: createdUser.userEmail,
+            userID: createdUser.userID,
           },
         })
       } catch (error) {
@@ -170,8 +172,7 @@ export async function users(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const { email, password } = request.body
-      let userWithPassword: VerifyUser | undefined = await verifyUser(UserEmail(email))
-      console.log(userWithPassword)
+      const userWithPassword: VerifyUser | undefined = await verifyUser(UserEmail(email))
       if (userWithPassword == undefined || userWithPassword == null) {
         return reply.status(403).send({ message: 'Login failed, incorrect email or password' })
       }
@@ -181,7 +182,6 @@ export async function users(fastify: FastifyInstance) {
         const token = fastify.jwt.sign({ user })
         const rolePermissions = await getRoleWithPermissions(RoleID(user.role.roleID))
         const roleFullPermissions = await getAllPermissionStatus(RoleID(user.role.roleID))
-
         return reply.status(200).send({
           message: 'Login success',
           token: token,
@@ -208,7 +208,6 @@ export async function users(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('view_user'))
         done()
         return reply
@@ -232,7 +231,6 @@ export async function users(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('update_user'))
         done()
         return reply
@@ -310,7 +308,6 @@ export async function users(fastify: FastifyInstance) {
     '/:id',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('delete_user'))
         done()
         return reply

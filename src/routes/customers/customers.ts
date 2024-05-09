@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify'
+
 import {
   CreateCustomerType,
   CreateDriverType,
@@ -20,48 +21,49 @@ import {
   patchDriverBody,
 } from './customerSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
+
 import {
-  createCompany,
-  CustomerOrgNumber,
-  CustomerCompanyName,
-  CompanyReference,
   CompanyAddress,
-  CompanyZipCode,
   CompanyAddressCity,
   CompanyCountry,
-  DriverExternalNumber,
-  DriverGDPRAccept,
-  DriverISWarrantyCustomer,
-  DriverAcceptsMarketing,
-  DriverFirstName,
-  DriverLastName,
-  DriverEmail,
-  DriverPhoneNumber,
-  DriverAddress,
-  DriverZipCode,
-  DriverAddressCity,
-  DriverCountry,
-  DriverHasCard,
-  DriverCardValidTo,
+  CompanyReference,
+  CompanyZipCode,
   CustomerCardNumber,
-  DriverKeyNumber,
-  DriverNotesShared,
-  DriverNotes,
   CustomerCompanyCreate,
-  editCompanyDetails,
+  CustomerCompanyName,
+  CustomerOrgNumber,
+  DriverAcceptsMarketing,
+  DriverAddress,
+  DriverAddressCity,
+  DriverCardValidTo,
+  DriverCountry,
+  DriverCreate,
+  DriverEmail,
+  DriverExternalNumber,
+  DriverFirstName,
+  DriverGDPRAccept,
+  DriverHasCard,
+  DriverISWarrantyCustomer,
+  DriverKeyNumber,
+  DriverLastName,
+  DriverNotes,
+  DriverNotesShared,
+  DriverPhoneNumber,
+  DriverZipCode,
+  createCompany,
   deleteCompany,
   Driver,
   Company,
   deleteDriver,
   editDriverDetails,
   createNewDriver,
-  DriverCreate,
   getCustomersPaginate,
   CustomersPaginate,
   DriversPaginate,
   getDriversPaginate,
   getDriverById,
   getCompanyById,
+  editCompanyDetails,
 } from '../../services/customerService.js'
 import {
   Limit,
@@ -145,7 +147,6 @@ export const customers = async (fastify: FastifyInstance) => {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('create_customer'))
         done()
         return reply

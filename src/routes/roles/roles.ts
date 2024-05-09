@@ -1,16 +1,17 @@
 import { FastifyInstance } from 'fastify'
+
 import {
-  createRole,
   CreatedRole,
-  getRolesPaginate,
-  getRoleByID,
-  updateRoleByID,
-  deleteRole,
-  getRoleWithPermissions,
   Role,
-  RoleID,
   RoleDescription,
+  RoleID,
   RoleName,
+  createRole,
+  deleteRole,
+  getRoleByID,
+  getRoleWithPermissions,
+  getRolesPaginate,
+  updateRoleByID,
 } from '../../services/roleService.js'
 import {
   ListRoleQueryParamSchema,
@@ -22,17 +23,18 @@ import {
 } from './roleSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
 import { RolesPaginated } from '../../services/roleService.js'
+
 import {
-  NextPageUrl,
-  PreviousPageUrl,
-  ResponseMessage,
-  Offset,
-  Search,
   Limit,
-  Page,
-  ResultCount,
-  RequestUrl,
   ModelName,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  ResponseMessage,
+  ResultCount,
+  Search,
 } from '../../plugins/pagination.js'
 export async function roles(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: ListRoleQueryParamSchemaType }>(

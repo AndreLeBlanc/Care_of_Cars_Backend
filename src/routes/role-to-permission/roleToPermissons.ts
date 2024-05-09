@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify'
+
 import {
   CreateRoleToPermissionSchema,
   CreateRoleToPermissionSchemaType,
@@ -6,11 +7,12 @@ import {
   DeleteRoleToPermissionType,
 } from './roleToPermissionSchema.js'
 import {
+  RoleToPermissions,
   createRoleToPermissions,
   deleteRoleToPermissions,
-  RoleToPermissions,
 } from '../../services/roleToPermissionService.js'
-import { PermissionTitle, PermissionID } from '../../services/permissionService.js'
+
+import { PermissionID, PermissionTitle } from '../../services/permissionService.js'
 
 import { RoleID } from '../../services/roleService.js'
 

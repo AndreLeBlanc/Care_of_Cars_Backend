@@ -1,5 +1,5 @@
 {
-  "id": "07c23724-e35c-4218-a8bb-41468ea17a57",
+  "id": "c63b86a1-dd39-45c1-8cb4-7da157851b0c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -1254,7 +1254,22 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "storeid_idx": {
+          "name": "storeid_idx",
+          "columns": [
+            "storeID"
+          ],
+          "isUnique": false
+        },
+        "day_idx": {
+          "name": "day_idx",
+          "columns": [
+            "day"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "storespecialhours_storeID_stores_storeID_fk": {
           "name": "storespecialhours_storeID_stores_storeID_fk",
@@ -1281,6 +1296,107 @@
       },
       "uniqueConstraints": {}
     },
+    "storeweeklynotes": {
+      "name": "storeweeklynotes",
+      "schema": "",
+      "columns": {
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "week": {
+          "name": "week",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weekNote": {
+          "name": "weekNote",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mondayNote": {
+          "name": "mondayNote",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tuesdayNote": {
+          "name": "tuesdayNote",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wednesdayNote": {
+          "name": "wednesdayNote",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "thursdayNote": {
+          "name": "thursdayNote",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fridayNote": {
+          "name": "fridayNote",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "saturdayNote": {
+          "name": "saturdayNote",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sundayNote": {
+          "name": "sundayNote",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "storeweeklynotes_storeID_stores_storeID_fk": {
+          "name": "storeweeklynotes_storeID_stores_storeID_fk",
+          "tableFrom": "storeweeklynotes",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "storeweeklynotes_storeID_week_pk": {
+          "name": "storeweeklynotes_storeID_week_pk",
+          "columns": [
+            "storeID",
+            "week"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "storeweeklynotes_storeID_week_unique": {
+          "name": "storeweeklynotes_storeID_week_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "storeID",
+            "week"
+          ]
+        }
+      }
+    },
     "users": {
       "name": "users",
       "schema": "",
@@ -1293,13 +1409,13 @@
         },
         "firstName": {
           "name": "firstName",
-          "type": "varchar",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
         },
         "lastName": {
           "name": "lastName",
-          "type": "varchar",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
         },
