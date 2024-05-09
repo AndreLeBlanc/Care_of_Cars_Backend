@@ -1,34 +1,36 @@
 import { FastifyInstance } from 'fastify'
+
 import {
-  ServiceSchema,
-  ServiceSchemaType,
   ListServiceQueryParamSchema,
   ListServiceQueryParamSchemaType,
+  ServiceSchema,
+  ServiceSchemaType,
+  getServiceByIDSchema,
+  getServiceByIDSchemaType,
   listServiceOrderByEnum,
   serviceOrderEnum,
-  getServiceByIDSchemaType,
-  getServiceByIDSchema,
 } from './serviceSchema.js'
 import {
   ServiceID,
+  ServiceNoVariant,
   createService,
+  getServiceById,
   getServicesPaginate,
   updateServiceByID,
-  getServiceById,
-  ServiceNoVariant,
 } from '../../services/serviceService.js'
 import { PermissionTitle } from '../../services/permissionService.js'
+
 import {
-  NextPageUrl,
-  PreviousPageUrl,
-  ResponseMessage,
-  Offset,
-  Search,
   Limit,
-  Page,
-  ResultCount,
-  RequestUrl,
   ModelName,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  ResponseMessage,
+  ResultCount,
+  Search,
 } from '../../plugins/pagination.js'
 
 export async function services(fastify: FastifyInstance) {

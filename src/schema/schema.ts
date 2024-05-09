@@ -1,19 +1,21 @@
 import { relations } from 'drizzle-orm'
+
 import {
-  serial,
-  text,
-  smallint,
-  timestamp,
-  pgTable,
-  date,
-  varchar,
-  integer,
-  primaryKey,
   boolean,
+  date,
   index,
+  integer,
   pgEnum,
+  pgTable,
+  primaryKey,
   real,
+  serial,
+  smallint,
+  text,
   time,
+  timestamp,
+  unique,
+  varchar,
 } from 'drizzle-orm/pg-core'
 
 const dbDates = {
@@ -283,7 +285,7 @@ export const storeopeninghours = pgTable('storeopeninghours', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
-export const storeopeninghouRselations = relations(storeopeninghours, ({ one }) => ({
+export const storeopeninghoursRelations = relations(storeopeninghours, ({ one }) => ({
   stores: one(stores, {
     fields: [storeopeninghours.storeID],
     references: [stores.storeID],
@@ -312,6 +314,37 @@ export const storespecialhours = pgTable(
 export const storespecialhoursRelations = relations(storespecialhours, ({ one }) => ({
   stores: one(stores, {
     fields: [storespecialhours.storeID],
+    references: [stores.storeID],
+  }),
+}))
+
+export const storeweeklynotes = pgTable(
+  'storeweeklynotes',
+  {
+    storeID: integer('storeID')
+      .references(() => stores.storeID, { onDelete: 'cascade' })
+      .notNull(),
+    week: date('week', { mode: 'date' }).notNull(),
+    weekNote: varchar('weekNote'),
+    mondayNote: varchar('mondayNote'),
+    tuesdayNote: varchar('tuesdayNote'),
+    wednesdayNote: varchar('wednesdayNote'),
+    thursdayNote: varchar('thursdayNote'),
+    fridayNote: varchar('fridayNote'),
+    saturdayNote: varchar('saturdayNote'),
+    sundayNote: varchar('sundayNote'),
+  },
+  (storeweeklynotes) => {
+    return {
+      pk: primaryKey({ columns: [storeweeklynotes.storeID, storeweeklynotes.week] }),
+      unq: unique().on(storeweeklynotes.storeID, storeweeklynotes.week),
+    }
+  },
+)
+
+export const storeweeklynotesRselations = relations(storeweeklynotes, ({ one }) => ({
+  stores: one(stores, {
+    fields: [storeweeklynotes.storeID],
     references: [stores.storeID],
   }),
 }))

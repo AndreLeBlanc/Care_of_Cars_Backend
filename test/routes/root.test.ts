@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
-import { describe, it, before, after } from 'node:test'
+
+import { after, before, describe, it } from 'node:test'
 import assert from 'assert'
 import { buildApp } from '../../src/app.js'
 
