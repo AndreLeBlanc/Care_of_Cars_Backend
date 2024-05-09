@@ -64,6 +64,8 @@ test/types/index.js
 # compiled app
 dist
 
+drizzle.config.ts
+
 .env  
 
 test/authTokenForTest.txt

@@ -276,6 +276,237 @@
         }
       }
     },
+    "productCategories": {
+      "name": "productCategories",
+      "schema": "",
+      "columns": {
+        "productCategoryID": {
+          "name": "productCategoryID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "productCategories_name_unique": {
+          "name": "productCategories_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      }
+    },
+    "products": {
+      "name": "products",
+      "schema": "",
+      "columns": {
+        "productId": {
+          "name": "productId",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "productItemNumber": {
+          "name": "productItemNumber",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productCategoryID": {
+          "name": "productCategoryID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productDescription": {
+          "name": "productDescription",
+          "type": "varchar(512)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "productSupplierArticleNumber": {
+          "name": "productSupplierArticleNumber",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "productExternalArticleNumber": {
+          "name": "productExternalArticleNumber",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "productUpdateRelatedData": {
+          "name": "productUpdateRelatedData",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "productInventoryBalance": {
+          "name": "productInventoryBalance",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productAward": {
+          "name": "productAward",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productCost": {
+          "name": "productCost",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "products_productCategoryID_productCategories_productCategoryID_fk": {
+          "name": "products_productCategoryID_productCategories_productCategoryID_fk",
+          "tableFrom": "products",
+          "tableTo": "productCategories",
+          "columnsFrom": [
+            "productCategoryID"
+          ],
+          "columnsTo": [
+            "productCategoryID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "products_productId_unique": {
+          "name": "products_productId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "productId"
+          ]
+        }
+      }
+    },
+    "rentcars": {
+      "name": "rentcars",
+      "schema": "",
+      "columns": {
+        "storeId": {
+          "name": "storeId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rentCarRegistrationNumber": {
+          "name": "rentCarRegistrationNumber",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "rentCarModel": {
+          "name": "rentCarModel",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rentCarColor": {
+          "name": "rentCarColor",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rentCarYear": {
+          "name": "rentCarYear",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rentCarNotes": {
+          "name": "rentCarNotes",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rentCarNumber": {
+          "name": "rentCarNumber",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "rentcars_rentCarRegistrationNumber_unique": {
+          "name": "rentcars_rentCarRegistrationNumber_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "rentCarRegistrationNumber"
+          ]
+        }
+      }
+    },
     "roleToPermissions": {
       "name": "roleToPermissions",
       "schema": "",

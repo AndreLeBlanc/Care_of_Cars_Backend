@@ -18,6 +18,16 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 
+export type DbDateType = {
+  createdAt: Date
+  updatedAt: Date
+}
+
+const dbDates = {
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+}
+
 export const users = pgTable('users', {
   userID: serial('userID').primaryKey(),
   firstName: varchar('firstName', { length: 128 }).notNull(),
@@ -229,6 +239,17 @@ export const stores = pgTable('stores', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
+export const rentcars = pgTable('rentcars', {
+  storeId: integer('storeId').notNull(),
+  rentCarRegistrationNumber: varchar('rentCarRegistrationNumber').primaryKey().unique(),
+  rentCarModel: varchar('rentCarModel').notNull(),
+  rentCarColor: varchar('rentCarColor').notNull(),
+  rentCarYear: integer('rentCarYear').notNull(),
+  rentCarNotes: varchar('rentCarNotes'),
+  rentCarNumber: integer('rentCarNumber'),
+  ...dbDates,
+})
+
 export const storepaymentinfo = pgTable('storepaymentinfo', {
   storePaymentOption: serial('storePaymentOption').primaryKey(),
   storeID: integer('storeID')
@@ -300,6 +321,41 @@ export const storespecialhoursRelations = relations(storespecialhours, ({ one })
   stores: one(stores, {
     fields: [storespecialhours.storeID],
     references: [stores.storeID],
+  }),
+}))
+
+export const productCategories = pgTable('productCategories', {
+  productCategoryID: serial('productCategoryID').primaryKey(),
+  name: varchar('name', { length: 256 }).unique().notNull(),
+  description: text('description'),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+})
+
+export const products = pgTable('products', {
+  productId: serial('productId').primaryKey().unique(),
+  productItemNumber: varchar('productItemNumber').notNull(),
+  productCategoryID: integer('productCategoryID')
+    .references(() => productCategories.productCategoryID)
+    .notNull(),
+  productDescription: varchar('productDescription', { length: 512 }),
+  productSupplierArticleNumber: varchar('productSupplierArticleNumber'),
+  productExternalArticleNumber: varchar('productExternalArticleNumber'),
+  productUpdateRelatedData: boolean('productUpdateRelatedData').default(false),
+  productInventoryBalance: integer('productInventoryBalance').notNull(),
+  productAward: integer('productAward').notNull(),
+  productCost: integer('productCost').notNull(),
+  ...dbDates,
+})
+
+export const productCategoryToProductRelations = relations(productCategories, ({ many }) => ({
+  services: many(products),
+}))
+
+export const productToCategoryRelations = relations(products, ({ one }) => ({
+  productCategories: one(productCategories, {
+    fields: [products.productCategoryID],
+    references: [productCategories.productCategoryID],
   }),
 }))
 
