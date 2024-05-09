@@ -19,12 +19,16 @@ import {
   DayClose,
   DayOpen,
   FridayClose,
+  FridayNote,
   FridayOpen,
   FromDate,
   MondayClose,
+  MondayNote,
   MondayOpen,
+  Notes,
   OpeningHours,
   SaturdayClose,
+  SaturdayNote,
   SaturdayOpen,
   Store,
   StoreAddress,
@@ -57,26 +61,35 @@ import {
   StoreZipCode,
   StoresPaginated,
   SundayClose,
+  SundayNote,
   SundayOpen,
   ThursdayClose,
+  ThursdayNote,
   ThursdayOpen,
   ToDate,
   TuesdayClose,
+  TuesdayNote,
   TuesdayOpen,
   WednesdayClose,
+  WednesdayNote,
   WednesdayOpen,
+  Week,
+  WeekNote,
   WeekOpeningHours,
   WeekOpeningHoursCreate,
   createSpecialOpeningHours,
   createStore,
   deleteSpecialOpeningHoursByDayAndStore,
   deleteStore,
+  deleteWeeklyNotes,
   deleteWeeklyOpeningHours,
   getOpeningHours,
   getStoreByID,
   getStoresPaginate,
+  getWeeklyNotes,
   updateSpecialOpeningHours,
   updateStoreByStoreID,
+  updateWeeklyNotes,
   updateWeeklyOpeningHours,
 } from '../../services/storeService.js'
 
@@ -91,6 +104,10 @@ import {
   StoreIDAndDaySchemaType,
   StoreIDSchema,
   StoreIDSchemaType,
+  StoreIDWeekSchema,
+  StoreIDWeekSchemaType,
+  StoreNotes,
+  StoreNotesType,
   StoreOpeningHours,
   StoreOpeningHoursCreate,
   StoreOpeningHoursCreateType,
@@ -107,13 +124,67 @@ import {
   StoreUpdateReplySchemaType,
   StoreUpdateSchema,
   StoreUpdateSchemaType,
-  //StoreWeeklyNotes,
-  //StoreWeeklyNotesType,
+  StoreWeeklyNotes,
+  StoreWeeklyNotesType,
+  WeekSchema,
+  WeekSchemaType,
   storeReplyMessage,
   storeReplyMessageType,
 } from './storesSchema..js'
 
 export async function stores(fastify: FastifyInstance) {
+  fastify.put<{
+    Body: StoreWeeklyNotesType
+    Reply: { message: storeReplyMessageType; notes: StoreWeeklyNotesType } | storeReplyMessageType
+  }>(
+    '/weekly-notes',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName = PermissionTitle('put_store_weekly_notes')
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        body: StoreWeeklyNotes,
+        response: {
+          201: { storeReplyMessage, notes: StoreWeeklyNotes },
+        },
+      },
+    },
+    async (request, reply) => {
+      const week: Week = Week(new Date(request.body.week))
+      const notes: Notes = {
+        storeID: StoreID(request.body.storeID),
+        weekNote: WeekNote(request.body.weekNote),
+        mondayNote: MondayNote(request.body.mondayNote),
+        tuesdayNote: TuesdayNote(request.body.tuesdayNote),
+        wednesdayNote: WednesdayNote(request.body.wednesdayNote),
+        thursdayNote: ThursdayNote(request.body.thursdayNote),
+        fridayNote: FridayNote(request.body.fridayNote),
+        saturdayNote: SaturdayNote(request.body.saturdayNote),
+        sundayNote: SundayNote(request.body.sundayNote),
+      }
+
+      const maybeWeekNotes: { notes: Notes; week: Week } | undefined = await updateWeeklyNotes(
+        notes,
+        week,
+      )
+      if (maybeWeekNotes != null) {
+        reply.status(200).send({
+          message: { message: 'weekly notes inserted' },
+          notes: { week: maybeWeekNotes.week.toISOString(), ...maybeWeekNotes.notes },
+        })
+      }
+      reply.status(417).send({ message: "Couldn't creat or update notes" })
+    },
+  )
+
   fastify.post<{
     Body: CreateStoreSchemaType
     Reply: { message: storeReplyMessageType; store: StoreReplySchemaType } | storeReplyMessageType
@@ -211,6 +282,81 @@ export async function stores(fastify: FastifyInstance) {
     },
   )
 
+  fastify.delete<{
+    Params: StoreIDWeekSchemaType
+    Reply:
+      | (storeReplyMessageType & { notes: StoreNotesType } & WeekSchemaType)
+      | storeReplyMessageType
+  }>(
+    '/weekly-notes/:storeID/:week/',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.params.week)
+        fastify.authorize(request, reply, PermissionTitle('delete_weekly_notes'))
+        done()
+        return reply
+      },
+      schema: {
+        params: StoreIDWeekSchema,
+        response: {
+          200: { ...storeReplyMessage, notes: StoreNotes, ...WeekSchema },
+        },
+      },
+    },
+    async (request, reply) => {
+      const storeID = StoreID(request.params.storeID)
+      const week = Week(new Date(request.params.week))
+      const deletedNotes: { notes: Notes; week: Week } | undefined = await deleteWeeklyNotes(
+        storeID,
+        week,
+      )
+      if (deletedNotes == null) {
+        return reply.status(404).send({ message: 'notes do not exist!' })
+      }
+      return reply.status(200).send({
+        message: 'Notes deleted',
+        notes: deletedNotes.notes,
+        week: deletedNotes.week.toISOString(),
+      })
+    },
+  )
+
+  fastify.get<{
+    Params: StoreIDWeekSchemaType
+    Reply:
+      | (storeReplyMessageType & { notes: StoreNotesType } & WeekSchemaType)
+      | storeReplyMessageType
+  }>(
+    '/weekly-notes/:storeID/:week',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, PermissionTitle('get_weekly_notes'))
+        done()
+        return reply
+      },
+      schema: {
+        params: StoreIDWeekSchema,
+        response: {
+          200: { storeReplyMessage, notes: StoreNotes, WeekSchema },
+        },
+      },
+    },
+    async (request, reply) => {
+      const storeID = StoreID(request.params.storeID)
+      const week = Week(new Date(request.params.week))
+      const getNotes: { notes: Notes; week: Week } | undefined = await getWeeklyNotes(storeID, week)
+      if (getNotes == null) {
+        return reply.status(404).send({ message: 'notes do not exist!' })
+      }
+      return reply.status(200).send({
+        message: 'Notes gotten',
+        notes: getNotes.notes,
+        week: getNotes.week.toISOString(),
+      })
+    },
+  )
+
   fastify.patch<{
     Params: StoreIDSchemaType
     Body: StoreUpdateSchemaType
@@ -295,7 +441,6 @@ export async function stores(fastify: FastifyInstance) {
       } else {
         updatedStore = await updateStoreByStoreID(storeID, store, paymentPatch)
       }
-      console.log(updatedStore)
 
       if (updatedStore == null) {
         return reply.status(417).send({ message: "couldn't create store" })
@@ -496,7 +641,7 @@ export async function stores(fastify: FastifyInstance) {
   )
 
   fastify.delete<{ Params: StoreIDSchemaType }>(
-    '/store-opening-hours:storeID',
+    '/store-opening-hours/:storeID',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
@@ -613,7 +758,7 @@ export async function stores(fastify: FastifyInstance) {
     Params: StoreIDAndDaySchemaType
     Reply: StoreSpecialHoursSchemaType | storeReplyMessageType
   }>(
-    '/store-special-opening-hours:storeID:day',
+    '/store-special-opening-hours/:storeID/:day',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('delete_store_special_opening_hours')

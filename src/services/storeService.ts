@@ -133,9 +133,8 @@ export type StoreSpecialHours = {
   dayClose: DayClose
 }
 
-export type WeeklyNotes = {
+export type Notes = {
   storeID: StoreID
-  week: Week
   weekNote: WeekNote
   mondayNote: MondayNote
   tuesdayNote: TuesdayNote
@@ -247,29 +246,34 @@ function startOfWeek(date: Date): Week {
 
   return Week(new Date(date.setDate(diff)))
 }
-export async function updateWeeklyNotes(weekNote: WeeklyNotes): Promise<WeeklyNotes | undefined> {
-  weekNote.week = startOfWeek(weekNote.week)
+export async function updateWeeklyNotes(
+  notes: Notes,
+  week: Week,
+): Promise<{ notes: Notes; week: Week } | undefined> {
+  week = startOfWeek(week)
   const [storeNotes] = await db
     .insert(storeweeklynotes)
-    .values(weekNote)
+    .values({ ...notes, week })
     .onConflictDoUpdate({
       target: [storeweeklynotes.storeID, storeweeklynotes.week],
-      set: weekNote,
+      set: { ...notes, week },
     })
     .returning()
   console.log(storeNotes)
   return storeNotes
     ? {
-        storeID: StoreID(storeNotes.storeID),
-        week: startOfWeek(storeNotes.week),
-        weekNote: WeekNote(storeNotes.weekNote),
-        mondayNote: MondayNote(storeNotes.mondayNote),
-        tuesdayNote: TuesdayNote(storeNotes.tuesdayNote),
-        wednesdayNote: WednesdayNote(storeNotes.wednesdayNote),
-        thursdayNote: ThursdayNote(storeNotes.thursdayNote),
-        fridayNote: FridayNote(storeNotes.fridayNote),
-        saturdayNote: SaturdayNote(storeNotes.saturdayNote),
-        sundayNote: SundayNote(storeNotes.sundayNote),
+        notes: {
+          storeID: StoreID(storeNotes.storeID),
+          weekNote: WeekNote(storeNotes.weekNote),
+          mondayNote: MondayNote(storeNotes.mondayNote),
+          tuesdayNote: TuesdayNote(storeNotes.tuesdayNote),
+          wednesdayNote: WednesdayNote(storeNotes.wednesdayNote),
+          thursdayNote: ThursdayNote(storeNotes.thursdayNote),
+          fridayNote: FridayNote(storeNotes.fridayNote),
+          saturdayNote: SaturdayNote(storeNotes.saturdayNote),
+          sundayNote: SundayNote(storeNotes.sundayNote),
+        },
+        week: Week(storeNotes.week),
       }
     : undefined
 }
@@ -277,7 +281,7 @@ export async function updateWeeklyNotes(weekNote: WeeklyNotes): Promise<WeeklyNo
 export async function getWeeklyNotes(
   storeID: StoreID,
   week: Week,
-): Promise<WeeklyNotes | undefined> {
+): Promise<{ notes: Notes; week: Week } | undefined> {
   week = startOfWeek(week)
   const [storeNotes] = await db
     .select()
@@ -285,16 +289,18 @@ export async function getWeeklyNotes(
     .where(and(eq(storeweeklynotes.storeID, storeID), eq(storeweeklynotes.week, week)))
   return storeNotes
     ? {
-        storeID: StoreID(storeNotes.storeID),
-        week: startOfWeek(storeNotes.week),
-        weekNote: WeekNote(storeNotes.weekNote),
-        mondayNote: MondayNote(storeNotes.mondayNote),
-        tuesdayNote: TuesdayNote(storeNotes.tuesdayNote),
-        wednesdayNote: WednesdayNote(storeNotes.wednesdayNote),
-        thursdayNote: ThursdayNote(storeNotes.thursdayNote),
-        fridayNote: FridayNote(storeNotes.fridayNote),
-        saturdayNote: SaturdayNote(storeNotes.saturdayNote),
-        sundayNote: SundayNote(storeNotes.sundayNote),
+        notes: {
+          storeID: StoreID(storeNotes.storeID),
+          weekNote: WeekNote(storeNotes.weekNote),
+          mondayNote: MondayNote(storeNotes.mondayNote),
+          tuesdayNote: TuesdayNote(storeNotes.tuesdayNote),
+          wednesdayNote: WednesdayNote(storeNotes.wednesdayNote),
+          thursdayNote: ThursdayNote(storeNotes.thursdayNote),
+          fridayNote: FridayNote(storeNotes.fridayNote),
+          saturdayNote: SaturdayNote(storeNotes.saturdayNote),
+          sundayNote: SundayNote(storeNotes.sundayNote),
+        },
+        week: Week(storeNotes.week),
       }
     : undefined
 }
@@ -302,7 +308,7 @@ export async function getWeeklyNotes(
 export async function deleteWeeklyNotes(
   storeID: StoreID,
   week: Week,
-): Promise<WeeklyNotes | undefined> {
+): Promise<{ notes: Notes; week: Week } | undefined> {
   week = startOfWeek(week)
   const [storeNotes] = await db
     .delete(storeweeklynotes)
@@ -310,16 +316,18 @@ export async function deleteWeeklyNotes(
     .returning()
   return storeNotes
     ? {
-        storeID: StoreID(storeNotes.storeID),
-        week: startOfWeek(storeNotes.week),
-        weekNote: WeekNote(storeNotes.weekNote),
-        mondayNote: MondayNote(storeNotes.mondayNote),
-        tuesdayNote: TuesdayNote(storeNotes.tuesdayNote),
-        wednesdayNote: WednesdayNote(storeNotes.wednesdayNote),
-        thursdayNote: ThursdayNote(storeNotes.thursdayNote),
-        fridayNote: FridayNote(storeNotes.fridayNote),
-        saturdayNote: SaturdayNote(storeNotes.saturdayNote),
-        sundayNote: SundayNote(storeNotes.sundayNote),
+        notes: {
+          storeID: StoreID(storeNotes.storeID),
+          weekNote: WeekNote(storeNotes.weekNote),
+          mondayNote: MondayNote(storeNotes.mondayNote),
+          tuesdayNote: TuesdayNote(storeNotes.tuesdayNote),
+          wednesdayNote: WednesdayNote(storeNotes.wednesdayNote),
+          thursdayNote: ThursdayNote(storeNotes.thursdayNote),
+          fridayNote: FridayNote(storeNotes.fridayNote),
+          saturdayNote: SaturdayNote(storeNotes.saturdayNote),
+          sundayNote: SundayNote(storeNotes.sundayNote),
+        },
+        week: Week(storeNotes.week),
       }
     : undefined
 }
