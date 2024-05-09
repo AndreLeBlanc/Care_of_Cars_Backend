@@ -10,7 +10,7 @@ import {
   getRentCarQueryParams,
   getRentCarQueryParamsType,
   patchRentCarBody,
-} from './schemas/rentCarSchema.js'
+} from './rentCarSchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
 import {
   RentCar,
@@ -21,6 +21,7 @@ import {
   RentCarRegistrationNumber,
   RentCarYear,
   RentCarsPaginate,
+  StoreID,
   createRentCar,
   deleteRentCarByRegNumber,
   editRentCar,
@@ -65,7 +66,13 @@ export const rentCar = async (fastify: FastifyInstance) => {
         rentCarNumber,
       } = req.body
 
+      //todo: Store id for rent Car
+      //On Login we are not assigned any storeId, we need to check this,
+      //@ts-ignore
+      const authKey = await req.jwtDecode()
+
       const rentCarDetails = {
+        storeId: StoreID(1),
         rentCarColor: RentCarColor(rentCarColor),
         rentCarModel: RentCarModel(rentCarModel),
         rentCarRegistrationNumber: RentCarRegistrationNumber(rentCarRegistrationNumber),
@@ -91,7 +98,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
 
   //Get Rent Cars
   fastify.get<{ Querystring: ListRentCarQueryParamSchemaType }>(
-    '/',
+    '/rent-cars-list',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('list_company_drivers')

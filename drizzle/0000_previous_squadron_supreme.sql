@@ -49,6 +49,44 @@ CREATE TABLE IF NOT EXISTS "permissions" (
 	CONSTRAINT "permissions_permissionName_unique" UNIQUE("permissionName")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "productCategories" (
+	"productCategoryID" serial PRIMARY KEY NOT NULL,
+	"name" varchar(256) NOT NULL,
+	"description" text,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "productCategories_name_unique" UNIQUE("name")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "products" (
+	"productId" serial PRIMARY KEY NOT NULL,
+	"productItemNumber" varchar NOT NULL,
+	"productCategoryID" integer NOT NULL,
+	"productDescription" varchar(512),
+	"productSupplierArticleNumber" varchar,
+	"productExternalArticleNumber" varchar,
+	"productUpdateRelatedData" boolean DEFAULT false,
+	"productInventoryBalance" integer NOT NULL,
+	"productAward" integer NOT NULL,
+	"productCost" integer NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "products_productId_unique" UNIQUE("productId")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "rentcars" (
+	"storeId" integer NOT NULL,
+	"rentCarRegistrationNumber" varchar PRIMARY KEY NOT NULL,
+	"rentCarModel" varchar NOT NULL,
+	"rentCarColor" varchar NOT NULL,
+	"rentCarYear" integer NOT NULL,
+	"rentCarNotes" varchar,
+	"rentCarNumber" integer,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "rentcars_rentCarRegistrationNumber_unique" UNIQUE("rentCarRegistrationNumber")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "roleToPermissions" (
 	"roleID" integer NOT NULL,
 	"permissionID" integer NOT NULL,
@@ -171,6 +209,21 @@ CREATE TABLE IF NOT EXISTS "storespecialhours" (
 	CONSTRAINT "storespecialhours_storeID_day_pk" PRIMARY KEY("storeID","day")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "storeweeklynotes" (
+	"storeID" integer NOT NULL,
+	"week" date NOT NULL,
+	"weekNote" varchar,
+	"mondayNote" varchar,
+	"tuesdayNote" varchar,
+	"wednesdayNote" varchar,
+	"thursdayNote" varchar,
+	"fridayNote" varchar,
+	"saturdayNote" varchar,
+	"sundayNote" varchar,
+	CONSTRAINT "storeweeklynotes_storeID_week_pk" PRIMARY KEY("storeID","week"),
+	CONSTRAINT "storeweeklynotes_storeID_week_unique" UNIQUE("storeID","week")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"userID" serial PRIMARY KEY NOT NULL,
 	"firstName" varchar(128) NOT NULL,
@@ -184,8 +237,16 @@ CREATE TABLE IF NOT EXISTS "users" (
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "storeid_idx" ON "storespecialhours" ("storeID");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "day_idx" ON "storespecialhours" ("day");--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "drivers" ADD CONSTRAINT "drivers_customerOrgNumber_companycustomers_customerOrgNumber_fk" FOREIGN KEY ("customerOrgNumber") REFERENCES "companycustomers"("customerOrgNumber") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "products" ADD CONSTRAINT "products_productCategoryID_productCategories_productCategoryID_fk" FOREIGN KEY ("productCategoryID") REFERENCES "productCategories"("productCategoryID") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -216,6 +277,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "storespecialhours" ADD CONSTRAINT "storespecialhours_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "stores"("storeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "storeweeklynotes" ADD CONSTRAINT "storeweeklynotes_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "stores"("storeID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
