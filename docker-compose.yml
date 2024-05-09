@@ -52,7 +52,7 @@ services:
       dockerfile: Dockerfile.test
       context: .
     ports:
-      - '3000:3000'
+      - 3100:3000
     environment:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}

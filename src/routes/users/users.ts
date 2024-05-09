@@ -9,12 +9,12 @@ import {
   ListUserQueryParamType,
   LoginUser,
   LoginUserType,
+  PatchUserPassword,
+  PatchUserPasswordType,
   PatchUserSchema,
   PatchUserSchemaType,
   getUserByIDSchema,
   getUserByIDType,
-  PatchUserPasswordType,
-  PatchUserPassword,
 } from './userSchema.js'
 import {
   CreatedUser,
@@ -34,8 +34,8 @@ import {
   getUsersPaginate,
   isStrongPassword,
   updateUserByID,
-  verifyUser,
   userInfoPassword,
+  verifyUser,
 } from '../../services/userService.js'
 import { RoleID } from '../../services/roleService.js'
 
