@@ -184,6 +184,7 @@ export async function users(fastify: FastifyInstance) {
         const roleFullPermissions = await getAllPermissionStatus(RoleID(user.role.roleID))
         return reply.status(200).send({
           message: 'Login success',
+          loginSuccess: true,
           token: token,
           user: {
             id: user.userID,
