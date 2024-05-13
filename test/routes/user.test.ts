@@ -6,15 +6,24 @@ import assert from 'assert'
 import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
-const jwt =
-  'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJmaXJzdE5hbWUiOiJTdXBlckFkbWluIiwiZW1haWwiOiJzdXBlcmFkbWluQHRlc3QuY29tIiwiaXNTdXBlckFkbWluIjp0cnVlLCJyb2xlIjp7ImlkIjoxLCJyb2xlTmFtZSI6IlN1cGVyQWRtaW4ifX0sImlhdCI6MTcxMDk0MzA5N30.sFrI-MOfltQXJrbAudYNjsTpzDm1OqAAwNM_5dPzxPU'
-
+let jwt = ''
 describe('POST /users/login HTTP', async () => {
   let app: FastifyInstance
 
   before(async () => {
     await initDrizzle()
     app = await buildApp({ logger: false }) // Assigning to the existing variable
+    const response = await app.inject({
+      method: 'POST',
+      url: '/users/login',
+      payload: {
+        email: 'superadmin@test.com',
+        password: 'admin123',
+      },
+    })
+    const parsedResponse = JSON.parse(response.body)
+
+    jwt = 'Bearer ' + parsedResponse.token
   })
 
   after(async () => {
@@ -35,7 +44,7 @@ describe('POST /users/login HTTP', async () => {
     assert.equal(parsedResponse.message, 'Login success')
     assert.deepStrictEqual(parsedResponse.user.id, 1)
     assert.deepStrictEqual(parsedResponse.user.firstName, 'SuperAdmin')
-    assert.deepStrictEqual(parsedResponse.user.LastName, 'SuperAdmin')
+    assert.deepStrictEqual(parsedResponse.user.lastName, 'SuperAdmin')
     assert.deepStrictEqual(parsedResponse.user.isSuperAdmin, true)
     assert.deepStrictEqual(parsedResponse.user.email, 'superadmin@test.com')
     assert.strictEqual(response.statusCode, 200)

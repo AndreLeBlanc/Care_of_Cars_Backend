@@ -6,17 +6,27 @@ import assert from 'assert'
 import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
-const jwt =
-  'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJmaXJzdE5hbWUiOiJTdXBlckFkbWluIiwiZW1haWwiOiJzdXBlcmFkbWluQHRlc3QuY29tIiwiaXNTdXBlckFkbWluIjp0cnVlLCJyb2xlIjp7ImlkIjoxLCJyb2xlTmFtZSI6IlN1cGVyQWRtaW4ifX0sImlhdCI6MTcxMDk0MzA5N30.sFrI-MOfltQXJrbAudYNjsTpzDm1OqAAwNM_5dPzxPU'
-
-describe('permissions', async () => {
+let jwt = ''
+describe('POST /users/login HTTP', async () => {
   let app: FastifyInstance
-  const permissionIDs: number[] = []
 
   before(async () => {
     await initDrizzle()
-    app = await buildApp({ logger: false })
+    app = await buildApp({ logger: false }) // Assigning to the existing variable
+    const response = await app.inject({
+      method: 'POST',
+      url: '/users/login',
+      payload: {
+        email: 'superadmin@test.com',
+        password: 'admin123',
+      },
+    })
+    const parsedResponse = JSON.parse(response.body)
+
+    jwt = 'Bearer ' + parsedResponse.token
   })
+
+  const permissionIDs: number[] = []
 
   after(async () => {
     await app.close()
