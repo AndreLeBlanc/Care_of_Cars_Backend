@@ -145,7 +145,7 @@ export async function permissions(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id: PermissionID = PermissionID(request.params.id)
+      const id: PermissionID = PermissionID(request.params.permissionID)
       const Permission: Permission | undefined = await getPermissionByID(id)
       if (Permission == null || Permission === undefined) {
         return reply.status(404).send({ message: 'Permission not found' })
@@ -177,7 +177,7 @@ export async function permissions(fastify: FastifyInstance) {
       if (Object.keys(PermissionData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id: PermissionID = PermissionID(request.params.id)
+      const id: PermissionID = PermissionID(request.params.permissionID)
 
       const Permission: Permission = await updatePermissionByID(id, PermissionData)
       if (Permission === undefined || Permission === null) {
@@ -205,7 +205,7 @@ export async function permissions(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id: PermissionID = PermissionID(request.params.id)
+      const id: PermissionID = PermissionID(request.params.permissionID)
       const deletedPermission: Permission | undefined = await deletePermission(id)
       if (deletedPermission == null) {
         return reply.status(404).send({ message: "Permission doesn't exist!" })

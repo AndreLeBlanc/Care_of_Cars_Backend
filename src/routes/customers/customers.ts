@@ -23,6 +23,7 @@ import {
 import { PermissionTitle } from '../../services/permissionService.js'
 
 import {
+  Company,
   CompanyAddress,
   CompanyAddressCity,
   CompanyCountry,
@@ -32,6 +33,8 @@ import {
   CustomerCompanyCreate,
   CustomerCompanyName,
   CustomerOrgNumber,
+  CustomersPaginate,
+  Driver,
   DriverAcceptsMarketing,
   DriverAddress,
   DriverAddressCity,
@@ -50,20 +53,17 @@ import {
   DriverNotesShared,
   DriverPhoneNumber,
   DriverZipCode,
-  createCompany,
-  deleteCompany,
-  Driver,
-  Company,
-  deleteDriver,
-  editDriverDetails,
-  createNewDriver,
-  getCustomersPaginate,
-  CustomersPaginate,
   DriversPaginate,
-  getDriversPaginate,
-  getDriverById,
-  getCompanyById,
+  createCompany,
+  createNewDriver,
+  deleteCompany,
+  deleteDriver,
   editCompanyDetails,
+  editDriverDetails,
+  getCompanyById,
+  getCustomersPaginate,
+  getDriverById,
+  getDriversPaginate,
 } from '../../services/customerService.js'
 import {
   Limit,
@@ -99,7 +99,7 @@ export const customers = async (fastify: FastifyInstance) => {
       },
     },
     async function (request, _) {
-      let { search = '', limit = 10, page = 1 } = request.query
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -346,7 +346,7 @@ export const customers = async (fastify: FastifyInstance) => {
       },
     },
     async function (request, _) {
-      let { search = '', limit = 10, page = 1 } = request.query
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -410,7 +410,7 @@ export const customers = async (fastify: FastifyInstance) => {
       },
     },
     async function (request, _) {
-      let { search = '', limit = 10, page = 1, companyOrgNumber } = request.query
+      const { search = '', limit = 10, page = 1, companyOrgNumber } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)

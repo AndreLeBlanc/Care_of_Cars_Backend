@@ -237,7 +237,7 @@ export async function stores(fastify: FastifyInstance) {
       }
 
       return reply.status(201).send({
-        message: 'store_created',
+        message: 'store created',
         store: {
           ...createdStore.store,
           createdAt: createdStore.createdAt.toISOString(),
@@ -252,7 +252,6 @@ export async function stores(fastify: FastifyInstance) {
     '/:storeID',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('delete_store'))
         done()
         return reply
@@ -291,7 +290,6 @@ export async function stores(fastify: FastifyInstance) {
     '/weekly-notes/:storeID/:week/',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.params.week)
         fastify.authorize(request, reply, PermissionTitle('delete_weekly_notes'))
         done()
         return reply
@@ -330,7 +328,6 @@ export async function stores(fastify: FastifyInstance) {
     '/weekly-notes/:storeID/:week',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('get_weekly_notes'))
         done()
         return reply
@@ -474,7 +471,6 @@ export async function stores(fastify: FastifyInstance) {
     '/:storeID',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('view_store'))
         done()
         return reply
@@ -644,7 +640,6 @@ export async function stores(fastify: FastifyInstance) {
     '/store-opening-hours/:storeID',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('delete_store_opening_hours'))
         done()
         return reply

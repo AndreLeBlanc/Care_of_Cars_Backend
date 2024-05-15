@@ -1,28 +1,30 @@
 import { FastifyInstance } from 'fastify'
+
 import {
-  createServiceCategory,
-  deleteServiceCategory,
-  getServiceCategoriesPaginate,
-  getServiceCategoryByID,
-  UpdatedServiceCategory,
-  updateServiceCategoryByID,
-  ServiceCategoryID,
+  ProductCategory,
+  ProductCategoryDescription,
+  ProductCategoryID,
+  ProductCategoryName,
+  ProductsCategoryPaginated,
   ServiceCategory,
   ServiceCategoryDescription,
+  ServiceCategoryID,
   ServiceCategoryName,
   ServicesPaginated,
-  createProductCategory,
-  ProductCategoryName,
-  ProductCategoryDescription,
-  getProductCategoryByID,
-  getProductCategoriesPaginate,
-  ProductsCategoryPaginated,
-  ProductCategoryID,
-  ProductCategory,
-  deleteProductCategory,
   UpdatedProductCategory,
+  UpdatedServiceCategory,
+  createProductCategory,
+  createServiceCategory,
+  deleteProductCategory,
+  deleteServiceCategory,
+  getProductCategoriesPaginate,
+  getProductCategoryByID,
+  getServiceCategoriesPaginate,
+  getServiceCategoryByID,
   updateProductCategoryByID,
+  updateServiceCategoryByID,
 } from '../../services/CategoryService.js'
+
 import {
   CreateServiceCategorySchema,
   CreateServiceCategorySchemaType,
@@ -34,17 +36,18 @@ import {
   getServiceCategoryByIDType,
 } from './categorySchema.js'
 import { PermissionTitle } from '../../services/permissionService.js'
+
 import {
-  NextPageUrl,
-  PreviousPageUrl,
-  ResponseMessage,
-  Offset,
-  Search,
   Limit,
-  Page,
-  ResultCount,
-  RequestUrl,
   ModelName,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  ResponseMessage,
+  ResultCount,
+  Search,
 } from '../../plugins/pagination.js'
 
 export async function serviceCategory(fastify: FastifyInstance) {
@@ -68,7 +71,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
     },
     async function (request, reply) {
-      let { search = '', limit = 10, page = 1 } = request.query
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -83,11 +86,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       if (servicesPaginated == null) {
         return reply.status(403).send({ message: "Can't find service Categories" })
       } else {
-        let message: ResponseMessage = fastify.responseMessage(
+        const message: ResponseMessage = fastify.responseMessage(
           ModelName('service category'),
           ResultCount(servicesPaginated.data.length),
         )
-        let requestUrl: RequestUrl = RequestUrl(
+        const requestUrl: RequestUrl = RequestUrl(
           request.protocol + '://' + request.hostname + request.url,
         )
         const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
@@ -135,7 +138,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
     },
     async function (request, reply) {
-      let { search = '', limit = 10, page = 1 } = request.query
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -146,11 +149,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       if (productsCategory == null) {
         return reply.status(403).send({ message: "Can't find service Categories" })
       } else {
-        let message: ResponseMessage = fastify.responseMessage(
+        const message: ResponseMessage = fastify.responseMessage(
           ModelName('Products category'),
           ResultCount(productsCategory.data.length),
         )
-        let requestUrl: RequestUrl = RequestUrl(
+        const requestUrl: RequestUrl = RequestUrl(
           request.protocol + '://' + request.hostname + request.url,
         )
         const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
@@ -299,7 +302,6 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
   )
 
-  //Delete service category
   fastify.patch<{
     Body: PatchServiceCategorySchemaType
     Reply: object

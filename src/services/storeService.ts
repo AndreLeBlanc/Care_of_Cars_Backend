@@ -13,9 +13,7 @@ import { db } from '../config/db-connect.js'
 
 import { and, between, eq, ilike, or, sql } from 'drizzle-orm'
 
-type PositiveInteger<T extends number> = `${T}` extends '0' | `-${any}` | `${any}.${any}`
-  ? never
-  : T
+import { PositiveInteger } from '../utils/helper.js'
 
 export type StoreName = Brand<string, 'storeName'>
 export const StoreName = make<StoreName>()

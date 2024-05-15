@@ -333,7 +333,7 @@ export const productCategories = pgTable('productCategories', {
 })
 
 export const products = pgTable('products', {
-  productId: serial('productId').primaryKey().unique(),
+  productId: serial('productId').primaryKey(),
   productItemNumber: varchar('productItemNumber').notNull(),
   productCategoryID: integer('productCategoryID')
     .references(() => productCategories.productCategoryID)
@@ -389,3 +389,69 @@ export const storeweeklynotesRelations = relations(storeweeklynotes, ({ one }) =
     references: [stores.storeID],
   }),
 }))
+
+export const qualificationsLocal = pgTable('qualificationsLocal', {
+  storeID: integer('storeID')
+    .references(() => stores.storeID, { onDelete: 'cascade' })
+    .notNull(),
+  localQualID: serial('localQualID').primaryKey(),
+  localQualName: varchar('localQualName', { length: 64 }).unique().notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+})
+
+export const qualificationsLocalRelations = relations(qualificationsLocal, ({ one }) => ({
+  stores: one(stores, {
+    fields: [qualificationsLocal.storeID],
+    references: [stores.storeID],
+  }),
+}))
+
+export const qualificationsGlobal = pgTable('qualificationsGlobal', {
+  globalQualID: serial('globalQualID').primaryKey(),
+  globalQualName: varchar('localQualName', { length: 64 }).unique().notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+})
+
+export const userLocalQualifications = pgTable(
+  'userLocalQualifications',
+  {
+    userID: integer('userID')
+      .references(() => users.userID, { onDelete: 'cascade' })
+      .notNull(),
+    localQualID: integer('localQualID')
+      .references(() => qualificationsLocal.localQualID, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
+  },
+  (userLocalQualifications) => {
+    return {
+      pk: primaryKey({
+        columns: [userLocalQualifications.localQualID, userLocalQualifications.userID],
+      }),
+    }
+  },
+)
+
+export const userGlobalQualifications = pgTable(
+  'userGlobalQualifications',
+  {
+    userID: integer('userID')
+      .references(() => users.userID, { onDelete: 'cascade' })
+      .notNull(),
+    globalQualID: integer('globalQualID')
+      .references(() => qualificationsGlobal.globalQualID, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
+  },
+  (userGlobalQualifications) => {
+    return {
+      pk: primaryKey({
+        columns: [userGlobalQualifications.globalQualID, userGlobalQualifications.userID],
+      }),
+    }
+  },
+)

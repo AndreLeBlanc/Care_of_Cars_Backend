@@ -1,17 +1,24 @@
 import { Static, Type } from '@sinclair/typebox'
 
+import { RoleID } from '../roles/roleSchema'
+
+const firstName = Type.String({ minLength: 3, maxLength: 128 })
+const lastName = Type.String({ minLength: 3, maxLength: 128 })
+const userEmail = Type.String({ format: 'email' })
+const userID = Type.Number()
+
 export const CreateUser = Type.Object({
-  firstName: Type.String({ minLength: 3, maxLength: 128 }),
-  lastName: Type.String({ minLength: 3, maxLength: 128 }),
-  email: Type.String({ format: 'email' }),
+  firstName: firstName,
+  lastName: lastName,
+  email: userEmail,
   password: Type.String(),
-  roleID: Type.Integer(),
+  roleID: RoleID,
 })
 export const CreateUserReply = Type.Object({
-  firstName: Type.String({ minLength: 3, maxLength: 128 }),
-  lastName: Type.String({ minLength: 3, maxLength: 128 }),
-  email: Type.String({ format: 'email' }),
-  userID: Type.Number(),
+  firstName: firstName,
+  lastName: lastName,
+  email: userEmail,
+  userID: userID,
 })
 
 export const ListUserQueryParam = Type.Object({
@@ -21,7 +28,7 @@ export const ListUserQueryParam = Type.Object({
 })
 
 export const LoginUser = Type.Object({
-  email: Type.String({ format: 'email' }),
+  email: userEmail,
   password: Type.String(),
 })
 export type LoginUserType = Static<typeof LoginUser>
@@ -36,9 +43,9 @@ export const getUserByIDSchema = Type.Object({
 export type getUserByIDType = Static<typeof getUserByIDSchema>
 
 export const PatchUserSchema = Type.Object({
-  firstName: Type.Optional(Type.String({ minLength: 3, maxLength: 128 })),
-  lastName: Type.Optional(Type.String({ minLength: 3, maxLength: 128 })),
-  email: Type.Optional(Type.String({ format: 'email' })),
+  firstName: firstName,
+  lastName: lastName,
+  email: userEmail,
   password: Type.Optional(Type.String()),
 })
 

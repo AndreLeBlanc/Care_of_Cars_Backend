@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { PermissionTitle } from '../../services/permissionService.js'
+
 import {
   AddProductType,
   ListProductsQueryParamSchema,
@@ -8,6 +9,7 @@ import {
   deleteProduct,
   deleteProductType,
 } from './productSchema.js'
+
 import {
   Product,
   ProductAddType,
@@ -27,6 +29,7 @@ import {
   getProductById,
   getProductsPaginated,
 } from '../../services/productService.js'
+
 import {
   Limit,
   ModelName,
@@ -239,8 +242,8 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         querystring: ListProductsQueryParamSchema,
       },
     },
-    async function (request, _) {
-      let { search = '', limit = 10, page = 1 } = request.query
+    async function (request) {
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
