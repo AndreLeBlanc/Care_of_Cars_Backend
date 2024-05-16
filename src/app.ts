@@ -1,9 +1,11 @@
 import { fastifyJwt } from '@fastify/jwt'
+
 import * as dotenv from 'dotenv'
 import { FastifyInstance, FastifyServerOptions, fastify } from 'fastify'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import pagination from './plugins/pagination.js'
+
 import jwt from './plugins/jwt.js'
 import { permissions } from './routes/permissions/permissions.js'
 import { roleToPermissions } from './routes/role-to-permission/roleToPermissons.js'
@@ -11,12 +13,17 @@ import { roles } from './routes/roles/roles.js'
 import { serviceCategory } from './routes/category/category.js'
 import { services } from './routes/services/services.js'
 import { users } from './routes/users/users.js'
+
 import { stores } from './routes/stores/stores.js'
+
 import { root } from './routes/root.js'
 import seedSuperAdmin from './plugins/seed.js'
+
 import { customers } from './routes/customers/customers.js'
 import { rentCar } from './routes/rentCar/rent-car.js'
+
 import { productsRoute } from './routes/product/products.js'
+import { qualificationsRoute } from './routes/qulifications/qualifcations.js'
 
 const defaultOptions = {
   logger: true,
@@ -80,6 +87,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
   //settings
   app.register(rentCar, { prefix: '/rent-car' })
   app.register(productsRoute, { prefix: '/product' })
+  app.register(qualificationsRoute, { prefix: '/qualifications' })
 
   app.register(pagination)
   if (typeof process.env.JWT_SECRET === 'string') {

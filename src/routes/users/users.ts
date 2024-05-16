@@ -34,6 +34,7 @@ import {
   getUsersPaginate,
   isStrongPassword,
   updateUserByID,
+  updateUserPasswordByID,
   userInfoPassword,
   verifyUser,
 } from '../../services/userService.js'
@@ -292,7 +293,7 @@ export async function users(fastify: FastifyInstance) {
               return reply.status(422).send({ message: 'Provide a strong password' })
             }
             const passwordHash = await generatePasswordHash(UserPassword(userData.newPassword))
-            const user: UserInfo = await updateUserByID(id, { password: passwordHash })
+            const user: UserInfo = await updateUserPasswordByID(id, passwordHash)
             reply.status(201).send({ message: 'User Updated', data: user })
           }
         } else {

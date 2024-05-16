@@ -62,15 +62,14 @@ export const roleToPermissions = pgTable(
   'roleToPermissions',
   {
     roleID: integer('roleID').notNull(),
-    permissionID: integer('permissionID').notNull(),
+    permissionID: integer('permissionID')
+      .references(() => permissions.permissionID)
+      .notNull(),
     createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
   },
   (roleToPermissions) => {
     return {
-      pk: primaryKey({
-        columns: [roleToPermissions.roleID, roleToPermissions.permissionID],
-      }),
       pkWithCustomName: primaryKey({
         name: 'roleToPermissionID',
         columns: [roleToPermissions.roleID, roleToPermissions.permissionID],
@@ -390,15 +389,23 @@ export const storeweeklynotesRelations = relations(storeweeklynotes, ({ one }) =
   }),
 }))
 
-export const qualificationsLocal = pgTable('qualificationsLocal', {
-  storeID: integer('storeID')
-    .references(() => stores.storeID, { onDelete: 'cascade' })
-    .notNull(),
-  localQualID: serial('localQualID').primaryKey(),
-  localQualName: varchar('localQualName', { length: 64 }).unique().notNull(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
-})
+export const qualificationsLocal = pgTable(
+  'qualificationsLocal',
+  {
+    storeID: integer('storeID')
+      .references(() => stores.storeID, { onDelete: 'cascade' })
+      .notNull(),
+    localQualID: serial('localQualID').primaryKey(),
+    localQualName: varchar('localQualName', { length: 64 }).notNull(),
+    createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  },
+  (qualificationsLocal) => {
+    return {
+      unq: unique().on(qualificationsLocal.localQualName, qualificationsLocal.storeID),
+    }
+  },
+)
 
 export const qualificationsLocalRelations = relations(qualificationsLocal, ({ one }) => ({
   stores: one(stores, {

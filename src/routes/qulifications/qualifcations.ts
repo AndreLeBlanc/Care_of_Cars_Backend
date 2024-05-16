@@ -8,8 +8,15 @@ import {
   CreateQualificationsLocalSchemaType,
   GlobalQualIDSchema,
   GlobalQualIDSchemaType,
+  ListQualsReplySchema,
+  ListQualsSchema,
+  ListQualsSchemaType,
   LocalQualIDSchema,
   LocalQualIDSchemaType,
+  PutUserGlobalQualSchema,
+  PutUserGlobalQualSchemaType,
+  PutUserLocalQualSchema,
+  PutUserLocalQualSchemaType,
   QualificationMessage,
   QualificationMessageType,
   QualificationsGlobalSchema,
@@ -21,27 +28,22 @@ import {
 import {
   CreateQualificationsGlobal,
   CreateQualificationsLocal,
-  CreatedAt,
   GlobalQualID,
   GlobalQualName,
   LocalQualID,
   LocalQualName,
   QualificationsGlobal,
+  QualificationsListed,
   QualificationsLocal,
-  QualificationsPaginated,
-  UpdatedAt,
   UserGlobalQualifications,
   UserLocalQualifications,
-  UserQualificationsGlobal,
-  UserQualificationsLocal,
   deleteGlobalQuals,
   deleteLocalQuals,
   deleteUserGlobalQualification,
   deleteUserLocalQualification,
   getGlobalQual,
   getLocalQual,
-  getQualifcationsPaginate,
-  getUserQualifications,
+  getQualifcations,
   setUserGlobalQualification,
   setUserLocalQualification,
   updateGlobalQuals,
@@ -49,19 +51,9 @@ import {
 } from '../../services/qualificationsService.js'
 
 import { StoreID } from '../../services/storeService.js'
+import { UserID } from '../../services/userService.js'
 
-import {
-  Limit,
-  ModelName,
-  NextPageUrl,
-  Offset,
-  Page,
-  PreviousPageUrl,
-  RequestUrl,
-  ResponseMessage,
-  ResultCount,
-  Search,
-} from '../../plugins/pagination.js'
+import { Search } from '../../plugins/pagination.js'
 
 export const qualificationsRoute = async (fastify: FastifyInstance) => {
   fastify.put<{
@@ -94,7 +86,9 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
         localQualName: LocalQualName(req.body.localQualName),
       }
 
-      const putQual: QualificationsLocal | undefined = await updateLocalQuals(qualification)
+      const putQual: QualificationsLocal | undefined = req.body.localQualID
+        ? await updateLocalQuals(qualification, LocalQualID(req.body.localQualID))
+        : await updateLocalQuals(qualification)
       if (putQual != null) {
         return rep.status(201).send({
           message: 'Qualification Created/updated successfully',
@@ -143,7 +137,9 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
         globalQualName: GlobalQualName(req.body.globalQualName),
       }
 
-      const putQual: QualificationsGlobal | undefined = await updateGlobalQuals(qualification)
+      const putQual: QualificationsGlobal | undefined = req.body.globalQualID
+        ? await updateGlobalQuals(qualification, GlobalQualID(req.body.globalQualID))
+        : await updateGlobalQuals(qualification)
       if (putQual != null) {
         return rep.status(201).send({
           message: 'Qualification Created/updated successfully',
@@ -165,7 +161,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
 
   //Deleted local Qualification
   fastify.delete<{ Params: LocalQualIDSchemaType }>(
-    '/:localQualID',
+    '/localqualifications/:localQualID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('delete_local_qualification')
@@ -196,7 +192,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
   )
 
   fastify.delete<{ Params: GlobalQualIDSchemaType }>(
-    '/:globalQualification',
+    '/globalQualifications/:globalQualification',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('delete_global_qualification')
@@ -227,7 +223,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
   )
 
   fastify.get<{ Params: LocalQualIDSchemaType }>(
-    '/:localQualID',
+    '/localQualifications/:localQualID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('get_local_qualification')
@@ -238,7 +234,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
       schema: {
         params: LocalQualIDSchema,
         response: {
-          200: { QualificationMessage, qualification: QualificationsGlobalSchema },
+          200: { QualificationMessage, qualification: QualificationsLocalSchema },
           404: QualificationMessage,
         },
       },
@@ -256,7 +252,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
   )
 
   fastify.get<{ Params: GlobalQualIDSchemaType }>(
-    '/:globalQualID',
+    '/globalQualifications:globalQualID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('get_global_qualification')
@@ -284,13 +280,11 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
     },
   )
 
-  //List products
-
-  fastify.get<{ Querystring: ListProductsQueryParamSchemaType }>(
-    '/product-list',
+  fastify.get<{ Querystring: ListQualsSchemaType }>(
+    '/qualifications-list',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = PermissionTitle('list_company_drivers')
+        const permissionName: PermissionTitle = PermissionTitle('list_qualifications')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply.status(403).send({
@@ -301,49 +295,194 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        querystring: ListProductsQueryParamSchema,
+        querystring: ListQualsSchema,
+        response: { 200: { QualificationMessage, qualification: ListQualsReplySchema } },
       },
     },
     async function (request) {
-      const { search = '', limit = 10, page = 1 } = request.query
+      const { search = '', storeID } = request.query
       const brandedSearch = Search(search)
-      const brandedLimit = Limit(limit)
-      const brandedPage = Page(page)
-      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
-      const result: ProductsPaginate = await getProductsPaginated(
-        brandedSearch,
-        brandedLimit,
-        brandedPage,
-        offset,
-      )
-
-      const message: ResponseMessage = fastify.responseMessage(
-        ModelName('Products'),
-        ResultCount(result.data.length),
-      )
-      const requestUrl: RequestUrl = RequestUrl(
-        request.protocol + '://' + request.hostname + request.url,
-      )
-      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
-      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
-
+      const result: QualificationsListed = storeID
+        ? await getQualifcations(brandedSearch, StoreID(storeID))
+        : await getQualifcations(brandedSearch)
       return {
-        message,
-        totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl,
-        totalPage: result.totalPage,
-        page: page,
-        limit: limit,
-        data: result.data,
+        message: 'qualifications',
+        totalLocalQuals: result.totalLocalQuals,
+        totalGlobalQuals: result.totalGlobalQuals,
+        localQuals: result.localQuals,
+        globalQuas: result.globalQuals,
+      }
+    },
+  )
+
+  fastify.put<{
+    Body: PutUserLocalQualSchemaType
+    Reply:
+      | { message: QualificationMessageType; qualification: PutUserLocalQualSchemaType }
+      | { message: QualificationMessageType }
+  }>(
+    '/local-qual',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, PermissionTitle('put_user_local_qualification'))
+        done()
+        return reply
+      },
+      schema: {
+        body: PutUserLocalQualSchema,
+        response: {
+          201: { message: QualificationMessage, qualification: PutUserLocalQualSchema },
+          504: QualificationMessage,
+        },
+      },
+    },
+    async (req, rep) => {
+      const userID = UserID(req.body.userID)
+      const localQualID = LocalQualID(req.body.localQualID)
+
+      const putQual: UserLocalQualifications | undefined = await setUserLocalQualification(
+        userID,
+        localQualID,
+      )
+      if (putQual != null) {
+        return rep.status(201).send({
+          message: 'Qualification set/updated successfully',
+          qualification: putQual,
+        })
+      } else {
+        return rep.status(504).send({
+          message: 'Fail to set local qualification',
+        })
+      }
+    },
+  )
+
+  fastify.put<{
+    Body: PutUserGlobalQualSchemaType
+    Reply:
+      | { message: QualificationMessageType; qualification: PutUserGlobalQualSchemaType }
+      | { message: QualificationMessageType }
+  }>(
+    '/global-qual',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, PermissionTitle('put_user_global_qualification'))
+        done()
+        return reply
+      },
+      schema: {
+        body: PutUserGlobalQualSchema,
+        response: {
+          201: { message: QualificationMessage, qualification: PutUserGlobalQualSchema },
+          504: QualificationMessage,
+        },
+      },
+    },
+    async (req, rep) => {
+      const userID = UserID(req.body.userID)
+      const globalQualID = GlobalQualID(req.body.globalQualID)
+
+      const putQual: UserGlobalQualifications | undefined = await setUserGlobalQualification(
+        userID,
+        globalQualID,
+      )
+      if (putQual != null) {
+        return rep.status(201).send({
+          message: 'Qualification set/updated successfully',
+          qualification: putQual,
+        })
+      } else {
+        return rep.status(504).send({
+          message: 'Fail to set global qualification',
+        })
+      }
+    },
+  )
+
+  fastify.delete<{
+    Body: PutUserLocalQualSchemaType
+    Reply:
+      | { message: QualificationMessageType; qualification: PutUserLocalQualSchemaType }
+      | { message: QualificationMessageType }
+  }>(
+    '/local-qual',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, PermissionTitle('delete_user_local_qualification'))
+        done()
+        return reply
+      },
+      schema: {
+        body: PutUserLocalQualSchema,
+        response: {
+          201: { message: QualificationMessage, qualification: PutUserLocalQualSchema },
+          504: QualificationMessage,
+        },
+      },
+    },
+    async (req, rep) => {
+      const userID = UserID(req.body.userID)
+      const localQualID = LocalQualID(req.body.localQualID)
+
+      const deleteQual: UserLocalQualifications | undefined = await deleteUserLocalQualification(
+        userID,
+        localQualID,
+      )
+      if (deleteQual != null) {
+        return rep.status(201).send({
+          message: 'Qualification deleted successfully',
+          qualification: deleteQual,
+        })
+      } else {
+        return rep.status(504).send({
+          message: 'Fail to delete qualification',
+        })
+      }
+    },
+  )
+
+  fastify.delete<{
+    Body: PutUserGlobalQualSchemaType
+    Reply:
+      | { message: QualificationMessageType; qualification: PutUserGlobalQualSchemaType }
+      | { message: QualificationMessageType }
+  }>(
+    '/global-qual',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, PermissionTitle('delete_user_global_qualification'))
+        done()
+        return reply
+      },
+      schema: {
+        body: PutUserGlobalQualSchema,
+        response: {
+          201: { message: QualificationMessage, qualification: PutUserGlobalQualSchema },
+          504: QualificationMessage,
+        },
+      },
+    },
+    async (req, rep) => {
+      const userID = UserID(req.body.userID)
+      const globalQualID = GlobalQualID(req.body.globalQualID)
+
+      const deleteQual: UserGlobalQualifications | undefined = await deleteUserGlobalQualification(
+        userID,
+        globalQualID,
+      )
+      if (deleteQual != null) {
+        return rep.status(201).send({
+          message: 'Qualification delete/updated successfully',
+          qualification: deleteQual,
+        })
+      } else {
+        return rep.status(504).send({
+          message: 'Fail to delete global qualification',
+        })
       }
     },
   )

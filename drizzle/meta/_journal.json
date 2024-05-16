@@ -5,8 +5,15 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1715251703907,
-      "tag": "0000_previous_squadron_supreme",
+      "when": 1715806806591,
+      "tag": "0000_tough_kingpin",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1715807394484,
+      "tag": "0001_flimsy_maggott",
       "breakpoints": true
     }
   ]

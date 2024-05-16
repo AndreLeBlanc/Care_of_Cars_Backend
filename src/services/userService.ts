@@ -241,10 +241,36 @@ export async function updateUserByID(id: UserID, user: PatchUserSchemaType): Pro
     updatedAt: updatedUser.updatedAt,
   }
 }
+export async function updateUserPasswordByID(
+  id: UserID,
+  password: UserPassword,
+): Promise<UserInfo> {
+  const userWithUpdatedAt = { password: password, updatedAt: new Date() }
+  const [updatedUser] = await db
+    .update(users)
+    .set(userWithUpdatedAt)
+    .where(eq(users.userID, id))
+    .returning({
+      userID: users.userID,
+      userFirstName: users.firstName,
+      userLastName: users.lastName,
+      userEmail: users.email,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    })
+  return {
+    userID: UserID(updatedUser.userID),
+    userFirstName: UserFirstName(updatedUser.userFirstName),
+    userLastName: UserLastName(updatedUser.userLastName),
+    userEmail: UserEmail(updatedUser.userEmail),
+    createdAt: updatedUser.createdAt,
+    updatedAt: updatedUser.updatedAt,
+  }
+}
 
-export async function generatePasswordHash(password: UserPassword): Promise<string> {
+export async function generatePasswordHash(password: UserPassword): Promise<UserPassword> {
   const salt = bcrypt.genSaltSync(10)
-  return bcrypt.hashSync(password, salt)
+  return UserPassword(bcrypt.hashSync(password, salt))
 }
 
 export async function isStrongPassword(password: UserPassword): Promise<boolean> {

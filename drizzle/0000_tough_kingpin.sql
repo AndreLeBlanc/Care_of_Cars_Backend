@@ -70,8 +70,24 @@ CREATE TABLE IF NOT EXISTS "products" (
 	"productAward" integer NOT NULL,
 	"productCost" integer NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "qualificationsGlobal" (
+	"globalQualID" serial PRIMARY KEY NOT NULL,
+	"localQualName" varchar(64) NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "products_productId_unique" UNIQUE("productId")
+	CONSTRAINT "qualificationsGlobal_localQualName_unique" UNIQUE("localQualName")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "qualificationsLocal" (
+	"storeID" integer NOT NULL,
+	"localQualID" serial PRIMARY KEY NOT NULL,
+	"localQualName" varchar(64) NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "qualificationsLocal_localQualName_unique" UNIQUE("localQualName")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "rentcars" (
@@ -92,7 +108,7 @@ CREATE TABLE IF NOT EXISTS "roleToPermissions" (
 	"permissionID" integer NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "roleToPermissions_roleID_permissionID_pk" PRIMARY KEY("roleID","permissionID")
+	CONSTRAINT "roleToPermissionID" PRIMARY KEY("roleID","permissionID")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "roles" (
@@ -224,6 +240,18 @@ CREATE TABLE IF NOT EXISTS "storeweeklynotes" (
 	CONSTRAINT "storeweeklynotes_storeID_week_unique" UNIQUE("storeID","week")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "userGlobalQualifications" (
+	"userID" integer NOT NULL,
+	"globalQualID" integer NOT NULL,
+	CONSTRAINT "userGlobalQualifications_globalQualID_userID_pk" PRIMARY KEY("globalQualID","userID")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "userLocalQualifications" (
+	"userID" integer NOT NULL,
+	"localQualID" integer NOT NULL,
+	CONSTRAINT "userLocalQualifications_localQualID_userID_pk" PRIMARY KEY("localQualID","userID")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"userID" serial PRIMARY KEY NOT NULL,
 	"firstName" varchar(128) NOT NULL,
@@ -247,6 +275,18 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "products" ADD CONSTRAINT "products_productCategoryID_productCategories_productCategoryID_fk" FOREIGN KEY ("productCategoryID") REFERENCES "productCategories"("productCategoryID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "qualificationsLocal" ADD CONSTRAINT "qualificationsLocal_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "stores"("storeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "roleToPermissions" ADD CONSTRAINT "roleToPermissions_permissionID_permissions_permissionID_fk" FOREIGN KEY ("permissionID") REFERENCES "permissions"("permissionID") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -283,6 +323,30 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "storeweeklynotes" ADD CONSTRAINT "storeweeklynotes_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "stores"("storeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "userGlobalQualifications" ADD CONSTRAINT "userGlobalQualifications_userID_users_userID_fk" FOREIGN KEY ("userID") REFERENCES "users"("userID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "userGlobalQualifications" ADD CONSTRAINT "userGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk" FOREIGN KEY ("globalQualID") REFERENCES "qualificationsGlobal"("globalQualID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "userLocalQualifications" ADD CONSTRAINT "userLocalQualifications_userID_users_userID_fk" FOREIGN KEY ("userID") REFERENCES "users"("userID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "userLocalQualifications" ADD CONSTRAINT "userLocalQualifications_localQualID_qualificationsLocal_localQualID_fk" FOREIGN KEY ("localQualID") REFERENCES "qualificationsLocal"("localQualID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

@@ -9,7 +9,7 @@ import {
   userLocalQualifications,
 } from '../schema/schema.js'
 
-import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
+import { Search } from '../plugins/pagination.js'
 
 import { db } from '../config/db-connect.js'
 
@@ -71,14 +71,11 @@ export type UserQualificationsLocal = {
   localQualName: LocalQualName
 }
 
-export type QualificationsPaginated = {
+export type QualificationsListed = {
   totalLocalQuals: number
   totalGlobalQuals: number
-  totalLocalPage: number
-  totalGlobalPage: number
-  perPage: number
-  localQuals: QualificationsLocal[]
-  globalQuals: QualificationsGlobal[]
+  localQuals: UserQualificationsLocal[]
+  globalQuals: UserQualificationsGlobal[]
 }
 
 export type UserLocalQualifications = {
@@ -93,15 +90,15 @@ export type UserGlobalQualifications = {
 
 export async function updateLocalQuals(
   localQual: CreateQualificationsLocal,
+  localQualID?: LocalQualID,
 ): Promise<QualificationsLocal | undefined> {
-  const [qual] = await db
-    .insert(qualificationsLocal)
-    .values(localQual)
-    .onConflictDoUpdate({
-      target: [qualificationsLocal.storeID, qualificationsLocal.localQualName],
-      set: localQual,
-    })
-    .returning()
+  const [qual] = localQualID
+    ? await db
+        .update(qualificationsLocal)
+        .set(localQual)
+        .where(eq(qualificationsLocal.localQualID, localQualID))
+        .returning()
+    : await db.insert(qualificationsLocal).values(localQual).returning()
   return qual
     ? {
         qual: {
@@ -119,15 +116,22 @@ export async function updateLocalQuals(
 
 export async function updateGlobalQuals(
   globalQual: CreateQualificationsGlobal,
+  globalQualID?: GlobalQualID,
 ): Promise<QualificationsGlobal | undefined> {
-  const [qual] = await db
-    .insert(qualificationsGlobal)
-    .values(globalQual)
-    .onConflictDoUpdate({
-      target: [qualificationsGlobal.globalQualName],
-      set: globalQual,
-    })
-    .returning()
+  const [qual] = globalQualID
+    ? await db
+        .update(qualificationsGlobal)
+        .set(globalQual)
+        .where(eq(qualificationsGlobal.globalQualID, globalQualID))
+        .returning()
+    : await db
+        .insert(qualificationsGlobal)
+        .values(globalQual)
+        .onConflictDoUpdate({
+          target: [qualificationsGlobal.globalQualName],
+          set: globalQual,
+        })
+        .returning()
   return qual
     ? {
         qual: {
@@ -213,15 +217,12 @@ export async function deleteGlobalQuals(
     : undefined
 }
 
-export async function getQualifcationsPaginate(
+export async function getQualifcations(
   search: Search,
-  limit = Limit(10),
-  page = Page(1),
-  offset = Offset(0),
   storeID?: StoreID,
-): Promise<QualificationsPaginated> {
+): Promise<QualificationsListed> {
   const quals = await db.transaction(async (tx) => {
-    const [totalGlobalQuals] = await tx
+    const [globalQualsCount] = await tx
       .select({
         count: sql`count(*)`.mapWith(Number).as('count'),
       })
@@ -232,8 +233,6 @@ export async function getQualifcationsPaginate(
       .select()
       .from(qualificationsGlobal)
       .where(ilike(qualificationsGlobal.globalQualName, '%' + search + '%'))
-      .limit(limit || 10)
-      .offset(offset || 0)
 
     if (storeID != null) {
       const [totalLocalQuals] = await tx
@@ -252,60 +251,41 @@ export async function getQualifcationsPaginate(
         .select()
         .from(qualificationsLocal)
         .where(eq(qualificationsLocal.storeID, storeID))
-        .limit(limit || 10)
-        .offset(offset || 0)
 
       return {
         totalLocalQuals: totalLocalQuals.count,
         localQualList: localQualList,
-        totalGlobalQuals: totalGlobalQuals.count,
+        totalGlobalQuals: globalQualsCount.count,
         globalQualList: globalQualList,
       }
     }
     return {
       totalLocalQuals: 0,
       localQualList: [],
-      totalGlobalQuals: totalGlobalQuals.count,
+      totalGlobalQuals: globalQualsCount.count,
       globalQualList: globalQualList,
     }
   })
-  const pageLocalQuals = Math.ceil(quals.totalLocalQuals / limit)
-  const pageGlobalQuals = Math.ceil(quals.totalGlobalQuals / limit)
 
-  const brandedLocalQuals: QualificationsLocal[] = quals.localQualList.map((localQuals) => {
+  const brandedLocalQuals: UserQualificationsLocal[] = quals.localQualList.map((localQuals) => {
     return {
-      qual: {
-        storeID: StoreID(localQuals.storeID),
-        localQualID: LocalQualID(localQuals.localQualID),
-        localQualName: LocalQualName(localQuals.localQualName),
-      },
-      dates: {
-        createdAt: CreatedAt(localQuals.createdAt),
-        updatedAt: UpdatedAt(localQuals.updatedAt),
-      },
+      storeID: StoreID(localQuals.storeID),
+      localQualID: LocalQualID(localQuals.localQualID),
+      localQualName: LocalQualName(localQuals.localQualName),
     }
   })
 
-  const brandedGlobalQuals: QualificationsGlobal[] = quals.globalQualList.map((globalQuals) => {
+  const brandedGlobalQuals: UserQualificationsGlobal[] = quals.globalQualList.map((globalQuals) => {
     return {
-      qual: {
-        globalQualID: GlobalQualID(globalQuals.globalQualID),
-        globalQualName: GlobalQualName(globalQuals.globalQualName),
-      },
-      dates: {
-        createdAt: CreatedAt(globalQuals.createdAt),
-        updatedAt: UpdatedAt(globalQuals.updatedAt),
-      },
+      globalQualID: GlobalQualID(globalQuals.globalQualID),
+      globalQualName: GlobalQualName(globalQuals.globalQualName),
     }
   })
   return {
     totalLocalQuals: quals.totalLocalQuals,
     totalGlobalQuals: quals.totalGlobalQuals,
-    totalLocalPage: pageLocalQuals,
-    totalGlobalPage: pageGlobalQuals,
     localQuals: brandedLocalQuals,
     globalQuals: brandedGlobalQuals,
-    perPage: page,
   }
 }
 

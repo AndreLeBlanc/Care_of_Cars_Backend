@@ -141,7 +141,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      const roleID: RoleID = RoleID(request.params.id)
+      const roleID: RoleID = RoleID(request.params.roleID)
       const role: Role | undefined = await getRoleByID(roleID)
       if (role == undefined || role == null) {
         return reply.status(404).send({ message: 'role not found' })
@@ -178,7 +178,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       if (Object.keys(roleData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id: RoleID = RoleID(request.params.id)
+      const id: RoleID = RoleID(request.params.roleID)
 
       const role: Role = await updateRoleByID(id, roleData)
       if (role == null) {
@@ -206,7 +206,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      const roleID: RoleID = RoleID(request.params.id)
+      const roleID: RoleID = RoleID(request.params.roleID)
       const deletedRole: Role | undefined = await deleteRole(roleID)
       if (deletedRole === undefined || deletedRole === null) {
         return reply.status(404).send({ message: "Role doesn't exist!" })

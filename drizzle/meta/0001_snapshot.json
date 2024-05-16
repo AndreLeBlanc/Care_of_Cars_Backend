@@ -1,6 +1,6 @@
 {
-  "id": "46c09ac3-d254-47a3-b32b-a2be55759dfb",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "f652c917-6574-4e6a-a7e7-175a2f8cee17",
+  "prevId": "46c09ac3-d254-47a3-b32b-a2be55759dfb",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -524,11 +524,12 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "qualificationsLocal_localQualName_unique": {
-          "name": "qualificationsLocal_localQualName_unique",
+        "qualificationsLocal_localQualName_storeID_unique": {
+          "name": "qualificationsLocal_localQualName_storeID_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "localQualName"
+            "localQualName",
+            "storeID"
           ]
         }
       }

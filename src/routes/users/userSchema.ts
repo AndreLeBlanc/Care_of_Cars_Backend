@@ -1,11 +1,11 @@
 import { Static, Type } from '@sinclair/typebox'
 
-import { RoleID } from '../roles/roleSchema'
+import { RoleID } from '../roles/roleSchema.js'
 
 const firstName = Type.String({ minLength: 3, maxLength: 128 })
 const lastName = Type.String({ minLength: 3, maxLength: 128 })
 const userEmail = Type.String({ format: 'email' })
-const userID = Type.Number()
+export const userID = Type.Number()
 
 export const CreateUser = Type.Object({
   firstName: firstName,
@@ -38,7 +38,7 @@ export type LoginUserType = Static<typeof LoginUser>
  * If this is modified both will be affected
  */
 export const getUserByIDSchema = Type.Object({
-  id: Type.Number(),
+  id: userID,
 })
 export type getUserByIDType = Static<typeof getUserByIDSchema>
 
@@ -52,7 +52,7 @@ export const PatchUserSchema = Type.Object({
 export const PatchUserPassword = Type.Object({
   oldPassword: Type.String(),
   newPassword: Type.String(),
-  userId: Type.Number(),
+  userId: userID,
 })
 export type PatchUserPasswordType = Static<typeof PatchUserPassword>
 
