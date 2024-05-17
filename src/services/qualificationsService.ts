@@ -13,7 +13,7 @@ import { Search } from '../plugins/pagination.js'
 
 import { db } from '../config/db-connect.js'
 
-import { and, eq, ilike, sql } from 'drizzle-orm'
+import { and, eq, ilike } from 'drizzle-orm'
 
 import { StoreID } from './storeService.js'
 import { UserID } from './userService.js'
@@ -220,50 +220,76 @@ export async function deleteGlobalQuals(
 export async function getQualifcations(
   search: Search,
   storeID?: StoreID,
+  userID?: UserID,
 ): Promise<QualificationsListed> {
   const quals = await db.transaction(async (tx) => {
-    const [globalQualsCount] = await tx
-      .select({
-        count: sql`count(*)`.mapWith(Number).as('count'),
-      })
-      .from(qualificationsGlobal)
-      .where(and(ilike(qualificationsGlobal.globalQualName, '%' + search + '%')))
-
-    const globalQualList = await tx
-      .select()
-      .from(qualificationsGlobal)
-      .where(ilike(qualificationsGlobal.globalQualName, '%' + search + '%'))
+    const globalQualsList = userID
+      ? await tx
+          .select({
+            globalQualID: qualificationsGlobal.globalQualID,
+            globalQualName: qualificationsGlobal.globalQualName,
+          })
+          .from(qualificationsGlobal)
+          .innerJoin(
+            userGlobalQualifications,
+            eq(userGlobalQualifications.globalQualID, qualificationsGlobal.globalQualID),
+          )
+          .where(
+            and(
+              ilike(qualificationsGlobal.globalQualName, '%' + search + '%'),
+              eq(userGlobalQualifications.userID, 1),
+            ),
+          )
+      : await tx
+          .select()
+          .from(qualificationsGlobal)
+          .where(and(ilike(qualificationsGlobal.globalQualName, '%' + search + '%')))
 
     if (storeID != null) {
-      const [totalLocalQuals] = await tx
-        .select({
-          count: sql`count(*)`.mapWith(Number).as('count'),
-        })
-        .from(qualificationsLocal)
-        .where(
-          and(
-            ilike(qualificationsLocal.localQualName, '%' + search + '%'),
-            eq(qualificationsLocal.storeID, storeID),
-          ),
-        )
-
-      const localQualList = await tx
-        .select()
-        .from(qualificationsLocal)
-        .where(eq(qualificationsLocal.storeID, storeID))
+      const localQualList = userID
+        ? await tx
+            .select({
+              localQualID: qualificationsLocal.localQualID,
+              localQualName: qualificationsLocal.localQualName,
+              storeID: qualificationsLocal.storeID,
+            })
+            .from(qualificationsLocal)
+            .innerJoin(
+              userLocalQualifications,
+              eq(userLocalQualifications.localQualID, qualificationsLocal.localQualID),
+            )
+            .where(
+              and(
+                ilike(qualificationsLocal.localQualName, '%' + search + '%'),
+                eq(qualificationsLocal.storeID, storeID),
+              ),
+            )
+        : await tx
+            .select({
+              localQualID: qualificationsLocal.localQualID,
+              localQualName: qualificationsLocal.localQualName,
+              storeID: qualificationsLocal.storeID,
+            })
+            .from(qualificationsLocal)
+            .where(
+              and(
+                ilike(qualificationsLocal.localQualName, '%' + search + '%'),
+                eq(qualificationsLocal.storeID, storeID),
+              ),
+            )
 
       return {
-        totalLocalQuals: totalLocalQuals.count,
+        totalLocalQuals: localQualList.length,
         localQualList: localQualList,
-        totalGlobalQuals: globalQualsCount.count,
-        globalQualList: globalQualList,
+        totalGlobalQuals: globalQualsList.length,
+        globalQualList: globalQualsList,
       }
     }
     return {
       totalLocalQuals: 0,
       localQualList: [],
-      totalGlobalQuals: globalQualsCount.count,
-      globalQualList: globalQualList,
+      totalGlobalQuals: globalQualsList.length,
+      globalQualList: globalQualsList,
     }
   })
 
@@ -281,6 +307,7 @@ export async function getQualifcations(
       globalQualName: GlobalQualName(globalQuals.globalQualName),
     }
   })
+
   return {
     totalLocalQuals: quals.totalLocalQuals,
     totalGlobalQuals: quals.totalGlobalQuals,

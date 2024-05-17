@@ -192,7 +192,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
   )
 
   fastify.delete<{ Params: GlobalQualIDSchemaType }>(
-    '/globalQualifications/:globalQualification',
+    '/globalQualifications/:globalQualID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('delete_global_qualification')
@@ -296,26 +296,34 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
       },
       schema: {
         querystring: ListQualsSchema,
-        response: { 200: { QualificationMessage, qualification: ListQualsReplySchema } },
+        response: { 200: ListQualsReplySchema },
       },
     },
     async function (request) {
-      const { search = '', storeID } = request.query
+      const { search = '', storeID, userID } = request.query
       const brandedSearch = Search(search)
-      const result: QualificationsListed = storeID
-        ? await getQualifcations(brandedSearch, StoreID(storeID))
-        : await getQualifcations(brandedSearch)
+      let result: QualificationsListed
+      if (userID == null) {
+        result = storeID
+          ? await getQualifcations(brandedSearch, StoreID(storeID))
+          : await getQualifcations(brandedSearch)
+      } else {
+        result = storeID
+          ? await getQualifcations(brandedSearch, StoreID(storeID), UserID(userID))
+          : await getQualifcations(brandedSearch, undefined, UserID(userID))
+      }
+
       return {
         message: 'qualifications',
         totalLocalQuals: result.totalLocalQuals,
         totalGlobalQuals: result.totalGlobalQuals,
         localQuals: result.localQuals,
-        globalQuas: result.globalQuals,
+        globalQuals: result.globalQuals,
       }
     },
   )
 
-  fastify.put<{
+  fastify.post<{
     Body: PutUserLocalQualSchemaType
     Reply:
       | { message: QualificationMessageType; qualification: PutUserLocalQualSchemaType }
@@ -358,7 +366,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
     },
   )
 
-  fastify.put<{
+  fastify.post<{
     Body: PutUserGlobalQualSchemaType
     Reply:
       | { message: QualificationMessageType; qualification: PutUserGlobalQualSchemaType }
