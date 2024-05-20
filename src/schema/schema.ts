@@ -1,3 +1,23 @@
+//import Dinero from 'dinero.js'
+//import { SEK } from '@dinero.js/currencies'
+
+import { Brand, make } from 'ts-brand'
+
+export type UserID = Brand<number, 'userID'>
+export const UserID = make<UserID>()
+export type UserPassword = Brand<string, ' userPassword'>
+export const UserPassword = make<UserPassword>()
+export type UserFirstName = Brand<string, ' userFirstName'>
+export const UserFirstName = make<UserFirstName>()
+export type UserLastName = Brand<string, ' userLastName'>
+export const UserLastName = make<UserLastName>()
+export type UserEmail = Brand<string, ' userEmail'>
+export const UserEmail = make<UserEmail>()
+export type Signature = Brand<string, ' signature'>
+export const Signature = make<Signature>()
+export type IsSuperAdmin = Brand<boolean | null, 'isSuperAdmin'>
+export const IsSuperAdmin = make<IsSuperAdmin>()
+import { RoleID } from '../services/roleService.js'
 import { relations } from 'drizzle-orm'
 
 import {
@@ -5,6 +25,7 @@ import {
   date,
   index,
   integer,
+  numeric,
   pgEnum,
   pgTable,
   primaryKey,
@@ -28,14 +49,28 @@ const dbDates = {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 }
 
+export const employees = pgTable('employees', {
+  shortUserName: varchar('firstName', { length: 16 }).notNull(),
+  employmentNumber: varchar('firstName', { length: 128 }).primaryKey(),
+  personalNumber: varchar('personalNumber', { length: 16 }).notNull().unique(),
+  signature: varchar('signature', { length: 4 }).$type<Signature>().notNull().unique(),
+  hourlyRate: numeric('hourlyRate'),
+  pin: varchar('pin', { length: 4 }),
+  comment: varchar('comment'),
+})
+
 export const users = pgTable('users', {
-  userID: serial('userID').primaryKey(),
-  firstName: varchar('firstName', { length: 128 }).notNull(),
-  lastName: varchar('lastName', { length: 128 }).notNull(),
-  email: varchar('email').notNull().unique(),
-  password: text('password').notNull(),
-  isSuperAdmin: boolean('isSuperAdmin').default(false),
+  userID: serial('userID').$type<UserID>().primaryKey(),
+  firstName: varchar('firstName', { length: 128 }).$type<UserFirstName>().notNull(),
+  lastName: varchar('lastName', { length: 128 }).$type<UserLastName>().notNull(),
+  email: varchar('email').notNull().$type<UserEmail>().unique(),
+  password: text('password').$type<UserPassword>().notNull(),
+  isSuperAdmin: boolean('isSuperAdmin')
+    .$type<IsSuperAdmin>()
+    .notNull()
+    .default(IsSuperAdmin(false)),
   roleID: integer('roleID')
+    .$type<RoleID>()
     .references(() => roles.roleID)
     .notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
@@ -458,6 +493,27 @@ export const userGlobalQualifications = pgTable(
     return {
       pk: primaryKey({
         columns: [userGlobalQualifications.globalQualID, userGlobalQualifications.userID],
+      }),
+    }
+  },
+)
+
+export const userBelongsToStore = pgTable(
+  'userBelongsToStore',
+  {
+    userID: integer('userID')
+      .references(() => users.userID, { onDelete: 'cascade' })
+      .notNull(),
+    storeID: integer('storeID')
+      .references(() => stores.storeID, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
+  },
+  (userBelongsToStore) => {
+    return {
+      pk: primaryKey({
+        columns: [userBelongsToStore.storeID, userBelongsToStore.userID],
       }),
     }
   },

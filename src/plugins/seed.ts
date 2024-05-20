@@ -1,8 +1,10 @@
 import fp from 'fastify-plugin'
 import * as dotenv from 'dotenv'
+
 import { CreatedRole, createRole } from '../services/roleService.js'
 import {
   CreatedUser,
+  IsSuperAdmin,
   UserEmail,
   UserFirstName,
   UserLastName,
@@ -45,7 +47,7 @@ export default fp<SupportPluginOptions>(async () => {
           UserEmail(process.env.SUPER_ADMIN_EMAIL),
           passwordHash,
           RoleID(role?.roleID),
-          true,
+          IsSuperAdmin(true),
         )
         console.info('Super admin created from seed!', role, user)
         return seedResult.Success

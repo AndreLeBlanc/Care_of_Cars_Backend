@@ -3,11 +3,11 @@ import bcrypt from 'bcryptjs'
 
 import { db } from '../config/db-connect.js'
 
-import { roles, users } from '../schema/schema.js'
-
-import { PatchUserSchemaType } from '../routes/users/userSchema.js'
+import { roles, userBelongsToStore, users } from '../schema/schema.js'
 
 import { RoleID, RoleName } from './roleService.js'
+
+import { StoreID } from './storeService.js'
 
 import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
@@ -23,17 +23,30 @@ export type UserLastName = Brand<string, ' userLastName'>
 export const UserLastName = make<UserLastName>()
 export type UserEmail = Brand<string, ' userEmail'>
 export const UserEmail = make<UserEmail>()
+export type Signature = Brand<string, ' signature'>
+export const Signature = make<Signature>()
+export type IsSuperAdmin = Brand<boolean | null, 'isSuperAdmin'>
+export const IsSuperAdmin = make<IsSuperAdmin>()
 
-type IsSuperAdmin = Brand<boolean | null, 'isSuperAdmin'>
-const IsSuperAdmin = make<IsSuperAdmin>()
+export type UserStore = {
+  userID: UserID
+  storeID: StoreID
+}
 
 export type UserInfo = {
   userID: UserID
-  userFirstName: UserFirstName
-  userLastName: UserLastName
-  userEmail: UserEmail
+  firstName: UserFirstName
+  lastName: UserLastName
+  email: UserEmail
   createdAt: Date
   updatedAt: Date
+}
+
+export type PatchUserInfo = {
+  userID: UserID
+  firstName: UserFirstName
+  lastName: UserLastName
+  email: UserEmail
 }
 
 export type userInfoPassword = UserInfo & {
@@ -65,9 +78,9 @@ export async function createUser(
   firstName: UserFirstName,
   lastName: UserLastName,
   email: UserEmail,
-  passwordHash: string,
+  passwordHash: UserPassword,
   roleID: RoleID,
-  isSuperAdmin: boolean = false,
+  isSuperAdmin: IsSuperAdmin = IsSuperAdmin(false),
 ): Promise<CreatedUser> {
   const [user] = await db
     .insert(users)
@@ -79,24 +92,8 @@ export async function createUser(
       roleID: roleID,
       isSuperAdmin: isSuperAdmin,
     })
-    .returning({
-      userID: users.userID,
-      userFirstName: users.firstName,
-      userLastName: users.lastName,
-      userEmail: users.email,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt,
-      roleID: users.roleID,
-    })
-  return {
-    userID: UserID(user.userID),
-    userFirstName: UserFirstName(user.userFirstName),
-    userLastName: UserLastName(user.userLastName),
-    userEmail: UserEmail(user.userEmail),
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-    roleID: RoleID(user.roleID),
-  }
+    .returning()
+  return user
 }
 
 export async function getUsersPaginate(
@@ -121,9 +118,9 @@ export async function getUsersPaginate(
     const usersList = await tx
       .select({
         userID: users.userID,
-        userFirstName: users.firstName,
-        userLastName: users.lastName,
-        userEmail: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       })
@@ -136,21 +133,11 @@ export async function getUsersPaginate(
   })
   const totalPage = Math.ceil(totalUsers.count / limit)
 
-  const brandedUserList = usersList.map((user) => {
-    return {
-      userID: UserID(user.userID),
-      userFirstName: UserFirstName(user.userFirstName),
-      userLastName: UserLastName(user.userLastName),
-      userEmail: UserEmail(user.userEmail),
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    }
-  })
   return {
     totalUsers: totalUsers.count,
     totalPage,
     perPage: page,
-    data: brandedUserList,
+    data: usersList,
   }
 }
 
@@ -194,31 +181,19 @@ export async function getUserByID(
   const [user] = await db
     .select({
       userID: users.userID,
-      userFirstName: users.firstName,
-      userLastName: users.lastName,
-      userEmail: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      email: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
       ...(checkPassword ? { password: users.password } : {}),
     })
     .from(users)
     .where(eq(users.userID, id))
-  return user
-    ? {
-        userID: UserID(user.userID),
-        userFirstName: UserFirstName(user.userFirstName),
-        userLastName: UserLastName(user.userLastName),
-        userEmail: UserEmail(user.userEmail),
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        ...(checkPassword
-          ? { password: user.password ? UserPassword(user.password) : undefined }
-          : {}),
-      }
-    : undefined
+  return user ? user : undefined
 }
 
-export async function updateUserByID(id: UserID, user: PatchUserSchemaType): Promise<UserInfo> {
+export async function updateUserByID(id: UserID, user: PatchUserInfo): Promise<UserInfo> {
   const userWithUpdatedAt = { ...user, updatedAt: new Date() }
   const [updatedUser] = await db
     .update(users)
@@ -226,21 +201,15 @@ export async function updateUserByID(id: UserID, user: PatchUserSchemaType): Pro
     .where(eq(users.userID, id))
     .returning({
       userID: users.userID,
-      userFirstName: users.firstName,
-      userLastName: users.lastName,
-      userEmail: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      email: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
     })
-  return {
-    userID: UserID(updatedUser.userID),
-    userFirstName: UserFirstName(updatedUser.userFirstName),
-    userLastName: UserLastName(updatedUser.userLastName),
-    userEmail: UserEmail(updatedUser.userEmail),
-    createdAt: updatedUser.createdAt,
-    updatedAt: updatedUser.updatedAt,
-  }
+  return updatedUser
 }
+
 export async function updateUserPasswordByID(
   id: UserID,
   password: UserPassword,
@@ -252,20 +221,13 @@ export async function updateUserPasswordByID(
     .where(eq(users.userID, id))
     .returning({
       userID: users.userID,
-      userFirstName: users.firstName,
-      userLastName: users.lastName,
-      userEmail: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      email: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
     })
-  return {
-    userID: UserID(updatedUser.userID),
-    userFirstName: UserFirstName(updatedUser.userFirstName),
-    userLastName: UserLastName(updatedUser.userLastName),
-    userEmail: UserEmail(updatedUser.userEmail),
-    createdAt: updatedUser.createdAt,
-    updatedAt: updatedUser.updatedAt,
-  }
+  return updatedUser
 }
 
 export async function generatePasswordHash(password: UserPassword): Promise<UserPassword> {
@@ -278,25 +240,55 @@ export async function isStrongPassword(password: UserPassword): Promise<boolean>
   return password.length >= 3
 }
 
-export async function DeleteUser(id: number): Promise<UserWithSuperAdmin | undefined> {
-  const [deletedUser] = await db.delete(users).where(eq(users.userID, id)).returning({
+export async function DeleteUser(userID: UserID): Promise<UserWithSuperAdmin | undefined> {
+  const [deletedUser] = await db.delete(users).where(eq(users.userID, userID)).returning({
     userID: users.userID,
-    userFirstName: users.firstName,
-    userLastName: users.lastName,
-    userEmail: users.email,
+    firstName: users.firstName,
+    lastName: users.lastName,
+    email: users.email,
     isSuperAdmin: users.isSuperAdmin,
     createdAt: users.createdAt,
     updatedAt: users.updatedAt,
   })
-  return deletedUser
-    ? {
-        userID: UserID(deletedUser.userID),
-        userFirstName: UserFirstName(deletedUser.userFirstName),
-        userLastName: UserLastName(deletedUser.userLastName),
-        userEmail: UserEmail(deletedUser.userEmail),
-        isSuperAdmin: IsSuperAdmin(deletedUser.isSuperAdmin),
-        createdAt: deletedUser.createdAt,
-        updatedAt: deletedUser.updatedAt,
-      }
+  if (deletedUser.isSuperAdmin != null) {
+    return deletedUser
+  } else {
+    return undefined
+  }
+}
+
+export async function assignToStore(
+  userID: UserID,
+  storeID: StoreID,
+): Promise<UserStore | undefined> {
+  const [newUserForStore] = await db
+    .insert(userBelongsToStore)
+    .values({ userID: userID, storeID: storeID })
+    .returning()
+  return newUserForStore
+    ? { storeID: StoreID(newUserForStore.storeID), userID: UserID(newUserForStore.userID) }
     : undefined
+}
+
+export async function deleteStoreUser(
+  userID: UserID,
+  storeID: StoreID,
+): Promise<UserStore | undefined> {
+  const [deletedUserForStore] = await db
+    .delete(userBelongsToStore)
+    .where(and(eq(userBelongsToStore.storeID, storeID), eq(userBelongsToStore.userID, userID)))
+    .returning()
+  return deletedUserForStore
+    ? { storeID: StoreID(deletedUserForStore.storeID), userID: UserID(deletedUserForStore.userID) }
+    : undefined
+}
+
+export async function selectStoreUsers(storeID: StoreID): Promise<UserID[] | undefined> {
+  const usersForStore = await db
+    .select({ userID: userBelongsToStore.userID })
+    .from(userBelongsToStore)
+    .where(eq(userBelongsToStore.storeID, storeID))
+
+  const brandedUsersForStore: UserID[] = usersForStore.map((user) => UserID(user.userID))
+  return usersForStore ? brandedUsersForStore : undefined
 }

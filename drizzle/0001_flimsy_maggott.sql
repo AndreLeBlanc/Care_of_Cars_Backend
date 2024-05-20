@@ -1,2 +1,0 @@
-ALTER TABLE "qualificationsLocal" DROP CONSTRAINT "qualificationsLocal_localQualName_unique";--> statement-breakpoint
-ALTER TABLE "qualificationsLocal" ADD CONSTRAINT "qualificationsLocal_localQualName_storeID_unique" UNIQUE("localQualName","storeID");
