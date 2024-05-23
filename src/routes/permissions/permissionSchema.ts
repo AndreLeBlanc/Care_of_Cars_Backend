@@ -13,7 +13,7 @@ const PermissionName = Type.String({ minLength: 3, maxLength: 256 })
 const PermissionDescription = Type.String()
 
 export const CreatePermissionSchema = Type.Object({
-  PermissionName: PermissionName,
+  permissionTitle: PermissionName,
   description: Type.Optional(PermissionDescription),
 })
 export type CreatePermissionSchemaType = Static<typeof CreatePermissionSchema>
@@ -24,7 +24,7 @@ export const getPermissionByIDSchema = Type.Object({
 export type getPermissionByIDType = Static<typeof getPermissionByIDSchema>
 
 export const PatchPermissionSchema = Type.Object({
-  PermissionName: Type.Optional(Type.String()),
+  permissionTitle: Type.String(),
   description: Type.Optional(PermissionDescription),
 })
 export type PatchPermissionSchemaType = Static<typeof PatchPermissionSchema>

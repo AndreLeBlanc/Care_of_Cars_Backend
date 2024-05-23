@@ -227,28 +227,28 @@ export type StoreOpeningHoursWithSpecialType = Static<typeof StoreOpeningHoursWi
 export const StoreWeeklyNotes = Type.Object({
   storeID: storeID,
   week: week,
-  weekNote: note,
-  mondayNote: note,
-  tuesdayNote: note,
-  wednesdayNote: note,
-  thursdayNote: note,
-  fridayNote: note,
-  saturdayNote: note,
-  sundayNote: note,
+  weekNote: Type.Optional(note),
+  mondayNote: Type.Optional(note),
+  tuesdayNote: Type.Optional(note),
+  wednesdayNote: Type.Optional(note),
+  thursdayNote: Type.Optional(note),
+  fridayNote: Type.Optional(note),
+  saturdayNote: Type.Optional(note),
+  sundayNote: Type.Optional(note),
 })
 
 export type StoreWeeklyNotesType = Static<typeof StoreWeeklyNotes>
 
 export const StoreNotes = Type.Object({
   storeID: storeID,
-  weekNote: note,
-  mondayNote: note,
-  tuesdayNote: note,
-  wednesdayNote: note,
-  thursdayNote: note,
-  fridayNote: note,
-  saturdayNote: note,
-  sundayNote: note,
+  weekNote: Type.Optional(note),
+  mondayNote: Type.Optional(note),
+  tuesdayNote: Type.Optional(note),
+  wednesdayNote: Type.Optional(note),
+  thursdayNote: Type.Optional(note),
+  fridayNote: Type.Optional(note),
+  saturdayNote: Type.Optional(note),
+  sundayNote: Type.Optional(note),
 })
 
 export type StoreNotesType = Static<typeof StoreNotes>

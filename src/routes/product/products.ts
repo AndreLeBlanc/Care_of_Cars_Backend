@@ -42,7 +42,7 @@ import {
   ResultCount,
   Search,
 } from '../../plugins/pagination.js'
-import { ServiceCategoryID } from '../../services/CategoryService.js'
+import { ProductCategoryID } from '../../services/CategoryService.js'
 
 export const productsRoute = async (fastify: FastifyInstance) => {
   fastify.post<{ Body: AddProductType; Reply: object }>(
@@ -72,7 +72,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       } = req.body
 
       const productDetails: ProductAddType = {
-        productCategoryID: ServiceCategoryID(productCategoryID),
+        productCategoryID: ProductCategoryID(productCategoryID),
         productItemNumber: ProductItemNumber(productItemNumber),
         productAward: ProductAward(productAward),
         productCost: ProductCost(productCost),
@@ -133,7 +133,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       } = req.body
 
       const productDetails: ProductAddType = {
-        productCategoryID: ServiceCategoryID(productCategoryID),
+        productCategoryID: ProductCategoryID(productCategoryID),
         productItemNumber: ProductItemNumber(productItemNumber),
         productAward: ProductAward(productAward),
         productCost: ProductCost(productCost),
@@ -212,6 +212,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const { itemCodeNumber } = request.params
+
       const productData: Product | undefined = await getProductById(
         ProductItemNumber(itemCodeNumber),
       )

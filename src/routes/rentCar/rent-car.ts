@@ -24,11 +24,10 @@ import {
   RentCarRegistrationNumber,
   RentCarYear,
   RentCarsPaginate,
-  StoreID,
   createRentCar,
   deleteRentCarByRegNumber,
   editRentCar,
-  getRentCarById,
+  getRentCarByID,
   getRentCarPaginate,
 } from '../../services/rentCarService.js'
 
@@ -44,6 +43,8 @@ import {
   ResultCount,
   Search,
 } from '../../plugins/pagination.js'
+
+import { StoreID } from '../../services/storeService.js'
 
 export const rentCar = async (fastify: FastifyInstance) => {
   //Create Rent Cars
@@ -76,7 +77,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
       //      const authKey = await req.jwtDecode()
 
       const rentCarDetails = {
-        storeId: StoreID(1),
+        storeID: StoreID(1),
         rentCarColor: RentCarColor(rentCarColor),
         rentCarModel: RentCarModel(rentCarModel),
         rentCarRegistrationNumber: RentCarRegistrationNumber(rentCarRegistrationNumber),
@@ -256,7 +257,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const { regNumber } = request.params
-      const rentCarDetails: RentCar | undefined = await getRentCarById(
+      const rentCarDetails: RentCar | undefined = await getRentCarByID(
         RentCarRegistrationNumber(regNumber),
       )
       if (rentCarDetails == null) {

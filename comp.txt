@@ -1,0 +1,484 @@
+
+> care-of-cars-backend@1.0.0 generate
+> drizzle-kit generate --config=src/config/drizzle.config.ts
+
+drizzle-kit: v0.21.2
+drizzle-orm: v0.30.9
+
+Reading config file '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/drizzle.config.ts'
+/home/andre/Documents/code/Care_of_Cars_Backend/src/config/drizzle.config.ts
+{
+  id: '.',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit',
+  exports: {},
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit/bin.cjs',
+  loaded: true,
+  children: [
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/commander/index.js',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/commander',
+      exports: [Command],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/commander/index.js',
+      loaded: true,
+      children: [Array],
+      paths: [Array]
+    },
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit/node_modules/glob/glob.js',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit/node_modules/glob',
+      exports: [Function],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit/node_modules/glob/glob.js',
+      loaded: true,
+      children: [Array],
+      paths: [Array]
+    },
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/json-diff/lib/index.js',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/json-diff/lib',
+      exports: [Object],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/json-diff/lib/index.js',
+      loaded: true,
+      children: [Array],
+      paths: [Array]
+    },
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/esbuild/lib/main.js',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/esbuild/lib',
+      exports: [Object],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/esbuild/lib/main.js',
+      loaded: true,
+      children: [],
+      paths: [Array]
+    }
+  ],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ]
+}
+url
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/drizzle.config.ts',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config',
+  exports: {},
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/drizzle.config.ts',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ],
+  _compile: [Function (anonymous)]
+}
+./connection-string
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/drizzle.config.ts',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config',
+  exports: { default: [Getter] },
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/drizzle.config.ts',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ],
+  _compile: [Function (anonymous)]
+}
+url
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/connection-string.ts',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config',
+  exports: {},
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/connection-string.ts',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ],
+  _compile: [Function (anonymous)]
+}
+dotenv
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/connection-string.ts',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config',
+  exports: { newConnectionString: [Getter] },
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/connection-string.ts',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ],
+  _compile: [Function (anonymous)]
+}
+fs
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/main.js',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib',
+  exports: {},
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/main.js',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ]
+}
+path
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/main.js',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib',
+  exports: {},
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/main.js',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ]
+}
+os
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/main.js',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib',
+  exports: {},
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/main.js',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ]
+}
+crypto
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/main.js',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib',
+  exports: {},
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/main.js',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ]
+}
+../package.json
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/main.js',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib',
+  exports: {},
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/main.js',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/lib/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/dotenv/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ]
+}
+Env is:  test , Connected to: superdbdocker
+/home/andre/Documents/code/Care_of_Cars_Backend/src/schema/schema.ts
+{
+  id: '.',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit',
+  exports: {},
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit/bin.cjs',
+  loaded: true,
+  children: [
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/commander/index.js',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/commander',
+      exports: [Command],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/commander/index.js',
+      loaded: true,
+      children: [Array],
+      paths: [Array]
+    },
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit/node_modules/glob/glob.js',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit/node_modules/glob',
+      exports: [Function],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit/node_modules/glob/glob.js',
+      loaded: true,
+      children: [Array],
+      paths: [Array]
+    },
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/json-diff/lib/index.js',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/json-diff/lib',
+      exports: [Object],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/json-diff/lib/index.js',
+      loaded: true,
+      children: [Array],
+      paths: [Array]
+    },
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/esbuild/lib/main.js',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/esbuild/lib',
+      exports: [Object],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/esbuild/lib/main.js',
+      loaded: true,
+      children: [],
+      paths: [Array]
+    },
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/drizzle.config.ts',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config',
+      exports: [Object],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/src/config/drizzle.config.ts',
+      loaded: true,
+      children: [Array],
+      paths: [Array],
+      _compile: [Function (anonymous)]
+    },
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-orm/pg-core/index.cjs',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-orm/pg-core',
+      exports: [Object],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-orm/pg-core/index.cjs',
+      loaded: true,
+      children: [Array],
+      paths: [Array]
+    },
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-orm/index.cjs',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-orm',
+      exports: [Object],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-orm/index.cjs',
+      loaded: true,
+      children: [Array],
+      paths: [Array]
+    }
+  ],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/drizzle-kit/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ]
+}
+url
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema/schema.ts',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema',
+  exports: {},
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema/schema.ts',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ],
+  _compile: [Function (anonymous)]
+}
+ts-brand
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema/schema.ts',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema',
+  exports: {
+    IsSuperAdmin: [Getter],
+    Signature: [Getter],
+    UserEmail: [Getter],
+    UserFirstName: [Getter],
+    UserID: [Getter],
+    UserLastName: [Getter],
+    UserPassword: [Getter],
+    colorForService: [Getter],
+    colorForServicepgEnum: [Getter],
+    companycustomers: [Getter],
+    companycustomersRelations: [Getter],
+    driverRelations: [Getter],
+    drivers: [Getter],
+    employees: [Getter],
+    permissions: [Getter],
+    productCategories: [Getter],
+    productCategoryToProductRelations: [Getter],
+    productToCategoryRelations: [Getter],
+    products: [Getter],
+    qualificationsGlobal: [Getter],
+    qualificationsLocal: [Getter],
+    qualificationsLocalRelations: [Getter],
+    rentcars: [Getter],
+    roleToPermissions: [Getter],
+    roles: [Getter],
+    serviceCategories: [Getter],
+    serviceToServiceCategoryRelations: [Getter],
+    serviceVariants: [Getter],
+    serviceVariantsRelations: [Getter],
+    services: [Getter],
+    servicesCategoryToServiceRelations: [Getter],
+    servicesRelations: [Getter],
+    storeopeninghours: [Getter],
+    storeopeninghoursRelations: [Getter],
+    storepaymentinfo: [Getter],
+    storepaymentinfoRelations: [Getter],
+    stores: [Getter],
+    storespecialhours: [Getter],
+    storespecialhoursRelations: [Getter],
+    storeweeklynotes: [Getter],
+    storeweeklynotesRelations: [Getter],
+    userBelongsToStore: [Getter],
+    userGlobalQualifications: [Getter],
+    userLocalQualifications: [Getter],
+    users: [Getter]
+  },
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema/schema.ts',
+  loaded: false,
+  children: [],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ],
+  _compile: [Function (anonymous)]
+}
+../services/productService.js
+{
+  id: '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema/schema.ts',
+  path: '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema',
+  exports: {
+    IsSuperAdmin: [Getter],
+    Signature: [Getter],
+    UserEmail: [Getter],
+    UserFirstName: [Getter],
+    UserID: [Getter],
+    UserLastName: [Getter],
+    UserPassword: [Getter],
+    colorForService: [Getter],
+    colorForServicepgEnum: [Getter],
+    companycustomers: [Getter],
+    companycustomersRelations: [Getter],
+    driverRelations: [Getter],
+    drivers: [Getter],
+    employees: [Getter],
+    permissions: [Getter],
+    productCategories: [Getter],
+    productCategoryToProductRelations: [Getter],
+    productToCategoryRelations: [Getter],
+    products: [Getter],
+    qualificationsGlobal: [Getter],
+    qualificationsLocal: [Getter],
+    qualificationsLocalRelations: [Getter],
+    rentcars: [Getter],
+    roleToPermissions: [Getter],
+    roles: [Getter],
+    serviceCategories: [Getter],
+    serviceToServiceCategoryRelations: [Getter],
+    serviceVariants: [Getter],
+    serviceVariantsRelations: [Getter],
+    services: [Getter],
+    servicesCategoryToServiceRelations: [Getter],
+    servicesRelations: [Getter],
+    storeopeninghours: [Getter],
+    storeopeninghoursRelations: [Getter],
+    storepaymentinfo: [Getter],
+    storepaymentinfoRelations: [Getter],
+    stores: [Getter],
+    storespecialhours: [Getter],
+    storespecialhoursRelations: [Getter],
+    storeweeklynotes: [Getter],
+    storeweeklynotesRelations: [Getter],
+    userBelongsToStore: [Getter],
+    userGlobalQualifications: [Getter],
+    userLocalQualifications: [Getter],
+    users: [Getter]
+  },
+  filename: '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema/schema.ts',
+  loaded: false,
+  children: [
+    {
+      id: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/ts-brand/lib/index.js',
+      path: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/ts-brand/lib',
+      exports: [Object],
+      filename: '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules/ts-brand/lib/index.js',
+      loaded: true,
+      children: [],
+      paths: [Array]
+    }
+  ],
+  paths: [
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/schema/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/src/node_modules',
+    '/home/andre/Documents/code/Care_of_Cars_Backend/node_modules',
+    '/home/andre/Documents/code/node_modules',
+    '/home/andre/Documents/node_modules',
+    '/home/andre/node_modules',
+    '/home/node_modules',
+    '/node_modules'
+  ],
+  _compile: [Function (anonymous)]
+}

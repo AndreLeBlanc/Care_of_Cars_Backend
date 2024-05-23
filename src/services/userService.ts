@@ -159,19 +159,6 @@ export async function verifyUser(email: UserEmail): Promise<VerifyUser | undefin
     .innerJoin(roles, eq(users.roleID, roles.roleID))
     .where(and(eq(users.email, email)))
   return results
-    ? {
-        userID: UserID(results.userID),
-        userFirstName: UserFirstName(results.userFirstName),
-        userLastName: UserLastName(results.userLastName),
-        userEmail: UserEmail(results.userEmail),
-        userPassword: UserPassword(results.userPassword),
-        isSuperAdmin: IsSuperAdmin(results.isSuperAdmin),
-        role: {
-          roleID: RoleID(results.role.roleID),
-          roleName: RoleName(results.role.roleName),
-        },
-      }
-    : undefined
 }
 
 export async function getUserByID(
@@ -190,15 +177,15 @@ export async function getUserByID(
     })
     .from(users)
     .where(eq(users.userID, id))
-  return user ? user : undefined
+  return user ?? undefined
 }
 
-export async function updateUserByID(id: UserID, user: PatchUserInfo): Promise<UserInfo> {
+export async function updateUserByID(user: PatchUserInfo): Promise<UserInfo> {
   const userWithUpdatedAt = { ...user, updatedAt: new Date() }
   const [updatedUser] = await db
     .update(users)
     .set(userWithUpdatedAt)
-    .where(eq(users.userID, id))
+    .where(eq(users.userID, user.userID))
     .returning({
       userID: users.userID,
       firstName: users.firstName,

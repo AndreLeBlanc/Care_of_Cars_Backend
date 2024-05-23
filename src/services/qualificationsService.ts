@@ -102,9 +102,9 @@ export async function updateLocalQuals(
   return qual
     ? {
         qual: {
-          storeID: StoreID(qual.storeID),
-          localQualID: LocalQualID(qual.localQualID),
-          localQualName: LocalQualName(qual.localQualName),
+          storeID: qual.storeID,
+          localQualID: qual.localQualID,
+          localQualName: qual.localQualName,
         },
         dates: {
           createdAt: CreatedAt(qual.createdAt),
@@ -135,8 +135,8 @@ export async function updateGlobalQuals(
   return qual
     ? {
         qual: {
-          globalQualID: GlobalQualID(qual.globalQualID),
-          globalQualName: GlobalQualName(qual.globalQualName),
+          globalQualID: qual.globalQualID,
+          globalQualName: qual.globalQualName,
         },
         dates: { createdAt: CreatedAt(qual.createdAt), updatedAt: UpdatedAt(qual.updatedAt) },
       }
@@ -153,9 +153,9 @@ export async function getLocalQual(
   return qual
     ? {
         qual: {
-          storeID: StoreID(qual.storeID),
-          localQualID: LocalQualID(qual.localQualID),
-          localQualName: LocalQualName(qual.localQualName),
+          storeID: qual.storeID,
+          localQualID: qual.localQualID,
+          localQualName: qual.localQualName,
         },
         dates: { createdAt: CreatedAt(qual.createdAt), updatedAt: UpdatedAt(qual.updatedAt) },
       }
@@ -172,8 +172,8 @@ export async function getGlobalQual(
   return qual
     ? {
         qual: {
-          globalQualID: GlobalQualID(qual.globalQualID),
-          globalQualName: GlobalQualName(qual.globalQualName),
+          globalQualID: qual.globalQualID,
+          globalQualName: qual.globalQualName,
         },
         dates: { createdAt: CreatedAt(qual.createdAt), updatedAt: UpdatedAt(qual.updatedAt) },
       }
@@ -190,9 +190,9 @@ export async function deleteLocalQuals(
   return qual
     ? {
         qual: {
-          storeID: StoreID(qual.storeID),
-          localQualID: LocalQualID(qual.localQualID),
-          localQualName: LocalQualName(qual.localQualName),
+          storeID: qual.storeID,
+          localQualID: qual.localQualID,
+          localQualName: qual.localQualName,
         },
         dates: { createdAt: CreatedAt(qual.createdAt), updatedAt: UpdatedAt(qual.updatedAt) },
       }
@@ -209,8 +209,8 @@ export async function deleteGlobalQuals(
   return qual
     ? {
         qual: {
-          globalQualID: GlobalQualID(qual.globalQualID),
-          globalQualName: GlobalQualName(qual.globalQualName),
+          globalQualID: qual.globalQualID,
+          globalQualName: qual.globalQualName,
         },
         dates: { createdAt: CreatedAt(qual.createdAt), updatedAt: UpdatedAt(qual.updatedAt) },
       }
@@ -237,7 +237,7 @@ export async function getQualifcations(
           .where(
             and(
               ilike(qualificationsGlobal.globalQualName, '%' + search + '%'),
-              eq(userGlobalQualifications.userID, 1),
+              eq(userGlobalQualifications.userID, userID),
             ),
           )
       : await tx
@@ -293,26 +293,11 @@ export async function getQualifcations(
     }
   })
 
-  const brandedLocalQuals: UserQualificationsLocal[] = quals.localQualList.map((localQuals) => {
-    return {
-      storeID: StoreID(localQuals.storeID),
-      localQualID: LocalQualID(localQuals.localQualID),
-      localQualName: LocalQualName(localQuals.localQualName),
-    }
-  })
-
-  const brandedGlobalQuals: UserQualificationsGlobal[] = quals.globalQualList.map((globalQuals) => {
-    return {
-      globalQualID: GlobalQualID(globalQuals.globalQualID),
-      globalQualName: GlobalQualName(globalQuals.globalQualName),
-    }
-  })
-
   return {
     totalLocalQuals: quals.totalLocalQuals,
     totalGlobalQuals: quals.totalGlobalQuals,
-    localQuals: brandedLocalQuals,
-    globalQuals: brandedGlobalQuals,
+    localQuals: quals.localQualList,
+    globalQuals: quals.globalQualList,
   }
 }
 
@@ -325,11 +310,6 @@ export async function setUserLocalQualification(
     .values({ userID: userID, localQualID: localQualID })
     .returning()
   return insertLocalQual
-    ? {
-        userID: UserID(insertLocalQual.userID),
-        localQualID: LocalQualID(insertLocalQual.localQualID),
-      }
-    : undefined
 }
 
 export async function setUserGlobalQualification(
@@ -339,10 +319,10 @@ export async function setUserGlobalQualification(
   const [insertGlobalQual] = await db
     .insert(userGlobalQualifications)
     .values({ userID: userID, globalQualID: globalQualID })
-    .returning()
+    .returning({ globalQualID: userGlobalQualifications.globalQualID })
   return insertGlobalQual
     ? {
-        userID: UserID(insertGlobalQual.userID),
+        userID: userID,
         globalQualID: LocalQualID(insertGlobalQual.globalQualID),
       }
     : undefined
@@ -360,10 +340,10 @@ export async function deleteUserLocalQualification(
         eq(userLocalQualifications.localQualID, localQualID),
       ),
     )
-    .returning()
+    .returning({ localQualID: userLocalQualifications.localQualID })
   return insertLocalQual
     ? {
-        userID: UserID(insertLocalQual.userID),
+        userID: userID,
         localQualID: LocalQualID(insertLocalQual.localQualID),
       }
     : undefined
@@ -381,10 +361,10 @@ export async function deleteUserGlobalQualification(
         eq(userGlobalQualifications.globalQualID, globalQualID),
       ),
     )
-    .returning()
+    .returning({ globalQualID: userGlobalQualifications.globalQualID })
   return insertGlobalQual
     ? {
-        userID: UserID(insertGlobalQual.userID),
+        userID: userID,
         globalQualID: LocalQualID(insertGlobalQual.globalQualID),
       }
     : undefined
@@ -421,24 +401,8 @@ export async function getUserQualifications(
     return { localQualsList, globalQualsList }
   })
 
-  const brandedLocalQuals: UserQualificationsLocal[] = quals.localQualsList.map((localQuals) => {
-    return {
-      storeID: StoreID(localQuals.storeID),
-      localQualID: LocalQualID(localQuals.localQualID),
-      localQualName: LocalQualName(localQuals.localQualName),
-    }
-  })
-
-  const brandedGlobalQuals: UserQualificationsGlobal[] = quals.globalQualsList.map(
-    (globalQuals) => {
-      return {
-        globalQualID: GlobalQualID(globalQuals.globalQualID),
-        globalQualName: GlobalQualName(globalQuals.globalQualName),
-      }
-    },
-  )
   return {
-    localQuals: brandedLocalQuals,
-    globalQuals: brandedGlobalQuals,
+    localQuals: quals.localQualsList,
+    globalQuals: quals.globalQualsList,
   }
 }

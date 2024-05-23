@@ -6,8 +6,6 @@ import { permissions, roleToPermissions, roles } from '../schema/schema.js'
 
 import { ilike } from 'drizzle-orm'
 
-import { RoleSchemaType } from '../routes/roles/roleSchema.js'
-
 import { PermissionID, PermissionTitle } from './permissionService.js'
 
 import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
@@ -20,7 +18,7 @@ export const RoleName = make<RoleName>()
 export type RoleID = Brand<number, 'roleID'>
 export const RoleID = make<RoleID>()
 
-export type RoleDescription = Brand<string | null, 'roleDescription'>
+export type RoleDescription = Brand<string, 'roleDescription'>
 export const RoleDescription = make<RoleDescription>()
 
 type RoleDate = {
@@ -28,13 +26,17 @@ type RoleDate = {
   updatedAt: Date
 }
 
-export type CreatedRole = { roleID: RoleID; roleName: RoleName; roleDescription: RoleDescription }
+export type CreatedRole = {
+  roleID: RoleID
+  roleName: RoleName
+  roleDescription: RoleDescription | null
+}
 
 export type RoleIDName = { roleName: RoleName; roleID: RoleID } & RoleDate
 
 export type Role = { roleName: RoleName } & RoleDate
 
-type RolesList = Role & { roleDescription: RoleDescription }
+type RolesList = Role & { roleDescription: RoleDescription | null }
 
 export type RoleHasPermission = {
   permissionID: PermissionID
@@ -88,20 +90,11 @@ export async function getRolesPaginate(
     .offset(offset || 0)
   const totalPage = Math.ceil(totalItems.count / limit)
 
-  const brandedRoleList: RolesList[] = rolesList.map((role) => {
-    return {
-      roleID: RoleID(role.roleID),
-      roleName: RoleName(role.roleName),
-      roleDescription: RoleDescription(role.roleDescription),
-      createdAt: role.createdAt,
-      updatedAt: role.updatedAt,
-    }
-  })
   return {
     totalItems: totalItems.count,
     totalPage,
     perPage: page,
-    data: brandedRoleList,
+    data: rolesList,
   }
 }
 
@@ -117,30 +110,24 @@ export async function createRole(
       roleName: roles.roleName,
       roleDescription: roles.description,
     })
-  return {
-    roleID: RoleID(newRole.roleID),
-    roleName: RoleName(newRole.roleName),
-    roleDescription: RoleDescription(newRole.roleDescription),
-  }
+  return newRole
 }
 
 export async function getRoleByID(id: RoleID): Promise<Role | undefined> {
-  const [results] = await db.select().from(roles).where(eq(roles.roleID, id))
-  return results
-    ? {
-        roleName: RoleName(results.roleName),
-        createdAt: results.createdAt,
-        updatedAt: results.updatedAt,
-      }
-    : undefined
+  const [role] = await db
+    .select({ roleName: roles.roleName, createdAt: roles.createdAt, updatedAt: roles.updatedAt })
+    .from(roles)
+    .where(eq(roles.roleID, id))
+    .limit(1)
+  return role
 }
 
-export async function updateRoleByID(id: RoleID, role: RoleSchemaType): Promise<Role> {
+export async function updateRoleByID(role: CreatedRole): Promise<Role> {
   const roleWithUpdatedAt = { ...role, updatedAt: new Date() }
   const [updatedRole] = await db
     .update(roles)
     .set(roleWithUpdatedAt)
-    .where(eq(roles.roleID, id))
+    .where(eq(roles.roleID, role.roleID))
     .returning({
       roleID: roles.roleID,
       roleName: roles.roleName,
@@ -148,11 +135,7 @@ export async function updateRoleByID(id: RoleID, role: RoleSchemaType): Promise<
       createdAt: roles.createdAt,
       updatedAt: roles.updatedAt,
     })
-  return {
-    roleName: RoleName(updatedRole.roleName),
-    createdAt: updatedRole.createdAt,
-    updatedAt: updatedRole.updatedAt,
-  }
+  return updatedRole
 }
 
 export async function deleteRole(id: RoleID): Promise<Role | undefined> {
@@ -170,7 +153,7 @@ export async function getRoleWithPermissions(roleID: RoleID): Promise<RoleHasPer
   const roleWithPermissions = await db
     .select({
       permissionID: permissions.permissionID,
-      permissionName: permissions.permissionName,
+      permissionName: permissions.permissionTitle,
       createdAt: permissions.createdAt,
       updatedAt: permissions.updatedAt,
     })
@@ -203,7 +186,7 @@ export async function getRoleWithPermissions(roleID: RoleID): Promise<RoleHasPer
 
 export async function getAllPermissionStatus(roleID: RoleID): Promise<PermissionStatus[]> {
   const allPermissions = await db
-    .select({ id: permissions.permissionID, permissionName: permissions.permissionName })
+    .select({ id: permissions.permissionID, permissionName: permissions.permissionTitle })
     .from(permissions)
     .limit(1000) // pagination is not possible here still we need to limit the rows.
   const rolePermissions: Array<{ permissionID: PermissionID; permissionName: PermissionTitle }> =

@@ -4,17 +4,18 @@ import { db } from '../config/db-connect.js'
 
 import { desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { Offset } from '../plugins/pagination.js'
-import { ServiceCategoryID } from './CategoryService.js'
+
+import { ProductCategoryID } from './CategoryService.js'
 
 export type ProductItemNumber = Brand<string, 'productItemNumber'>
 export const ProductItemNumber = make<ProductItemNumber>()
-export type ProductDescription = Brand<string | null, 'productDescription'>
+export type ProductDescription = Brand<string, 'productDescription'>
 export const ProductDescription = make<ProductDescription>()
-export type ProductSupplierArticleNumber = Brand<string | null, 'productSupplierArticleNumber'>
+export type ProductSupplierArticleNumber = Brand<string, 'productSupplierArticleNumber'>
 export const ProductSupplierArticleNumber = make<ProductSupplierArticleNumber>()
-export type ProductExternalArticleNumber = Brand<string | null, 'productExternalArticleNumber'>
+export type ProductExternalArticleNumber = Brand<string, 'productExternalArticleNumber'>
 export const ProductExternalArticleNumber = make<ProductExternalArticleNumber>()
-export type ProductUpdateRelatedData = Brand<boolean | null, 'productUpdateRelatedData'>
+export type ProductUpdateRelatedData = Brand<boolean, 'productUpdateRelatedData'>
 export const ProductUpdateRelatedData = make<ProductUpdateRelatedData>()
 export type ProductInventoryBalance = Brand<number, 'productInventoryBalance'>
 export const ProductInventoryBalance = make<ProductInventoryBalance>()
@@ -22,18 +23,20 @@ export type ProductAward = Brand<number, 'productAward'>
 export const ProductAward = make<ProductAward>()
 export type ProductCost = Brand<number, 'productCost'>
 export const ProductCost = make<ProductCost>()
+export type ProductID = Brand<number, 'productID'>
+export const ProductID = make<ProductID>()
 
 export type ProductAddType = {
   productItemNumber: ProductItemNumber
-  productCategoryID: ServiceCategoryID
+  productCategoryID: ProductCategoryID
   productDescription?: ProductDescription
   productSupplierArticleNumber?: ProductSupplierArticleNumber
   productExternalArticleNumber?: ProductExternalArticleNumber
   productUpdateRelatedData?: ProductUpdateRelatedData
-  productInventoryBalance: ProductInventoryBalance
+  productInventoryBalance?: ProductInventoryBalance
   productAward: ProductAward
   productCost: ProductCost
-  productId?: number
+  productId?: ProductID
 }
 
 export type Product = ProductAddType & DbDateType
@@ -62,34 +65,28 @@ export async function addProduct(data: ProductAddType): Promise<Product | undefi
       productSupplierArticleNumber: data.productSupplierArticleNumber,
       productUpdateRelatedData: data.productUpdateRelatedData,
     })
-    .returning({
-      productCategoryID: products.productCategoryID,
-      productItemNumber: products.productItemNumber,
-      productAward: products.productAward,
-      productCost: products.productCost,
-      productDescription: products.productDescription,
-      productExternalArticleNumber: products.productExternalArticleNumber,
-      productInventoryBalance: products.productInventoryBalance,
-      productSupplierArticleNumber: products.productSupplierArticleNumber,
-      productUpdateRelatedData: products.productUpdateRelatedData,
-      createdAt: products.createdAt,
-      updatedAt: products.updatedAt,
-    })
+    .returning()
   return newProduct
     ? {
-        productCategoryID: ServiceCategoryID(newProduct.productCategoryID),
+        productCategoryID: ProductCategoryID(newProduct.productCategoryID),
         productItemNumber: ProductItemNumber(newProduct.productItemNumber),
         productAward: ProductAward(newProduct.productAward),
         productCost: ProductCost(newProduct.productCost),
-        productDescription: ProductDescription(newProduct.productDescription),
-        productExternalArticleNumber: ProductExternalArticleNumber(
-          newProduct.productExternalArticleNumber,
-        ),
-        productInventoryBalance: ProductInventoryBalance(newProduct.productInventoryBalance),
-        productSupplierArticleNumber: ProductSupplierArticleNumber(
-          newProduct.productSupplierArticleNumber,
-        ),
-        productUpdateRelatedData: ProductUpdateRelatedData(newProduct.productUpdateRelatedData),
+        productDescription: newProduct.productDescription
+          ? ProductDescription(newProduct.productDescription)
+          : undefined,
+        productExternalArticleNumber: newProduct.productExternalArticleNumber
+          ? ProductExternalArticleNumber(newProduct.productExternalArticleNumber)
+          : undefined,
+        productInventoryBalance: newProduct.productInventoryBalance
+          ? ProductInventoryBalance(newProduct.productInventoryBalance)
+          : undefined,
+        productSupplierArticleNumber: newProduct.productSupplierArticleNumber
+          ? ProductSupplierArticleNumber(newProduct.productSupplierArticleNumber)
+          : undefined,
+        productUpdateRelatedData: newProduct.productUpdateRelatedData
+          ? ProductUpdateRelatedData(newProduct.productUpdateRelatedData)
+          : undefined,
         createdAt: newProduct.createdAt,
         updatedAt: newProduct.updatedAt,
       }
@@ -125,19 +122,25 @@ export async function editProduct(data: ProductAddType): Promise<ProductEdit | u
 
   return editProduct
     ? {
-        productCategoryID: ServiceCategoryID(editProduct.productCategoryID),
+        productCategoryID: ProductCategoryID(editProduct.productCategoryID),
         productItemNumber: ProductItemNumber(editProduct.productItemNumber),
         productAward: ProductAward(editProduct.productAward),
         productCost: ProductCost(editProduct.productCost),
-        productDescription: ProductDescription(editProduct.productDescription),
-        productExternalArticleNumber: ProductExternalArticleNumber(
-          editProduct.productExternalArticleNumber,
-        ),
-        productInventoryBalance: ProductInventoryBalance(editProduct.productInventoryBalance),
-        productSupplierArticleNumber: ProductSupplierArticleNumber(
-          editProduct.productSupplierArticleNumber,
-        ),
-        productUpdateRelatedData: ProductUpdateRelatedData(editProduct.productUpdateRelatedData),
+        productDescription: editProduct.productDescription
+          ? ProductDescription(editProduct.productDescription)
+          : undefined,
+        productExternalArticleNumber: editProduct.productExternalArticleNumber
+          ? ProductExternalArticleNumber(editProduct.productExternalArticleNumber)
+          : undefined,
+        productInventoryBalance: editProduct.productInventoryBalance
+          ? ProductInventoryBalance(editProduct.productInventoryBalance)
+          : undefined,
+        productSupplierArticleNumber: editProduct.productSupplierArticleNumber
+          ? ProductSupplierArticleNumber(editProduct.productSupplierArticleNumber)
+          : undefined,
+        productUpdateRelatedData: editProduct.productUpdateRelatedData
+          ? ProductUpdateRelatedData(editProduct.productUpdateRelatedData)
+          : undefined,
       }
     : undefined
 }
@@ -154,7 +157,9 @@ export async function deleteProductByItemNumber(
 }
 
 //Get product by Id,
-export async function getProductById(productItemNumber: ProductItemNumber) {
+export async function getProductById(
+  productItemNumber: ProductItemNumber,
+): Promise<Product | undefined> {
   const [productData] = await db
     .select({
       productCategoryID: products.productCategoryID,
@@ -173,19 +178,25 @@ export async function getProductById(productItemNumber: ProductItemNumber) {
     .where(eq(products.productItemNumber, productItemNumber))
   return productData
     ? {
-        productCategoryID: ServiceCategoryID(productData.productCategoryID),
+        productCategoryID: ProductCategoryID(productData.productCategoryID),
         productItemNumber: ProductItemNumber(productData.productItemNumber),
         productAward: ProductAward(productData.productAward),
         productCost: ProductCost(productData.productCost),
-        productDescription: ProductDescription(productData.productDescription),
-        productExternalArticleNumber: ProductExternalArticleNumber(
-          productData.productExternalArticleNumber,
-        ),
-        productInventoryBalance: ProductInventoryBalance(productData.productInventoryBalance),
-        productSupplierArticleNumber: ProductSupplierArticleNumber(
-          productData.productSupplierArticleNumber,
-        ),
-        productUpdateRelatedData: ProductUpdateRelatedData(productData.productUpdateRelatedData),
+        productDescription: productData.productDescription
+          ? ProductDescription(productData.productDescription)
+          : undefined,
+        productExternalArticleNumber: productData.productExternalArticleNumber
+          ? ProductExternalArticleNumber(productData.productExternalArticleNumber)
+          : undefined,
+        productInventoryBalance: productData.productInventoryBalance
+          ? ProductInventoryBalance(productData.productInventoryBalance)
+          : undefined,
+        productSupplierArticleNumber: productData.productSupplierArticleNumber
+          ? ProductSupplierArticleNumber(productData.productSupplierArticleNumber)
+          : undefined,
+        productUpdateRelatedData: productData.productUpdateRelatedData
+          ? ProductUpdateRelatedData(productData.productUpdateRelatedData)
+          : undefined,
         createdAt: productData.createdAt,
         updatedAt: productData.updatedAt,
       }
@@ -218,7 +229,7 @@ export async function getProductsPaginated(
     const productList = await tx
       .select({
         productId: products.productId,
-        serviceCategoryID: products.productCategoryID,
+        productCategoryID: products.productCategoryID,
         productItemNumber: products.productItemNumber,
         productAward: products.productAward,
         productCost: products.productCost,
@@ -242,15 +253,25 @@ export async function getProductsPaginated(
   const ProductsBrandedList = returnData.productList.map((item) => {
     return {
       productId: item.productId,
-      productCategoryID: ServiceCategoryID(item.serviceCategoryID),
+      productCategoryID: ProductCategoryID(item.productCategoryID),
       productItemNumber: ProductItemNumber(item.productItemNumber),
       productAward: ProductAward(item.productAward),
       productCost: ProductCost(item.productCost),
-      productDescription: ProductDescription(item.productDescription),
-      productExternalArticleNumber: ProductExternalArticleNumber(item.productExternalArticleNumber),
-      productInventoryBalance: ProductInventoryBalance(item.productInventoryBalance),
-      productSupplierArticleNumber: ProductSupplierArticleNumber(item.productSupplierArticleNumber),
-      productUpdateRelatedData: ProductUpdateRelatedData(item.productUpdateRelatedData),
+      productDescription: item.productDescription
+        ? ProductDescription(item.productDescription)
+        : undefined,
+      productExternalArticleNumber: item.productExternalArticleNumber
+        ? ProductExternalArticleNumber(item.productExternalArticleNumber)
+        : undefined,
+      productInventoryBalance: item.productInventoryBalance
+        ? ProductInventoryBalance(item.productInventoryBalance)
+        : undefined,
+      productSupplierArticleNumber: item.productSupplierArticleNumber
+        ? ProductSupplierArticleNumber(item.productSupplierArticleNumber)
+        : undefined,
+      productUpdateRelatedData: item.productUpdateRelatedData
+        ? ProductUpdateRelatedData(item.productUpdateRelatedData)
+        : undefined,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
     }

@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 
 import {
+  CreateProductCategory,
   ProductCategory,
   ProductCategoryDescription,
   ProductCategoryID,
@@ -246,7 +247,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   // Get Product category
   fastify.get<{ Params: getServiceCategoryByIDType }>(
-    '/product/:id',
+    '/product/:productID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('view_product_category')
@@ -264,7 +265,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id = request.params.id
+      const id = ProductCategoryID(request.params.id)
       const productCategory = await getProductCategoryByID(id)
       if (productCategory == undefined || productCategory == null) {
         return reply.status(404).send({ message: 'Product Category not found' })
@@ -275,7 +276,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   //Get service category by id
   fastify.get<{ Params: getServiceCategoryByIDType }>(
-    '/service/:id',
+    '/service/:serviceID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('view_service_category')
@@ -293,7 +294,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id = request.params.id
+      const id = ServiceCategoryID(request.params.id)
       const serviceCategory = await getServiceCategoryByID(id)
       if (serviceCategory == undefined || serviceCategory == null) {
         return reply.status(404).send({ message: 'Service Category not found' })
@@ -307,7 +308,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     Reply: object
     Params: getServiceCategoryByIDType
   }>(
-    '/service/:id',
+    '/service/:serviceID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('update_service_category')
@@ -332,11 +333,16 @@ export async function serviceCategory(fastify: FastifyInstance) {
           .status(422)
           .send({ message: 'Provide at least one required property to update.' })
       } else {
-        const id: ServiceCategoryID = ServiceCategoryID(request.params.id)
-
         const serviceCategory: UpdatedServiceCategory | undefined = await updateServiceCategoryByID(
-          id,
-          serviceCategoryData as PatchServiceCategorySchemaType,
+          {
+            serviceCategoryID: ServiceCategoryID(request.params.id),
+            serviceCategoryName: request.body.name
+              ? ServiceCategoryName(request.body.name)
+              : undefined,
+            ServiceCategoryDescription: request.body.description
+              ? ServiceCategoryDescription(request.body.description)
+              : undefined,
+          },
         )
         if (serviceCategory == null) {
           return reply.status(404).send({ message: 'Service Category not found' })
@@ -352,7 +358,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     Reply: object
     Params: getServiceCategoryByIDType
   }>(
-    '/product/:id',
+    '/product/:productID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('update_product_category')
@@ -371,17 +377,23 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const productCategoryData = request.body
-      if (!(productCategoryData.name as string) && !(productCategoryData.description as string)) {
+      if (!(request.body.name as string) && !(request.body.description as string)) {
         return reply
           .status(422)
           .send({ message: 'Provide at least one required property to update.' })
       } else {
         const id: ProductCategoryID = ProductCategoryID(request.params.id)
-
+        const productCategoryName = ProductCategoryName(request.body.name)
+        const productCategoryDescription = request.body.description
+          ? ProductCategoryDescription(request.body.description)
+          : undefined
+        const makeProductCategory: CreateProductCategory = {
+          productCategoryID: id,
+          productCategoryName: productCategoryName,
+          productCategoryDescription: productCategoryDescription,
+        }
         const productCategory: UpdatedProductCategory | undefined = await updateProductCategoryByID(
-          id,
-          productCategoryData as PatchServiceCategorySchemaType,
+          makeProductCategory,
         )
         if (productCategory == null) {
           return reply.status(404).send({ message: 'product Category not found' })
@@ -393,7 +405,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   //Delete service category
   fastify.delete<{ Params: getServiceCategoryByIDType }>(
-    '/service/:id',
+    '/service/:serviceID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('delete_service_category')
@@ -422,7 +434,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   //Delete product category
   fastify.delete<{ Params: getServiceCategoryByIDType }>(
-    '/product/:id',
+    '/product/:productID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('delete_product_category')

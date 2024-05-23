@@ -10,14 +10,32 @@ import {
   listServiceOrderByEnum,
   serviceOrderEnum,
 } from './serviceSchema.js'
+
 import {
+  ServiceAward,
+  ServiceCallInterval,
+  ServiceCost,
+  ServiceDay1,
+  ServiceDay2,
+  ServiceDay3,
+  ServiceDay4,
+  ServiceDay5,
+  ServiceExternalArticleNumber,
+  ServiceHidden,
   ServiceID,
+  ServiceIncludeInAutomaticSms,
+  ServiceItemNumber,
+  ServiceName,
   ServiceNoVariant,
+  ServiceSuppliersArticleNumber,
+  ServiceWarrantyCard,
   createService,
   getServiceById,
   getServicesPaginate,
   updateServiceByID,
 } from '../../services/serviceService.js'
+import { ServiceCategoryID } from '../../services/CategoryService.js'
+
 import { PermissionTitle } from '../../services/permissionService.js'
 
 import {
@@ -59,12 +77,13 @@ export async function services(fastify: FastifyInstance) {
         page = 1,
         orderBy = listServiceOrderByEnum.id,
         order = serviceOrderEnum.desc,
-        hidden = true,
+        hidden = false,
       } = request.query
 
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
+      const brandedHidden = ServiceHidden(hidden)
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
       const result = await getServicesPaginate(
         brandedSearch,
@@ -73,7 +92,7 @@ export async function services(fastify: FastifyInstance) {
         offset,
         orderBy,
         order,
-        hidden,
+        brandedHidden,
       )
       const message: ResponseMessage = fastify.responseMessage(
         ModelName('services'),
@@ -84,12 +103,12 @@ export async function services(fastify: FastifyInstance) {
       )
       const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
         requestUrl,
-        result.totalPage,
+        Page(result.totalPage),
         brandedPage,
       )
       const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
         requestUrl,
-        result.totalPage,
+        Page(result.totalPage),
         brandedPage,
       )
 
@@ -124,9 +143,57 @@ export async function services(fastify: FastifyInstance) {
         response: {},
       },
     },
+
     async (request, reply) => {
-      const service = request.body
-      const serviceData = await createService(service)
+      const service = {
+        serviceName: ServiceName(request.body.serviceName),
+        serviceCategoryID: ServiceCategoryID(request.body.serviceCategoryID),
+        serviceIncludeInAutomaticSms: ServiceIncludeInAutomaticSms(
+          request.body.serviceIncludeInAutomaticSms,
+        ),
+        serviceHidden: request.body.serviceHidden
+          ? ServiceHidden(request.body.serviceHidden)
+          : undefined,
+        serviceCallInterval: ServiceCallInterval(request.body.serviceCallInterval),
+        serviceColorForService: request.body.serviceColorForService
+          ? request.body.serviceColorForService
+          : undefined,
+        serviceWarrantyCard: request.body.serviceWarrantyCard
+          ? ServiceWarrantyCard(request.body.serviceWarrantyCard)
+          : undefined,
+        serviceItemNumber: request.body.serviceItemNumber
+          ? ServiceItemNumber(request.body.serviceItemNumber)
+          : undefined,
+        serviceSuppliersArticleNumber: request.body.serviceSuppliersArticleNumber
+          ? ServiceSuppliersArticleNumber(request.body.serviceSuppliersArticleNumber)
+          : undefined,
+        serviceExternalArticleNumber: request.body.serviceExternalArticleNumber
+          ? ServiceExternalArticleNumber(request.body.serviceExternalArticleNumber)
+          : undefined,
+        serviceVariants: request.body.serviceVariants.map((serviceVariant) => {
+          return {
+            serviceName: ServiceName(serviceVariant.name),
+            serviceAward: ServiceAward(serviceVariant.award),
+            serviceCost: ServiceCost(serviceVariant.cost),
+            serviceDay1: serviceVariant.serviceDay1
+              ? ServiceDay1(serviceVariant.serviceDay1)
+              : undefined,
+            serviceDay2: serviceVariant.serviceDay2
+              ? ServiceDay2(serviceVariant.serviceDay2)
+              : undefined,
+            serviceDay3: serviceVariant.serviceDay3
+              ? ServiceDay3(serviceVariant.serviceDay3)
+              : undefined,
+            serviceDay4: serviceVariant.serviceDay4
+              ? ServiceDay4(serviceVariant.serviceDay4)
+              : undefined,
+            serviceDay5: serviceVariant.serviceDay5
+              ? ServiceDay5(serviceVariant.serviceDay5)
+              : undefined,
+          }
+        }),
+      }
+      const serviceData: ServiceID = await createService(service)
       reply.status(201).send({ message: 'Service created', data: serviceData })
     },
   )
@@ -135,7 +202,7 @@ export async function services(fastify: FastifyInstance) {
     Reply: object
     Params: getServiceByIDSchemaType
   }>(
-    '/:id',
+    '/:serviceID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('update_service')
@@ -154,12 +221,58 @@ export async function services(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const serviceData = request.body
-      if (Object.keys(serviceData).length == 0) {
+      if (Object.keys(request.body).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-
-      const service = await updateServiceByID(ServiceID(request.params.id), serviceData)
+      const serviceData = {
+        serviceName: ServiceName(request.body.serviceName),
+        serviceCategoryID: ServiceCategoryID(request.body.serviceCategoryID),
+        serviceIncludeInAutomaticSms: ServiceIncludeInAutomaticSms(
+          request.body.serviceIncludeInAutomaticSms,
+        ),
+        serviceHidden: request.body.serviceHidden
+          ? ServiceHidden(request.body.serviceHidden)
+          : undefined,
+        serviceCallInterval: ServiceCallInterval(request.body.serviceCallInterval),
+        serviceColorForService: request.body.serviceColorForService
+          ? request.body.serviceColorForService
+          : undefined,
+        serviceWarrantyCard: request.body.serviceWarrantyCard
+          ? ServiceWarrantyCard(request.body.serviceWarrantyCard)
+          : undefined,
+        serviceItemNumber: request.body.serviceItemNumber
+          ? ServiceItemNumber(request.body.serviceItemNumber)
+          : undefined,
+        serviceSuppliersArticleNumber: request.body.serviceSuppliersArticleNumber
+          ? ServiceSuppliersArticleNumber(request.body.serviceSuppliersArticleNumber)
+          : undefined,
+        serviceExternalArticleNumber: request.body.serviceExternalArticleNumber
+          ? ServiceExternalArticleNumber(request.body.serviceExternalArticleNumber)
+          : undefined,
+        serviceVariants: request.body.serviceVariants.map((serviceVariant) => {
+          return {
+            serviceName: ServiceName(serviceVariant.name),
+            serviceAward: ServiceAward(serviceVariant.award),
+            serviceCost: ServiceCost(serviceVariant.cost),
+            serviceDay1: serviceVariant.serviceDay1
+              ? ServiceDay1(serviceVariant.serviceDay1)
+              : undefined,
+            serviceDay2: serviceVariant.serviceDay2
+              ? ServiceDay2(serviceVariant.serviceDay2)
+              : undefined,
+            serviceDay3: serviceVariant.serviceDay3
+              ? ServiceDay3(serviceVariant.serviceDay3)
+              : undefined,
+            serviceDay4: serviceVariant.serviceDay4
+              ? ServiceDay4(serviceVariant.serviceDay4)
+              : undefined,
+            serviceDay5: serviceVariant.serviceDay5
+              ? ServiceDay5(serviceVariant.serviceDay5)
+              : undefined,
+          }
+        }),
+      }
+      const service = await updateServiceByID(ServiceID(request.params.serviceID), serviceData)
       if (service == undefined) {
         return reply.status(404).send({ message: 'Service not found' })
       }
@@ -168,7 +281,7 @@ export async function services(fastify: FastifyInstance) {
   )
 
   fastify.get<{ Params: getServiceByIDSchemaType }>(
-    '/:id',
+    '/:serviceID',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
@@ -182,7 +295,7 @@ export async function services(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id = ServiceID(request.params.id)
+      const id = ServiceID(request.params.serviceID)
       const user: ServiceNoVariant | undefined = await getServiceById(id)
       if (user == null) {
         return reply.status(404).send({ message: 'user not found' })

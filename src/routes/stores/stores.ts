@@ -21,7 +21,6 @@ import {
   FridayClose,
   FridayNote,
   FridayOpen,
-  FromDate,
   MondayClose,
   MondayNote,
   MondayOpen,
@@ -66,7 +65,6 @@ import {
   ThursdayClose,
   ThursdayNote,
   ThursdayOpen,
-  ToDate,
   TuesdayClose,
   TuesdayNote,
   TuesdayOpen,
@@ -161,14 +159,20 @@ export async function stores(fastify: FastifyInstance) {
       const week: Week = Week(new Date(request.body.week))
       const notes: Notes = {
         storeID: StoreID(request.body.storeID),
-        weekNote: WeekNote(request.body.weekNote),
-        mondayNote: MondayNote(request.body.mondayNote),
-        tuesdayNote: TuesdayNote(request.body.tuesdayNote),
-        wednesdayNote: WednesdayNote(request.body.wednesdayNote),
-        thursdayNote: ThursdayNote(request.body.thursdayNote),
-        fridayNote: FridayNote(request.body.fridayNote),
-        saturdayNote: SaturdayNote(request.body.saturdayNote),
-        sundayNote: SundayNote(request.body.sundayNote),
+        weekNote: request.body.weekNote ? WeekNote(request.body.weekNote) : undefined,
+        mondayNote: request.body.mondayNote ? MondayNote(request.body.mondayNote) : undefined,
+        tuesdayNote: request.body.tuesdayNote ? TuesdayNote(request.body.tuesdayNote) : undefined,
+        wednesdayNote: request.body.wednesdayNote
+          ? WednesdayNote(request.body.wednesdayNote)
+          : undefined,
+        thursdayNote: request.body.thursdayNote
+          ? ThursdayNote(request.body.thursdayNote)
+          : undefined,
+        fridayNote: request.body.fridayNote ? FridayNote(request.body.fridayNote) : undefined,
+        saturdayNote: request.body.saturdayNote
+          ? SaturdayNote(request.body.saturdayNote)
+          : undefined,
+        sundayNote: request.body.sundayNote ? SundayNote(request.body.sundayNote) : undefined,
       }
 
       const maybeWeekNotes: { notes: Notes; week: Week } | undefined = await updateWeeklyNotes(
@@ -601,28 +605,34 @@ export async function stores(fastify: FastifyInstance) {
     async (request, reply) => {
       const storeID = StoreID(request.body.storeID)
       const store: WeekOpeningHoursCreate = {
-        mondayOpen: MondayOpen(request.body.mondayOpen ? request.body.mondayOpen : null),
-        mondayClose: MondayClose(request.body.mondayClose ? request.body.mondayClose : null),
-        tuesdayOpen: TuesdayOpen(request.body.tuesdayOpen ? request.body.tuesdayOpen : null),
-        tuesdayClose: TuesdayClose(request.body.tuesdayClose ? request.body.tuesdayClose : null),
-        wednesdayOpen: WednesdayOpen(
-          request.body.wednesdayOpen ? request.body.wednesdayOpen : null,
-        ),
-        wednesdayClose: WednesdayClose(
-          request.body.wednesdayClose ? request.body.wednesdayClose : null,
-        ),
-        thursdayOpen: ThursdayOpen(request.body.thursdayOpen ? request.body.thursdayOpen : null),
-        thursdayClose: ThursdayClose(
-          request.body.thursdayClose ? request.body.thursdayClose : null,
-        ),
-        fridayOpen: FridayOpen(request.body.fridayOpen ? request.body.fridayOpen : null),
-        fridayClose: FridayClose(request.body.fridayClose ? request.body.fridayClose : null),
-        saturdayOpen: SaturdayOpen(request.body.saturdayOpen ? request.body.saturdayOpen : null),
-        saturdayClose: SaturdayClose(
-          request.body.saturdayClose ? request.body.saturdayClose : null,
-        ),
-        sundayOpen: SundayOpen(request.body.sundayOpen ? request.body.sundayOpen : null),
-        sundayClose: SundayClose(request.body.sundayClose ? request.body.sundayClose : null),
+        mondayOpen: request.body.mondayOpen ? MondayOpen(request.body.mondayOpen) : undefined,
+        mondayClose: request.body.mondayClose ? MondayClose(request.body.mondayClose) : undefined,
+        tuesdayOpen: request.body.tuesdayOpen ? TuesdayOpen(request.body.tuesdayOpen) : undefined,
+        tuesdayClose: request.body.tuesdayClose
+          ? TuesdayClose(request.body.tuesdayClose)
+          : undefined,
+        wednesdayOpen: request.body.wednesdayOpen
+          ? WednesdayOpen(request.body.wednesdayOpen)
+          : undefined,
+        wednesdayClose: request.body.wednesdayClose
+          ? WednesdayClose(request.body.wednesdayClose)
+          : undefined,
+        thursdayOpen: request.body.thursdayOpen
+          ? ThursdayOpen(request.body.thursdayOpen)
+          : undefined,
+        thursdayClose: request.body.thursdayClose
+          ? ThursdayClose(request.body.thursdayClose)
+          : undefined,
+        fridayOpen: request.body.fridayOpen ? FridayOpen(request.body.fridayOpen) : undefined,
+        fridayClose: request.body.fridayClose ? FridayClose(request.body.fridayClose) : undefined,
+        saturdayOpen: request.body.saturdayOpen
+          ? SaturdayOpen(request.body.saturdayOpen)
+          : undefined,
+        saturdayClose: request.body.saturdayClose
+          ? SaturdayClose(request.body.saturdayClose)
+          : undefined,
+        sundayOpen: request.body.sundayOpen ? SundayOpen(request.body.sundayOpen) : undefined,
+        sundayClose: request.body.sundayClose ? SundayClose(request.body.sundayClose) : undefined,
       }
 
       const updatedHours: WeekOpeningHours | undefined = await updateWeeklyOpeningHours(
@@ -812,8 +822,8 @@ export async function stores(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const storeID: StoreID = StoreID(request.query.storeID)
-      const from: FromDate = FromDate(new Date(request.query.from))
-      const to: ToDate = ToDate(new Date(request.query.to))
+      const from: Day = Day(new Date(request.query.from))
+      const to: Day = Day(new Date(request.query.to))
 
       const openingHours: OpeningHours | undefined = await getOpeningHours(storeID, from, to)
       if (openingHours == null) {

@@ -98,7 +98,7 @@ export const customers = async (fastify: FastifyInstance) => {
         querystring: ListCustomersQueryParamSchema,
       },
     },
-    async function (request, _) {
+    async function (request) {
       const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
@@ -345,7 +345,7 @@ export const customers = async (fastify: FastifyInstance) => {
         querystring: ListDriversQueryParamSchema,
       },
     },
-    async function (request, _) {
+    async function (request) {
       const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
@@ -409,7 +409,7 @@ export const customers = async (fastify: FastifyInstance) => {
         querystring: ListDriversCompanyQueryParamSchema,
       },
     },
-    async function (request, _) {
+    async function (request) {
       const { search = '', limit = 10, page = 1, companyOrgNumber } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
@@ -420,7 +420,7 @@ export const customers = async (fastify: FastifyInstance) => {
         brandedLimit,
         brandedPage,
         offset,
-        companyOrgNumber,
+        CustomerOrgNumber(companyOrgNumber),
       )
 
       const message: ResponseMessage = fastify.responseMessage(

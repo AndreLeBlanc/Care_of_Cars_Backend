@@ -191,22 +191,23 @@ export async function users(fastify: FastifyInstance) {
       }
       const match = await bcrypt.compare(password, userWithPassword.userPassword)
       if (match) {
-        const { userPassword, ...user } = userWithPassword
-        const token = fastify.jwt.sign({ user })
-        const rolePermissions = await getRoleWithPermissions(RoleID(user.role.roleID))
-        const roleFullPermissions = await getAllPermissionStatus(RoleID(user.role.roleID))
+        const token = fastify.jwt.sign({ userWithPassword })
+        const rolePermissions = await getRoleWithPermissions(RoleID(userWithPassword.role.roleID))
+        const roleFullPermissions = await getAllPermissionStatus(
+          RoleID(userWithPassword.role.roleID),
+        )
         return reply.status(200).send({
           message: 'Login success',
           token: token,
           user: {
-            id: user.userID,
-            firstName: user.userFirstName,
-            lastName: user.userLastName,
-            email: user.userEmail,
-            isSuperAdmin: user.isSuperAdmin,
+            id: userWithPassword.userID,
+            firstName: userWithPassword.userFirstName,
+            lastName: userWithPassword.userLastName,
+            email: userWithPassword.userEmail,
+            isSuperAdmin: userWithPassword.isSuperAdmin,
             role: {
-              id: user.role.roleID,
-              roleName: user.role.roleName,
+              id: userWithPassword.role.roleID,
+              roleName: userWithPassword.role.roleName,
               rolePermissions: rolePermissions,
               roleFullPermissions: roleFullPermissions,
             },
@@ -258,22 +259,14 @@ export async function users(fastify: FastifyInstance) {
       if (Object.keys(userData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id = UserID(request.params.userID)
-      if (userData?.password) {
-        const isStrongPass: boolean = await isStrongPassword(UserPassword(userData.password))
-        if (!isStrongPass) {
-          return reply.status(422).send({ message: 'Provide a strong password' })
-        }
-        userData.password = await generatePasswordHash(UserPassword(userData.password))
-      }
       const patchData = {
         firstName: UserFirstName(userData.firstName),
         lastName: UserLastName(userData.lastName),
-        userID: id,
+        userID: UserID(request.params.userID),
         email: UserEmail(userData.email),
       }
 
-      const user: UserInfo = await updateUserByID(id, patchData)
+      const user: UserInfo = await updateUserByID(patchData)
       if (user === undefined) {
         return reply.status(404).send({ message: 'user not found' })
       }
@@ -325,7 +318,7 @@ export async function users(fastify: FastifyInstance) {
   )
 
   fastify.delete<{ Params: GetUserByIDSchemaType }>(
-    '/:id',
+    '/:userID',
     {
       preHandler: async (request, reply, done) => {
         fastify.authorize(request, reply, PermissionTitle('delete_user'))

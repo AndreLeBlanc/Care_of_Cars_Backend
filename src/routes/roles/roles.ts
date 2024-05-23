@@ -123,7 +123,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     },
   )
   fastify.get<{ Params: getRoleByIDType }>(
-    '/:id',
+    '/:roleID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('view_role')
@@ -155,7 +155,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     Reply: object
     Params: getRoleByIDType
   }>(
-    '/:id',
+    '/:roleID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('update_role')
@@ -174,13 +174,17 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      const roleData = request.body
-      if (Object.keys(roleData).length == 0) {
+      if (Object.keys(request.body).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id: RoleID = RoleID(request.params.roleID)
+      const role: Role = await updateRoleByID({
+        roleID: RoleID(request.params.roleID),
+        roleDescription: request.body.description
+          ? RoleDescription(request.body.description)
+          : null,
+        roleName: RoleName(request.body.roleName),
+      })
 
-      const role: Role = await updateRoleByID(id, roleData)
       if (role == null) {
         return reply.status(404).send({ message: 'role not found' })
       }
@@ -188,7 +192,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
     },
   )
   fastify.delete<{ Params: getRoleByIDType }>(
-    '/:id',
+    '/:roleID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('delete_role')

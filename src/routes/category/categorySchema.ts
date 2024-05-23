@@ -21,7 +21,7 @@ export const getServiceCategoryByIDSchema = Type.Object({
 export type getServiceCategoryByIDType = Static<typeof getServiceCategoryByIDSchema>
 
 export const PatchServiceCategorySchema = Type.Object({
-  name: Type.Optional(Type.String()),
+  name: Type.String(),
   description: Type.Optional(Type.String()),
 })
 export type PatchServiceCategorySchemaType = Static<typeof PatchServiceCategorySchema>
