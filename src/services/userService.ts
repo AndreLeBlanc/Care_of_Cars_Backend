@@ -1,9 +1,9 @@
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
-import { db } from '../config/db-connect.js'
+import { db } from '../config/db-connect'
 
-import { roles, userBelongsToStore, users } from '../schema/schema.js'
+import { roles, userBelongsToStore, users } from '../schema/schema'
 
 import { RoleID, RoleName } from './roleService.js'
 

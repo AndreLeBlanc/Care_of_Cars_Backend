@@ -1,7 +1,7 @@
-//import Dinero from 'dinero.js'
+//import Dinero from 'dinero'
 //import { SEK } from '@dinero.js/currencies'
 
-import { RoleDescription, RoleID, RoleName } from '../services/roleService.js'
+import { RoleDescription, RoleID, RoleName } from '../services/roleService'
 
 //import { Brand, make } from 'ts-brand'
 
@@ -28,13 +28,9 @@ import {
   UserID,
   UserLastName,
   UserPassword,
-} from '../services/userService.js'
+} from '../services/userService'
 
-import {
-  PermissionDescription,
-  PermissionID,
-  PermissionTitle,
-} from '../services/permissionService.js'
+import { PermissionDescription, PermissionID, PermissionTitle } from '../services/permissionService'
 
 import {
   ProductCategoryDescription,
@@ -43,7 +39,7 @@ import {
   ServiceCategoryDescription,
   ServiceCategoryID,
   ServiceCategoryName,
-} from '../services/CategoryService.js'
+} from '../services/CategoryService'
 
 import {
   ProductDescription,
@@ -53,7 +49,7 @@ import {
   ProductItemNumber,
   ProductSupplierArticleNumber,
   ProductUpdateRelatedData,
-} from '../services/productService.js'
+} from '../services/productService'
 
 import {
   ServiceAward,
@@ -72,7 +68,7 @@ import {
   ServiceName,
   ServiceSuppliersArticleNumber,
   ServiceWarrantyCard,
-} from '../services/serviceService.js'
+} from '../services/serviceService'
 
 import {
   CompanyAddress,
@@ -100,7 +96,7 @@ import {
   DriverNotesShared,
   DriverPhoneNumber,
   DriverZipCode,
-} from '../services/customerService.js'
+} from '../services/customerService'
 
 import {
   Day,
@@ -150,7 +146,7 @@ import {
   WednesdayOpen,
   Week,
   WeekNote,
-} from '../services/storeService.js'
+} from '../services/storeService'
 
 import {
   RentCarColor,
@@ -159,7 +155,7 @@ import {
   RentCarNumber,
   RentCarRegistrationNumber,
   RentCarYear,
-} from '../services/rentCarService.js'
+} from '../services/rentCarService'
 import { relations } from 'drizzle-orm'
 
 import {
@@ -180,14 +176,14 @@ import {
   unique,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { StoreZipCode } from '../services/storeService.js'
+import { StoreZipCode } from '../services/storeService'
 
 import {
   GlobalQualID,
   GlobalQualName,
   LocalQualID,
   LocalQualName,
-} from '../services/qualificationsService.js'
+} from '../services/qualificationsService'
 
 export type DbDateType = {
   createdAt: Date
