@@ -1,11 +1,11 @@
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
-import { db } from '../config/db-connect'
+import { db } from '../config/db-connect.js'
 
-import { RoleID, RoleName, StoreID, roles, userBelongsToStore, users } from '../schema/schema'
+import { RoleID, RoleName, StoreID, roles, userBelongsToStore, users } from '../schema/schema.js'
 
-import { Limit, Offset, Page, Search } from '../plugins/pagination'
+import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 import {
   IsSuperAdmin,

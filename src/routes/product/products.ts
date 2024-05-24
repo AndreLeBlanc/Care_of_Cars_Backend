@@ -7,7 +7,7 @@ import {
   addProductBody,
   deleteProduct,
   deleteProductType,
-} from './productSchema'
+} from './productSchema.js'
 
 import {
   Product,
@@ -19,7 +19,7 @@ import {
   editProduct,
   getProductById,
   getProductsPaginated,
-} from '../../services/productService'
+} from '../../services/productService.js'
 
 import {
   Limit,
@@ -32,7 +32,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination'
+} from '../../plugins/pagination.js'
 import {
   PermissionTitle,
   ProductAward,
@@ -44,7 +44,7 @@ import {
   ProductItemNumber,
   ProductSupplierArticleNumber,
   ProductUpdateRelatedData,
-} from '../../schema/schema'
+} from '../../schema/schema.js'
 
 export const productsRoute = async (fastify: FastifyInstance) => {
   fastify.post<{ Body: AddProductType; Reply: object }>(

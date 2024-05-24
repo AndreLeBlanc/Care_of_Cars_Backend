@@ -8,7 +8,7 @@ import {
   ServiceCategoryDescription,
   ServiceCategoryID,
   ServiceCategoryName,
-} from '../../schema/schema'
+} from '../../schema/schema.js'
 
 import {
   CreateProductCategory,
@@ -28,7 +28,7 @@ import {
   getServiceCategoryByID,
   updateProductCategoryByID,
   updateServiceCategoryByID,
-} from '../../services/CategoryService'
+} from '../../services/CategoryService.js'
 
 import {
   CreateServiceCategorySchema,
@@ -39,7 +39,7 @@ import {
   PatchServiceCategorySchemaType,
   getServiceCategoryByIDSchema,
   getServiceCategoryByIDType,
-} from './categorySchema'
+} from './categorySchema.js'
 
 import {
   Limit,
@@ -52,7 +52,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination'
+} from '../../plugins/pagination.js'
 
 export async function serviceCategory(fastify: FastifyInstance) {
   //Get service categories

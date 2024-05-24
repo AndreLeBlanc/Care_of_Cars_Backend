@@ -8,8 +8,8 @@ import {
   UserID,
   userGlobalQualifications,
   userLocalQualifications,
-} from '../schema/schema'
-import { db } from '../config/db-connect'
+} from '../schema/schema.js'
+import { db } from '../config/db-connect.js'
 
 import { count, eq } from 'drizzle-orm'
 

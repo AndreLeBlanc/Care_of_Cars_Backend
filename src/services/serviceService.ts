@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm'
-import { db } from '../config/db-connect'
+import { db } from '../config/db-connect.js'
 
-import { listServiceOrderByEnum, serviceOrderEnum } from '../routes/services/serviceSchema'
+import { listServiceOrderByEnum, serviceOrderEnum } from '../routes/services/serviceSchema.js'
 
 import {
   ServiceAward,
@@ -25,9 +25,9 @@ import {
   serviceCategories,
   serviceVariants,
   services,
-} from '../schema/schema'
+} from '../schema/schema.js'
 
-import { Limit, Offset, Page, Search } from '../plugins/pagination'
+import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 export type updateServiceVariant = {
   serviceID?: ServiceID

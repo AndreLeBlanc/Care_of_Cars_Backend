@@ -11,11 +11,11 @@ import {
   qualificationsLocal,
   userGlobalQualifications,
   userLocalQualifications,
-} from '../schema/schema'
+} from '../schema/schema.js'
 
-import { Search } from '../plugins/pagination'
+import { Search } from '../plugins/pagination.js'
 
-import { db } from '../config/db-connect'
+import { db } from '../config/db-connect.js'
 
 import { and, eq, ilike } from 'drizzle-orm'
 

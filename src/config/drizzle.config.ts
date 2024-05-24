@@ -1,6 +1,6 @@
 import type { Config } from 'drizzle-kit'
 
-import { ConnectionString, newConnectionString } from './connection-string'
+import { ConnectionString, newConnectionString } from './connection-string.js'
 
 const maybeConnectionString: ConnectionString = newConnectionString()
 let conString: string = ''

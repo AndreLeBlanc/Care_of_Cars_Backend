@@ -9,7 +9,7 @@ import {
   getRoleWithPermissions,
   getRolesPaginate,
   updateRoleByID,
-} from '../../services/roleService'
+} from '../../services/roleService.js'
 import {
   ListRoleQueryParamSchema,
   ListRoleQueryParamSchemaType,
@@ -17,9 +17,9 @@ import {
   RoleSchemaType,
   getRoleByIDSchema,
   getRoleByIDType,
-} from './roleSchema'
-import { PermissionTitle, RoleDescription, RoleID, RoleName } from '../../schema/schema'
-import { RolesPaginated } from '../../services/roleService'
+} from './roleSchema.js'
+import { PermissionTitle, RoleDescription, RoleID, RoleName } from '../../schema/schema.js'
+import { RolesPaginated } from '../../services/roleService.js'
 
 import {
   Limit,
@@ -32,7 +32,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination'
+} from '../../plugins/pagination.js'
 export async function roles(fastify: FastifyInstance): Promise<void> {
   fastify.get<{ Querystring: ListRoleQueryParamSchemaType }>(
     '/',

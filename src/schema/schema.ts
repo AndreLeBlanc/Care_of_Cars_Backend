@@ -1,4 +1,4 @@
-import { PositiveInteger } from '../utils/helper'
+import { PositiveInteger } from '../utils/helper.js'
 
 import { Brand, make } from 'ts-brand'
 

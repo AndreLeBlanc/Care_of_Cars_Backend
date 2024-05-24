@@ -10,7 +10,7 @@ import {
   getServiceByIDSchemaType,
   listServiceOrderByEnum,
   serviceOrderEnum,
-} from './serviceSchema'
+} from './serviceSchema.js'
 
 import {
   ServiceNoVariant,
@@ -18,7 +18,7 @@ import {
   getServiceById,
   getServicesPaginate,
   updateServiceByID,
-} from '../../services/serviceService'
+} from '../../services/serviceService.js'
 
 import {
   PermissionTitle,
@@ -39,7 +39,7 @@ import {
   ServiceName,
   ServiceSuppliersArticleNumber,
   ServiceWarrantyCard,
-} from '../../schema/schema'
+} from '../../schema/schema.js'
 
 import {
   Limit,
@@ -52,7 +52,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination'
+} from '../../plugins/pagination.js'
 
 export async function services(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceQueryParamSchemaType }>(

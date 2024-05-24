@@ -11,7 +11,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination'
+} from '../../plugins/pagination.js'
 
 import {
   Day,
@@ -92,7 +92,7 @@ import {
   updateStoreByStoreID,
   updateWeeklyNotes,
   updateWeeklyOpeningHours,
-} from '../../services/storeService'
+} from '../../services/storeService.js'
 
 import {
   CreateStoreSchema,
@@ -131,7 +131,7 @@ import {
   WeekSchemaType,
   storeReplyMessage,
   storeReplyMessageType,
-} from './storesSchema.'
+} from './storesSchema..js'
 
 export async function stores(fastify: FastifyInstance) {
   fastify.put<{

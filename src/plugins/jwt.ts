@@ -2,7 +2,7 @@ import fp from 'fastify-plugin'
 
 import { FastifyReply } from 'fastify/types/reply'
 import { FastifyRequest } from 'fastify/types/request'
-import { roleHasPermission } from '../services/roleService'
+import { roleHasPermission } from '../services/roleService.js'
 
 import { PermissionTitle, RoleID } from '../schema/schema.js'
 

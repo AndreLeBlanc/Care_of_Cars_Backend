@@ -19,7 +19,7 @@ import {
   getDriverByEmailType,
   patchCompanyBody,
   patchDriverBody,
-} from './customerSchema'
+} from './customerSchema.js'
 
 import {
   Company,
@@ -38,7 +38,7 @@ import {
   getCustomersPaginate,
   getDriverById,
   getDriversPaginate,
-} from '../../services/customerService'
+} from '../../services/customerService.js'
 import {
   Limit,
   ModelName,
@@ -50,7 +50,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination'
+} from '../../plugins/pagination.js'
 
 import {
   CompanyAddress,

@@ -11,11 +11,11 @@ import {
   ProductSupplierArticleNumber,
   ProductUpdateRelatedData,
   products,
-} from '../schema/schema'
-import { db } from '../config/db-connect'
+} from '../schema/schema.js'
+import { db } from '../config/db-connect.js'
 
 import { desc, eq, ilike, or, sql } from 'drizzle-orm'
-import { Offset } from '../plugins/pagination'
+import { Offset } from '../plugins/pagination.js'
 
 export type ProductAddType = {
   productItemNumber: ProductItemNumber

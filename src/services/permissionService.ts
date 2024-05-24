@@ -1,12 +1,17 @@
 import { desc, eq, or, sql } from 'drizzle-orm'
 
-import { db } from '../config/db-connect'
+import { db } from '../config/db-connect.js'
 
-import { PermissionDescription, PermissionID, PermissionTitle, permissions } from '../schema/schema'
+import {
+  PermissionDescription,
+  PermissionID,
+  PermissionTitle,
+  permissions,
+} from '../schema/schema.js'
 
 import { ilike } from 'drizzle-orm'
 
-import { Limit, Offset, Page, Search } from '../plugins/pagination'
+import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 export type PermissionIDDescName = {
   permissionID: PermissionID

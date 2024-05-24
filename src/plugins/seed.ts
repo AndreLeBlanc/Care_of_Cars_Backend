@@ -2,8 +2,8 @@ import fp from 'fastify-plugin'
 
 import * as dotenv from 'dotenv'
 
-import { CreatedRole, createRole } from '../services/roleService'
-import { CreatedUser, createUser, generatePasswordHash } from '../services/userService'
+import { CreatedRole, createRole } from '../services/roleService.js'
+import { CreatedUser, createUser, generatePasswordHash } from '../services/userService.js'
 import {
   IsSuperAdmin,
   RoleDescription,

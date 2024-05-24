@@ -1,5 +1,5 @@
-import { buildApp } from './app'
-import { initDrizzle } from './config/db-connect'
+import { buildApp } from './app.js'
+import { initDrizzle } from './config/db-connect.js'
 
 async function start() {
   console.log('starting')

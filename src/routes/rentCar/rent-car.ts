@@ -44,7 +44,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination'
+} from '../../plugins/pagination.js'
 
 export const rentCar = async (fastify: FastifyInstance) => {
   //Create Rent Cars

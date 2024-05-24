@@ -1,4 +1,4 @@
-import { db } from '../config/db-connect'
+import { db } from '../config/db-connect.js'
 
 import {
   RentCarColor,
@@ -9,10 +9,10 @@ import {
   RentCarYear,
   StoreID,
   rentcars,
-} from '../schema/schema'
+} from '../schema/schema.js'
 
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
-import { Offset } from '../plugins/pagination'
+import { Offset } from '../plugins/pagination.js'
 
 export type RentCarCreateType = {
   storeID: StoreID

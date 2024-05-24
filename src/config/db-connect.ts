@@ -1,11 +1,11 @@
 import pkg from 'pg'
 const { Pool } = pkg
-import * as schema from '../schema/schema'
+import * as schema from '../schema/schema.js'
 import { migrate } from 'drizzle-orm/node-postgres/migrator'
 
 import { drizzle } from 'drizzle-orm/node-postgres'
 
-import { ConnectionString, newConnectionString } from './connection-string'
+import { ConnectionString, newConnectionString } from './connection-string.js'
 const connectionString: ConnectionString = newConnectionString()
 
 const pool = new Pool({

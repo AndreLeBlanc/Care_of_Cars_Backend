@@ -51,11 +51,11 @@ import {
   stores,
   storespecialhours,
   storeweeklynotes,
-} from '../schema/schema'
+} from '../schema/schema.js'
 
-import { Limit, Offset, Page, Search } from '../plugins/pagination'
+import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
-import { db } from '../config/db-connect'
+import { db } from '../config/db-connect.js'
 
 import { and, between, eq, ilike, or, sql } from 'drizzle-orm'
 

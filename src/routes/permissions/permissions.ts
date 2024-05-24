@@ -9,9 +9,9 @@ import {
   getPermissionByID,
   getPermissionsPaginate,
   updatePermissionByID,
-} from '../../services/permissionService'
+} from '../../services/permissionService.js'
 
-import { PermissionDescription, PermissionID, PermissionTitle } from '../../schema/schema'
+import { PermissionDescription, PermissionID, PermissionTitle } from '../../schema/schema.js'
 
 import {
   CreatePermissionSchema,
@@ -22,7 +22,7 @@ import {
   PatchPermissionSchemaType,
   getPermissionByIDSchema,
   getPermissionByIDType,
-} from './permissionSchema'
+} from './permissionSchema.js'
 import {
   Limit,
   ModelName,
@@ -34,7 +34,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination'
+} from '../../plugins/pagination.js'
 export async function permissions(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(
     '/',

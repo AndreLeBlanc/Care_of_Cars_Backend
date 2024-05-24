@@ -35,14 +35,14 @@ export enum colorForService {
   Red = 'Red',
   None = 'None',
 }
-const colorForServiceType = Type.Enum(colorForService)
+const colorForServiceType = Type.Enum(colorForService, { default: 'None' })
 export const ServiceSchema = Type.Object({
   serviceName: Type.String(),
   serviceCategoryID: Type.Integer(),
   serviceIncludeInAutomaticSms: Type.Boolean(),
   serviceHidden: Type.Optional(Type.Boolean()),
   serviceCallInterval: Type.Integer({ minimum: 1, maximum: 12 }),
-  serviceColorForService: colorForServiceType.default('None'),
+  serviceColorForService: colorForServiceType,
   serviceWarrantyCard: Type.Optional(Type.Boolean({ default: false })),
   serviceItemNumber: Type.Optional(Type.String()),
   serviceSuppliersArticleNumber: Type.Optional(Type.String()),

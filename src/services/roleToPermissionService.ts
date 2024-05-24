@@ -1,8 +1,8 @@
 import { and, eq } from 'drizzle-orm'
 
-import { db } from '../config/db-connect'
+import { db } from '../config/db-connect.js'
 
-import { PermissionID, RoleID, roleToPermissions } from '../schema/schema'
+import { PermissionID, RoleID, roleToPermissions } from '../schema/schema.js'
 
 import { Brand, make } from 'ts-brand'
 

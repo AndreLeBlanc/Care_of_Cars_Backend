@@ -26,13 +26,13 @@ import {
   DriverZipCode,
   companycustomers,
   drivers,
-} from '../schema/schema'
-import { db } from '../config/db-connect'
+} from '../schema/schema.js'
+import { db } from '../config/db-connect.js'
 
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
 
-import { Offset, Search } from '../plugins/pagination'
-import { isEmail } from '../utils/helper'
+import { Offset, Search } from '../plugins/pagination.js'
+import { isEmail } from '../utils/helper.js'
 
 export type CustomerCompanyCreate = {
   customerOrgNumber: CustomerOrgNumber

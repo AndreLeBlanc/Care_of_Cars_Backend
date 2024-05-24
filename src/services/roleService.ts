@@ -1,6 +1,6 @@
 import { desc, eq, or, sql } from 'drizzle-orm'
 
-import { db } from '../config/db-connect'
+import { db } from '../config/db-connect.js'
 
 import {
   PermissionID,
@@ -11,11 +11,11 @@ import {
   permissions,
   roleToPermissions,
   roles,
-} from '../schema/schema'
+} from '../schema/schema.js'
 
 import { ilike } from 'drizzle-orm'
 
-import { Limit, Offset, Page, Search } from '../plugins/pagination'
+import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 type RoleDate = {
   createdAt: Date

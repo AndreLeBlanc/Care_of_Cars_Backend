@@ -22,7 +22,7 @@ import {
   QualificationsGlobalSchemaType,
   QualificationsLocalSchema,
   QualificationsLocalSchemaType,
-} from './qualificationsSchema'
+} from './qualificationsSchema.js'
 
 import {
   CreateQualificationsGlobal,
@@ -43,7 +43,7 @@ import {
   setUserLocalQualification,
   updateGlobalQuals,
   updateLocalQuals,
-} from '../../services/qualificationsService'
+} from '../../services/qualificationsService.js'
 
 import {
   GlobalQualID,
@@ -53,9 +53,9 @@ import {
   PermissionTitle,
   StoreID,
   UserID,
-} from '../../schema/schema'
+} from '../../schema/schema.js'
 
-import { Search } from '../../plugins/pagination'
+import { Search } from '../../plugins/pagination.js'
 
 export const qualificationsRoute = async (fastify: FastifyInstance) => {
   fastify.put<{
