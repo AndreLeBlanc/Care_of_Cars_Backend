@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify'
-import { PermissionTitle } from '../../services/permissionService.js'
 
 import {
   AddProductType,
@@ -8,27 +7,19 @@ import {
   addProductBody,
   deleteProduct,
   deleteProductType,
-} from './productSchema.js'
+} from './productSchema'
 
 import {
   Product,
   ProductAddType,
-  ProductAward,
-  ProductCost,
-  ProductDescription,
   ProductEdit,
-  ProductExternalArticleNumber,
-  ProductInventoryBalance,
-  ProductItemNumber,
-  ProductSupplierArticleNumber,
-  ProductUpdateRelatedData,
   ProductsPaginate,
   addProduct,
   deleteProductByItemNumber,
   editProduct,
   getProductById,
   getProductsPaginated,
-} from '../../services/productService.js'
+} from '../../services/productService'
 
 import {
   Limit,
@@ -41,8 +32,19 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination.js'
-import { ProductCategoryID } from '../../services/CategoryService.js'
+} from '../../plugins/pagination'
+import {
+  PermissionTitle,
+  ProductAward,
+  ProductCategoryID,
+  ProductCost,
+  ProductDescription,
+  ProductExternalArticleNumber,
+  ProductInventoryBalance,
+  ProductItemNumber,
+  ProductSupplierArticleNumber,
+  ProductUpdateRelatedData,
+} from '../../schema/schema'
 
 export const productsRoute = async (fastify: FastifyInstance) => {
   fastify.post<{ Body: AddProductType; Reply: object }>(

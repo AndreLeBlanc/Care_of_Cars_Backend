@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify'
-import { PermissionTitle } from '../../services/permissionService.js'
 
 import {
   Limit,
@@ -12,7 +11,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination.js'
+} from '../../plugins/pagination'
 
 import {
   Day,
@@ -24,12 +23,10 @@ import {
   MondayClose,
   MondayNote,
   MondayOpen,
-  Notes,
-  OpeningHours,
+  PermissionTitle,
   SaturdayClose,
   SaturdayNote,
   SaturdayOpen,
-  Store,
   StoreAddress,
   StoreAllowCarAPI,
   StoreAllowSendSMS,
@@ -37,28 +34,20 @@ import {
   StoreCity,
   StoreContactPerson,
   StoreCountry,
-  StoreCreate,
   StoreDescription,
   StoreEmail,
   StoreID,
   StoreMaxUsers,
-  StoreMaybePaymentOptions,
   StoreName,
   StoreOrgNumber,
-  StorePaymentOptions,
   StorePaymentdays,
   StorePhone,
   StorePlusgiro,
   StoreSendSMS,
-  StoreSpecialHours,
-  StoreSpecialHoursCreate,
   StoreStatus,
-  StoreUpdateCreate,
   StoreUsesCheckin,
   StoreUsesPIN,
-  StoreWithSeparateDates,
   StoreZipCode,
-  StoresPaginated,
   SundayClose,
   SundayNote,
   SundayOpen,
@@ -73,6 +62,20 @@ import {
   WednesdayOpen,
   Week,
   WeekNote,
+} from '../../schema/schema.js'
+
+import {
+  Notes,
+  OpeningHours,
+  Store,
+  StoreCreate,
+  StoreMaybePaymentOptions,
+  StorePaymentOptions,
+  StoreSpecialHours,
+  StoreSpecialHoursCreate,
+  StoreUpdateCreate,
+  StoreWithSeparateDates,
+  StoresPaginated,
   WeekOpeningHours,
   WeekOpeningHoursCreate,
   createSpecialOpeningHours,
@@ -89,7 +92,7 @@ import {
   updateStoreByStoreID,
   updateWeeklyNotes,
   updateWeeklyOpeningHours,
-} from '../../services/storeService.js'
+} from '../../services/storeService'
 
 import {
   CreateStoreSchema,
@@ -128,7 +131,7 @@ import {
   WeekSchemaType,
   storeReplyMessage,
   storeReplyMessageType,
-} from './storesSchema..js'
+} from './storesSchema.'
 
 export async function stores(fastify: FastifyInstance) {
   fastify.put<{

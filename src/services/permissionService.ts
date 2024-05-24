@@ -1,20 +1,12 @@
 import { desc, eq, or, sql } from 'drizzle-orm'
 
-import { db } from '../config/db-connect.js'
-import { permissions } from '../schema/schema.js'
+import { db } from '../config/db-connect'
+
+import { PermissionDescription, PermissionID, PermissionTitle, permissions } from '../schema/schema'
 
 import { ilike } from 'drizzle-orm'
 
-import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
-
-import { Brand, make } from 'ts-brand'
-
-export type PermissionID = Brand<number, 'permissionID'>
-export const PermissionID = make<PermissionID>()
-export type PermissionTitle = Brand<string, 'permissionName'>
-export const PermissionTitle = make<PermissionTitle>()
-export type PermissionDescription = Brand<string, ' permissionDescription'>
-export const PermissionDescription = make<PermissionDescription>()
+import { Limit, Offset, Page, Search } from '../plugins/pagination'
 
 export type PermissionIDDescName = {
   permissionID: PermissionID

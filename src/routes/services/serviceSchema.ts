@@ -42,7 +42,7 @@ export const ServiceSchema = Type.Object({
   serviceIncludeInAutomaticSms: Type.Boolean(),
   serviceHidden: Type.Optional(Type.Boolean()),
   serviceCallInterval: Type.Integer({ minimum: 1, maximum: 12 }),
-  serviceColorForService: Type.Optional(colorForServiceType),
+  serviceColorForService: colorForServiceType.default('None'),
   serviceWarrantyCard: Type.Optional(Type.Boolean({ default: false })),
   serviceItemNumber: Type.Optional(Type.String()),
   serviceSuppliersArticleNumber: Type.Optional(Type.String()),

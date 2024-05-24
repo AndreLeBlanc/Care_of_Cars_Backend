@@ -5,7 +5,7 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator'
 
 import { drizzle } from 'drizzle-orm/node-postgres'
 
-import { ConnectionString, newConnectionString } from './connection-string.js'
+import { ConnectionString, newConnectionString } from './connection-string'
 const connectionString: ConnectionString = newConnectionString()
 
 const pool = new Pool({

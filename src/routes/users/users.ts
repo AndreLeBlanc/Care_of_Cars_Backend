@@ -21,16 +21,11 @@ import {
   StoreUserResponseSchemaType,
   StoreUserSchema,
   StoreUserSchemaType,
-} from './userSchema.js'
+} from './userSchema'
 import {
   CreatedUser,
   DeleteUser,
-  UserEmail,
-  UserFirstName,
-  UserID,
   UserInfo,
-  UserLastName,
-  UserPassword,
   UserStore,
   UserWithSuperAdmin,
   UsersPaginated,
@@ -47,13 +42,20 @@ import {
   updateUserPasswordByID,
   userInfoPassword,
   verifyUser,
-} from '../../services/userService.js'
-import { RoleID } from '../../services/roleService.js'
-import { StoreID } from '../../services/storeService.js'
+} from '../../services/userService'
 
-import { PermissionTitle } from '../../services/permissionService.js'
+import {
+  PermissionTitle,
+  RoleID,
+  StoreID,
+  UserEmail,
+  UserFirstName,
+  UserID,
+  UserLastName,
+  UserPassword,
+} from '../../schema/schema.js'
 
-import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
+import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService'
 
 import {
   Limit,
@@ -66,8 +68,8 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination.js'
-import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema..js'
+} from '../../plugins/pagination'
+import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema.'
 
 export async function users(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListUserQueryParamType }>(

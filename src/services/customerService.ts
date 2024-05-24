@@ -1,64 +1,38 @@
-import { Brand, make } from 'ts-brand'
-import { companycustomers, drivers } from '../schema/schema.js'
-import { db } from '../config/db-connect.js'
+import {
+  CompanyAddress,
+  CompanyAddressCity,
+  CompanyCountry,
+  CompanyReference,
+  CompanyZipCode,
+  CustomerCardNumber,
+  CustomerCompanyName,
+  CustomerOrgNumber,
+  DriverAcceptsMarketing,
+  DriverAddress,
+  DriverAddressCity,
+  DriverCardValidTo,
+  DriverCountry,
+  DriverEmail,
+  DriverExternalNumber,
+  DriverFirstName,
+  DriverGDPRAccept,
+  DriverHasCard,
+  DriverISWarrantyCustomer,
+  DriverKeyNumber,
+  DriverLastName,
+  DriverNotes,
+  DriverNotesShared,
+  DriverPhoneNumber,
+  DriverZipCode,
+  companycustomers,
+  drivers,
+} from '../schema/schema'
+import { db } from '../config/db-connect'
 
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
 
-import { Offset, Search } from '../plugins/pagination.js'
-import { isEmail } from '../utils/helper.js'
-
-export type DriverExternalNumber = Brand<string, 'driverExternalNumber'>
-export const DriverExternalNumber = make<DriverExternalNumber>()
-export type DriverGDPRAccept = Brand<boolean, 'driverGDPRAccept'>
-export const DriverGDPRAccept = make<DriverGDPRAccept>()
-export type DriverISWarrantyCustomer = Brand<boolean, 'customerISWarrantyCustomer'>
-export const DriverISWarrantyCustomer = make<DriverISWarrantyCustomer>()
-export type DriverAcceptsMarketing = Brand<boolean, 'driverAcceptsMarketing'>
-export const DriverAcceptsMarketing = make<DriverAcceptsMarketing>()
-export type CustomerCompanyName = Brand<string, 'customerCompanyName'>
-export const CustomerCompanyName = make<CustomerCompanyName>()
-export type CustomerOrgNumber = Brand<string, 'customerOrgNumber'>
-export const CustomerOrgNumber = make<CustomerOrgNumber>()
-export type DriverFirstName = Brand<string, 'driverFirstName'>
-export const DriverFirstName = make<DriverFirstName>()
-export type DriverLastName = Brand<string, 'driverLastName'>
-export const DriverLastName = make<DriverLastName>()
-export type CompanyReference = Brand<string, 'companyReference'>
-export const CompanyReference = make<CompanyReference>()
-export type CompanyEmail = Brand<string, 'companyEmail'>
-export const CompanyEmail = make<CompanyEmail>()
-export type DriverEmail = Brand<string, 'driverEmail'>
-export const DriverEmail = make<DriverEmail>()
-export type DriverPhoneNumber = Brand<string, 'DriverPhoneNumber'>
-export const DriverPhoneNumber = make<DriverPhoneNumber>()
-export type CompanyAddress = Brand<string, 'companyAddress'>
-export const CompanyAddress = make<CompanyAddress>()
-export type DriverAddress = Brand<string, 'driverAddress'>
-export const DriverAddress = make<DriverAddress>()
-export type CompanyZipCode = Brand<string, 'companyZipCode'>
-export const CompanyZipCode = make<CompanyZipCode>()
-export type DriverZipCode = Brand<string, 'driverZipCode'>
-export const DriverZipCode = make<DriverZipCode>()
-export type CompanyAddressCity = Brand<string, 'companyAddressCity'>
-export const CompanyAddressCity = make<CompanyAddressCity>()
-export type DriverAddressCity = Brand<string, 'driverAddressCity'>
-export const DriverAddressCity = make<DriverAddressCity>()
-export type CompanyCountry = Brand<string, 'companyCountry'>
-export const CompanyCountry = make<CompanyCountry>()
-export type DriverCountry = Brand<string, 'driverCountry'>
-export const DriverCountry = make<DriverCountry>()
-export type DriverHasCard = Brand<boolean, 'driverHasCard'>
-export const DriverHasCard = make<DriverHasCard>()
-export type CustomerCardNumber = Brand<string | null, 'customerCardNumber'>
-export const CustomerCardNumber = make<CustomerCardNumber>()
-export type DriverCardValidTo = Brand<Date | null, 'driverCardValidTo'>
-export const DriverCardValidTo = make<DriverCardValidTo>()
-export type DriverKeyNumber = Brand<string | null, 'driverKeyNumber'>
-export const DriverKeyNumber = make<DriverKeyNumber>()
-export type DriverNotesShared = Brand<string | null, 'driverNotesShared'>
-export const DriverNotesShared = make<DriverNotesShared>()
-export type DriverNotes = Brand<string | null, 'driverNotes'>
-export const DriverNotes = make<DriverNotes>()
+import { Offset, Search } from '../plugins/pagination'
+import { isEmail } from '../utils/helper'
 
 export type CustomerCompanyCreate = {
   customerOrgNumber: CustomerOrgNumber

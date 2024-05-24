@@ -1,121 +1,63 @@
-import { Brand, make } from 'ts-brand'
 import {
+  Day,
+  DayClose,
+  DayOpen,
+  FridayClose,
+  FridayNote,
+  FridayOpen,
+  MondayClose,
+  MondayNote,
+  MondayOpen,
+  SaturdayClose,
+  SaturdayNote,
+  SaturdayOpen,
+  StoreAddress,
+  StoreAllowCarAPI,
+  StoreAllowSendSMS,
+  StoreBankgiro,
+  StoreCity,
+  StoreContactPerson,
+  StoreCountry,
+  StoreDescription,
+  StoreEmail,
+  StoreID,
+  StoreMaxUsers,
+  StoreName,
+  StoreOrgNumber,
+  StorePaymentdays,
+  StorePhone,
+  StorePlusgiro,
+  StoreSendSMS,
+  StoreStatus,
+  StoreUsesCheckin,
+  StoreUsesPIN,
+  StoreZipCode,
+  SundayClose,
+  SundayNote,
+  SundayOpen,
+  ThursdayClose,
+  ThursdayNote,
+  ThursdayOpen,
+  TuesdayClose,
+  TuesdayNote,
+  TuesdayOpen,
+  WednesdayClose,
+  WednesdayNote,
+  WednesdayOpen,
+  Week,
+  WeekNote,
   storeopeninghours,
   storepaymentinfo,
   stores,
   storespecialhours,
   storeweeklynotes,
-} from '../schema/schema.js'
+} from '../schema/schema'
 
-import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
+import { Limit, Offset, Page, Search } from '../plugins/pagination'
 
-import { db } from '../config/db-connect.js'
+import { db } from '../config/db-connect'
 
 import { and, between, eq, ilike, or, sql } from 'drizzle-orm'
-
-import { PositiveInteger } from '../utils/helper.js'
-
-export type StoreName = Brand<string, 'storeName'>
-export const StoreName = make<StoreName>()
-export type StoreOrgNumber = Brand<string, 'storeOrgNumber'>
-export const StoreOrgNumber = make<StoreOrgNumber>()
-export type StoreID = Brand<number, 'storeID'>
-export const StoreID = make<StoreID>()
-export type StoreStatus = Brand<boolean, 'storeStatus'>
-export const StoreStatus = make<StoreStatus>()
-export type StoreEmail = Brand<string, 'storeEmail'>
-export const StoreEmail = make<StoreEmail>()
-export type StorePhone = Brand<string, 'storePhone'>
-export const StorePhone = make<StorePhone>()
-export type StoreAddress = Brand<string, 'storeAddress'>
-export const StoreAddress = make<StoreAddress>()
-export type StoreZipCode = Brand<string, 'storeZipCode'>
-export const StoreZipCode = make<StoreZipCode>()
-export type StoreCity = Brand<string, 'storeCity'>
-export const StoreCity = make<StoreCity>()
-export type StoreCountry = Brand<string, 'storeCountry'>
-export const StoreCountry = make<StoreCountry>()
-export type StoreDescription = Brand<string, 'storeDescription'>
-export const StoreDescription = make<StoreDescription>()
-export type StoreContactPerson = Brand<string, 'storeContactPerson'>
-export const StoreContactPerson = make<StoreContactPerson>()
-export type StoreMaxUsers = Brand<PositiveInteger<number>, 'storeMaxUsers'>
-export const StoreMaxUsers = make<StoreMaxUsers>()
-export type StoreAllowCarAPI = Brand<boolean, 'storeAllowCarAPI'>
-export const StoreAllowCarAPI = make<StoreAllowCarAPI>()
-export type StoreAllowSendSMS = Brand<boolean, 'storeAllowSendSMS'>
-export const StoreAllowSendSMS = make<StoreAllowSendSMS>()
-export type StoreSendSMS = Brand<boolean, 'storeSendSMS'>
-export const StoreSendSMS = make<StoreSendSMS>()
-export type StoreUsesCheckin = Brand<boolean, 'storeUsesCheckin'>
-export const StoreUsesCheckin = make<StoreUsesCheckin>()
-export type StoreUsesPIN = Brand<boolean, 'storeUsesPIN'>
-export const StoreUsesPIN = make<StoreUsesPIN>()
-export type StoreBankgiro = Brand<string, 'storeBankgiro'>
-export const StoreBankgiro = make<StoreBankgiro>()
-export type StorePlusgiro = Brand<string, 'storePlusgiro'>
-export const StorePlusgiro = make<StorePlusgiro>()
-export type StorePaymentdays = Brand<PositiveInteger<number>, 'storePaymentdays'>
-export const StorePaymentdays = make<StorePaymentdays>()
-
-export type MondayOpen = Brand<string, 'mondayOpen'>
-export const MondayOpen = make<MondayOpen>()
-export type MondayClose = Brand<string, 'mondayClose'>
-export const MondayClose = make<MondayClose>()
-export type TuesdayOpen = Brand<string, 'tuesdayOpen'>
-export const TuesdayOpen = make<TuesdayOpen>()
-export type TuesdayClose = Brand<string, 'tuesdayClose'>
-export const TuesdayClose = make<TuesdayClose>()
-export type WednesdayOpen = Brand<string, 'wednesdayOpen'>
-export const WednesdayOpen = make<WednesdayOpen>()
-export type WednesdayClose = Brand<string, 'wednesdayClose'>
-export const WednesdayClose = make<WednesdayClose>()
-export type ThursdayOpen = Brand<string, 'thursdayOpen'>
-export const ThursdayOpen = make<ThursdayOpen>()
-export type ThursdayClose = Brand<string, 'thursdayClose'>
-export const ThursdayClose = make<ThursdayClose>()
-export type FridayOpen = Brand<string, 'fridayOpen'>
-export const FridayOpen = make<FridayOpen>()
-export type FridayClose = Brand<string, 'fridayClose'>
-export const FridayClose = make<FridayClose>()
-export type SaturdayOpen = Brand<string, 'saturdayOpen'>
-export const SaturdayOpen = make<SaturdayOpen>()
-export type SaturdayClose = Brand<string, 'saturdayClose'>
-export const SaturdayClose = make<SaturdayClose>()
-export type SundayOpen = Brand<string, 'sundayOpen'>
-export const SundayOpen = make<SundayOpen>()
-export type SundayClose = Brand<string, 'sundayClose'>
-export const SundayClose = make<SundayClose>()
-
-export type WeekNote = Brand<string, 'weekNote'>
-export const WeekNote = make<WeekNote>()
-export type MondayNote = Brand<string, 'mondayNote'>
-export const MondayNote = make<MondayNote>()
-export type TuesdayNote = Brand<string, 'tuesdayNote'>
-export const TuesdayNote = make<TuesdayNote>()
-export type WednesdayNote = Brand<string, 'wednesdayNote'>
-export const WednesdayNote = make<WednesdayNote>()
-export type ThursdayNote = Brand<string, 'thursdayNote'>
-export const ThursdayNote = make<ThursdayNote>()
-export type FridayNote = Brand<string, 'fridayNote'>
-export const FridayNote = make<FridayNote>()
-export type SaturdayNote = Brand<string, 'saturdayNote'>
-export const SaturdayNote = make<SaturdayNote>()
-export type SundayNote = Brand<string, 'sundayNote'>
-export const SundayNote = make<SundayNote>()
-export type Week = Brand<Date, 'week'>
-export const Week = make<Week>()
-
-export type Day = Brand<Date, 'day'>
-export const Day = make<Day>()
-export type DayOpen = Brand<string, 'dayOpen'>
-export const DayOpen = make<DayOpen>()
-export type DayClose = Brand<string, 'dayClose'>
-export const DayClose = make<DayClose>()
-export type FromDate = Brand<Date, 'fromDate'>
-export const FromDate = make<FromDate>()
-export type ToDate = Brand<Date, 'toDate'>
-export const ToDate = make<ToDate>()
 
 export type StoreSpecialHoursCreate = {
   storeID: StoreID

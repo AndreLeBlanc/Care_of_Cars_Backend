@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify'
 
 import { after, before, describe, it } from 'node:test'
 import assert from 'assert'
-import { buildApp } from '../../src/app.js'
+import { buildApp } from '../../src/app'
 
 describe('GET / HTTP', () => {
   let app: FastifyInstance

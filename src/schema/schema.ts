@@ -1,161 +1,310 @@
-//import Dinero from 'dinero'
-//import { SEK } from '@dinero.js/currencies'
+import { PositiveInteger } from '../utils/helper'
 
-import { RoleDescription, RoleID, RoleName } from '../services/roleService'
+import { Brand, make } from 'ts-brand'
 
-//import { Brand, make } from 'ts-brand'
+export type UserID = Brand<number, 'userID'>
+export const UserID = make<UserID>()
+export type UserPassword = Brand<string, ' userPassword'>
+export const UserPassword = make<UserPassword>()
+export type UserFirstName = Brand<string, ' userFirstName'>
+export const UserFirstName = make<UserFirstName>()
+export type UserLastName = Brand<string, ' userLastName'>
+export const UserLastName = make<UserLastName>()
+export type UserEmail = Brand<string, ' userEmail'>
+export const UserEmail = make<UserEmail>()
+export type Signature = Brand<string, ' signature'>
+export const Signature = make<Signature>()
+export type IsSuperAdmin = Brand<boolean | null, 'isSuperAdmin'>
+export const IsSuperAdmin = make<IsSuperAdmin>()
 
-//export type UserID = Brand<number, 'userID'>
-//export const UserID = make<UserID>()
-//export type UserPassword = Brand<string, ' userPassword'>
-//export const UserPassword = make<UserPassword>()
-//export type UserFirstName = Brand<string, ' userFirstName'>
-//export const UserFirstName = make<UserFirstName>()
-//export type UserLastName = Brand<string, ' userLastName'>
-//export const UserLastName = make<UserLastName>()
-//export type UserEmail = Brand<string, ' userEmail'>
-//export const UserEmail = make<UserEmail>()
-//export type Signature = Brand<string, ' signature'>
-//export const Signature = make<Signature>()
-//export type IsSuperAdmin = Brand<boolean | null, 'isSuperAdmin'>
-//export const IsSuperAdmin = make<IsSuperAdmin>()
+export type ServiceCategoryID = Brand<number, 'serviceCategoryID'>
+export const ServiceCategoryID = make<ServiceCategoryID>()
+export type ServiceCategoryName = Brand<string, 'serviceCategoryName'>
+export const ServiceCategoryName = make<ServiceCategoryName>()
+export type ServiceCategoryDescription = Brand<string, 'ServiceCategoryDescription'>
+export const ServiceCategoryDescription = make<ServiceCategoryDescription>()
 
-import {
-  IsSuperAdmin,
-  Signature,
-  UserEmail,
-  UserFirstName,
-  UserID,
-  UserLastName,
-  UserPassword,
-} from '../services/userService'
+export type ProductCategoryID = Brand<number, 'productCategoryID'>
+export const ProductCategoryID = make<ProductCategoryID>()
+export type ProductCategoryName = Brand<string, 'productCategoryName'>
+export const ProductCategoryName = make<ProductCategoryName>()
+export type ProductCategoryDescription = Brand<string, 'productCategoryDescription'>
+export const ProductCategoryDescription = make<ProductCategoryDescription>()
 
-import { PermissionDescription, PermissionID, PermissionTitle } from '../services/permissionService'
+export type StoreName = Brand<string, 'storeName'>
+export const StoreName = make<StoreName>()
+export type StoreOrgNumber = Brand<string, 'storeOrgNumber'>
+export const StoreOrgNumber = make<StoreOrgNumber>()
+export type StoreID = Brand<number, 'storeID'>
+export const StoreID = make<StoreID>()
+export type StoreStatus = Brand<boolean, 'storeStatus'>
+export const StoreStatus = make<StoreStatus>()
+export type StoreEmail = Brand<string, 'storeEmail'>
+export const StoreEmail = make<StoreEmail>()
+export type StorePhone = Brand<string, 'storePhone'>
+export const StorePhone = make<StorePhone>()
+export type StoreAddress = Brand<string, 'storeAddress'>
+export const StoreAddress = make<StoreAddress>()
+export type StoreZipCode = Brand<string, 'storeZipCode'>
+export const StoreZipCode = make<StoreZipCode>()
+export type StoreCity = Brand<string, 'storeCity'>
+export const StoreCity = make<StoreCity>()
+export type StoreCountry = Brand<string, 'storeCountry'>
+export const StoreCountry = make<StoreCountry>()
+export type StoreDescription = Brand<string, 'storeDescription'>
+export const StoreDescription = make<StoreDescription>()
+export type StoreContactPerson = Brand<string, 'storeContactPerson'>
+export const StoreContactPerson = make<StoreContactPerson>()
+export type StoreMaxUsers = Brand<PositiveInteger<number>, 'storeMaxUsers'>
+export const StoreMaxUsers = make<StoreMaxUsers>()
+export type StoreAllowCarAPI = Brand<boolean, 'storeAllowCarAPI'>
+export const StoreAllowCarAPI = make<StoreAllowCarAPI>()
+export type StoreAllowSendSMS = Brand<boolean, 'storeAllowSendSMS'>
+export const StoreAllowSendSMS = make<StoreAllowSendSMS>()
+export type StoreSendSMS = Brand<boolean, 'storeSendSMS'>
+export const StoreSendSMS = make<StoreSendSMS>()
+export type StoreUsesCheckin = Brand<boolean, 'storeUsesCheckin'>
+export const StoreUsesCheckin = make<StoreUsesCheckin>()
+export type StoreUsesPIN = Brand<boolean, 'storeUsesPIN'>
+export const StoreUsesPIN = make<StoreUsesPIN>()
+export type StoreBankgiro = Brand<string, 'storeBankgiro'>
+export const StoreBankgiro = make<StoreBankgiro>()
+export type StorePlusgiro = Brand<string, 'storePlusgiro'>
+export const StorePlusgiro = make<StorePlusgiro>()
+export type StorePaymentdays = Brand<PositiveInteger<number>, 'storePaymentdays'>
+export const StorePaymentdays = make<StorePaymentdays>()
 
-import {
-  ProductCategoryDescription,
-  ProductCategoryID,
-  ProductCategoryName,
-  ServiceCategoryDescription,
-  ServiceCategoryID,
-  ServiceCategoryName,
-} from '../services/CategoryService'
+export type MondayOpen = Brand<string, 'mondayOpen'>
+export const MondayOpen = make<MondayOpen>()
+export type MondayClose = Brand<string, 'mondayClose'>
+export const MondayClose = make<MondayClose>()
+export type TuesdayOpen = Brand<string, 'tuesdayOpen'>
+export const TuesdayOpen = make<TuesdayOpen>()
+export type TuesdayClose = Brand<string, 'tuesdayClose'>
+export const TuesdayClose = make<TuesdayClose>()
+export type WednesdayOpen = Brand<string, 'wednesdayOpen'>
+export const WednesdayOpen = make<WednesdayOpen>()
+export type WednesdayClose = Brand<string, 'wednesdayClose'>
+export const WednesdayClose = make<WednesdayClose>()
+export type ThursdayOpen = Brand<string, 'thursdayOpen'>
+export const ThursdayOpen = make<ThursdayOpen>()
+export type ThursdayClose = Brand<string, 'thursdayClose'>
+export const ThursdayClose = make<ThursdayClose>()
+export type FridayOpen = Brand<string, 'fridayOpen'>
+export const FridayOpen = make<FridayOpen>()
+export type FridayClose = Brand<string, 'fridayClose'>
+export const FridayClose = make<FridayClose>()
+export type SaturdayOpen = Brand<string, 'saturdayOpen'>
+export const SaturdayOpen = make<SaturdayOpen>()
+export type SaturdayClose = Brand<string, 'saturdayClose'>
+export const SaturdayClose = make<SaturdayClose>()
+export type SundayOpen = Brand<string, 'sundayOpen'>
+export const SundayOpen = make<SundayOpen>()
+export type SundayClose = Brand<string, 'sundayClose'>
+export const SundayClose = make<SundayClose>()
 
-import {
-  ProductDescription,
-  ProductExternalArticleNumber,
-  ProductID,
-  ProductInventoryBalance,
-  ProductItemNumber,
-  ProductSupplierArticleNumber,
-  ProductUpdateRelatedData,
-} from '../services/productService'
+export type WeekNote = Brand<string, 'weekNote'>
+export const WeekNote = make<WeekNote>()
+export type MondayNote = Brand<string, 'mondayNote'>
+export const MondayNote = make<MondayNote>()
+export type TuesdayNote = Brand<string, 'tuesdayNote'>
+export const TuesdayNote = make<TuesdayNote>()
+export type WednesdayNote = Brand<string, 'wednesdayNote'>
+export const WednesdayNote = make<WednesdayNote>()
+export type ThursdayNote = Brand<string, 'thursdayNote'>
+export const ThursdayNote = make<ThursdayNote>()
+export type FridayNote = Brand<string, 'fridayNote'>
+export const FridayNote = make<FridayNote>()
+export type SaturdayNote = Brand<string, 'saturdayNote'>
+export const SaturdayNote = make<SaturdayNote>()
+export type SundayNote = Brand<string, 'sundayNote'>
+export const SundayNote = make<SundayNote>()
+export type Week = Brand<Date, 'week'>
+export const Week = make<Week>()
 
-import {
-  ServiceAward,
-  ServiceCallInterval,
-  ServiceCost,
-  ServiceDay1,
-  ServiceDay2,
-  ServiceDay3,
-  ServiceDay4,
-  ServiceDay5,
-  ServiceExternalArticleNumber,
-  ServiceHidden,
-  ServiceID,
-  ServiceIncludeInAutomaticSms,
-  ServiceItemNumber,
-  ServiceName,
-  ServiceSuppliersArticleNumber,
-  ServiceWarrantyCard,
-} from '../services/serviceService'
+export type Day = Brand<Date, 'day'>
+export const Day = make<Day>()
+export type DayOpen = Brand<string, 'dayOpen'>
+export const DayOpen = make<DayOpen>()
+export type DayClose = Brand<string, 'dayClose'>
+export const DayClose = make<DayClose>()
+export type FromDate = Brand<Date, 'fromDate'>
+export const FromDate = make<FromDate>()
+export type ToDate = Brand<Date, 'toDate'>
+export const ToDate = make<ToDate>()
 
-import {
-  CompanyAddress,
-  CompanyAddressCity,
-  CompanyCountry,
-  CompanyReference,
-  CompanyZipCode,
-  CustomerCardNumber,
-  CustomerCompanyName,
-  CustomerOrgNumber,
-  DriverAcceptsMarketing,
-  DriverAddress,
-  DriverAddressCity,
-  DriverCardValidTo,
-  DriverCountry,
-  DriverEmail,
-  DriverExternalNumber,
-  DriverFirstName,
-  DriverGDPRAccept,
-  DriverHasCard,
-  DriverISWarrantyCustomer,
-  DriverKeyNumber,
-  DriverLastName,
-  DriverNotes,
-  DriverNotesShared,
-  DriverPhoneNumber,
-  DriverZipCode,
-} from '../services/customerService'
+export type DriverExternalNumber = Brand<string, 'driverExternalNumber'>
+export const DriverExternalNumber = make<DriverExternalNumber>()
+export type DriverGDPRAccept = Brand<boolean, 'driverGDPRAccept'>
+export const DriverGDPRAccept = make<DriverGDPRAccept>()
+export type DriverISWarrantyCustomer = Brand<boolean, 'customerISWarrantyCustomer'>
+export const DriverISWarrantyCustomer = make<DriverISWarrantyCustomer>()
+export type DriverAcceptsMarketing = Brand<boolean, 'driverAcceptsMarketing'>
+export const DriverAcceptsMarketing = make<DriverAcceptsMarketing>()
+export type CustomerCompanyName = Brand<string, 'customerCompanyName'>
+export const CustomerCompanyName = make<CustomerCompanyName>()
+export type CustomerOrgNumber = Brand<string, 'customerOrgNumber'>
+export const CustomerOrgNumber = make<CustomerOrgNumber>()
+export type DriverFirstName = Brand<string, 'driverFirstName'>
+export const DriverFirstName = make<DriverFirstName>()
+export type DriverLastName = Brand<string, 'driverLastName'>
+export const DriverLastName = make<DriverLastName>()
+export type CompanyReference = Brand<string, 'companyReference'>
+export const CompanyReference = make<CompanyReference>()
+export type CompanyEmail = Brand<string, 'companyEmail'>
+export const CompanyEmail = make<CompanyEmail>()
+export type DriverEmail = Brand<string, 'driverEmail'>
+export const DriverEmail = make<DriverEmail>()
+export type DriverPhoneNumber = Brand<string, 'DriverPhoneNumber'>
+export const DriverPhoneNumber = make<DriverPhoneNumber>()
+export type CompanyAddress = Brand<string, 'companyAddress'>
+export const CompanyAddress = make<CompanyAddress>()
+export type DriverAddress = Brand<string, 'driverAddress'>
+export const DriverAddress = make<DriverAddress>()
+export type CompanyZipCode = Brand<string, 'companyZipCode'>
+export const CompanyZipCode = make<CompanyZipCode>()
+export type DriverZipCode = Brand<string, 'driverZipCode'>
+export const DriverZipCode = make<DriverZipCode>()
+export type CompanyAddressCity = Brand<string, 'companyAddressCity'>
+export const CompanyAddressCity = make<CompanyAddressCity>()
+export type DriverAddressCity = Brand<string, 'driverAddressCity'>
+export const DriverAddressCity = make<DriverAddressCity>()
+export type CompanyCountry = Brand<string, 'companyCountry'>
+export const CompanyCountry = make<CompanyCountry>()
+export type DriverCountry = Brand<string, 'driverCountry'>
+export const DriverCountry = make<DriverCountry>()
+export type DriverHasCard = Brand<boolean, 'driverHasCard'>
+export const DriverHasCard = make<DriverHasCard>()
+export type CustomerCardNumber = Brand<string | null, 'customerCardNumber'>
+export const CustomerCardNumber = make<CustomerCardNumber>()
+export type DriverCardValidTo = Brand<Date | null, 'driverCardValidTo'>
+export const DriverCardValidTo = make<DriverCardValidTo>()
+export type DriverKeyNumber = Brand<string | null, 'driverKeyNumber'>
+export const DriverKeyNumber = make<DriverKeyNumber>()
+export type DriverNotesShared = Brand<string | null, 'driverNotesShared'>
+export const DriverNotesShared = make<DriverNotesShared>()
+export type DriverNotes = Brand<string | null, 'driverNotes'>
+export const DriverNotes = make<DriverNotes>()
 
-import {
-  Day,
-  DayClose,
-  DayOpen,
-  FridayClose,
-  FridayNote,
-  FridayOpen,
-  MondayClose,
-  MondayNote,
-  MondayOpen,
-  SaturdayClose,
-  SaturdayNote,
-  SaturdayOpen,
-  StoreAddress,
-  StoreAllowCarAPI,
-  StoreAllowSendSMS,
-  StoreBankgiro,
-  StoreCity,
-  StoreContactPerson,
-  StoreCountry,
-  StoreDescription,
-  StoreEmail,
-  StoreID,
-  StoreMaxUsers,
-  StoreName,
-  StoreOrgNumber,
-  StorePaymentOptions,
-  StorePaymentdays,
-  StorePhone,
-  StorePlusgiro,
-  StoreSendSMS,
-  StoreStatus,
-  StoreUsesCheckin,
-  StoreUsesPIN,
-  SundayClose,
-  SundayNote,
-  SundayOpen,
-  ThursdayClose,
-  ThursdayNote,
-  ThursdayOpen,
-  TuesdayClose,
-  TuesdayNote,
-  TuesdayOpen,
-  WednesdayClose,
-  WednesdayNote,
-  WednesdayOpen,
-  Week,
-  WeekNote,
-} from '../services/storeService'
+export type PermissionID = Brand<number, 'permissionID'>
+export const PermissionID = make<PermissionID>()
+export type PermissionTitle = Brand<string, 'permissionName'>
+export const PermissionTitle = make<PermissionTitle>()
+export type PermissionDescription = Brand<string, ' permissionDescription'>
+export const PermissionDescription = make<PermissionDescription>()
 
-import {
-  RentCarColor,
-  RentCarModel,
-  RentCarNotes,
-  RentCarNumber,
-  RentCarRegistrationNumber,
-  RentCarYear,
-} from '../services/rentCarService'
+export type ProductItemNumber = Brand<string, 'productItemNumber'>
+export const ProductItemNumber = make<ProductItemNumber>()
+export type ProductDescription = Brand<string, 'productDescription'>
+export const ProductDescription = make<ProductDescription>()
+export type ProductSupplierArticleNumber = Brand<string, 'productSupplierArticleNumber'>
+export const ProductSupplierArticleNumber = make<ProductSupplierArticleNumber>()
+export type ProductExternalArticleNumber = Brand<string, 'productExternalArticleNumber'>
+export const ProductExternalArticleNumber = make<ProductExternalArticleNumber>()
+export type ProductUpdateRelatedData = Brand<boolean, 'productUpdateRelatedData'>
+export const ProductUpdateRelatedData = make<ProductUpdateRelatedData>()
+export type ProductInventoryBalance = Brand<number, 'productInventoryBalance'>
+export const ProductInventoryBalance = make<ProductInventoryBalance>()
+export type ProductAward = Brand<number, 'productAward'>
+export const ProductAward = make<ProductAward>()
+export type ProductCost = Brand<number, 'productCost'>
+export const ProductCost = make<ProductCost>()
+export type ProductID = Brand<number, 'productID'>
+export const ProductID = make<ProductID>()
+
+export type LocalQualID = Brand<PositiveInteger<number>, 'localQualID'>
+export const LocalQualID = make<LocalQualID>()
+export type LocalQualName = Brand<string, 'localQualName'>
+export const LocalQualName = make<LocalQualName>()
+export type CreatedAt = Brand<Date, 'createdAt'>
+export const CreatedAt = make<CreatedAt>()
+export type UpdatedAt = Brand<Date, 'updatedAt'>
+export const UpdatedAt = make<UpdatedAt>()
+export type GlobalQualID = Brand<PositiveInteger<number>, 'globalQualID'>
+export const GlobalQualID = make<GlobalQualID>()
+export type GlobalQualName = Brand<string, 'globalQualName'>
+export const GlobalQualName = make<GlobalQualName>()
+
+export type RentCarRegistrationNumber = Brand<string, 'rentCarRegistrationNumber'>
+export const RentCarRegistrationNumber = make<RentCarRegistrationNumber>()
+export type RentCarModel = Brand<string, 'rentCarModel'>
+export const RentCarModel = make<RentCarModel>()
+export type RentCarColor = Brand<string, 'rentCarColor'>
+export const RentCarColor = make<RentCarColor>()
+export type RentCarYear = Brand<number, 'rentCarYear'>
+export const RentCarYear = make<RentCarYear>()
+export type RentCarNotes = Brand<string, 'rentCarNotes'>
+export const RentCarNotes = make<RentCarNotes>()
+export type RentCarNumber = Brand<number, 'rentCarNumber'>
+export const RentCarNumber = make<RentCarNumber>()
+
+export type ServiceIncludeInAutomaticSms = Brand<boolean, 'ServiceIncludeInAutomaticSms'>
+export const ServiceIncludeInAutomaticSms = make<ServiceIncludeInAutomaticSms>()
+export type ServiceHidden = Brand<boolean, 'ServiceHidden'>
+export const ServiceHidden = make<ServiceHidden>()
+export type ServiceCallInterval = Brand<number, 'ServiceCallInterval'>
+export const ServiceCallInterval = make<ServiceCallInterval>()
+export type ServiceWarrantyCard = Brand<boolean, 'ServiceWarrantyCard'>
+export const ServiceWarrantyCard = make<ServiceWarrantyCard>()
+export type ServiceItemNumber = Brand<string, 'ServiceItemNumber'>
+export const ServiceItemNumber = make<ServiceItemNumber>()
+export type ServiceSuppliersArticleNumber = Brand<string, 'ServiceSuppliersArticleNumber'>
+export const ServiceSuppliersArticleNumber = make<ServiceSuppliersArticleNumber>()
+export type ServiceExternalArticleNumber = Brand<string, 'ServiceExternalArticleNumber'>
+export const ServiceExternalArticleNumber = make<ServiceExternalArticleNumber>()
+
+export const colorForService = [
+  'LightBlue',
+  'Blue',
+  'DarkBlue',
+  'LightGreen',
+  'Green',
+  'DarkGreen',
+  'LightYellow',
+  'Yellow',
+  'DarkYellow',
+  'LightPurple',
+  'Purple',
+  'DarkPurple',
+  'LightPink',
+  'Pink',
+  'DarkPink',
+  'LightTurquoise',
+  'Turquoise',
+  'DarkTurquoise',
+  'Orange',
+  'Red',
+  'None',
+] as const
+
+export type ServiceID = Brand<number, ' serviceID'>
+export const ServiceID = make<ServiceID>()
+export type ServiceName = Brand<string, ' serviceName'>
+export const ServiceName = make<ServiceName>()
+export type ServiceAward = Brand<number, ' serviceAward'>
+export const ServiceAward = make<ServiceAward>()
+export type ServiceCost = Brand<number, ' serviceCost'>
+export const ServiceCost = make<ServiceCost>()
+export type ServiceDay1 = Brand<string, ' serviceDay1'>
+export const ServiceDay1 = make<ServiceDay1>()
+export type ServiceDay2 = Brand<string, ' serviceDay2'>
+export const ServiceDay2 = make<ServiceDay2>()
+export type ServiceDay3 = Brand<string, ' serviceDay3'>
+export const ServiceDay3 = make<ServiceDay3>()
+export type ServiceDay4 = Brand<string, ' serviceDay4'>
+export const ServiceDay4 = make<ServiceDay4>()
+export type ServiceDay5 = Brand<string, ' serviceDay5'>
+export const ServiceDay5 = make<ServiceDay5>()
+
+export type RoleName = Brand<string, 'roleName'>
+export const RoleName = make<RoleName>()
+
+export type RoleID = Brand<number, 'roleID'>
+export const RoleID = make<RoleID>()
+
+export type RoleDescription = Brand<string, 'roleDescription'>
+export const RoleDescription = make<RoleDescription>()
+
 import { relations } from 'drizzle-orm'
 
 import {
@@ -176,14 +325,8 @@ import {
   unique,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { StoreZipCode } from '../services/storeService'
 
-import {
-  GlobalQualID,
-  GlobalQualName,
-  LocalQualID,
-  LocalQualName,
-} from '../services/qualificationsService'
+export type ColorForService = (typeof colorForService)[number]
 
 export type DbDateType = {
   createdAt: Date
@@ -263,32 +406,6 @@ export const roleToPermissions = pgTable(
   },
 )
 
-export const colorForService = [
-  'LightBlue',
-  'Blue',
-  'DarkBlue',
-  'LightGreen',
-  'Green',
-  'DarkGreen',
-  'LightYellow',
-  'Yellow',
-  'DarkYellow',
-  'LightPurple',
-  'Purple',
-  'DarkPurple',
-  'LightPink',
-  'Pink',
-  'DarkPink',
-  'LightTurquoise',
-  'Turquoise',
-  'DarkTurquoise',
-  'Orange',
-  'Red',
-  'None',
-] as const
-
-export const colorForServicepgEnum = pgEnum('colorForService', colorForService)
-
 export const serviceCategories = pgTable('serviceCategories', {
   serviceCategoryID: serial('serviceCategoryID').$type<ServiceCategoryID>().primaryKey(),
   serviceCategoryName: varchar('serviceCategoryName', { length: 256 })
@@ -299,6 +416,8 @@ export const serviceCategories = pgTable('serviceCategories', {
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
+
+export const colorForServicepgEnum = pgEnum('colorForService', colorForService)
 
 export const services = pgTable('services', {
   serviceID: serial('serviceID').$type<ServiceID>().primaryKey(),
@@ -312,7 +431,7 @@ export const services = pgTable('services', {
     .notNull(),
   hidden: boolean('hidden').$type<ServiceHidden>(),
   callInterval: integer('callInterval').$type<ServiceCallInterval>(),
-  colorForService: colorForServicepgEnum('colorForService').notNull().default('None'),
+  colorForService: varchar('colorForService').notNull(),
   warrantyCard: boolean('warrantyCard').$type<ServiceWarrantyCard>(),
   itemNumber: varchar('itemNumber', { length: 256 }).$type<ServiceItemNumber>(),
   suppliersArticleNumber: varchar('suppliersArticleNumber', {
@@ -478,11 +597,10 @@ export const rentcars = pgTable('rentcars', {
 })
 
 export const storepaymentinfo = pgTable('storepaymentinfo', {
-  storePaymentOption: serial('storePaymentOption').$type<StorePaymentOptions>().primaryKey(),
   storeID: integer('storeID')
     .$type<StoreID>()
     .references(() => stores.storeID, { onDelete: 'cascade' })
-    .unique(),
+    .primaryKey(),
   bankgiro: varchar('bankgiro', { length: 16 }).$type<StoreBankgiro>(),
   plusgiro: varchar('plusgiro', { length: 16 }).$type<StorePlusgiro>(),
   paymentdays: smallint('paymentdays')

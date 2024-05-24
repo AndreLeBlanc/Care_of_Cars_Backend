@@ -1,6 +1,27 @@
 import { FastifyInstance } from 'fastify'
 
 import {
+  PermissionTitle,
+  RentCarColor,
+  RentCarModel,
+  RentCarNotes,
+  RentCarNumber,
+  RentCarRegistrationNumber,
+  RentCarYear,
+  StoreID,
+} from '../../schema/schema.js'
+
+import {
+  RentCar,
+  RentCarsPaginate,
+  createRentCar,
+  deleteRentCarByRegNumber,
+  editRentCar,
+  getRentCarByID,
+  getRentCarPaginate,
+} from '../../services/rentCarService.js'
+
+import {
   AddCustomerType,
   ListRentCarQueryParamSchema,
   ListRentCarQueryParamSchemaType,
@@ -12,25 +33,6 @@ import {
   getRentCarQueryParamsType,
   patchRentCarBody,
 } from './rentCarSchema.js'
-
-import { PermissionTitle } from '../../services/permissionService.js'
-
-import {
-  RentCar,
-  RentCarColor,
-  RentCarModel,
-  RentCarNotes,
-  RentCarNumber,
-  RentCarRegistrationNumber,
-  RentCarYear,
-  RentCarsPaginate,
-  createRentCar,
-  deleteRentCarByRegNumber,
-  editRentCar,
-  getRentCarByID,
-  getRentCarPaginate,
-} from '../../services/rentCarService.js'
-
 import {
   Limit,
   ModelName,
@@ -42,9 +44,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination.js'
-
-import { StoreID } from '../../services/storeService.js'
+} from '../../plugins/pagination'
 
 export const rentCar = async (fastify: FastifyInstance) => {
   //Create Rent Cars

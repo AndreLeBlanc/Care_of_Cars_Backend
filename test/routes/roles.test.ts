@@ -3,8 +3,8 @@ import fc from 'fast-check'
 
 import { after, before, describe, it } from 'node:test'
 import assert from 'assert'
-import { buildApp } from '../../src/app.js'
-import { initDrizzle } from '../../src/config/db-connect.js'
+import { buildApp } from '../../src/app'
+import { initDrizzle } from '../../src/config/db-connect'
 
 let jwt = ''
 describe('POST /users/login HTTP', async () => {

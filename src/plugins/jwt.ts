@@ -2,12 +2,11 @@ import fp from 'fastify-plugin'
 
 import { FastifyReply } from 'fastify/types/reply'
 import { FastifyRequest } from 'fastify/types/request'
-import { roleHasPermission } from '../services/roleService.js'
+import { roleHasPermission } from '../services/roleService'
 
-import { PermissionTitle } from '../services/permissionService.js'
+import { PermissionTitle, RoleID } from '../schema/schema.js'
 
 import { FastifyJwtNamespace } from '@fastify/jwt'
-import { RoleID } from '../services/roleService.js'
 
 export interface SupportPluginOptions {}
 

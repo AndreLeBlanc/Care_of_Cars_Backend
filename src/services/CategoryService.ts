@@ -1,26 +1,19 @@
 import { desc, eq, or, sql } from 'drizzle-orm'
-import { db } from '../config/db-connect.js'
+import { db } from '../config/db-connect'
 
-import { productCategories, serviceCategories } from '../schema/schema.js'
+import {
+  ProductCategoryDescription,
+  ProductCategoryID,
+  ProductCategoryName,
+  ServiceCategoryDescription,
+  ServiceCategoryID,
+  ServiceCategoryName,
+  productCategories,
+  serviceCategories,
+} from '../schema/schema'
 import { ilike } from 'drizzle-orm'
 
-import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
-
-import { Brand, make } from 'ts-brand'
-
-export type ServiceCategoryID = Brand<number, 'serviceCategoryID'>
-export const ServiceCategoryID = make<ServiceCategoryID>()
-export type ServiceCategoryName = Brand<string, 'serviceCategoryName'>
-export const ServiceCategoryName = make<ServiceCategoryName>()
-export type ServiceCategoryDescription = Brand<string, 'ServiceCategoryDescription'>
-export const ServiceCategoryDescription = make<ServiceCategoryDescription>()
-
-export type ProductCategoryID = Brand<number, 'productCategoryID'>
-export const ProductCategoryID = make<ProductCategoryID>()
-export type ProductCategoryName = Brand<string, 'productCategoryName'>
-export const ProductCategoryName = make<ProductCategoryName>()
-export type ProductCategoryDescription = Brand<string, 'productCategoryDescription'>
-export const ProductCategoryDescription = make<ProductCategoryDescription>()
+import { Limit, Offset, Page, Search } from '../plugins/pagination'
 
 export type CreateServiceCategory = {
   serviceCategoryID: ServiceCategoryID

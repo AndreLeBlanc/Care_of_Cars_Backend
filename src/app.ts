@@ -4,26 +4,26 @@ import * as dotenv from 'dotenv'
 import { FastifyInstance, FastifyServerOptions, fastify } from 'fastify'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
-import pagination from './plugins/pagination.js'
+import pagination from './plugins/pagination'
 
-import jwt from './plugins/jwt.js'
-import { permissions } from './routes/permissions/permissions.js'
-import { roleToPermissions } from './routes/role-to-permission/roleToPermissons.js'
-import { roles } from './routes/roles/roles.js'
-import { serviceCategory } from './routes/category/category.js'
-import { services } from './routes/services/services.js'
-import { users } from './routes/users/users.js'
+import jwt from './plugins/jwt'
+import { permissions } from './routes/permissions/permissions'
+import { roleToPermissions } from './routes/role-to-permission/roleToPermissons'
+import { roles } from './routes/roles/roles'
+import { serviceCategory } from './routes/category/category'
+import { services } from './routes/services/services'
+import { users } from './routes/users/users'
 
-import { stores } from './routes/stores/stores.js'
+import { stores } from './routes/stores/stores'
 
-import { root } from './routes/root.js'
-import seedSuperAdmin from './plugins/seed.js'
+import { root } from './routes/root'
+import seedSuperAdmin from './plugins/seed'
 
-import { customers } from './routes/customers/customers.js'
-import { rentCar } from './routes/rentCar/rent-car.js'
+import { customers } from './routes/customers/customers'
+import { rentCar } from './routes/rentCar/rent-car'
 
-import { productsRoute } from './routes/product/products.js'
-import { qualificationsRoute } from './routes/qulifications/qualifcations.js'
+import { productsRoute } from './routes/product/products'
+import { qualificationsRoute } from './routes/qulifications/qualifcations'
 
 const defaultOptions = {
   logger: true,

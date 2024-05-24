@@ -1,6 +1,6 @@
 import { Static, Type } from '@sinclair/typebox'
 
-import { CreatedAndUpdatedAT } from '../../utils/helper.js'
+import { CreatedAndUpdatedAT } from '../../utils/helper'
 const storeName = Type.String()
 const storeOrgNumber = Type.String()
 export const storeID = Type.Integer()

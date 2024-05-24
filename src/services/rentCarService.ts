@@ -1,23 +1,18 @@
-import { Brand, make } from 'ts-brand'
-import { db } from '../config/db-connect.js'
-import { rentcars } from '../schema/schema.js'
+import { db } from '../config/db-connect'
+
+import {
+  RentCarColor,
+  RentCarModel,
+  RentCarNotes,
+  RentCarNumber,
+  RentCarRegistrationNumber,
+  RentCarYear,
+  StoreID,
+  rentcars,
+} from '../schema/schema'
 
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
-import { Offset } from '../plugins/pagination.js'
-import { StoreID } from './storeService.js'
-
-export type RentCarRegistrationNumber = Brand<string, 'rentCarRegistrationNumber'>
-export const RentCarRegistrationNumber = make<RentCarRegistrationNumber>()
-export type RentCarModel = Brand<string, 'rentCarModel'>
-export const RentCarModel = make<RentCarModel>()
-export type RentCarColor = Brand<string, 'rentCarColor'>
-export const RentCarColor = make<RentCarColor>()
-export type RentCarYear = Brand<number, 'rentCarYear'>
-export const RentCarYear = make<RentCarYear>()
-export type RentCarNotes = Brand<string, 'rentCarNotes'>
-export const RentCarNotes = make<RentCarNotes>()
-export type RentCarNumber = Brand<number, 'rentCarNumber'>
-export const RentCarNumber = make<RentCarNumber>()
+import { Offset } from '../plugins/pagination'
 
 export type RentCarCreateType = {
   storeID: StoreID

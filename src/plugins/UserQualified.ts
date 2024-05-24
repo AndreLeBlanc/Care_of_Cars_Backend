@@ -2,11 +2,14 @@ import fp from 'fastify-plugin'
 
 import { Brand, make } from 'ts-brand'
 
-import { GlobalQualID, LocalQualID } from '../services/qualificationsService.js'
-import { UserID } from '../services/userService.js'
-
-import { userGlobalQualifications, userLocalQualifications } from '../schema/schema.js'
-import { db } from '../config/db-connect.js'
+import {
+  GlobalQualID,
+  LocalQualID,
+  UserID,
+  userGlobalQualifications,
+  userLocalQualifications,
+} from '../schema/schema'
+import { db } from '../config/db-connect'
 
 import { count, eq } from 'drizzle-orm'
 

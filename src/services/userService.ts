@@ -3,30 +3,18 @@ import bcrypt from 'bcryptjs'
 
 import { db } from '../config/db-connect'
 
-import { roles, userBelongsToStore, users } from '../schema/schema'
+import { RoleID, RoleName, StoreID, roles, userBelongsToStore, users } from '../schema/schema'
 
-import { RoleID, RoleName } from './roleService.js'
+import { Limit, Offset, Page, Search } from '../plugins/pagination'
 
-import { StoreID } from './storeService.js'
-
-import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
-
-import { Brand, make } from 'ts-brand'
-
-export type UserID = Brand<number, 'userID'>
-export const UserID = make<UserID>()
-export type UserPassword = Brand<string, ' userPassword'>
-export const UserPassword = make<UserPassword>()
-export type UserFirstName = Brand<string, ' userFirstName'>
-export const UserFirstName = make<UserFirstName>()
-export type UserLastName = Brand<string, ' userLastName'>
-export const UserLastName = make<UserLastName>()
-export type UserEmail = Brand<string, ' userEmail'>
-export const UserEmail = make<UserEmail>()
-export type Signature = Brand<string, ' signature'>
-export const Signature = make<Signature>()
-export type IsSuperAdmin = Brand<boolean | null, 'isSuperAdmin'>
-export const IsSuperAdmin = make<IsSuperAdmin>()
+import {
+  IsSuperAdmin,
+  UserEmail,
+  UserFirstName,
+  UserID,
+  UserLastName,
+  UserPassword,
+} from '../schema/schema.js'
 
 export type UserStore = {
   userID: UserID

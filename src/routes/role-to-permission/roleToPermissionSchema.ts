@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 
-import { PermissionID } from '../permissions/permissionSchema.js'
-import { RoleID } from '../roles/roleSchema.js'
+import { PermissionID } from '../permissions/permissionSchema'
+import { RoleID } from '../roles/roleSchema'
 
 export const CreateRoleToPermissionSchema = Type.Object({
   roleID: RoleID,

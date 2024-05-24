@@ -19,28 +19,53 @@ import {
   getDriverByEmailType,
   patchCompanyBody,
   patchDriverBody,
-} from './customerSchema.js'
-import { PermissionTitle } from '../../services/permissionService.js'
+} from './customerSchema'
 
 import {
   Company,
+  CustomerCompanyCreate,
+  CustomersPaginate,
+  Driver,
+  DriverCreate,
+  DriversPaginate,
+  createCompany,
+  createNewDriver,
+  deleteCompany,
+  deleteDriver,
+  editCompanyDetails,
+  editDriverDetails,
+  getCompanyById,
+  getCustomersPaginate,
+  getDriverById,
+  getDriversPaginate,
+} from '../../services/customerService'
+import {
+  Limit,
+  ModelName,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  ResponseMessage,
+  ResultCount,
+  Search,
+} from '../../plugins/pagination'
+
+import {
   CompanyAddress,
   CompanyAddressCity,
   CompanyCountry,
   CompanyReference,
   CompanyZipCode,
   CustomerCardNumber,
-  CustomerCompanyCreate,
   CustomerCompanyName,
   CustomerOrgNumber,
-  CustomersPaginate,
-  Driver,
   DriverAcceptsMarketing,
   DriverAddress,
   DriverAddressCity,
   DriverCardValidTo,
   DriverCountry,
-  DriverCreate,
   DriverEmail,
   DriverExternalNumber,
   DriverFirstName,
@@ -53,30 +78,8 @@ import {
   DriverNotesShared,
   DriverPhoneNumber,
   DriverZipCode,
-  DriversPaginate,
-  createCompany,
-  createNewDriver,
-  deleteCompany,
-  deleteDriver,
-  editCompanyDetails,
-  editDriverDetails,
-  getCompanyById,
-  getCustomersPaginate,
-  getDriverById,
-  getDriversPaginate,
-} from '../../services/customerService.js'
-import {
-  Limit,
-  ModelName,
-  NextPageUrl,
-  Offset,
-  Page,
-  PreviousPageUrl,
-  RequestUrl,
-  ResponseMessage,
-  ResultCount,
-  Search,
-} from '../../plugins/pagination.js'
+  PermissionTitle,
+} from '../../schema/schema.js'
 
 export const customers = async (fastify: FastifyInstance) => {
   //Get customers

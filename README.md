@@ -176,7 +176,7 @@ in `src/routes/` add a folder with the name of your route. Add two files in the 
 
 ```
 import { FastifyInstance } from 'fastify'
-import { exampleFuncSchema, exampleFuncInputSchema } from './exampleSchema.js'
+import { exampleFuncSchema, exampleFuncInputSchema } from './exampleSchema'
 
 export async function exampleRoute(fastify: FastifyInstance) {
   fastify.get<{ Querystring: exampleFuncInputSchema }>(
@@ -208,7 +208,7 @@ export default exampleRoute
 in `src/app.ts` import:
 
 ```
-import { exampleRoute } from './routes/example/example.js'
+import { exampleRoute } from './routes/example/example'
 import exampleFunction from './plugins/example.js
 
 ```

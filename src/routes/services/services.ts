@@ -5,15 +5,26 @@ import {
   ListServiceQueryParamSchemaType,
   ServiceSchema,
   ServiceSchemaType,
+  colorForService,
   getServiceByIDSchema,
   getServiceByIDSchemaType,
   listServiceOrderByEnum,
   serviceOrderEnum,
-} from './serviceSchema.js'
+} from './serviceSchema'
 
 import {
+  ServiceNoVariant,
+  createService,
+  getServiceById,
+  getServicesPaginate,
+  updateServiceByID,
+} from '../../services/serviceService'
+
+import {
+  PermissionTitle,
   ServiceAward,
   ServiceCallInterval,
+  ServiceCategoryID,
   ServiceCost,
   ServiceDay1,
   ServiceDay2,
@@ -26,17 +37,9 @@ import {
   ServiceIncludeInAutomaticSms,
   ServiceItemNumber,
   ServiceName,
-  ServiceNoVariant,
   ServiceSuppliersArticleNumber,
   ServiceWarrantyCard,
-  createService,
-  getServiceById,
-  getServicesPaginate,
-  updateServiceByID,
-} from '../../services/serviceService.js'
-import { ServiceCategoryID } from '../../services/CategoryService.js'
-
-import { PermissionTitle } from '../../services/permissionService.js'
+} from '../../schema/schema'
 
 import {
   Limit,
@@ -49,7 +52,7 @@ import {
   ResponseMessage,
   ResultCount,
   Search,
-} from '../../plugins/pagination.js'
+} from '../../plugins/pagination'
 
 export async function services(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListServiceQueryParamSchemaType }>(
@@ -155,9 +158,7 @@ export async function services(fastify: FastifyInstance) {
           ? ServiceHidden(request.body.serviceHidden)
           : undefined,
         serviceCallInterval: ServiceCallInterval(request.body.serviceCallInterval),
-        serviceColorForService: request.body.serviceColorForService
-          ? request.body.serviceColorForService
-          : undefined,
+        serviceColorForService: request.body.serviceColorForService as colorForService,
         serviceWarrantyCard: request.body.serviceWarrantyCard
           ? ServiceWarrantyCard(request.body.serviceWarrantyCard)
           : undefined,
@@ -234,9 +235,7 @@ export async function services(fastify: FastifyInstance) {
           ? ServiceHidden(request.body.serviceHidden)
           : undefined,
         serviceCallInterval: ServiceCallInterval(request.body.serviceCallInterval),
-        serviceColorForService: request.body.serviceColorForService
-          ? request.body.serviceColorForService
-          : undefined,
+        serviceColorForService: request.body.serviceColorForService,
         serviceWarrantyCard: request.body.serviceWarrantyCard
           ? ServiceWarrantyCard(request.body.serviceWarrantyCard)
           : undefined,

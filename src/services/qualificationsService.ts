@@ -1,35 +1,23 @@
-import { Brand, make } from 'ts-brand'
-
-import { PositiveInteger } from '../utils/helper.js'
-
 import {
+  CreatedAt,
+  GlobalQualID,
+  GlobalQualName,
+  LocalQualID,
+  LocalQualName,
+  StoreID,
+  UpdatedAt,
+  UserID,
   qualificationsGlobal,
   qualificationsLocal,
   userGlobalQualifications,
   userLocalQualifications,
-} from '../schema/schema.js'
+} from '../schema/schema'
 
-import { Search } from '../plugins/pagination.js'
+import { Search } from '../plugins/pagination'
 
-import { db } from '../config/db-connect.js'
+import { db } from '../config/db-connect'
 
 import { and, eq, ilike } from 'drizzle-orm'
-
-import { StoreID } from './storeService.js'
-import { UserID } from './userService.js'
-
-export type LocalQualID = Brand<PositiveInteger<number>, 'localQualID'>
-export const LocalQualID = make<LocalQualID>()
-export type LocalQualName = Brand<string, 'localQualName'>
-export const LocalQualName = make<LocalQualName>()
-export type CreatedAt = Brand<Date, 'createdAt'>
-export const CreatedAt = make<CreatedAt>()
-export type UpdatedAt = Brand<Date, 'updatedAt'>
-export const UpdatedAt = make<UpdatedAt>()
-export type GlobalQualID = Brand<PositiveInteger<number>, 'globalQualID'>
-export const GlobalQualID = make<GlobalQualID>()
-export type GlobalQualName = Brand<string, 'globalQualName'>
-export const GlobalQualName = make<GlobalQualName>()
 
 export type CreateQualificationsLocal = {
   storeID: StoreID

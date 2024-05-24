@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
-import { CreatedAndUpdatedAT } from '../../utils/helper.js'
-import { storeID } from '../stores/storesSchema..js'
-import { userID } from '../users/userSchema.js'
+import { CreatedAndUpdatedAT } from '../../utils/helper'
+import { storeID } from '../stores/storesSchema.'
+import { userID } from '../users/userSchema'
 
 const localQualID = Type.Integer()
 const globalQualID = Type.Integer()

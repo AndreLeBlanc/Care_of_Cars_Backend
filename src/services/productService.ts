@@ -1,30 +1,21 @@
-import { Brand, make } from 'ts-brand'
-import { DbDateType, products } from '../schema/schema.js'
-import { db } from '../config/db-connect.js'
+import {
+  DbDateType,
+  ProductAward,
+  ProductCategoryID,
+  ProductCost,
+  ProductDescription,
+  ProductExternalArticleNumber,
+  ProductID,
+  ProductInventoryBalance,
+  ProductItemNumber,
+  ProductSupplierArticleNumber,
+  ProductUpdateRelatedData,
+  products,
+} from '../schema/schema'
+import { db } from '../config/db-connect'
 
 import { desc, eq, ilike, or, sql } from 'drizzle-orm'
-import { Offset } from '../plugins/pagination.js'
-
-import { ProductCategoryID } from './CategoryService.js'
-
-export type ProductItemNumber = Brand<string, 'productItemNumber'>
-export const ProductItemNumber = make<ProductItemNumber>()
-export type ProductDescription = Brand<string, 'productDescription'>
-export const ProductDescription = make<ProductDescription>()
-export type ProductSupplierArticleNumber = Brand<string, 'productSupplierArticleNumber'>
-export const ProductSupplierArticleNumber = make<ProductSupplierArticleNumber>()
-export type ProductExternalArticleNumber = Brand<string, 'productExternalArticleNumber'>
-export const ProductExternalArticleNumber = make<ProductExternalArticleNumber>()
-export type ProductUpdateRelatedData = Brand<boolean, 'productUpdateRelatedData'>
-export const ProductUpdateRelatedData = make<ProductUpdateRelatedData>()
-export type ProductInventoryBalance = Brand<number, 'productInventoryBalance'>
-export const ProductInventoryBalance = make<ProductInventoryBalance>()
-export type ProductAward = Brand<number, 'productAward'>
-export const ProductAward = make<ProductAward>()
-export type ProductCost = Brand<number, 'productCost'>
-export const ProductCost = make<ProductCost>()
-export type ProductID = Brand<number, 'productID'>
-export const ProductID = make<ProductID>()
+import { Offset } from '../plugins/pagination'
 
 export type ProductAddType = {
   productItemNumber: ProductItemNumber

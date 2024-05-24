@@ -1,18 +1,19 @@
 import fp from 'fastify-plugin'
+
 import * as dotenv from 'dotenv'
 
-import { CreatedRole, createRole } from '../services/roleService.js'
+import { CreatedRole, createRole } from '../services/roleService'
+import { CreatedUser, createUser, generatePasswordHash } from '../services/userService'
 import {
-  CreatedUser,
   IsSuperAdmin,
+  RoleDescription,
+  RoleID,
+  RoleName,
   UserEmail,
   UserFirstName,
   UserLastName,
   UserPassword,
-  createUser,
-  generatePasswordHash,
-} from '../services/userService.js'
-import { RoleDescription, RoleID, RoleName } from '../services/roleService.js'
+} from '../schema/schema.js'
 dotenv.config()
 
 export interface SupportPluginOptions {
