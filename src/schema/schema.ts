@@ -2,6 +2,27 @@ import { PositiveInteger } from '../utils/helper.js'
 
 import { Brand, make } from 'ts-brand'
 
+import { relations } from 'drizzle-orm'
+
+import {
+  boolean,
+  date,
+  index,
+  integer,
+  numeric,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  real,
+  serial,
+  smallint,
+  text,
+  time,
+  timestamp,
+  unique,
+  varchar,
+} from 'drizzle-orm/pg-core'
+
 export type UserID = Brand<number, 'userID'>
 export const UserID = make<UserID>()
 export type UserPassword = Brand<string, ' userPassword'>
@@ -253,30 +274,6 @@ export const ServiceSuppliersArticleNumber = make<ServiceSuppliersArticleNumber>
 export type ServiceExternalArticleNumber = Brand<string, 'ServiceExternalArticleNumber'>
 export const ServiceExternalArticleNumber = make<ServiceExternalArticleNumber>()
 
-export const colorForService = [
-  'LightBlue',
-  'Blue',
-  'DarkBlue',
-  'LightGreen',
-  'Green',
-  'DarkGreen',
-  'LightYellow',
-  'Yellow',
-  'DarkYellow',
-  'LightPurple',
-  'Purple',
-  'DarkPurple',
-  'LightPink',
-  'Pink',
-  'DarkPink',
-  'LightTurquoise',
-  'Turquoise',
-  'DarkTurquoise',
-  'Orange',
-  'Red',
-  'None',
-] as const
-
 export type ServiceID = Brand<number, ' serviceID'>
 export const ServiceID = make<ServiceID>()
 export type ServiceName = Brand<string, ' serviceName'>
@@ -320,26 +317,29 @@ export const EmployeePin = make<EmployeePin>()
 export type EmployeeComment = Brand<string, 'employeeComment'>
 export const EmployeeComment = make<EmployeeComment>()
 
-import { relations } from 'drizzle-orm'
-
-import {
-  boolean,
-  date,
-  index,
-  integer,
-  numeric,
-  pgEnum,
-  pgTable,
-  primaryKey,
-  real,
-  serial,
-  smallint,
-  text,
-  time,
-  timestamp,
-  unique,
-  varchar,
-} from 'drizzle-orm/pg-core'
+export const colorForService = [
+  'LightBlue',
+  'Blue',
+  'DarkBlue',
+  'LightGreen',
+  'Green',
+  'DarkGreen',
+  'LightYellow',
+  'Yellow',
+  'DarkYellow',
+  'LightPurple',
+  'Purple',
+  'DarkPurple',
+  'LightPink',
+  'Pink',
+  'DarkPink',
+  'LightTurquoise',
+  'Turquoise',
+  'DarkTurquoise',
+  'Orange',
+  'Red',
+  'None',
+] as const
 
 export type ColorForService = (typeof colorForService)[number]
 
