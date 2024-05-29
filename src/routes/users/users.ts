@@ -200,6 +200,7 @@ export async function users(fastify: FastifyInstance) {
         )
         return reply.status(200).send({
           message: 'Login success',
+          loginSuccess: true,
           token: token,
           user: {
             id: userWithPassword.userID,
