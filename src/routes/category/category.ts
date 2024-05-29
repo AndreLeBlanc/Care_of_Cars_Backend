@@ -250,7 +250,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   // Get Product category
   fastify.get<{ Params: getServiceCategoryByIDType }>(
-    '/product/:productID',
+    '/product/:producgCategoryID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('view_product_category')
@@ -279,7 +279,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   //Get service category by id
   fastify.get<{ Params: getServiceCategoryByIDType }>(
-    '/service/:serviceID',
+    '/service/:serviceCategoryID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('view_service_category')
@@ -311,7 +311,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     Reply: object
     Params: getServiceCategoryByIDType
   }>(
-    '/service/:serviceID',
+    '/service/:serviceCategoryID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('update_service_category')
@@ -361,7 +361,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
     Reply: object
     Params: getServiceCategoryByIDType
   }>(
-    '/product/:productID',
+    '/product/:producgCategoryID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('update_product_category')
@@ -408,7 +408,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   //Delete service category
   fastify.delete<{ Params: getServiceCategoryByIDType }>(
-    '/service/:serviceID',
+    '/service/:serviceCategoryID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('delete_service_category')
@@ -437,7 +437,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   //Delete product category
   fastify.delete<{ Params: getServiceCategoryByIDType }>(
-    '/product/:productID',
+    '/product/:producgCategoryID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('delete_product_category')

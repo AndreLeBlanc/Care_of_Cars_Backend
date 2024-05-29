@@ -287,4 +287,14 @@ is easier to understand and more difficult to confuse than
 function example(id: number)
 ´´´
 
+## Deploying to dev server.
+
+We are currently using http://141.94.70.202:3000/docs/static/index.html as our dev server.
+
+Log in using ssh.
+
+check out the commit you want to run.
+
+Build the docker container and run it. See section on docker.
+
 ## Don't Panic. It's the first helpful or intelligible thing anybody's said to me all day

@@ -305,6 +305,21 @@ export const RoleID = make<RoleID>()
 export type RoleDescription = Brand<string, 'roleDescription'>
 export const RoleDescription = make<RoleDescription>()
 
+export type EmployeeID = Brand<number, 'employeeID'>
+export const EmployeeID = make<EmployeeID>()
+export type ShortUserName = Brand<string, 'ShortUserName'>
+export const ShortUserName = make<ShortUserName>()
+export type EmploymentNumber = Brand<string, 'employmentNumber'>
+export const EmploymentNumber = make<EmploymentNumber>()
+export type EmployeePersonalNumber = Brand<string, 'employeePersonalNumber'>
+export const EmployeePersonalNumber = make<EmployeePersonalNumber>()
+export type EmployeeHourlyRate = Brand<number, 'employeeHourlyRate'>
+export const EmployeeHourlyRate = make<EmployeeHourlyRate>()
+export type EmployeePin = Brand<string, 'employeePin'>
+export const EmployeePin = make<EmployeePin>()
+export type EmployeeComment = Brand<string, 'employeeComment'>
+export const EmployeeComment = make<EmployeeComment>()
+
 import { relations } from 'drizzle-orm'
 
 import {
@@ -339,14 +354,44 @@ const dbDates = {
 }
 
 export const employees = pgTable('employees', {
-  shortUserName: varchar('firstName', { length: 16 }).notNull(),
-  employmentNumber: varchar('firstName', { length: 128 }).primaryKey(),
-  personalNumber: varchar('personalNumber', { length: 16 }).notNull().unique(),
+  employeeID: serial('employeeID').$type<EmployeeID>().primaryKey(),
+  shortUserName: varchar('firstName', { length: 16 }).$type<ShortUserName>().notNull(),
+  employmentNumber: varchar('firstName', { length: 128 })
+    .$type<EmploymentNumber>()
+    .unique()
+    .notNull(),
+  employeePersonalNumber: varchar('employeePersonalNumber', { length: 16 })
+    .$type<EmployeePersonalNumber>()
+    .notNull()
+    .unique(),
   signature: varchar('signature', { length: 4 }).$type<Signature>().notNull().unique(),
-  hourlyRate: numeric('hourlyRate'),
-  pin: varchar('pin', { length: 4 }),
-  comment: varchar('comment'),
+  employeeHourlyRate: numeric('employeeHourlyRate').$type<EmployeeHourlyRate>(),
+  employeePin: varchar('employeePin', { length: 4 }).$type<EmployeePin>(),
+  employeeComment: varchar('employeeComment').$type<EmployeeComment>(),
 })
+
+export const employeeStore = pgTable(
+  'employeeStore',
+  {
+    storeID: integer('storeID')
+      .$type<StoreID>()
+      .references(() => stores.storeID, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
+    employeeID: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
+  },
+  (employeeStore) => {
+    return {
+      pk: primaryKey({ columns: [employeeStore.storeID, employeeStore.employeeID] }),
+    }
+  },
+)
 
 export const users = pgTable('users', {
   userID: serial('userID').$type<UserID>().primaryKey(),
@@ -564,6 +609,7 @@ export const stores = pgTable('stores', {
   storeDescription: varchar('storeDescription').$type<StoreDescription>(),
   storeContactPerson: varchar('storeContactPerson', { length: 64 }).$type<StoreContactPerson>(),
   storeMaxUsers: integer('storeMaxUsers').$type<StoreMaxUsers>(),
+  currency: varchar('currency').default('SEK'),
   storeAllowCarAPI: boolean('storeAllowCarAPI')
     .$type<StoreAllowCarAPI>()
     .default(StoreAllowCarAPI(true)),
