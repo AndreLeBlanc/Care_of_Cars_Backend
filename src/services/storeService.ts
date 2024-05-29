@@ -935,9 +935,9 @@ export async function getStoresPaginate(
   const totalPage = Math.ceil(totalStores.count / limit)
 
   return {
-    totalStores: totalStores.count,
-    totalPage,
-    perPage: page,
+    totalStores: ResultCount(totalStores.count),
+    totalPage: Page(totalPage),
+    perPage: Limit(page),
     data: storesList,
   }
 }
