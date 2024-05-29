@@ -1,62 +1,38 @@
-import { Brand, make } from 'ts-brand'
-import { companycustomers, drivers } from '../schema/schema.js'
+import {
+  CompanyAddress,
+  CompanyAddressCity,
+  CompanyCountry,
+  CompanyReference,
+  CompanyZipCode,
+  CustomerCardNumber,
+  CustomerCompanyName,
+  CustomerOrgNumber,
+  DriverAcceptsMarketing,
+  DriverAddress,
+  DriverAddressCity,
+  DriverCardValidTo,
+  DriverCountry,
+  DriverEmail,
+  DriverExternalNumber,
+  DriverFirstName,
+  DriverGDPRAccept,
+  DriverHasCard,
+  DriverISWarrantyCustomer,
+  DriverKeyNumber,
+  DriverLastName,
+  DriverNotes,
+  DriverNotesShared,
+  DriverPhoneNumber,
+  DriverZipCode,
+  companycustomers,
+  drivers,
+} from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
-import { Offset } from '../plugins/pagination.js'
-import { isEmail } from '../utils/helper.js'
 
-export type DriverExternalNumber = Brand<string | null, 'driverExternalNumber'>
-export const DriverExternalNumber = make<DriverExternalNumber>()
-export type DriverGDPRAccept = Brand<boolean, 'driverGDPRAccept'>
-export const DriverGDPRAccept = make<DriverGDPRAccept>()
-export type DriverISWarrantyCustomer = Brand<boolean, 'customerISWarrantyCustomer'>
-export const DriverISWarrantyCustomer = make<DriverISWarrantyCustomer>()
-export type DriverAcceptsMarketing = Brand<boolean, 'driverAcceptsMarketing'>
-export const DriverAcceptsMarketing = make<DriverAcceptsMarketing>()
-export type CustomerCompanyName = Brand<string, 'customerCompanyName'>
-export const CustomerCompanyName = make<CustomerCompanyName>()
-export type CustomerOrgNumber = Brand<string, 'customerOrgNumber'>
-export const CustomerOrgNumber = make<CustomerOrgNumber>()
-export type DriverFirstName = Brand<string, 'driverFirstName'>
-export const DriverFirstName = make<DriverFirstName>()
-export type DriverLastName = Brand<string, 'driverLastName'>
-export const DriverLastName = make<DriverLastName>()
-export type CompanyReference = Brand<string, 'companyReference'>
-export const CompanyReference = make<CompanyReference>()
-export type CompanyEmail = Brand<string, 'companyEmail'>
-export const CompanyEmail = make<CompanyEmail>()
-export type DriverEmail = Brand<string, 'driverEmail'>
-export const DriverEmail = make<DriverEmail>()
-export type DriverPhoneNumber = Brand<string, 'DriverPhoneNumber'>
-export const DriverPhoneNumber = make<DriverPhoneNumber>()
-export type CompanyAddress = Brand<string, 'companyAddress'>
-export const CompanyAddress = make<CompanyAddress>()
-export type DriverAddress = Brand<string, 'driverAddress'>
-export const DriverAddress = make<DriverAddress>()
-export type CompanyZipCode = Brand<string, 'companyZipCode'>
-export const CompanyZipCode = make<CompanyZipCode>()
-export type DriverZipCode = Brand<string, 'driverZipCode'>
-export const DriverZipCode = make<DriverZipCode>()
-export type CompanyAddressCity = Brand<string, 'companyAddressCity'>
-export const CompanyAddressCity = make<CompanyAddressCity>()
-export type DriverAddressCity = Brand<string, 'driverAddressCity'>
-export const DriverAddressCity = make<DriverAddressCity>()
-export type CompanyCountry = Brand<string, 'companyCountry'>
-export const CompanyCountry = make<CompanyCountry>()
-export type DriverCountry = Brand<string, 'driverCountry'>
-export const DriverCountry = make<DriverCountry>()
-export type DriverHasCard = Brand<boolean | null, 'driverHasCard'>
-export const DriverHasCard = make<DriverHasCard>()
-export type CustomerCardNumber = Brand<string | null, 'customerCardNumber'>
-export const CustomerCardNumber = make<CustomerCardNumber>()
-export type DriverCardValidTo = Brand<Date | null, 'driverCardValidTo'>
-export const DriverCardValidTo = make<DriverCardValidTo>()
-export type DriverKeyNumber = Brand<string | null, 'driverKeyNumber'>
-export const DriverKeyNumber = make<DriverKeyNumber>()
-export type DriverNotesShared = Brand<string | null, 'driverNotesShared'>
-export const DriverNotesShared = make<DriverNotesShared>()
-export type DriverNotes = Brand<string | null, 'driverNotes'>
-export const DriverNotes = make<DriverNotes>()
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
+
+import { Offset, Search } from '../plugins/pagination.js'
+import { isEmail } from '../utils/helper.js'
 
 export type CustomerCompanyCreate = {
   customerOrgNumber: CustomerOrgNumber
@@ -82,7 +58,7 @@ export type DriverCreate = {
   driverZipCode: DriverZipCode
   driverAddressCity: DriverAddressCity
   driverCountry: DriverCountry
-  driverHasCard: DriverHasCard
+  driverHasCard?: DriverHasCard
   driverCardNumber?: CustomerCardNumber
   driverCardValidTo?: DriverCardValidTo
   driverKeyNumber?: DriverKeyNumber
@@ -226,52 +202,28 @@ export async function createCompanyDriver(
       driverNotesShared: driver.driverNotesShared,
       driverNotes: driver.driverNotes,
     })
-    .returning({
-      customerOrgNumber: drivers.customerOrgNumber,
-      driverExternalNumber: drivers.driverExternalNumber,
-      driverGDPRAccept: drivers.driverGDPRAccept,
-      driverISWarrantyDriver: drivers.driverISWarrantyDriver,
-      driverAcceptsMarketing: drivers.driverAcceptsMarketing,
-      driverFirstName: drivers.driverFirstName,
-      driverLastName: drivers.driverLastName,
-      driverEmail: drivers.driverEmail,
-      driverPhoneNumber: drivers.driverPhoneNumber,
-      driverAddress: drivers.driverAddress,
-      driverZipCode: drivers.driverZipCode,
-      driverAddressCity: drivers.driverAddressCity,
-      driverCountry: drivers.driverCountry,
-      driverHasCard: drivers.driverHasCard,
-      driverCardValidTo: drivers.driverCardValidTo,
-      driverCardNumber: drivers.driverCardNumber,
-      driverKeyNumber: drivers.driverKeyNumber,
-      driverNotesShared: drivers.driverNotesShared,
-      driverNotes: drivers.driverNotes,
-      createdAt: drivers.createdAt,
-      updatedAt: drivers.updatedAt,
-    })
+    .returning()
   return newDriver
     ? {
-        customerOrgNumber: newDriver.customerOrgNumber
-          ? CustomerOrgNumber(newDriver.customerOrgNumber)
-          : undefined,
-        driverExternalNumber: DriverExternalNumber(newDriver.driverExternalNumber),
-        driverGDPRAccept: DriverGDPRAccept(newDriver.driverGDPRAccept),
-        driverISWarrantyDriver: DriverISWarrantyCustomer(newDriver.driverISWarrantyDriver),
-        driverAcceptsMarketing: DriverAcceptsMarketing(newDriver.driverAcceptsMarketing),
-        driverFirstName: DriverFirstName(newDriver.driverFirstName),
-        driverLastName: DriverLastName(newDriver.driverLastName),
-        driverEmail: DriverEmail(newDriver.driverEmail),
-        driverPhoneNumber: DriverPhoneNumber(newDriver.driverPhoneNumber),
-        driverAddress: DriverAddress(newDriver.driverAddress),
-        driverZipCode: DriverZipCode(newDriver.driverZipCode),
-        driverAddressCity: DriverAddressCity(newDriver.driverAddressCity),
-        driverCountry: DriverCountry(newDriver.driverCountry),
-        driverHasCard: DriverHasCard(newDriver.driverHasCard),
-        driverCardValidTo: DriverCardValidTo(newDriver.driverCardValidTo),
-        driverCardNumber: CustomerCardNumber(newDriver.driverCardNumber),
-        driverKeyNumber: DriverKeyNumber(newDriver.driverKeyNumber),
-        driverNotesShared: DriverNotesShared(newDriver.driverNotesShared),
-        driverNotes: DriverNotes(newDriver.driverNotes),
+        customerOrgNumber: newDriver.customerOrgNumber ?? undefined,
+        driverExternalNumber: newDriver.driverExternalNumber ?? undefined,
+        driverGDPRAccept: newDriver.driverGDPRAccept,
+        driverISWarrantyDriver: newDriver.driverISWarrantyDriver,
+        driverAcceptsMarketing: newDriver.driverAcceptsMarketing,
+        driverFirstName: newDriver.driverFirstName,
+        driverLastName: newDriver.driverLastName,
+        driverEmail: newDriver.driverEmail,
+        driverPhoneNumber: newDriver.driverPhoneNumber,
+        driverAddress: newDriver.driverAddress,
+        driverZipCode: newDriver.driverZipCode,
+        driverAddressCity: newDriver.driverAddressCity,
+        driverCountry: newDriver.driverCountry,
+        driverHasCard: newDriver.driverHasCard ?? undefined,
+        driverCardValidTo: newDriver.driverCardValidTo ?? undefined,
+        driverCardNumber: newDriver.driverCardNumber ?? undefined,
+        driverKeyNumber: newDriver.driverKeyNumber ?? undefined,
+        driverNotesShared: newDriver.driverNotesShared ?? undefined,
+        driverNotes: newDriver.driverNotes ?? undefined,
         createdAt: newDriver.createdAt,
         updatedAt: newDriver.updatedAt,
       }
@@ -302,53 +254,29 @@ export async function createNewDriver(driver: DriverCreate): Promise<Driver | un
       driverNotesShared: driver.driverNotesShared,
       driverNotes: driver.driverNotes,
     })
-    .returning({
-      customerOrgNumber: drivers.customerOrgNumber,
-      driverExternalNumber: drivers.driverExternalNumber,
-      driverGDPRAccept: drivers.driverGDPRAccept,
-      driverISWarrantyDriver: drivers.driverISWarrantyDriver,
-      driverAcceptsMarketing: drivers.driverAcceptsMarketing,
-      driverFirstName: drivers.driverFirstName,
-      driverLastName: drivers.driverLastName,
-      driverEmail: drivers.driverEmail,
-      driverPhoneNumber: drivers.driverPhoneNumber,
-      driverAddress: drivers.driverAddress,
-      driverZipCode: drivers.driverZipCode,
-      driverAddressCity: drivers.driverAddressCity,
-      driverCountry: drivers.driverCountry,
-      driverHasCard: drivers.driverHasCard,
-      driverCardValidTo: drivers.driverCardValidTo,
-      driverCardNumber: drivers.driverCardNumber,
-      driverKeyNumber: drivers.driverKeyNumber,
-      driverNotesShared: drivers.driverNotesShared,
-      driverNotes: drivers.driverNotes,
-      createdAt: drivers.createdAt,
-      updatedAt: drivers.updatedAt,
-    })
+    .returning()
 
   return newDriver
     ? {
-        customerOrgNumber: newDriver.customerOrgNumber
-          ? CustomerOrgNumber(newDriver.customerOrgNumber)
-          : undefined,
-        driverExternalNumber: DriverExternalNumber(newDriver.driverExternalNumber),
-        driverGDPRAccept: DriverGDPRAccept(newDriver.driverGDPRAccept),
-        driverISWarrantyDriver: DriverISWarrantyCustomer(newDriver.driverISWarrantyDriver),
-        driverAcceptsMarketing: DriverAcceptsMarketing(newDriver.driverAcceptsMarketing),
-        driverFirstName: DriverFirstName(newDriver.driverFirstName),
-        driverLastName: DriverLastName(newDriver.driverLastName),
-        driverEmail: DriverEmail(newDriver.driverEmail),
-        driverPhoneNumber: DriverPhoneNumber(newDriver.driverPhoneNumber),
-        driverAddress: DriverAddress(newDriver.driverAddress),
-        driverZipCode: DriverZipCode(newDriver.driverZipCode),
-        driverAddressCity: DriverAddressCity(newDriver.driverAddressCity),
-        driverCountry: DriverCountry(newDriver.driverCountry),
-        driverHasCard: DriverHasCard(newDriver.driverHasCard),
-        driverCardValidTo: DriverCardValidTo(newDriver.driverCardValidTo),
-        driverCardNumber: CustomerCardNumber(newDriver.driverCardNumber),
-        driverKeyNumber: DriverKeyNumber(newDriver.driverKeyNumber),
-        driverNotesShared: DriverNotesShared(newDriver.driverNotesShared),
-        driverNotes: DriverNotes(newDriver.driverNotes),
+        customerOrgNumber: newDriver.customerOrgNumber ?? undefined,
+        driverExternalNumber: newDriver.driverExternalNumber ?? undefined,
+        driverGDPRAccept: newDriver.driverGDPRAccept,
+        driverISWarrantyDriver: newDriver.driverISWarrantyDriver,
+        driverAcceptsMarketing: newDriver.driverAcceptsMarketing,
+        driverFirstName: newDriver.driverFirstName,
+        driverLastName: newDriver.driverLastName,
+        driverEmail: newDriver.driverEmail,
+        driverPhoneNumber: newDriver.driverPhoneNumber,
+        driverAddress: newDriver.driverAddress,
+        driverZipCode: newDriver.driverZipCode,
+        driverAddressCity: newDriver.driverAddressCity,
+        driverCountry: newDriver.driverCountry,
+        driverHasCard: newDriver.driverHasCard ?? undefined,
+        driverCardValidTo: newDriver.driverCardValidTo ?? undefined,
+        driverCardNumber: newDriver.driverCardNumber ?? undefined,
+        driverKeyNumber: newDriver.driverKeyNumber ?? undefined,
+        driverNotesShared: newDriver.driverNotesShared ?? undefined,
+        driverNotes: newDriver.driverNotes ?? undefined,
         createdAt: newDriver.createdAt,
         updatedAt: newDriver.updatedAt,
       }
@@ -369,33 +297,16 @@ export async function editCompanyDetails(
       updatedAt: new Date(),
     })
     .where(eq(companycustomers.customerOrgNumber, company.customerOrgNumber))
-    .returning({
-      customerOrgNumber: companycustomers.customerOrgNumber,
-      customerComapanyName: companycustomers.customerComapanyName,
-      customerAddress: companycustomers.companyAddress,
-      customerZipCode: companycustomers.companyZipCode,
-      customerAddressCity: companycustomers.companyAddressCity,
-      customerCountry: companycustomers.companyCountry,
-      createdAt: companycustomers.createdAt,
-      updatedAt: companycustomers.updatedAt,
-    })
+    .returning()
 
   return updatedCompany
     ? {
-        customerOrgNumber: CustomerOrgNumber(updatedCompany.customerOrgNumber),
-        customerCompanyName: CustomerCompanyName(updatedCompany.customerComapanyName),
-        companyAddress: updatedCompany.customerAddress
-          ? CompanyAddress(updatedCompany.customerAddress)
-          : undefined,
-        companyAddressCity: updatedCompany.customerAddressCity
-          ? CompanyAddressCity(updatedCompany.customerAddressCity)
-          : undefined,
-        companyCountry: updatedCompany.customerCountry
-          ? CompanyCountry(updatedCompany.customerCountry)
-          : undefined,
-        companyZipCode: updatedCompany.customerZipCode
-          ? CompanyZipCode(updatedCompany.customerZipCode)
-          : undefined,
+        customerOrgNumber: updatedCompany.customerOrgNumber,
+        customerCompanyName: updatedCompany.customerComapanyName,
+        companyAddress: updatedCompany.companyAddress ?? undefined,
+        companyZipCode: updatedCompany.companyZipCode ?? undefined,
+        companyAddressCity: updatedCompany.companyAddressCity ?? undefined,
+        companyCountry: updatedCompany.companyCountry ?? undefined,
         createdAt: updatedCompany.createdAt,
         updatedAt: updatedCompany.updatedAt,
       }
@@ -463,7 +374,7 @@ export async function editDriverDetails(driver: DriverCreate): Promise<Driver | 
 
   return updatedDriver
     ? {
-        driverExternalNumber: DriverExternalNumber(updatedDriver.driverExternalNumber),
+        driverExternalNumber: updatedDriver.driverExternalNumber ?? undefined,
         driverGDPRAccept: DriverGDPRAccept(updatedDriver.driverGDPRAccept),
         driverISWarrantyDriver: DriverISWarrantyCustomer(updatedDriver.driverISWarrantyDriver),
         driverAcceptsMarketing: DriverAcceptsMarketing(updatedDriver.driverAcceptsMarketing),
@@ -474,7 +385,9 @@ export async function editDriverDetails(driver: DriverCreate): Promise<Driver | 
         driverAddress: DriverAddress(updatedDriver.driverAddress),
         driverZipCode: DriverZipCode(updatedDriver.driverZipCode),
         driverAddressCity: DriverAddressCity(updatedDriver.driverAddressCity),
-        driverHasCard: DriverHasCard(updatedDriver.driverHasCard),
+        driverHasCard: updatedDriver.driverHasCard
+          ? DriverHasCard(updatedDriver.driverHasCard)
+          : undefined,
         driverCardValidTo: DriverCardValidTo(updatedDriver.driverCardValidTo),
         driverCardNumber: CustomerCardNumber(updatedDriver.driverCardNumber),
         driverKeyNumber: DriverKeyNumber(updatedDriver.driverKeyNumber),
@@ -561,11 +474,11 @@ export async function getCustomersPaginate(
 
 //Drivers Paginate
 export async function getDriversPaginate(
-  search: string,
+  search: Search,
   limit = 10,
   page = 1,
   offset = Offset(0),
-  isCompany?: string,
+  isCompany?: CustomerOrgNumber,
 ): Promise<DriversPaginate> {
   const returnData = await db.transaction(async (tx) => {
     let condition
@@ -706,24 +619,24 @@ export async function getDriverById(driverEmail: DriverEmail): Promise<Driver | 
     .where(eq(drivers.driverEmail, driverEmail))
   return driverDetails
     ? {
-        driverExternalNumber: DriverExternalNumber(driverDetails.driverExternalNumber),
-        driverGDPRAccept: DriverGDPRAccept(driverDetails.driverGDPRAccept),
-        driverISWarrantyDriver: DriverISWarrantyCustomer(driverDetails.driverISWarrantyDriver),
-        driverAcceptsMarketing: DriverAcceptsMarketing(driverDetails.driverAcceptsMarketing),
-        driverFirstName: DriverFirstName(driverDetails.driverFirstName),
-        driverLastName: DriverLastName(driverDetails.driverLastName),
-        driverEmail: DriverEmail(driverDetails.driverEmail),
-        driverPhoneNumber: DriverPhoneNumber(driverDetails.driverPhoneNumber),
-        driverAddress: DriverAddress(driverDetails.driverAddress),
-        driverZipCode: DriverZipCode(driverDetails.driverZipCode),
-        driverAddressCity: DriverAddressCity(driverDetails.driverAddressCity),
-        driverHasCard: DriverHasCard(driverDetails.driverHasCard),
-        driverCardValidTo: DriverCardValidTo(driverDetails.driverCardValidTo),
-        driverCardNumber: CustomerCardNumber(driverDetails.driverCardNumber),
-        driverKeyNumber: DriverKeyNumber(driverDetails.driverKeyNumber),
-        driverNotesShared: DriverNotesShared(driverDetails.driverNotesShared),
-        driverNotes: DriverNotes(driverDetails.driverNotes),
-        driverCountry: DriverCountry(driverDetails.driverCountry),
+        driverExternalNumber: driverDetails.driverExternalNumber ?? undefined,
+        driverGDPRAccept: driverDetails.driverGDPRAccept,
+        driverISWarrantyDriver: driverDetails.driverISWarrantyDriver,
+        driverAcceptsMarketing: driverDetails.driverAcceptsMarketing,
+        driverFirstName: driverDetails.driverFirstName,
+        driverLastName: driverDetails.driverLastName,
+        driverEmail: driverDetails.driverEmail,
+        driverPhoneNumber: driverDetails.driverPhoneNumber,
+        driverAddress: driverDetails.driverAddress,
+        driverZipCode: driverDetails.driverZipCode,
+        driverAddressCity: driverDetails.driverAddressCity,
+        driverHasCard: driverDetails.driverHasCard ?? undefined,
+        driverCardValidTo: driverDetails.driverCardValidTo ?? undefined,
+        driverCardNumber: driverDetails.driverCardNumber ?? undefined,
+        driverKeyNumber: driverDetails.driverKeyNumber ?? undefined,
+        driverNotesShared: driverDetails.driverNotesShared ?? undefined,
+        driverNotes: driverDetails.driverNotes ?? undefined,
+        driverCountry: driverDetails.driverCountry,
         createdAt: driverDetails.createdAt,
         updatedAt: driverDetails.updatedAt,
       }

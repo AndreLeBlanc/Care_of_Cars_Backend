@@ -4,11 +4,11 @@ export const ServiceVariantsSchema = Type.Object({
   name: Type.String(),
   award: Type.Number({ minimum: 0.01 }),
   cost: Type.Number({ minimum: 0.01 }),
-  day1: Type.Optional(Type.String()),
-  day2: Type.Optional(Type.String()),
-  day3: Type.Optional(Type.String()),
-  day4: Type.Optional(Type.String()),
-  day5: Type.Optional(Type.String()),
+  serviceDay1: Type.Optional(Type.String()),
+  serviceDay2: Type.Optional(Type.String()),
+  serviceDay3: Type.Optional(Type.String()),
+  serviceDay4: Type.Optional(Type.String()),
+  serviceDay5: Type.Optional(Type.String()),
 })
 export type CreateServiceVariantsSchemaType = Static<typeof ServiceVariantsSchema>
 
@@ -33,20 +33,21 @@ export enum colorForService {
   DarkTurquoise = 'DarkTurquoise',
   Orange = 'Orange',
   Red = 'Red',
+  None = 'None',
 }
-const colorForServiceType = Type.Enum(colorForService)
+const colorForServiceType = Type.Enum(colorForService, { default: 'None' })
 export const ServiceSchema = Type.Object({
-  name: Type.String(),
+  serviceName: Type.String(),
   serviceCategoryID: Type.Integer(),
-  includeInAutomaticSms: Type.Optional(Type.Boolean()),
-  hidden: Type.Optional(Type.Boolean()),
-  callInterval: Type.Optional(Type.Integer({ minimum: 1, maximum: 12 })),
-  colorForService: Type.Optional(colorForServiceType),
-  warrantyCard: Type.Optional(Type.Boolean()),
-  itemNumber: Type.Optional(Type.String()),
-  suppliersArticleNumber: Type.Optional(Type.String()),
-  externalArticleNumber: Type.Optional(Type.String()),
-  serviceVariants: Type.Optional(Type.Array(ServiceVariantsSchema)),
+  serviceIncludeInAutomaticSms: Type.Boolean(),
+  serviceHidden: Type.Optional(Type.Boolean()),
+  serviceCallInterval: Type.Integer({ minimum: 1, maximum: 12 }),
+  serviceColorForService: colorForServiceType,
+  serviceWarrantyCard: Type.Optional(Type.Boolean({ default: false })),
+  serviceItemNumber: Type.Optional(Type.String()),
+  serviceSuppliersArticleNumber: Type.Optional(Type.String()),
+  serviceExternalArticleNumber: Type.Optional(Type.String()),
+  serviceVariants: Type.Array(ServiceVariantsSchema),
 })
 
 export type ServiceSchemaType = Static<typeof ServiceSchema>
@@ -75,7 +76,7 @@ export const ListServiceQueryParamSchema = Type.Object({
 export type ListServiceQueryParamSchemaType = Static<typeof ListServiceQueryParamSchema>
 
 export const getServiceByIDSchema = Type.Object({
-  id: Type.Number(),
+  serviceID: Type.Number(),
 })
 
 export type getServiceByIDSchemaType = Static<typeof getServiceByIDSchema>

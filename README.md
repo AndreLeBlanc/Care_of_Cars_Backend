@@ -176,7 +176,7 @@ in `src/routes/` add a folder with the name of your route. Add two files in the 
 
 ```
 import { FastifyInstance } from 'fastify'
-import { exampleFuncSchema, exampleFuncInputSchema } from './exampleSchema.js'
+import { exampleFuncSchema, exampleFuncInputSchema } from './exampleSchema'
 
 export async function exampleRoute(fastify: FastifyInstance) {
   fastify.get<{ Querystring: exampleFuncInputSchema }>(
@@ -208,7 +208,7 @@ export default exampleRoute
 in `src/app.ts` import:
 
 ```
-import { exampleRoute } from './routes/example/example.js'
+import { exampleRoute } from './routes/example/example'
 import exampleFunction from './plugins/example.js
 
 ```
@@ -286,5 +286,15 @@ is easier to understand and more difficult to confuse than
 
 function example(id: number)
 ´´´
+
+## Deploying to dev server.
+
+We are currently using http://141.94.70.202:3000/docs/static/index.html as our dev server.
+
+Log in using ssh.
+
+check out the commit you want to run.
+
+Build the docker container and run it. See section on docker.
 
 ## Don't Panic. It's the first helpful or intelligible thing anybody's said to me all day

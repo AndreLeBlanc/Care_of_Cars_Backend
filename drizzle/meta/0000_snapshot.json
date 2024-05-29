@@ -1,10 +1,10 @@
 {
-  "id": "764d6085-e4f3-4022-84f5-1ed2fe670bce",
+  "id": "4c87256b-6f15-499c-97b3-6e3a15afe43f",
   "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "5",
-  "dialect": "pg",
+  "version": "6",
+  "dialect": "postgresql",
   "tables": {
-    "companycustomers": {
+    "public.companycustomers": {
       "name": "companycustomers",
       "schema": "",
       "columns": {
@@ -64,7 +64,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "drivers": {
+    "public.drivers": {
       "name": "drivers",
       "schema": "",
       "columns": {
@@ -226,7 +226,68 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "permissions": {
+    "public.employees": {
+      "name": "employees",
+      "schema": "",
+      "columns": {
+        "firstName": {
+          "name": "firstName",
+          "type": "varchar(128)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "personalNumber": {
+          "name": "personalNumber",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "signature": {
+          "name": "signature",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hourlyRate": {
+          "name": "hourlyRate",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pin": {
+          "name": "pin",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "comment": {
+          "name": "comment",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "employees_personalNumber_unique": {
+          "name": "employees_personalNumber_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "personalNumber"
+          ]
+        },
+        "employees_signature_unique": {
+          "name": "employees_signature_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "signature"
+          ]
+        }
+      }
+    },
+    "public.permissions": {
       "name": "permissions",
       "schema": "",
       "columns": {
@@ -276,7 +337,7 @@
         }
       }
     },
-    "productCategories": {
+    "public.productCategories": {
       "name": "productCategories",
       "schema": "",
       "columns": {
@@ -326,7 +387,7 @@
         }
       }
     },
-    "products": {
+    "public.products": {
       "name": "products",
       "schema": "",
       "columns": {
@@ -377,7 +438,7 @@
           "name": "productInventoryBalance",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "productAward": {
           "name": "productAward",
@@ -423,22 +484,123 @@
         }
       },
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.qualificationsGlobal": {
+      "name": "qualificationsGlobal",
+      "schema": "",
+      "columns": {
+        "globalQualID": {
+          "name": "globalQualID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "localQualName": {
+          "name": "localQualName",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "products_productId_unique": {
-          "name": "products_productId_unique",
+        "qualificationsGlobal_localQualName_unique": {
+          "name": "qualificationsGlobal_localQualName_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "productId"
+            "localQualName"
           ]
         }
       }
     },
-    "rentcars": {
+    "public.qualificationsLocal": {
+      "name": "qualificationsLocal",
+      "schema": "",
+      "columns": {
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "localQualID": {
+          "name": "localQualID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "localQualName": {
+          "name": "localQualName",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "qualificationsLocal_storeID_stores_storeID_fk": {
+          "name": "qualificationsLocal_storeID_stores_storeID_fk",
+          "tableFrom": "qualificationsLocal",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "qualificationsLocal_localQualName_storeID_unique": {
+          "name": "qualificationsLocal_localQualName_storeID_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "localQualName",
+            "storeID"
+          ]
+        }
+      }
+    },
+    "public.rentcars": {
       "name": "rentcars",
       "schema": "",
       "columns": {
-        "storeId": {
-          "name": "storeId",
+        "storeID": {
+          "name": "storeID",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -495,7 +657,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "rentcars_storeID_stores_storeID_fk": {
+          "name": "rentcars_storeID_stores_storeID_fk",
+          "tableFrom": "rentcars",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "rentcars_rentCarRegistrationNumber_unique": {
@@ -507,7 +683,7 @@
         }
       }
     },
-    "roleToPermissions": {
+    "public.roleToPermissions": {
       "name": "roleToPermissions",
       "schema": "",
       "columns": {
@@ -539,15 +715,22 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "roleToPermissions_roleID_permissionID_pk": {
-          "name": "roleToPermissions_roleID_permissionID_pk",
-          "columns": [
-            "roleID",
+      "foreignKeys": {
+        "roleToPermissions_permissionID_permissions_permissionID_fk": {
+          "name": "roleToPermissions_permissionID_permissions_permissionID_fk",
+          "tableFrom": "roleToPermissions",
+          "tableTo": "permissions",
+          "columnsFrom": [
             "permissionID"
-          ]
-        },
+          ],
+          "columnsTo": [
+            "permissionID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
         "roleToPermissionID": {
           "name": "roleToPermissionID",
           "columns": [
@@ -558,7 +741,7 @@
       },
       "uniqueConstraints": {}
     },
-    "roles": {
+    "public.roles": {
       "name": "roles",
       "schema": "",
       "columns": {
@@ -608,7 +791,7 @@
         }
       }
     },
-    "serviceCategories": {
+    "public.serviceCategories": {
       "name": "serviceCategories",
       "schema": "",
       "columns": {
@@ -618,8 +801,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "name": {
-          "name": "name",
+        "serviceCategoryName": {
+          "name": "serviceCategoryName",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true
@@ -649,16 +832,16 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "serviceCategories_name_unique": {
-          "name": "serviceCategories_name_unique",
+        "serviceCategories_serviceCategoryName_unique": {
+          "name": "serviceCategories_serviceCategoryName_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "name"
+            "serviceCategoryName"
           ]
         }
       }
     },
-    "serviceVariants": {
+    "public.serviceVariants": {
       "name": "serviceVariants",
       "schema": "",
       "columns": {
@@ -756,7 +939,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "services": {
+    "public.services": {
       "name": "services",
       "schema": "",
       "columns": {
@@ -782,7 +965,7 @@
           "name": "includeInAutomaticSms",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "hidden": {
           "name": "hidden",
@@ -798,10 +981,9 @@
         },
         "colorForService": {
           "name": "colorForService",
-          "type": "colorForService",
+          "type": "varchar",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'None'"
+          "notNull": true
         },
         "warrantyCard": {
           "name": "warrantyCard",
@@ -861,7 +1043,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "storeopeninghours": {
+    "public.storeopeninghours": {
       "name": "storeopeninghours",
       "schema": "",
       "columns": {
@@ -989,21 +1171,15 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "storepaymentinfo": {
+    "public.storepaymentinfo": {
       "name": "storepaymentinfo",
       "schema": "",
       "columns": {
-        "storePaymentOption": {
-          "name": "storePaymentOption",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "storeID": {
           "name": "storeID",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "bankgiro": {
           "name": "bankgiro",
@@ -1056,17 +1232,9 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "storepaymentinfo_storeID_unique": {
-          "name": "storepaymentinfo_storeID_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "storeID"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
-    "stores": {
+    "public.stores": {
       "name": "stores",
       "schema": "",
       "columns": {
@@ -1225,7 +1393,7 @@
         }
       }
     },
-    "storespecialhours": {
+    "public.storespecialhours": {
       "name": "storespecialhours",
       "schema": "",
       "columns": {
@@ -1296,7 +1464,7 @@
       },
       "uniqueConstraints": {}
     },
-    "storeweeklynotes": {
+    "public.storeweeklynotes": {
       "name": "storeweeklynotes",
       "schema": "",
       "columns": {
@@ -1397,7 +1565,178 @@
         }
       }
     },
-    "users": {
+    "public.userBelongsToStore": {
+      "name": "userBelongsToStore",
+      "schema": "",
+      "columns": {
+        "userID": {
+          "name": "userID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "userBelongsToStore_userID_users_userID_fk": {
+          "name": "userBelongsToStore_userID_users_userID_fk",
+          "tableFrom": "userBelongsToStore",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userID"
+          ],
+          "columnsTo": [
+            "userID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "userBelongsToStore_storeID_stores_storeID_fk": {
+          "name": "userBelongsToStore_storeID_stores_storeID_fk",
+          "tableFrom": "userBelongsToStore",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "userBelongsToStore_storeID_userID_pk": {
+          "name": "userBelongsToStore_storeID_userID_pk",
+          "columns": [
+            "storeID",
+            "userID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.userGlobalQualifications": {
+      "name": "userGlobalQualifications",
+      "schema": "",
+      "columns": {
+        "userID": {
+          "name": "userID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "globalQualID": {
+          "name": "globalQualID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "userGlobalQualifications_userID_users_userID_fk": {
+          "name": "userGlobalQualifications_userID_users_userID_fk",
+          "tableFrom": "userGlobalQualifications",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userID"
+          ],
+          "columnsTo": [
+            "userID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "userGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk": {
+          "name": "userGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk",
+          "tableFrom": "userGlobalQualifications",
+          "tableTo": "qualificationsGlobal",
+          "columnsFrom": [
+            "globalQualID"
+          ],
+          "columnsTo": [
+            "globalQualID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "userGlobalQualifications_globalQualID_userID_pk": {
+          "name": "userGlobalQualifications_globalQualID_userID_pk",
+          "columns": [
+            "globalQualID",
+            "userID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.userLocalQualifications": {
+      "name": "userLocalQualifications",
+      "schema": "",
+      "columns": {
+        "userID": {
+          "name": "userID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "localQualID": {
+          "name": "localQualID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "userLocalQualifications_userID_users_userID_fk": {
+          "name": "userLocalQualifications_userID_users_userID_fk",
+          "tableFrom": "userLocalQualifications",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userID"
+          ],
+          "columnsTo": [
+            "userID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "userLocalQualifications_localQualID_qualificationsLocal_localQualID_fk": {
+          "name": "userLocalQualifications_localQualID_qualificationsLocal_localQualID_fk",
+          "tableFrom": "userLocalQualifications",
+          "tableTo": "qualificationsLocal",
+          "columnsFrom": [
+            "localQualID"
+          ],
+          "columnsTo": [
+            "localQualID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "userLocalQualifications_localQualID_userID_pk": {
+          "name": "userLocalQualifications_localQualID_userID_pk",
+          "columns": [
+            "localQualID",
+            "userID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.users": {
       "name": "users",
       "schema": "",
       "columns": {
@@ -1435,7 +1774,7 @@
           "name": "isSuperAdmin",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": false
         },
         "roleID": {
@@ -1488,31 +1827,32 @@
     }
   },
   "enums": {
-    "colorForService": {
+    "public.colorForService": {
       "name": "colorForService",
-      "values": {
-        "LightBlue": "LightBlue",
-        "Blue": "Blue",
-        "DarkBlue": "DarkBlue",
-        "LightGreen": "LightGreen",
-        "Green": "Green",
-        "DarkGreen": "DarkGreen",
-        "LightYellow": "LightYellow",
-        "Yellow": "Yellow",
-        "DarkYellow": "DarkYellow",
-        "LightPurple": "LightPurple",
-        "Purple": "Purple",
-        "DarkPurple": "DarkPurple",
-        "LightPink": "LightPink",
-        "Pink": "Pink",
-        "DarkPink": "DarkPink",
-        "LightTurquoise": "LightTurquoise",
-        "Turquoise": "Turquoise",
-        "DarkTurquoise": "DarkTurquoise",
-        "Orange": "Orange",
-        "Red": "Red",
-        "None": "None"
-      }
+      "schema": "public",
+      "values": [
+        "LightBlue",
+        "Blue",
+        "DarkBlue",
+        "LightGreen",
+        "Green",
+        "DarkGreen",
+        "LightYellow",
+        "Yellow",
+        "DarkYellow",
+        "LightPurple",
+        "Purple",
+        "DarkPurple",
+        "LightPink",
+        "Pink",
+        "DarkPink",
+        "LightTurquoise",
+        "Turquoise",
+        "DarkTurquoise",
+        "Orange",
+        "Red",
+        "None"
+      ]
     }
   },
   "schemas": {},

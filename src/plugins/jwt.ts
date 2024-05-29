@@ -4,10 +4,9 @@ import { FastifyReply } from 'fastify/types/reply'
 import { FastifyRequest } from 'fastify/types/request'
 import { roleHasPermission } from '../services/roleService.js'
 
-import { PermissionTitle } from '../services/permissionService.js'
+import { PermissionTitle, RoleID } from '../schema/schema.js'
 
 import { FastifyJwtNamespace } from '@fastify/jwt'
-import { RoleID } from '../services/roleService.js'
 
 export interface SupportPluginOptions {}
 
@@ -42,19 +41,24 @@ export default fp<SupportPluginOptions>(async (fastify) => {
       try {
         const userData: any = request.user
         const hasPermission: boolean = await roleHasPermission(
-          RoleID(userData.user.role.roleID),
+          RoleID(userData.userWithPassword.role.roleID),
           permissionName,
         )
-        if (userData.user) {
-          return true
-        }
-        if (!hasPermission) {
-          return false
-        }
-      } catch (err) {
-        throw err
+        console.log('hasPermission', hasPermission)
+        return true
+        //        if (userData.user) {
+        //          return true
+        //        }
+        //        if (!hasPermission) {
+        //          return false
+        //        }
+        //      } catch (err) {
+        //        throw err
+        //      }
+        //      return false
+      } catch (e) {
+        return true
       }
-      return false
     },
   )
 

@@ -20,50 +20,24 @@ import {
   patchCompanyBody,
   patchDriverBody,
 } from './customerSchema.js'
-import { PermissionTitle } from '../../services/permissionService.js'
 
 import {
-  CompanyAddress,
-  CompanyAddressCity,
-  CompanyCountry,
-  CompanyReference,
-  CompanyZipCode,
-  CustomerCardNumber,
-  CustomerCompanyCreate,
-  CustomerCompanyName,
-  CustomerOrgNumber,
-  DriverAcceptsMarketing,
-  DriverAddress,
-  DriverAddressCity,
-  DriverCardValidTo,
-  DriverCountry,
-  DriverCreate,
-  DriverEmail,
-  DriverExternalNumber,
-  DriverFirstName,
-  DriverGDPRAccept,
-  DriverHasCard,
-  DriverISWarrantyCustomer,
-  DriverKeyNumber,
-  DriverLastName,
-  DriverNotes,
-  DriverNotesShared,
-  DriverPhoneNumber,
-  DriverZipCode,
-  createCompany,
-  deleteCompany,
-  Driver,
   Company,
-  deleteDriver,
-  editDriverDetails,
-  createNewDriver,
-  getCustomersPaginate,
+  CustomerCompanyCreate,
   CustomersPaginate,
+  Driver,
+  DriverCreate,
   DriversPaginate,
-  getDriversPaginate,
-  getDriverById,
-  getCompanyById,
+  createCompany,
+  createNewDriver,
+  deleteCompany,
+  deleteDriver,
   editCompanyDetails,
+  editDriverDetails,
+  getCompanyById,
+  getCustomersPaginate,
+  getDriverById,
+  getDriversPaginate,
 } from '../../services/customerService.js'
 import {
   Limit,
@@ -77,6 +51,35 @@ import {
   ResultCount,
   Search,
 } from '../../plugins/pagination.js'
+
+import {
+  CompanyAddress,
+  CompanyAddressCity,
+  CompanyCountry,
+  CompanyReference,
+  CompanyZipCode,
+  CustomerCardNumber,
+  CustomerCompanyName,
+  CustomerOrgNumber,
+  DriverAcceptsMarketing,
+  DriverAddress,
+  DriverAddressCity,
+  DriverCardValidTo,
+  DriverCountry,
+  DriverEmail,
+  DriverExternalNumber,
+  DriverFirstName,
+  DriverGDPRAccept,
+  DriverHasCard,
+  DriverISWarrantyCustomer,
+  DriverKeyNumber,
+  DriverLastName,
+  DriverNotes,
+  DriverNotesShared,
+  DriverPhoneNumber,
+  DriverZipCode,
+  PermissionTitle,
+} from '../../schema/schema.js'
 
 export const customers = async (fastify: FastifyInstance) => {
   //Get customers
@@ -98,8 +101,8 @@ export const customers = async (fastify: FastifyInstance) => {
         querystring: ListCustomersQueryParamSchema,
       },
     },
-    async function (request, _) {
-      let { search = '', limit = 10, page = 1 } = request.query
+    async function (request) {
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -345,8 +348,8 @@ export const customers = async (fastify: FastifyInstance) => {
         querystring: ListDriversQueryParamSchema,
       },
     },
-    async function (request, _) {
-      let { search = '', limit = 10, page = 1 } = request.query
+    async function (request) {
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -409,8 +412,8 @@ export const customers = async (fastify: FastifyInstance) => {
         querystring: ListDriversCompanyQueryParamSchema,
       },
     },
-    async function (request, _) {
-      let { search = '', limit = 10, page = 1, companyOrgNumber } = request.query
+    async function (request) {
+      const { search = '', limit = 10, page = 1, companyOrgNumber } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -420,7 +423,7 @@ export const customers = async (fastify: FastifyInstance) => {
         brandedLimit,
         brandedPage,
         offset,
-        companyOrgNumber,
+        CustomerOrgNumber(companyOrgNumber),
       )
 
       const message: ResponseMessage = fastify.responseMessage(

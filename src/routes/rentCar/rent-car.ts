@@ -1,4 +1,26 @@
 import { FastifyInstance } from 'fastify'
+
+import {
+  PermissionTitle,
+  RentCarColor,
+  RentCarModel,
+  RentCarNotes,
+  RentCarNumber,
+  RentCarRegistrationNumber,
+  RentCarYear,
+  StoreID,
+} from '../../schema/schema.js'
+
+import {
+  RentCar,
+  RentCarsPaginate,
+  createRentCar,
+  deleteRentCarByRegNumber,
+  editRentCar,
+  getRentCarByID,
+  getRentCarPaginate,
+} from '../../services/rentCarService.js'
+
 import {
   AddCustomerType,
   ListRentCarQueryParamSchema,
@@ -11,23 +33,6 @@ import {
   getRentCarQueryParamsType,
   patchRentCarBody,
 } from './rentCarSchema.js'
-import { PermissionTitle } from '../../services/permissionService.js'
-import {
-  RentCar,
-  RentCarColor,
-  RentCarModel,
-  RentCarNotes,
-  RentCarNumber,
-  RentCarRegistrationNumber,
-  RentCarYear,
-  RentCarsPaginate,
-  StoreID,
-  createRentCar,
-  deleteRentCarByRegNumber,
-  editRentCar,
-  getRentCarById,
-  getRentCarPaginate,
-} from '../../services/rentCarService.js'
 import {
   Limit,
   ModelName,
@@ -68,11 +73,11 @@ export const rentCar = async (fastify: FastifyInstance) => {
 
       //todo: Store id for rent Car
       //On Login we are not assigned any storeId, we need to check this,
-      //@ts-ignore
-      const authKey = await req.jwtDecode()
+      // //@ts-ignore
+      //      const authKey = await req.jwtDecode()
 
       const rentCarDetails = {
-        storeId: StoreID(1),
+        storeID: StoreID(1),
         rentCarColor: RentCarColor(rentCarColor),
         rentCarModel: RentCarModel(rentCarModel),
         rentCarRegistrationNumber: RentCarRegistrationNumber(rentCarRegistrationNumber),
@@ -115,8 +120,8 @@ export const rentCar = async (fastify: FastifyInstance) => {
         querystring: ListRentCarQueryParamSchema,
       },
     },
-    async function (request, _) {
-      let { search = '', limit = 10, page = 1 } = request.query
+    async function (request) {
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -252,7 +257,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const { regNumber } = request.params
-      const rentCarDetails: RentCar | undefined = await getRentCarById(
+      const rentCarDetails: RentCar | undefined = await getRentCarByID(
         RentCarRegistrationNumber(regNumber),
       )
       if (rentCarDetails == null) {

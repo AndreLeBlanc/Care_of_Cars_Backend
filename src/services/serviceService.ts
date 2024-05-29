@@ -1,97 +1,96 @@
 import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { db } from '../config/db-connect.js'
 
+import { listServiceOrderByEnum, serviceOrderEnum } from '../routes/services/serviceSchema.js'
+
 import {
-  ServiceSchemaType,
+  ServiceAward,
+  ServiceCallInterval,
+  ServiceCategoryID,
+  ServiceCost,
+  ServiceDay1,
+  ServiceDay2,
+  ServiceDay3,
+  ServiceDay4,
+  ServiceDay5,
+  ServiceExternalArticleNumber,
+  ServiceHidden,
+  ServiceID,
+  ServiceIncludeInAutomaticSms,
+  ServiceItemNumber,
+  ServiceName,
+  ServiceSuppliersArticleNumber,
+  ServiceWarrantyCard,
   colorForService,
-  listServiceOrderByEnum,
-  serviceOrderEnum,
-} from '../routes/services/serviceSchema.js'
-import { serviceCategories, serviceVariants, services } from '../schema/schema.js'
-import { ServiceCategoryID } from './CategoryService.js'
-import { Offset, Page, Search, Limit } from '../plugins/pagination.js'
+  serviceCategories,
+  serviceVariants,
+  services,
+} from '../schema/schema.js'
 
-import { Brand, make } from 'ts-brand'
-
-export type ServiceID = Brand<number, ' serviceID'>
-export const ServiceID = make<ServiceID>()
-type ServiceName = Brand<string, ' serviceName'>
-const ServiceName = make<ServiceName>()
-type ServiceAward = Brand<number, ' serviceAward'>
-const ServiceAward = make<ServiceAward>()
-type ServiceCost = Brand<number, ' serviceCost'>
-const ServiceCost = make<ServiceCost>()
-type ServiceDay1 = Brand<string, ' serviceDay1'>
-const ServiceDay1 = make<ServiceDay1>()
-type ServiceDay2 = Brand<string, ' serviceDay2'>
-const ServiceDay2 = make<ServiceDay2>()
-type ServiceDay3 = Brand<string, ' serviceDay3'>
-const ServiceDay3 = make<ServiceDay3>()
-type ServiceDay4 = Brand<string, ' serviceDay4'>
-const ServiceDay4 = make<ServiceDay4>()
-type ServiceDay5 = Brand<string, ' serviceDay5'>
-const ServiceDay5 = make<ServiceDay5>()
+import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 export type updateServiceVariant = {
-  serviceID: ServiceID
+  serviceID?: ServiceID
   serviceName: ServiceName
   serviceAward: ServiceAward
   serviceCost: ServiceCost
-  serviceDay1: ServiceDay1
-  serviceDay2: ServiceDay2
-  serviceDay3: ServiceDay3
-  serviceDay4: ServiceDay4
-  serviceDay5: ServiceDay5
+  serviceDay1?: ServiceDay1
+  serviceDay2?: ServiceDay2
+  serviceDay3?: ServiceDay3
+  serviceDay4?: ServiceDay4
+  serviceDay5?: ServiceDay5
 }
 
-type ServiceIncludeInAutomaticSms = Brand<boolean | null, 'ServiceIncludeInAutomaticSms'>
-const ServiceIncludeInAutomaticSms = make<ServiceIncludeInAutomaticSms>()
-type ServiceHidden = Brand<boolean | null, 'ServiceHidden'>
-const ServiceHidden = make<ServiceHidden>()
-type ServiceCallInterval = Brand<number | null, 'ServiceCallInterval'>
-const ServiceCallInterval = make<ServiceCallInterval>()
-type ServiceWarrantyCard = Brand<boolean | null, 'ServiceWarrantyCard'>
-const ServiceWarrantyCard = make<ServiceWarrantyCard>()
-type ServiceItemNumber = Brand<string | null, 'ServiceItemNumber'>
-const ServiceItemNumber = make<ServiceItemNumber>()
-type ServiceSuppliersArticleNumber = Brand<string | null, 'ServiceSuppliersArticleNumber'>
-const ServiceSuppliersArticleNumber = make<ServiceSuppliersArticleNumber>()
-type ServiceExternalArticleNumber = Brand<string | null, 'ServiceExternalArticleNumber'>
-const ServiceExternalArticleNumber = make<ServiceExternalArticleNumber>()
+export type ServicesPaginated = {
+  totalItems: number
+  totalPage: number
+  perPage: Page
+  data: ServiceNoVariant[]
+}
+
+export type ColorForService = (typeof colorForService)[number]
 
 export type ServiceNoVariant = {
-  serviceID: ServiceID
+  serviceID?: ServiceID
   serviceName: ServiceName
   serviceCategoryID: ServiceCategoryID
   serviceIncludeInAutomaticSms: ServiceIncludeInAutomaticSms
-  serviceHidden: ServiceHidden
-  serviceCallInterval: ServiceCallInterval
-  serviceColorForService: colorForService
-  serviceWarrantyCard: ServiceWarrantyCard
-  serviceItemNumber: ServiceItemNumber
-  serviceSuppliersArticleNumber: ServiceSuppliersArticleNumber
-  serviceExternalArticleNumber: ServiceExternalArticleNumber
-  createdAt: Date
-  updatedAt: Date
+  serviceHidden?: ServiceHidden
+  serviceCallInterval?: ServiceCallInterval
+  serviceColorForService?: ColorForService
+  serviceWarrantyCard?: ServiceWarrantyCard
+  serviceItemNumber?: ServiceItemNumber
+  serviceSuppliersArticleNumber?: ServiceSuppliersArticleNumber
+  serviceExternalArticleNumber?: ServiceExternalArticleNumber
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 export type UpdateService = ServiceNoVariant & { serviceVariants: updateServiceVariant[] }
 
-export async function createService(service: ServiceSchemaType): Promise<ServiceID> {
+function convertToColorEnum(str: string): ColorForService | undefined {
+  if (colorForService.includes(str as ColorForService)) {
+    return str as ColorForService
+  }
+  return undefined
+}
+
+export async function createService(service: UpdateService): Promise<ServiceID> {
+  const color: ColorForService = service.serviceColorForService || 'None'
   return await db.transaction(async (tx) => {
     const [insertedService] = await tx
       .insert(services)
       .values({
-        name: service.name,
+        name: service.serviceName,
         serviceCategoryID: service.serviceCategoryID,
-        includeInAutomaticSms: service.includeInAutomaticSms,
-        hidden: service.hidden,
-        callInterval: service.callInterval,
-        colorForService: service.colorForService,
-        warrantyCard: service.warrantyCard,
-        itemNumber: service.itemNumber,
-        suppliersArticleNumber: service.suppliersArticleNumber,
-        externalArticleNumber: service.externalArticleNumber,
+        includeInAutomaticSms: service.serviceIncludeInAutomaticSms,
+        hidden: service.serviceHidden,
+        callInterval: service.serviceCallInterval,
+        colorForService: color,
+        warrantyCard: service.serviceWarrantyCard,
+        itemNumber: service.serviceItemNumber,
+        suppliersArticleNumber: service.serviceSuppliersArticleNumber,
+        externalArticleNumber: service.serviceExternalArticleNumber,
       })
       .returning({
         serviceID: services.serviceID,
@@ -99,14 +98,14 @@ export async function createService(service: ServiceSchemaType): Promise<Service
     for (const serviceVariant of service.serviceVariants || []) {
       await tx.insert(serviceVariants).values({
         serviceID: insertedService.serviceID,
-        name: serviceVariant.name,
-        award: serviceVariant.award,
-        cost: serviceVariant.cost,
-        day1: serviceVariant.day1,
-        day2: serviceVariant.day2,
-        day3: serviceVariant.day3,
-        day4: serviceVariant.day4,
-        day5: serviceVariant.day5,
+        name: serviceVariant.serviceName,
+        award: serviceVariant.serviceAward,
+        cost: serviceVariant.serviceCost,
+        day1: serviceVariant.serviceDay1,
+        day2: serviceVariant.serviceDay2,
+        day3: serviceVariant.serviceDay3,
+        day4: serviceVariant.serviceDay4,
+        day5: serviceVariant.serviceDay5,
       })
     }
     return ServiceID(insertedService.serviceID)
@@ -120,8 +119,8 @@ export async function getServicesPaginate(
   offset = Offset(0),
   orderBy: listServiceOrderByEnum,
   order: serviceOrderEnum,
-  hidden: boolean = true,
-): Promise<any> {
+  hidden: ServiceHidden = ServiceHidden(true),
+): Promise<ServicesPaginated> {
   const condition = and(
     eq(services.hidden, hidden),
     or(
@@ -171,76 +170,72 @@ export async function getServicesPaginate(
   })
   const totalPage: number = Math.ceil(totalItems.count / limit)
 
+  const serviceListBranded = servicesList.map((service) => {
+    return {
+      serviceName: service.name,
+      serviceCategoryID: service.serviceCategoryID,
+      serviceIncludeInAutomaticSms: service.includeInAutomaticSms ?? undefined,
+      serviceHidden: service.hidden ?? undefined,
+      serviceCallInterval: service.callInterval ?? undefined,
+      serviceColorForService: convertToColorEnum(service.colorForService),
+      serviceWarrantyCard: service.warrantyCard ?? undefined,
+      serviceItemNumber: service.itemNumber ?? undefined,
+      serviceSuppliersArticleNumber: service.suppliersArticleNumber ?? undefined,
+      serviceExternalArticleNumber: service.externalArticleNumber ?? undefined,
+      updatedAt: service.updatedAt,
+    }
+  })
+
   return {
     totalItems: totalItems.count,
     totalPage,
     perPage: page,
-    data: servicesList,
+    data: serviceListBranded,
   }
 }
 
-export async function updateServiceByID(id: ServiceID, service: ServiceSchemaType) {
+export async function updateServiceByID(id: ServiceID, service: UpdateService) {
   const serviceWithUpdatedAt = { ...service, updatedAt: new Date() }
   return await db.transaction(async (tx) => {
+    const color: ColorForService = service.serviceColorForService || 'None'
+
     const [updatedService] = await tx
       .update(services)
       .set({
-        name: serviceWithUpdatedAt.name,
+        name: serviceWithUpdatedAt.serviceName,
         serviceCategoryID: serviceWithUpdatedAt.serviceCategoryID,
-        includeInAutomaticSms: serviceWithUpdatedAt.includeInAutomaticSms,
-        hidden: serviceWithUpdatedAt.hidden,
-        callInterval: serviceWithUpdatedAt.callInterval,
-        colorForService: serviceWithUpdatedAt.colorForService,
-        warrantyCard: serviceWithUpdatedAt.warrantyCard,
-        itemNumber: serviceWithUpdatedAt.itemNumber,
-        suppliersArticleNumber: serviceWithUpdatedAt.suppliersArticleNumber,
-        externalArticleNumber: serviceWithUpdatedAt.externalArticleNumber,
+        includeInAutomaticSms: serviceWithUpdatedAt.serviceIncludeInAutomaticSms,
+        hidden: serviceWithUpdatedAt.serviceHidden,
+        callInterval: serviceWithUpdatedAt.serviceCallInterval,
+        colorForService: color,
+        warrantyCard: serviceWithUpdatedAt.serviceWarrantyCard,
+        itemNumber: serviceWithUpdatedAt.serviceItemNumber,
+        suppliersArticleNumber: serviceWithUpdatedAt.serviceSuppliersArticleNumber,
+        externalArticleNumber: serviceWithUpdatedAt.serviceExternalArticleNumber,
         updatedAt: serviceWithUpdatedAt.updatedAt,
       })
       .where(eq(services.serviceID, id))
-      .returning({
-        serviceID: { serviceID: services.serviceCategoryID },
-        serviceName: { serviceName: services.name },
-        serviceCategoryID: { serviceCategoryID: services.serviceCategoryID },
-        serviceIncludeInAutomaticSms: {
-          serviceIncludeInAutomaticSms: services.includeInAutomaticSms,
-        },
-        serviceHidden: { serviceHidden: services.hidden },
-        serviceCallInterval: { serviceCallInterval: services.callInterval },
-        serviceColorForService: services.colorForService,
-        serviceWarrantyCard: { serviceWarrantyCard: services.warrantyCard },
-        serviceItemNumber: { serviceItemNumber: services.itemNumber },
-        serviceSuppliersArticleNumber: {
-          serviceSuppliersArticleNumber: services.suppliersArticleNumber,
-        },
-        serviceExternalArticleNumber: {
-          serviceExternalArticleNumber: services.externalArticleNumber,
-        },
-        createdAt: services.createdAt,
-        updatedAt: services.updatedAt,
-      })
+      .returning()
     if (updatedService == null) {
       return undefined
     }
     //    delete all existing variants and insert fresh
-    await db
-      .delete(serviceVariants)
-      .where(eq(serviceVariants.serviceID, updatedService.serviceID.serviceID))
+    await db.delete(serviceVariants).where(eq(serviceVariants.serviceID, updatedService.serviceID))
     for (const serviceVariant of service.serviceVariants || []) {
       await tx.insert(serviceVariants).values({
-        name: serviceVariant.name,
-        serviceID: updatedService.serviceID.serviceID,
-        award: serviceVariant.award,
-        cost: serviceVariant.cost,
-        day1: serviceVariant.day1,
-        day2: serviceVariant.day2,
-        day3: serviceVariant.day3,
-        day4: serviceVariant.day4,
-        day5: serviceVariant.day5,
+        name: serviceVariant.serviceName,
+        serviceID: updatedService.serviceID,
+        award: serviceVariant.serviceAward,
+        cost: serviceVariant.serviceCost,
+        day1: serviceVariant.serviceDay1,
+        day2: serviceVariant.serviceDay2,
+        day3: serviceVariant.serviceDay3,
+        day4: serviceVariant.serviceDay4,
+        day5: serviceVariant.serviceDay5,
       })
     }
     const updatedServiceWithVariants = await tx.query.services.findFirst({
-      where: eq(services.serviceCategoryID, updatedService.serviceID.serviceID),
+      where: eq(services.serviceID, updatedService.serviceID),
       with: {
         serviceCategories: true,
         serviceVariants: true,
@@ -262,11 +257,6 @@ export async function getServiceById(serviceID: ServiceID): Promise<ServiceNoVar
     return undefined
   }
 
-  function convertToColorEnum(str: string): colorForService | undefined {
-    const colorValue: colorForService = colorForService[str as keyof typeof colorForService]
-    return colorValue
-  }
-
   const serviceColor = convertToColorEnum(servicesDetail.colorForService)
 
   if (serviceColor === undefined) {
@@ -274,25 +264,31 @@ export async function getServiceById(serviceID: ServiceID): Promise<ServiceNoVar
   }
 
   return {
-    serviceID: ServiceID(servicesDetail.serviceID),
-    serviceName: ServiceName(servicesDetail.name),
-    serviceCategoryID: ServiceCategoryID(servicesDetail.serviceCategoryID),
+    serviceID: servicesDetail.serviceID,
+    serviceName: servicesDetail.name,
+    serviceCategoryID: servicesDetail.serviceCategoryID,
 
     serviceIncludeInAutomaticSms: ServiceIncludeInAutomaticSms(
       servicesDetail.includeInAutomaticSms,
     ),
-    serviceHidden: ServiceHidden(servicesDetail.hidden),
-    serviceCallInterval: ServiceCallInterval(servicesDetail.callInterval),
+    serviceHidden: servicesDetail.hidden ?? undefined,
+    serviceCallInterval: servicesDetail.callInterval
+      ? ServiceCallInterval(servicesDetail.callInterval)
+      : undefined,
     serviceColorForService: serviceColor,
-    serviceWarrantyCard: ServiceWarrantyCard(servicesDetail.warrantyCard),
-    serviceItemNumber: ServiceItemNumber(servicesDetail.itemNumber),
+    serviceWarrantyCard: servicesDetail.warrantyCard
+      ? ServiceWarrantyCard(servicesDetail.warrantyCard)
+      : undefined,
+    serviceItemNumber: servicesDetail.itemNumber
+      ? ServiceItemNumber(servicesDetail.itemNumber)
+      : undefined,
 
-    serviceSuppliersArticleNumber: ServiceSuppliersArticleNumber(
-      servicesDetail.suppliersArticleNumber,
-    ),
-    serviceExternalArticleNumber: ServiceExternalArticleNumber(
-      servicesDetail.externalArticleNumber,
-    ),
+    serviceSuppliersArticleNumber: servicesDetail.suppliersArticleNumber
+      ? ServiceSuppliersArticleNumber(servicesDetail.suppliersArticleNumber)
+      : undefined,
+    serviceExternalArticleNumber: servicesDetail.externalArticleNumber
+      ? ServiceExternalArticleNumber(servicesDetail.externalArticleNumber)
+      : undefined,
     createdAt: servicesDetail.createdAt,
     updatedAt: servicesDetail.updatedAt,
   }

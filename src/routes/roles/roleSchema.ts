@@ -1,5 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 
+export const RoleID = Type.Number()
+
 export const ListRoleQueryParamSchema = Type.Object({
   search: Type.Optional(Type.String()),
   limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
@@ -14,6 +16,6 @@ export const RoleSchema = Type.Object({
 export type RoleSchemaType = Static<typeof RoleSchema>
 
 export const getRoleByIDSchema = Type.Object({
-  id: Type.Number(),
+  roleID: RoleID,
 })
 export type getRoleByIDType = Static<typeof getRoleByIDSchema>

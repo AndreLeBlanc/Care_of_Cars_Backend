@@ -12,9 +12,7 @@ import {
   deleteRoleToPermissions,
 } from '../../services/roleToPermissionService.js'
 
-import { PermissionID, PermissionTitle } from '../../services/permissionService.js'
-
-import { RoleID } from '../../services/roleService.js'
+import { PermissionID, PermissionTitle, RoleID } from '../../schema/schema.js'
 
 export async function roleToPermissions(fastify: FastifyInstance): Promise<void> {
   fastify.post<{ Body: CreateRoleToPermissionSchemaType; Reply: object }>(

@@ -1,9 +1,28 @@
 import { Static, Type } from '@sinclair/typebox'
 
-const CreatedAndUpdatedAT = Type.Object({
-  createdAt: Type.String({ format: 'date' }),
-  updatedAt: Type.String({ format: 'date' }),
-})
+import { CreatedAndUpdatedAT } from '../../utils/helper.js'
+const storeName = Type.String()
+const storeOrgNumber = Type.String()
+export const storeID = Type.Integer()
+const storeStatus = Type.Boolean()
+const storeEmail = Type.String({ format: 'email' })
+const storePhone = Type.String({ pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$' })
+const storeAddress = Type.String()
+const storeZipCode = Type.String()
+const storeCity = Type.String()
+const storeCountry = Type.String()
+const storeDescription = Type.String()
+const storeContactPerson = Type.String()
+const storeMaxUsers = Type.Integer({ minimum: 1, maximum: 1024 })
+const storeAllowCarAPI = Type.Boolean()
+const storeAllowSendSMS = Type.Boolean()
+const storeSendSMS = Type.Boolean()
+const storeUsesCheckin = Type.Boolean()
+const storeUsesPIN = Type.Boolean()
+const day = Type.String({ format: 'date' })
+const week = Type.String({ format: 'date' })
+const note = Type.String()
+const openingTime = Type.String({ format: 'time' })
 
 const PaymentInfoSchema = Type.Object({
   bankgiro: Type.Optional(Type.String()),
@@ -12,25 +31,23 @@ const PaymentInfoSchema = Type.Object({
 })
 
 export const CreateStoreSchema = Type.Object({
-  storeName: Type.String(),
-  storeOrgNumber: Type.String(),
-  storeStatus: Type.Boolean(),
-  storeEmail: Type.String({ format: 'email' }),
-  storePhone: Type.String({
-    pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
-  }),
-  storeAddress: Type.String(),
-  storeZipCode: Type.String(),
-  storeCity: Type.String(),
-  storeCountry: Type.String(),
-  storeDescription: Type.Optional(Type.String()),
-  storeContactPerson: Type.Optional(Type.String()),
-  storeMaxUsers: Type.Optional(Type.Integer({ minimum: 1, maximum: 1024 })),
-  storeAllowCarAPI: Type.Optional(Type.Boolean()),
-  storeAllowSendSMS: Type.Optional(Type.Boolean()),
-  storeSendSMS: Type.Optional(Type.Boolean()),
-  storeUsesCheckin: Type.Optional(Type.Boolean()),
-  storeUsesPIN: Type.Optional(Type.Boolean()),
+  storeName: storeName,
+  storeOrgNumber: storeOrgNumber,
+  storeStatus: storeStatus,
+  storeEmail: storeEmail,
+  storePhone: storePhone,
+  storeAddress: storeAddress,
+  storeZipCode: storeZipCode,
+  storeCity: storeCity,
+  storeCountry: storeCountry,
+  storeDescription: Type.Optional(storeDescription),
+  storeContactPerson: Type.Optional(storeContactPerson),
+  storeMaxUsers: Type.Optional(storeMaxUsers),
+  storeAllowCarAPI: Type.Optional(storeAllowCarAPI),
+  storeAllowSendSMS: Type.Optional(storeAllowSendSMS),
+  storeSendSMS: Type.Optional(storeSendSMS),
+  storeUsesCheckin: Type.Optional(storeUsesCheckin),
+  storeUsesPIN: Type.Optional(storeUsesPIN),
 })
 
 export type CreateStoreSchemaType = Static<typeof CreateStoreSchema>
@@ -39,7 +56,7 @@ export const StoreReplySchema = Type.Composite([
   CreateStoreSchema,
   CreatedAndUpdatedAT,
   Type.Object({
-    storeID: Type.Integer(),
+    storeID: storeID,
     storePaymentOptions: Type.Optional(PaymentInfoSchema),
   }),
 ])
@@ -47,27 +64,27 @@ export const StoreReplySchema = Type.Composite([
 export type StoreReplySchemaType = Static<typeof StoreReplySchema>
 
 export const StoreIDAndDaySchema = Type.Object({
-  storeID: Type.Integer(),
-  day: Type.String({ format: 'date' }),
+  storeID: storeID,
+  day: day,
 })
 
 export type StoreIDAndDaySchemaType = Static<typeof StoreIDAndDaySchema>
 
 export const StoreIDSchema = Type.Object({
-  storeID: Type.Integer(),
+  storeID: storeID,
 })
 
 export type StoreIDSchemaType = Static<typeof StoreIDSchema>
 
 export const StoreIDWeekSchema = Type.Object({
-  storeID: Type.Integer(),
-  week: Type.String(),
+  storeID: storeID,
+  week: week,
 })
 
 export type StoreIDWeekSchemaType = Static<typeof StoreIDWeekSchema>
 
 export const WeekSchema = Type.Object({
-  week: Type.String(),
+  week: week,
 })
 
 export type WeekSchemaType = Static<typeof WeekSchema>
@@ -86,7 +103,7 @@ export const StoreUpdateReplySchema = Type.Object({
       CreateStoreSchema,
       CreatedAndUpdatedAT,
       Type.Object({
-        storeID: Type.Integer(),
+        storeID: storeID,
       }),
     ]),
   ),
@@ -119,9 +136,9 @@ export const StorePaginateReply = Type.Object({
   limit: Type.Integer(),
   data: Type.Array(
     Type.Object({
-      storeName: Type.String(),
-      storeOrgNumber: Type.String(),
-      storeID: Type.Integer(),
+      storeName: storeName,
+      storeOrgNumber: storeOrgNumber,
+      storeID: storeID,
     }),
   ),
 })
@@ -129,26 +146,26 @@ export const StorePaginateReply = Type.Object({
 export type StorePaginateReplyType = Static<typeof StorePaginateReply>
 
 const DayOpeningTimesSchema = Type.Object({
-  mondayOpen: Type.Optional(Type.String({ format: 'time' })),
-  mondayClose: Type.Optional(Type.String({ format: 'time' })),
-  tuesdayOpen: Type.Optional(Type.String({ format: 'time' })),
-  tuesdayClose: Type.Optional(Type.String({ format: 'time' })),
-  wednesdayOpen: Type.Optional(Type.String({ format: 'time' })),
-  wednesdayClose: Type.Optional(Type.String({ format: 'time' })),
-  thursdayOpen: Type.Optional(Type.String({ format: 'time' })),
-  thursdayClose: Type.Optional(Type.String({ format: 'time' })),
-  fridayOpen: Type.Optional(Type.String({ format: 'time' })),
-  fridayClose: Type.Optional(Type.String({ format: 'time' })),
-  saturdayOpen: Type.Optional(Type.String({ format: 'time' })),
-  saturdayClose: Type.Optional(Type.String({ format: 'time' })),
-  sundayOpen: Type.Optional(Type.String({ format: 'time' })),
-  sundayClose: Type.Optional(Type.String({ format: 'time' })),
+  mondayOpen: Type.Optional(openingTime),
+  mondayClose: Type.Optional(openingTime),
+  tuesdayOpen: Type.Optional(openingTime),
+  tuesdayClose: Type.Optional(openingTime),
+  wednesdayOpen: Type.Optional(openingTime),
+  wednesdayClose: Type.Optional(openingTime),
+  thursdayOpen: Type.Optional(openingTime),
+  thursdayClose: Type.Optional(openingTime),
+  fridayOpen: Type.Optional(openingTime),
+  fridayClose: Type.Optional(openingTime),
+  saturdayOpen: Type.Optional(openingTime),
+  saturdayClose: Type.Optional(openingTime),
+  sundayOpen: Type.Optional(openingTime),
+  sundayClose: Type.Optional(openingTime),
 })
 
 export const StoreOpeningHoursCreate = Type.Composite([
   DayOpeningTimesSchema,
   Type.Object({
-    storeID: Type.Integer(),
+    storeID: storeID,
   }),
 ])
 
@@ -158,17 +175,17 @@ export const StoreOpeningHours = Type.Composite([
   DayOpeningTimesSchema,
   Type.Object({
     message: Type.String(),
-    storeID: Type.Integer(),
+    storeID: storeID,
   }),
 ])
 
 export type StoreOpeningHoursType = Static<typeof StoreOpeningHours>
 
 export const StoreSpecialHoursSchemaCreate = Type.Object({
-  storeID: Type.Integer(),
-  day: Type.String({ format: 'date' }),
-  dayOpen: Type.String({ format: 'time' }),
-  dayClose: Type.String({ format: 'time' }),
+  storeID: storeID,
+  day: day,
+  dayOpen: openingTime,
+  dayClose: openingTime,
 })
 
 export type StoreSpecialHoursSchemaCreateType = Static<typeof StoreSpecialHoursSchemaCreate>
@@ -184,16 +201,16 @@ export type StoreSpecialHoursSchemaType = Static<typeof StoreSpecialHoursSchema>
 
 export const GetOpeningHours = Type.Object({
   message: Type.Optional(Type.String()),
-  storeID: Type.Integer(),
-  from: Type.String({ format: 'date' }),
-  to: Type.String({ format: 'date' }),
+  storeID: storeID,
+  from: day,
+  to: day,
 })
 
 export type GetOpeningHoursType = Static<typeof GetOpeningHours>
 
 export const ReturnedOpeningHours = Type.Object({
   message: Type.Optional(Type.String()),
-  storeID: Type.Integer(),
+  storeID: storeID,
   specialHours: Type.Array(StoreSpecialHoursSchema),
   weeklyOpeningHours: Type.Optional(DayOpeningTimesSchema),
 })
@@ -208,30 +225,30 @@ export const StoreOpeningHoursWithSpecial = Type.Object({
 export type StoreOpeningHoursWithSpecialType = Static<typeof StoreOpeningHoursWithSpecial>
 
 export const StoreWeeklyNotes = Type.Object({
-  storeID: Type.Integer(),
-  week: Type.String({ format: 'date' }),
-  weekNote: Type.String(),
-  mondayNote: Type.String(),
-  tuesdayNote: Type.String(),
-  wednesdayNote: Type.String(),
-  thursdayNote: Type.String(),
-  fridayNote: Type.String(),
-  saturdayNote: Type.String(),
-  sundayNote: Type.String(),
+  storeID: storeID,
+  week: week,
+  weekNote: Type.Optional(note),
+  mondayNote: Type.Optional(note),
+  tuesdayNote: Type.Optional(note),
+  wednesdayNote: Type.Optional(note),
+  thursdayNote: Type.Optional(note),
+  fridayNote: Type.Optional(note),
+  saturdayNote: Type.Optional(note),
+  sundayNote: Type.Optional(note),
 })
 
 export type StoreWeeklyNotesType = Static<typeof StoreWeeklyNotes>
 
 export const StoreNotes = Type.Object({
-  storeID: Type.Integer(),
-  weekNote: Type.String(),
-  mondayNote: Type.String(),
-  tuesdayNote: Type.String(),
-  wednesdayNote: Type.String(),
-  thursdayNote: Type.String(),
-  fridayNote: Type.String(),
-  saturdayNote: Type.String(),
-  sundayNote: Type.String(),
+  storeID: storeID,
+  weekNote: Type.Optional(note),
+  mondayNote: Type.Optional(note),
+  tuesdayNote: Type.Optional(note),
+  wednesdayNote: Type.Optional(note),
+  thursdayNote: Type.Optional(note),
+  fridayNote: Type.Optional(note),
+  saturdayNote: Type.Optional(note),
+  sundayNote: Type.Optional(note),
 })
 
 export type StoreNotesType = Static<typeof StoreNotes>

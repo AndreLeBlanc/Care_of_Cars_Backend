@@ -5,41 +5,55 @@ import {
   CreateUser,
   CreateUserReply,
   CreateUserType,
+  GetUserByIDSchema,
+  GetUserByIDSchemaType,
   ListUserQueryParam,
   ListUserQueryParamType,
+  ListUserSchema,
+  ListUserSchemaType,
   LoginUser,
   LoginUserType,
   PatchUserPassword,
   PatchUserPasswordType,
   PatchUserSchema,
   PatchUserSchemaType,
-  getUserByIDSchema,
-  getUserByIDType,
+  StoreUserResponseSchema,
+  StoreUserResponseSchemaType,
+  StoreUserSchema,
+  StoreUserSchemaType,
 } from './userSchema.js'
 import {
   CreatedUser,
   DeleteUser,
-  UserEmail,
-  UserFirstName,
-  UserID,
   UserInfo,
-  UserLastName,
-  UserPassword,
+  UserStore,
   UserWithSuperAdmin,
   UsersPaginated,
   VerifyUser,
+  assignToStore,
   createUser,
+  deleteStoreUser,
   generatePasswordHash,
   getUserByID,
   getUsersPaginate,
   isStrongPassword,
+  selectStoreUsers,
   updateUserByID,
+  updateUserPasswordByID,
   userInfoPassword,
   verifyUser,
 } from '../../services/userService.js'
-import { RoleID } from '../../services/roleService.js'
 
-import { PermissionTitle } from '../../services/permissionService.js'
+import {
+  PermissionTitle,
+  RoleID,
+  StoreID,
+  UserEmail,
+  UserFirstName,
+  UserID,
+  UserLastName,
+  UserPassword,
+} from '../../schema/schema.js'
 
 import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
 
@@ -55,6 +69,7 @@ import {
   ResultCount,
   Search,
 } from '../../plugins/pagination.js'
+import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema..js'
 
 export async function users(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
@@ -145,15 +160,15 @@ export async function users(fastify: FastifyInstance) {
           UserFirstName(firstName),
           UserLastName(lastName),
           UserEmail(email),
-          passwordHash,
+          UserPassword(passwordHash),
           RoleID(roleID),
         )
         return reply.status(201).send({
           message: 'User created',
           body: {
-            firstName: createdUser.userFirstName,
-            lastName: createdUser.userLastName,
-            email: createdUser.userEmail,
+            firstName: createdUser.firstName,
+            lastName: createdUser.lastName,
+            email: createdUser.email,
             userID: createdUser.userID,
           },
         })
@@ -178,23 +193,24 @@ export async function users(fastify: FastifyInstance) {
       }
       const match = await bcrypt.compare(password, userWithPassword.userPassword)
       if (match) {
-        const { userPassword, ...user } = userWithPassword
-        const token = fastify.jwt.sign({ user })
-        const rolePermissions = await getRoleWithPermissions(RoleID(user.role.roleID))
-        const roleFullPermissions = await getAllPermissionStatus(RoleID(user.role.roleID))
+        const token = fastify.jwt.sign({ userWithPassword })
+        const rolePermissions = await getRoleWithPermissions(RoleID(userWithPassword.role.roleID))
+        const roleFullPermissions = await getAllPermissionStatus(
+          RoleID(userWithPassword.role.roleID),
+        )
         return reply.status(200).send({
           message: 'Login success',
           loginSuccess: true,
           token: token,
           user: {
-            id: user.userID,
-            firstName: user.userFirstName,
-            lastName: user.userLastName,
-            email: user.userEmail,
-            isSuperAdmin: user.isSuperAdmin,
+            id: userWithPassword.userID,
+            firstName: userWithPassword.userFirstName,
+            lastName: userWithPassword.userLastName,
+            email: userWithPassword.userEmail,
+            isSuperAdmin: userWithPassword.isSuperAdmin,
             role: {
-              id: user.role.roleID,
-              roleName: user.role.roleName,
+              id: userWithPassword.role.roleID,
+              roleName: userWithPassword.role.roleName,
               rolePermissions: rolePermissions,
               roleFullPermissions: roleFullPermissions,
             },
@@ -205,8 +221,8 @@ export async function users(fastify: FastifyInstance) {
     },
   )
 
-  fastify.get<{ Params: getUserByIDType }>(
-    '/:id',
+  fastify.get<{ Params: GetUserByIDSchemaType }>(
+    '/:userID',
     {
       preHandler: async (request, reply, done) => {
         fastify.authorize(request, reply, PermissionTitle('view_user'))
@@ -215,11 +231,11 @@ export async function users(fastify: FastifyInstance) {
       },
 
       schema: {
-        params: getUserByIDSchema,
+        params: GetUserByIDSchema,
       },
     },
     async (request, reply) => {
-      const id = UserID(request.params.id)
+      const id = UserID(request.params.userID)
       const user: UserInfo | undefined = await getUserByID(id)
       if (user == null) {
         return reply.status(404).send({ message: 'user not found' })
@@ -228,8 +244,8 @@ export async function users(fastify: FastifyInstance) {
     },
   )
 
-  fastify.patch<{ Body: PatchUserSchemaType; Reply: object; Params: getUserByIDType }>(
-    '/:id',
+  fastify.patch<{ Body: PatchUserSchemaType; Reply: object; Params: GetUserByIDSchemaType }>(
+    '/:userID',
     {
       preHandler: async (request, reply, done) => {
         fastify.authorize(request, reply, PermissionTitle('update_user'))
@@ -238,7 +254,7 @@ export async function users(fastify: FastifyInstance) {
       },
       schema: {
         body: PatchUserSchema,
-        params: getUserByIDSchema,
+        params: GetUserByIDSchema,
       },
     },
     async (request, reply) => {
@@ -246,15 +262,14 @@ export async function users(fastify: FastifyInstance) {
       if (Object.keys(userData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id = UserID(request.params.id)
-      if (userData?.password) {
-        const isStrongPass: boolean = await isStrongPassword(UserPassword(userData.password))
-        if (!isStrongPass) {
-          return reply.status(422).send({ message: 'Provide a strong password' })
-        }
-        userData.password = await generatePasswordHash(UserPassword(userData.password))
+      const patchData = {
+        firstName: UserFirstName(userData.firstName),
+        lastName: UserLastName(userData.lastName),
+        userID: UserID(request.params.userID),
+        email: UserEmail(userData.email),
       }
-      const user: UserInfo = await updateUserByID(id, userData)
+
+      const user: UserInfo = await updateUserByID(patchData)
       if (user === undefined) {
         return reply.status(404).send({ message: 'user not found' })
       }
@@ -293,7 +308,7 @@ export async function users(fastify: FastifyInstance) {
               return reply.status(422).send({ message: 'Provide a strong password' })
             }
             const passwordHash = await generatePasswordHash(UserPassword(userData.newPassword))
-            const user: UserInfo = await updateUserByID(id, { password: passwordHash })
+            const user: UserInfo = await updateUserPasswordByID(id, passwordHash)
             reply.status(201).send({ message: 'User Updated', data: user })
           }
         } else {
@@ -305,8 +320,8 @@ export async function users(fastify: FastifyInstance) {
     },
   )
 
-  fastify.delete<{ Params: getUserByIDType }>(
-    '/:id',
+  fastify.delete<{ Params: GetUserByIDSchemaType }>(
+    '/:userID',
     {
       preHandler: async (request, reply, done) => {
         fastify.authorize(request, reply, PermissionTitle('delete_user'))
@@ -314,16 +329,96 @@ export async function users(fastify: FastifyInstance) {
         return reply
       },
       schema: {
-        params: getUserByIDSchema,
+        params: GetUserByIDSchema,
       },
     },
     async (request, reply) => {
-      const id = UserID(request.params.id)
+      const id = UserID(request.params.userID)
       const user: UserWithSuperAdmin | undefined = await DeleteUser(id)
       if (user == undefined || user == null) {
         return reply.status(404).send({ message: "User doesn't exist!" })
       }
       return reply.status(200).send({ message: 'user deleted' })
+    },
+  )
+
+  fastify.delete<{
+    Params: StoreUserSchemaType
+    Reply: (StoreUserResponseSchemaType & StoreUserSchemaType) | StoreUserResponseSchemaType
+  }>(
+    '/storeUser/:userID/:storeID',
+    {
+      preHandler: async (request, reply, done) => {
+        fastify.authorize(request, reply, PermissionTitle('delete_user_from_store'))
+        done()
+        return reply
+      },
+      schema: {
+        params: StoreUserSchema,
+        response: { 200: { ...StoreUserResponseSchema, ...StoreUserSchema } },
+      },
+    },
+    async (request, reply) => {
+      const userID = UserID(request.params.userID)
+      const storeID = StoreID(request.params.storeID)
+      const user: UserStore | undefined = await deleteStoreUser(userID, storeID)
+      if (user == undefined || user == null) {
+        return reply.status(404).send({ message: "User doesn't exist!" })
+      }
+      return reply.status(200).send({ message: 'user deleted', ...user })
+    },
+  )
+
+  fastify.post<{
+    Params: StoreUserSchemaType
+    Reply: (StoreUserResponseSchemaType & StoreUserSchemaType) | StoreUserResponseSchemaType
+  }>(
+    '/storeUser/:userID/:storeID',
+    {
+      preHandler: async (request, reply, done) => {
+        fastify.authorize(request, reply, PermissionTitle('assign_user_to_store'))
+        done()
+        return reply
+      },
+      schema: {
+        params: StoreUserSchema,
+        response: { 200: { ...StoreUserResponseSchema, ...StoreUserSchema } },
+      },
+    },
+    async (request, reply) => {
+      const userID = UserID(request.params.userID)
+      const storeID = StoreID(request.params.storeID)
+      const user: UserStore | undefined = await assignToStore(userID, storeID)
+      if (user == undefined || user == null) {
+        return reply.status(404).send({ message: "User couldn't be assigned" })
+      }
+      return reply.status(200).send({ message: 'user assigned', ...user })
+    },
+  )
+
+  fastify.get<{
+    Params: StoreIDSchemaType
+    Reply: (StoreUserResponseSchemaType & ListUserSchemaType) | StoreUserResponseSchemaType
+  }>(
+    '/storeUser/:storeID',
+    {
+      preHandler: async (request, reply, done) => {
+        fastify.authorize(request, reply, PermissionTitle('assign_user_to_store'))
+        done()
+        return reply
+      },
+      schema: {
+        params: StoreIDSchema,
+        response: { 200: { ...StoreUserResponseSchema, ...ListUserSchema } },
+      },
+    },
+    async (request, reply) => {
+      const storeID = StoreID(request.params.storeID)
+      const users: UserID[] | undefined = await selectStoreUsers(storeID)
+      if (users == null) {
+        return reply.status(404).send({ message: "Users couldn't be found" })
+      }
+      return reply.status(200).send({ message: 'user assigned', userIDs: users })
     },
   )
 }

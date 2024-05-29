@@ -2,10 +2,7 @@ import { FastifyInstance } from 'fastify'
 
 import {
   Permission,
-  PermissionDescription,
-  PermissionID,
   PermissionIDDescName,
-  PermissionTitle,
   PermissionsPaginate,
   createPermission,
   deletePermission,
@@ -13,6 +10,8 @@ import {
   getPermissionsPaginate,
   updatePermissionByID,
 } from '../../services/permissionService.js'
+
+import { PermissionDescription, PermissionID, PermissionTitle } from '../../schema/schema.js'
 
 import {
   CreatePermissionSchema,
@@ -118,16 +117,16 @@ export async function permissions(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const { PermissionName, description = '' } = request.body
+      const { permissionTitle, description = '' } = request.body
       const Permission: PermissionIDDescName = await createPermission(
-        PermissionTitle(PermissionName),
+        PermissionTitle(permissionTitle),
         PermissionDescription(description),
       )
       reply.status(201).send({ message: 'Permission created', data: Permission })
     },
   )
   fastify.get<{ Params: getPermissionByIDType }>(
-    '/:id',
+    '/:permissionID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('view_permission')
@@ -145,7 +144,7 @@ export async function permissions(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id: PermissionID = PermissionID(request.params.id)
+      const id: PermissionID = PermissionID(request.params.permissionID)
       const Permission: Permission | undefined = await getPermissionByID(id)
       if (Permission == null || Permission === undefined) {
         return reply.status(404).send({ message: 'Permission not found' })
@@ -154,7 +153,7 @@ export async function permissions(fastify: FastifyInstance) {
     },
   )
   fastify.patch<{ Body: PatchPermissionSchemaType; Reply: object; Params: getPermissionByIDType }>(
-    '/:id',
+    '/:permissionID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('update_permission')
@@ -177,9 +176,14 @@ export async function permissions(fastify: FastifyInstance) {
       if (Object.keys(PermissionData).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
-      const id: PermissionID = PermissionID(request.params.id)
 
-      const Permission: Permission = await updatePermissionByID(id, PermissionData)
+      const Permission: Permission = await updatePermissionByID({
+        permissionID: PermissionID(request.params.permissionID),
+        permissionTitle: PermissionTitle(request.body.permissionTitle),
+        permissionDescription: request.body.description
+          ? PermissionDescription(request.body.description)
+          : null,
+      })
       if (Permission === undefined || Permission === null) {
         return reply.status(404).send({ message: 'Permission not found' })
       }
@@ -187,7 +191,7 @@ export async function permissions(fastify: FastifyInstance) {
     },
   )
   fastify.delete<{ Params: getPermissionByIDType }>(
-    '/:id',
+    '/:permissionID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('delete_permission')
@@ -205,7 +209,7 @@ export async function permissions(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const id: PermissionID = PermissionID(request.params.id)
+      const id: PermissionID = PermissionID(request.params.permissionID)
       const deletedPermission: Permission | undefined = await deletePermission(id)
       if (deletedPermission == null) {
         return reply.status(404).send({ message: "Permission doesn't exist!" })

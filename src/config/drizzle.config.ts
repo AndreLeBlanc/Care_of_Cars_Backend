@@ -1,4 +1,5 @@
 import type { Config } from 'drizzle-kit'
+
 import { ConnectionString, newConnectionString } from './connection-string'
 
 const maybeConnectionString: ConnectionString = newConnectionString()
@@ -11,8 +12,8 @@ if (typeof maybeConnectionString === 'string') {
 export default {
   schema: './src/schema/schema.ts',
   out: './drizzle',
-  driver: 'pg',
+  dialect: 'postgresql',
   dbCredentials: {
-    connectionString: conString,
+    url: conString,
   },
 } satisfies Config

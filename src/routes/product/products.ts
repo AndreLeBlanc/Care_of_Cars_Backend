@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { PermissionTitle } from '../../services/permissionService.js'
+
 import {
   AddProductType,
   ListProductsQueryParamSchema,
@@ -8,18 +8,11 @@ import {
   deleteProduct,
   deleteProductType,
 } from './productSchema.js'
+
 import {
   Product,
   ProductAddType,
-  ProductAward,
-  ProductCost,
-  ProductDescription,
   ProductEdit,
-  ProductExternalArticleNumber,
-  ProductInventoryBalance,
-  ProductItemNumber,
-  ProductSupplierArticleNumber,
-  ProductUpdateRelatedData,
   ProductsPaginate,
   addProduct,
   deleteProductByItemNumber,
@@ -27,6 +20,7 @@ import {
   getProductById,
   getProductsPaginated,
 } from '../../services/productService.js'
+
 import {
   Limit,
   ModelName,
@@ -39,7 +33,18 @@ import {
   ResultCount,
   Search,
 } from '../../plugins/pagination.js'
-import { ServiceCategoryID } from '../../services/CategoryService.js'
+import {
+  PermissionTitle,
+  ProductAward,
+  ProductCategoryID,
+  ProductCost,
+  ProductDescription,
+  ProductExternalArticleNumber,
+  ProductInventoryBalance,
+  ProductItemNumber,
+  ProductSupplierArticleNumber,
+  ProductUpdateRelatedData,
+} from '../../schema/schema.js'
 
 export const productsRoute = async (fastify: FastifyInstance) => {
   fastify.post<{ Body: AddProductType; Reply: object }>(
@@ -69,7 +74,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       } = req.body
 
       const productDetails: ProductAddType = {
-        productCategoryID: ServiceCategoryID(productCategoryID),
+        productCategoryID: ProductCategoryID(productCategoryID),
         productItemNumber: ProductItemNumber(productItemNumber),
         productAward: ProductAward(productAward),
         productCost: ProductCost(productCost),
@@ -130,7 +135,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       } = req.body
 
       const productDetails: ProductAddType = {
-        productCategoryID: ServiceCategoryID(productCategoryID),
+        productCategoryID: ProductCategoryID(productCategoryID),
         productItemNumber: ProductItemNumber(productItemNumber),
         productAward: ProductAward(productAward),
         productCost: ProductCost(productCost),
@@ -209,6 +214,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const { itemCodeNumber } = request.params
+
       const productData: Product | undefined = await getProductById(
         ProductItemNumber(itemCodeNumber),
       )
@@ -239,8 +245,8 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         querystring: ListProductsQueryParamSchema,
       },
     },
-    async function (request, _) {
-      let { search = '', limit = 10, page = 1 } = request.query
+    async function (request) {
+      const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)

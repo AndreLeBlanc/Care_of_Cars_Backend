@@ -1,26 +1,21 @@
-import { Brand, make } from 'ts-brand'
 import { db } from '../config/db-connect.js'
-import { rentcars } from '../schema/schema.js'
-import { desc, eq, ilike, or, sql } from 'drizzle-orm'
+
+import {
+  RentCarColor,
+  RentCarModel,
+  RentCarNotes,
+  RentCarNumber,
+  RentCarRegistrationNumber,
+  RentCarYear,
+  StoreID,
+  rentcars,
+} from '../schema/schema.js'
+
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { Offset } from '../plugins/pagination.js'
 
-export type StoreID = Brand<number, 'storeId'>
-export const StoreID = make<StoreID>()
-export type RentCarRegistrationNumber = Brand<string | null, 'rentCarRegistrationNumber'>
-export const RentCarRegistrationNumber = make<RentCarRegistrationNumber>()
-export type RentCarModel = Brand<string, 'rentCarModel'>
-export const RentCarModel = make<RentCarModel>()
-export type RentCarColor = Brand<string, 'rentCarColor'>
-export const RentCarColor = make<RentCarColor>()
-export type RentCarYear = Brand<number, 'rentCarYear'>
-export const RentCarYear = make<RentCarYear>()
-export type RentCarNotes = Brand<string | null, 'rentCarNotes'>
-export const RentCarNotes = make<RentCarNotes>()
-export type RentCarNumber = Brand<number | null, 'rentCarNumber'>
-export const RentCarNumber = make<RentCarNumber>()
-
 export type RentCarCreateType = {
-  storeId: StoreID
+  storeID: StoreID
   rentCarRegistrationNumber: RentCarRegistrationNumber
   rentCarModel: RentCarModel
   rentCarColor: RentCarColor
@@ -59,7 +54,7 @@ export const createRentCar = async (carData: RentCarCreateType): Promise<RentCar
   const [newCar] = await db
     .insert(rentcars)
     .values({
-      storeId: carData.storeId,
+      storeID: carData.storeID,
       rentCarRegistrationNumber: carData.rentCarRegistrationNumber,
       rentCarModel: carData.rentCarModel,
       rentCarColor: carData.rentCarColor,
@@ -68,7 +63,7 @@ export const createRentCar = async (carData: RentCarCreateType): Promise<RentCar
       rentCarNumber: carData.rentCarNumber,
     })
     .returning({
-      storeId: rentcars.storeId,
+      storeID: rentcars.storeID,
       rentCarRegistrationNumber: rentcars.rentCarRegistrationNumber,
       rentCarModel: rentcars.rentCarModel,
       rentCarColor: rentcars.rentCarColor,
@@ -78,15 +73,16 @@ export const createRentCar = async (carData: RentCarCreateType): Promise<RentCar
       createdAt: rentcars.createdAt,
       updatedAt: rentcars.updatedAt,
     })
+
   return newCar
     ? {
-        storeId: StoreID(newCar.storeId),
-        rentCarRegistrationNumber: RentCarRegistrationNumber(newCar.rentCarRegistrationNumber),
-        rentCarModel: RentCarModel(newCar.rentCarModel),
-        rentCarColor: RentCarColor(newCar.rentCarColor),
-        rentCarYear: RentCarYear(newCar.rentCarYear),
-        rentCarNotes: RentCarNotes(newCar.rentCarNotes),
-        rentCarNumber: RentCarNumber(newCar.rentCarNumber),
+        storeID: newCar.storeID,
+        rentCarRegistrationNumber: newCar.rentCarRegistrationNumber,
+        rentCarModel: newCar.rentCarModel,
+        rentCarColor: newCar.rentCarColor,
+        rentCarYear: newCar.rentCarYear,
+        rentCarNotes: newCar.rentCarNotes ? newCar.rentCarNotes : undefined,
+        rentCarNumber: newCar.rentCarNumber ? newCar.rentCarNumber : undefined,
         createdAt: newCar.createdAt,
         updatedAt: newCar.updatedAt,
       }
@@ -98,14 +94,18 @@ export async function getRentCarPaginate(
   limit = 10,
   page = 1,
   offset = Offset(0),
+  storeID?: StoreID,
 ): Promise<RentCarsPaginate> {
-  const returnData = await db.transaction(async (tx) => {
-    const condition = or(
+  const rentalCarInfo = await db.transaction(async (tx) => {
+    let condition = or(
       ilike(rentcars.rentCarRegistrationNumber, '%' + search + '%'),
       ilike(rentcars.rentCarModel, '%' + search + '%'),
       ilike(rentcars.rentCarNotes, '%' + search + '%'),
     )
 
+    if (storeID != undefined) {
+      condition = and(condition, eq(rentcars.storeID, storeID))
+    }
     const [totalItems] = await tx
       .select({
         count: sql`count(*)`.mapWith(Number).as('count'),
@@ -115,7 +115,7 @@ export async function getRentCarPaginate(
 
     const rentCarList = await tx
       .select({
-        storeId: rentcars.storeId,
+        storeID: rentcars.storeID,
         rentCarRegistrationNumber: rentcars.rentCarRegistrationNumber,
         rentCarModel: rentcars.rentCarModel,
         rentCarColor: rentcars.rentCarColor,
@@ -134,27 +134,27 @@ export async function getRentCarPaginate(
     return { totalItems, rentCarList }
   })
 
-  const rentCarBrandedList = returnData.rentCarList.map((item) => {
+  const totalPage = Math.ceil(rentalCarInfo.totalItems.count / limit)
+
+  const brandedRentCars: RentCar[] = rentalCarInfo.rentCarList.map((rentCar) => {
     return {
-      storeId: StoreID(item.storeId),
-      rentCarRegistrationNumber: RentCarRegistrationNumber(item.rentCarRegistrationNumber),
-      rentCarModel: RentCarModel(item.rentCarModel),
-      rentCarColor: RentCarColor(item.rentCarColor),
-      rentCarYear: RentCarYear(item.rentCarYear),
-      rentCarNotes: RentCarNotes(item.rentCarNotes),
-      rentCarNumber: RentCarNumber(item.rentCarNumber),
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
+      storeID: rentCar.storeID,
+      rentCarRegistrationNumber: rentCar.rentCarRegistrationNumber,
+      rentCarModel: rentCar.rentCarModel,
+      rentCarColor: rentCar.rentCarColor,
+      rentCarYear: rentCar.rentCarYear,
+      rentCarNotes: rentCar.rentCarNotes ? rentCar.rentCarNotes : undefined,
+      rentCarNumber: rentCar.rentCarNumber ? rentCar.rentCarNumber : undefined,
+      createdAt: rentCar.createdAt,
+      updatedAt: rentCar.updatedAt,
     }
   })
 
-  const totalPage = Math.ceil(returnData.totalItems.count / limit)
-
   return {
-    totalItems: returnData.totalItems.count,
+    totalItems: rentalCarInfo.totalItems.count,
     totalPage,
     perPage: page,
-    data: rentCarBrandedList,
+    data: brandedRentCars,
   }
 }
 
@@ -183,7 +183,7 @@ export async function editRentCar(carDetails: RentCarEditType): Promise<RentCar 
     })
     .where(eq(rentcars.rentCarRegistrationNumber, carDetails.rentCarRegistrationNumber))
     .returning({
-      storeId: rentcars.storeId,
+      storeID: rentcars.storeID,
       rentCarRegistrationNumber: rentcars.rentCarRegistrationNumber,
       rentCarModel: rentcars.rentCarModel,
       rentCarColor: rentcars.rentCarColor,
@@ -196,27 +196,25 @@ export async function editRentCar(carDetails: RentCarEditType): Promise<RentCar 
 
   return updatedRentCar
     ? {
-        storeId: StoreID(updatedRentCar.storeId),
-        rentCarRegistrationNumber: RentCarRegistrationNumber(
-          updatedRentCar.rentCarRegistrationNumber,
-        ),
-        rentCarModel: RentCarModel(updatedRentCar.rentCarModel),
-        rentCarColor: RentCarColor(updatedRentCar.rentCarColor),
-        rentCarYear: RentCarYear(updatedRentCar.rentCarYear),
-        rentCarNotes: RentCarNotes(updatedRentCar.rentCarNotes),
-        rentCarNumber: RentCarNumber(updatedRentCar.rentCarNumber),
+        storeID: updatedRentCar.storeID,
+        rentCarRegistrationNumber: updatedRentCar.rentCarRegistrationNumber,
+        rentCarModel: updatedRentCar.rentCarModel,
+        rentCarColor: updatedRentCar.rentCarColor,
+        rentCarYear: updatedRentCar.rentCarYear,
+        rentCarNotes: updatedRentCar.rentCarNotes ? updatedRentCar.rentCarNotes : undefined,
+        rentCarNumber: updatedRentCar.rentCarNumber ? updatedRentCar.rentCarNumber : undefined,
         createdAt: updatedRentCar.createdAt,
         updatedAt: updatedRentCar.updatedAt,
       }
     : undefined
 }
 
-export async function getRentCarById(
+export async function getRentCarByID(
   regNumber: RentCarRegistrationNumber,
 ): Promise<RentCar | undefined> {
   const [rentCarDetails] = await db
     .select({
-      storeId: rentcars.storeId,
+      storeID: rentcars.storeID,
       rentCarRegistrationNumber: rentcars.rentCarRegistrationNumber,
       rentCarModel: rentcars.rentCarModel,
       rentCarColor: rentcars.rentCarColor,
@@ -230,15 +228,13 @@ export async function getRentCarById(
     .where(eq(rentcars.rentCarRegistrationNumber, regNumber))
   return rentCarDetails
     ? {
-        storeId: StoreID(rentCarDetails.storeId),
-        rentCarRegistrationNumber: RentCarRegistrationNumber(
-          rentCarDetails.rentCarRegistrationNumber,
-        ),
-        rentCarModel: RentCarModel(rentCarDetails.rentCarModel),
-        rentCarColor: RentCarColor(rentCarDetails.rentCarColor),
-        rentCarYear: RentCarYear(rentCarDetails.rentCarYear),
-        rentCarNotes: RentCarNotes(rentCarDetails.rentCarNotes),
-        rentCarNumber: RentCarNumber(rentCarDetails.rentCarNumber),
+        storeID: rentCarDetails.storeID,
+        rentCarRegistrationNumber: rentCarDetails.rentCarRegistrationNumber,
+        rentCarModel: rentCarDetails.rentCarModel,
+        rentCarColor: rentCarDetails.rentCarColor,
+        rentCarYear: rentCarDetails.rentCarYear,
+        rentCarNotes: rentCarDetails.rentCarNotes ? rentCarDetails.rentCarNotes : undefined,
+        rentCarNumber: rentCarDetails.rentCarNumber ? rentCarDetails.rentCarNumber : undefined,
         createdAt: rentCarDetails.createdAt,
         updatedAt: rentCarDetails.updatedAt,
       }
