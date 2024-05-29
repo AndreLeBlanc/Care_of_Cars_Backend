@@ -314,6 +314,11 @@ export const EmployeePin = make<EmployeePin>()
 export type EmployeeComment = Brand<string, 'employeeComment'>
 export const EmployeeComment = make<EmployeeComment>()
 
+export type TotalEmployees = Brand<number, 'totalEmployees'>
+export const TotalEmployees = make<TotalEmployees>()
+export type TotalPage = Brand<number, 'totalPage'>
+export const TotalPage = make<TotalPage>()
+
 export const colorForService = [
   'LightBlue',
   'Blue',
@@ -365,6 +370,8 @@ export const employees = pgTable('employees', {
   employeeHourlyRate: numeric('employeeHourlyRate').$type<EmployeeHourlyRate>(),
   employeePin: varchar('employeePin', { length: 4 }).$type<EmployeePin>(),
   employeeComment: varchar('employeeComment').$type<EmployeeComment>(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
 export const employeeStore = pgTable(

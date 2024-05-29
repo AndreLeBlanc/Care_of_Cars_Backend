@@ -53,7 +53,7 @@ import {
   storeweeklynotes,
 } from '../schema/schema.js'
 
-import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
+import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.js'
 
 import { db } from '../config/db-connect.js'
 
@@ -166,9 +166,9 @@ export type StoreMaybePaymentOptions =
   | undefined
 
 export type StoresPaginated = {
-  totalStores: number
-  totalPage: number
-  perPage: number
+  totalStores: ResultCount
+  totalPage: Page
+  perPage: Limit
   data: { storeName: StoreName; storeID: StoreID; storeOrgNumber: StoreOrgNumber }[]
 }
 
