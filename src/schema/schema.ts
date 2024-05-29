@@ -273,7 +273,6 @@ export type ServiceSuppliersArticleNumber = Brand<string, 'ServiceSuppliersArtic
 export const ServiceSuppliersArticleNumber = make<ServiceSuppliersArticleNumber>()
 export type ServiceExternalArticleNumber = Brand<string, 'ServiceExternalArticleNumber'>
 export const ServiceExternalArticleNumber = make<ServiceExternalArticleNumber>()
-
 export type ServiceID = Brand<number, ' serviceID'>
 export const ServiceID = make<ServiceID>()
 export type ServiceName = Brand<string, ' serviceName'>
@@ -295,10 +294,8 @@ export const ServiceDay5 = make<ServiceDay5>()
 
 export type RoleName = Brand<string, 'roleName'>
 export const RoleName = make<RoleName>()
-
 export type RoleID = Brand<number, 'roleID'>
 export const RoleID = make<RoleID>()
-
 export type RoleDescription = Brand<string, 'roleDescription'>
 export const RoleDescription = make<RoleDescription>()
 
