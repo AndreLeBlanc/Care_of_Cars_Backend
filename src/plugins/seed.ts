@@ -38,6 +38,7 @@ export default fp<SupportPluginOptions>(async () => {
           RoleName('SuperAdmin'),
           RoleDescription('Super admin user'),
         )
+
         // Below two envs are required in plugins/env.ts so it will throw message in console if not added.
         const passwordHash = await generatePasswordHash(
           UserPassword(process.env.SUPER_ADMIN_PASSWORD),
@@ -51,6 +52,20 @@ export default fp<SupportPluginOptions>(async () => {
           IsSuperAdmin(true),
         )
         console.info('Super admin created from seed!', role, user)
+        const roleSecond: CreatedRole = await createRole(
+          RoleName('testRole'),
+          RoleDescription('second test user'),
+        )
+        const userSecond: CreatedUser = await createUser(
+          UserFirstName('SuperAdmin'),
+          UserLastName('SuperAdmin'),
+          UserEmail(process.env.SUPER_ADMIN_EMAIL),
+          passwordHash,
+          RoleID(role?.roleID),
+          IsSuperAdmin(true),
+        )
+
+        console.info('Second user created from seed!', roleSecond, userSecond)
         return seedResult.Success
       } else {
         return seedResult.WrongConfig
