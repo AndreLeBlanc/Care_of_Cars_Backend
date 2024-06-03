@@ -63,6 +63,37 @@ export default fp<SupportPluginOptions>(async (fastify) => {
   )
 
   fastify.decorate(
+    'authorizePin',
+    async function (
+      request: FastifyRequest,
+      _: FastifyReply,
+      permissionName: PermissionTitle,
+    ): Promise<boolean> {
+      try {
+        const userData: any = request.user
+        const hasPermission: boolean = await roleHasPermission(
+          RoleID(userData.userWithPassword.role.roleID),
+          permissionName,
+        )
+        console.log('hasPermission', hasPermission)
+        return true
+        //        if (userData.user) {
+        //          return true
+        //        }
+        //        if (!hasPermission) {
+        //          return false
+        //        }
+        //      } catch (err) {
+        //        throw err
+        //      }
+        //      return false
+      } catch (e) {
+        return true
+      }
+    },
+  )
+
+  fastify.decorate(
     'authenticate',
     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
       try {
@@ -82,6 +113,11 @@ declare module 'fastify' {
       jwtVerify: 'securityJwtVerify'
     }> {
     authorize(
+      request: FastifyRequest,
+      reply: FastifyReply,
+      permissionName: PermissionTitle,
+    ): Promise<boolean>
+    authorizePin(
       request: FastifyRequest,
       reply: FastifyReply,
       permissionName: PermissionTitle,

@@ -1,5 +1,5 @@
 {
-  "id": "4c87256b-6f15-499c-97b3-6e3a15afe43f",
+  "id": "711275ef-e58c-4396-9666-91e546c440e0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -226,18 +226,87 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.employeeStore": {
+      "name": "employeeStore",
+      "schema": "",
+      "columns": {
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "employeeID": {
+          "name": "employeeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "employeeStore_storeID_stores_storeID_fk": {
+          "name": "employeeStore_storeID_stores_storeID_fk",
+          "tableFrom": "employeeStore",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "employeeStore_employeeID_employees_employeeID_fk": {
+          "name": "employeeStore_employeeID_employees_employeeID_fk",
+          "tableFrom": "employeeStore",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "employeeID"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "employeeStore_storeID_employeeID_pk": {
+          "name": "employeeStore_storeID_employeeID_pk",
+          "columns": [
+            "storeID",
+            "employeeID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
     "public.employees": {
       "name": "employees",
       "schema": "",
       "columns": {
-        "firstName": {
-          "name": "firstName",
-          "type": "varchar(128)",
+        "employeeID": {
+          "name": "employeeID",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
-        "personalNumber": {
-          "name": "personalNumber",
+        "shortUserName": {
+          "name": "shortUserName",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "employmentNumber": {
+          "name": "employmentNumber",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "employeePersonalNumber": {
+          "name": "employeePersonalNumber",
           "type": "varchar(16)",
           "primaryKey": false,
           "notNull": true
@@ -248,34 +317,61 @@
           "primaryKey": false,
           "notNull": true
         },
-        "hourlyRate": {
-          "name": "hourlyRate",
+        "employeeHourlyRate": {
+          "name": "employeeHourlyRate",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "pin": {
-          "name": "pin",
+        "employeeHourlyRateCurrency": {
+          "name": "employeeHourlyRateCurrency",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employeePin": {
+          "name": "employeePin",
           "type": "varchar(4)",
           "primaryKey": false,
           "notNull": false
         },
-        "comment": {
-          "name": "comment",
+        "employeeComment": {
+          "name": "employeeComment",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "employees_personalNumber_unique": {
-          "name": "employees_personalNumber_unique",
+        "employees_employmentNumber_unique": {
+          "name": "employees_employmentNumber_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "personalNumber"
+            "employmentNumber"
+          ]
+        },
+        "employees_employeePersonalNumber_unique": {
+          "name": "employees_employeePersonalNumber_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "employeePersonalNumber"
           ]
         },
         "employees_signature_unique": {
@@ -1315,6 +1411,13 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'SEK'"
         },
         "storeAllowCarAPI": {
           "name": "storeAllowCarAPI",

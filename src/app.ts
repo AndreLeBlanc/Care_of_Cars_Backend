@@ -15,6 +15,8 @@ import { serviceCategory } from './routes/category/category.js'
 import { services } from './routes/services/services.js'
 import { users } from './routes/users/users.js'
 
+import { employees } from './routes/employees/employees.js'
+
 import { stores } from './routes/stores/stores.js'
 
 import { root } from './routes/root.js'
@@ -89,6 +91,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
   app.register(stores, { prefix: 'stores' })
   app.register(services, { prefix: 'services' })
   app.register(users, { prefix: '/users' })
+  app.register(employees, { prefix: '/employees' })
   app.register(root, { prefix: '/' })
   app.register(customers, { prefix: '/customer' })
   //settings
