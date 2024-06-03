@@ -40,14 +40,26 @@ CREATE TABLE IF NOT EXISTS "drivers" (
 	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "employeeStore" (
+	"storeID" integer NOT NULL,
+	"employeeID" integer NOT NULL,
+	CONSTRAINT "employeeStore_storeID_employeeID_pk" PRIMARY KEY("storeID","employeeID")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "employees" (
-	"firstName" varchar(128) PRIMARY KEY NOT NULL,
-	"personalNumber" varchar(16) NOT NULL,
+	"employeeID" serial PRIMARY KEY NOT NULL,
+	"shortUserName" varchar(16) NOT NULL,
+	"employmentNumber" varchar(128) NOT NULL,
+	"employeePersonalNumber" varchar(16) NOT NULL,
 	"signature" varchar(4) NOT NULL,
-	"hourlyRate" numeric,
-	"pin" varchar(4),
-	"comment" varchar,
-	CONSTRAINT "employees_personalNumber_unique" UNIQUE("personalNumber"),
+	"employeeHourlyRate" numeric,
+	"employeeHourlyRateCurrency" varchar,
+	"employeePin" varchar(4),
+	"employeeComment" varchar,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "employees_employmentNumber_unique" UNIQUE("employmentNumber"),
+	CONSTRAINT "employees_employeePersonalNumber_unique" UNIQUE("employeePersonalNumber"),
 	CONSTRAINT "employees_signature_unique" UNIQUE("signature")
 );
 --> statement-breakpoint
@@ -214,6 +226,7 @@ CREATE TABLE IF NOT EXISTS "stores" (
 	"storeDescription" varchar,
 	"storeContactPerson" varchar(64),
 	"storeMaxUsers" integer,
+	"currency" varchar DEFAULT 'SEK',
 	"storeAllowCarAPI" boolean DEFAULT true,
 	"storeAllowSendSMS" boolean DEFAULT true,
 	"storeSendSMS" boolean DEFAULT true,
@@ -282,6 +295,18 @@ CREATE TABLE IF NOT EXISTS "users" (
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "drivers" ADD CONSTRAINT "drivers_customerOrgNumber_companycustomers_customerOrgNumber_fk" FOREIGN KEY ("customerOrgNumber") REFERENCES "public"."companycustomers"("customerOrgNumber") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employeeStore" ADD CONSTRAINT "employeeStore_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "public"."stores"("storeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employeeStore" ADD CONSTRAINT "employeeStore_employeeID_employees_employeeID_fk" FOREIGN KEY ("employeeID") REFERENCES "public"."employees"("employeeID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

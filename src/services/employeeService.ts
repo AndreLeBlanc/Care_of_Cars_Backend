@@ -1,6 +1,8 @@
 import {
   EmployeeComment,
   EmployeeHourlyRate,
+  EmployeeHourlyRateCurrency,
+  EmployeeHourlyRateDinero,
   EmployeeID,
   EmployeePersonalNumber,
   EmployeePin,
@@ -11,24 +13,32 @@ import {
   employeeStore,
   employees,
 } from '../schema/schema.js'
+
+import Dinero from 'dinero.js'
+
 import { db } from '../config/db-connect.js'
 
 import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.js'
 
 import { and, eq, ilike, or, sql } from 'drizzle-orm'
 
-export type CreateEmployee = {
-  employeeID: EmployeeID
+type EmployeeNoRate = {
+  employeeID?: EmployeeID
   shortUserName: ShortUserName
   employmentNumber: EmploymentNumber
   employeePersonalNumber: EmployeePersonalNumber
   signature: Signature
-  employeeHourlyRate?: EmployeeHourlyRate
   employeePin?: EmployeePin
   employeeComment?: EmployeeComment
 }
 
-export type Employee = CreateEmployee & {
+export type CreateEmployee = EmployeeNoRate & {
+  employeeHourlyRateCurrency?: EmployeeHourlyRateCurrency
+  employeeHourlyRate?: EmployeeHourlyRate
+}
+
+export type Employee = EmployeeNoRate & {
+  employeeHourlyRateDinero?: EmployeeHourlyRateDinero
   storeIDs: StoreID[]
   employeeID: EmployeeID
   createdAt: Date
@@ -39,13 +49,30 @@ export type EmployeePaginated = {
   totalEmployees: ResultCount
   totalPage: Page
   perPage: Limit
-  employees: CreateEmployee[]
+  employees: (EmployeeNoRate & {
+    employeeHourlyRateDinero?: EmployeeHourlyRateDinero
+  })[]
+}
+
+function dineroDBReturn(
+  amount: EmployeeHourlyRate | null,
+  currency: EmployeeHourlyRateCurrency | null,
+): EmployeeHourlyRateDinero | undefined {
+  if (currency != null && amount != null) {
+    return EmployeeHourlyRateDinero(
+      Dinero({
+        amount: amount,
+        currency: currency,
+      }),
+    )
+  }
+  return undefined
 }
 
 export async function putEmployee(
   stores: StoreID[],
-  employeeID: EmployeeID,
   employee: CreateEmployee,
+  employeeID?: EmployeeID,
 ): Promise<Employee | undefined> {
   if (stores.length < 1) {
     return undefined
@@ -58,12 +85,15 @@ export async function putEmployee(
           .where(eq(employees.employeeID, employeeID))
           .returning()
       : await db.insert(employees).values(employee).returning()
+
     const employeeIDStoreID = stores.map((store) => {
-      return { storeID: store, employeeID: employeeID }
+      return { storeID: store, employeeID: createdEmployee.employeeID }
     })
+
     const employeeStores = await tx
       .insert(employeeStore)
       .values(employeeIDStoreID)
+      .onConflictDoNothing()
       .returning({ storeID: employeeStore.storeID })
 
     const createdEmployeeWithNull = {
@@ -72,7 +102,10 @@ export async function putEmployee(
       employmentNumber: createdEmployee.employmentNumber,
       employeePersonalNumber: createdEmployee.employeePersonalNumber,
       signature: createdEmployee.signature,
-      employeeHourlyRate: createdEmployee.employeeHourlyRate ?? undefined,
+      employeeHourlyRateDinero: dineroDBReturn(
+        createdEmployee.employeeHourlyRate,
+        createdEmployee.employeeHourlyRateCurrency,
+      ),
       employeePin: createdEmployee.employeePin ?? undefined,
       employeeComment: createdEmployee.employeeComment ?? undefined,
       createdAt: createdEmployee.createdAt,
@@ -147,7 +180,7 @@ export async function getEmployeesPaginate(
   limit = Limit(10),
   page = Page(1),
   offset = Offset(0),
-): Promise<EmployeePaginated> {
+): Promise<EmployeePaginated | undefined> {
   const { totalEmployees, listedEmployeeWithNull } = await db.transaction(async (tx) => {
     const condition = and(
       or(
@@ -162,15 +195,15 @@ export async function getEmployeesPaginate(
         count: sql`count(*)`.mapWith(Number).as('count'),
       })
       .from(employees)
-      .innerJoin(employeeStore, condition)
-
+      .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
+      .where(condition)
     const employeesList = await tx
       .select()
       .from(employees)
-      .innerJoin(employeeStore, condition)
+      .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
+      .where(condition)
       .limit(limit || 10)
       .offset(offset || 0)
-
     const listedEmployeeWithNull = employeesList.map((employee) => {
       return {
         employeeID: employee.employees.employeeID,
@@ -178,7 +211,10 @@ export async function getEmployeesPaginate(
         employmentNumber: employee.employees.employmentNumber,
         employeePersonalNumber: employee.employees.employeePersonalNumber,
         signature: employee.employees.signature,
-        employeeHourlyRate: employee.employees.employeeHourlyRate ?? undefined,
+        employeeHourlyRateDinero: dineroDBReturn(
+          employee.employees.employeeHourlyRate,
+          employee.employees.employeeHourlyRateCurrency,
+        ),
         employeePin: employee.employees.employeePin ?? undefined,
         employeeComment: employee.employees.employeeComment ?? undefined,
         createdAt: employee.employees.createdAt,

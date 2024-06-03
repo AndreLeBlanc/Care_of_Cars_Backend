@@ -23,6 +23,8 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 
+import { Currency, Dinero } from 'dinero.js'
+
 export type UserID = Brand<number, 'userID'>
 export const UserID = make<UserID>()
 export type UserPassword = Brand<string, ' userPassword'>
@@ -309,6 +311,10 @@ export type EmployeePersonalNumber = Brand<string, 'employeePersonalNumber'>
 export const EmployeePersonalNumber = make<EmployeePersonalNumber>()
 export type EmployeeHourlyRate = Brand<number, 'employeeHourlyRate'>
 export const EmployeeHourlyRate = make<EmployeeHourlyRate>()
+export type EmployeeHourlyRateDinero = Brand<Dinero, 'employeeHourlyRateDinero'>
+export const EmployeeHourlyRateDinero = make<EmployeeHourlyRateDinero>()
+export type EmployeeHourlyRateCurrency = Brand<Currency, 'employeeHourlyRateCurrency'>
+export const EmployeeHourlyRateCurrency = make<EmployeeHourlyRateCurrency>()
 export type EmployeePin = Brand<string, 'employeePin'>
 export const EmployeePin = make<EmployeePin>()
 export type EmployeeComment = Brand<string, 'employeeComment'>
@@ -357,8 +363,8 @@ const dbDates = {
 
 export const employees = pgTable('employees', {
   employeeID: serial('employeeID').$type<EmployeeID>().primaryKey(),
-  shortUserName: varchar('firstName', { length: 16 }).$type<ShortUserName>().notNull(),
-  employmentNumber: varchar('firstName', { length: 128 })
+  shortUserName: varchar('shortUserName', { length: 16 }).$type<ShortUserName>().notNull(),
+  employmentNumber: varchar('employmentNumber', { length: 128 })
     .$type<EmploymentNumber>()
     .unique()
     .notNull(),
@@ -368,6 +374,9 @@ export const employees = pgTable('employees', {
     .unique(),
   signature: varchar('signature', { length: 4 }).$type<Signature>().notNull().unique(),
   employeeHourlyRate: numeric('employeeHourlyRate').$type<EmployeeHourlyRate>(),
+  employeeHourlyRateCurrency: varchar(
+    'employeeHourlyRateCurrency',
+  ).$type<EmployeeHourlyRateCurrency>(),
   employeePin: varchar('employeePin', { length: 4 }).$type<EmployeePin>(),
   employeeComment: varchar('employeeComment').$type<EmployeeComment>(),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
