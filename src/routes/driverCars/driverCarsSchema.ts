@@ -1,6 +1,8 @@
 import { Static, Type } from '@sinclair/typebox'
 
-import { driverID } from '../customers/customerSchema'
+import { driverID } from '../customers/customerSchema.js'
+
+import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 
 const driverCarID = Type.Integer({ minimum: 0 })
 const driverCarRegistrationNumber = Type.String({ minLength: 3, maxLength: 11 })
@@ -13,7 +15,7 @@ const driverCarNotes = Type.String()
 
 export const DriverCarSchema = Type.Object({
   driverID: Type.Optional(driverID),
-  driverCarID: driverCarID,
+  driverCarID: Type.Optional(driverCarID),
   driverCarRegistrationNumber: driverCarRegistrationNumber,
   driverCarBrand: driverCarBrand,
   driverCarModel: driverCarModel,
@@ -25,13 +27,37 @@ export const DriverCarSchema = Type.Object({
 
 export type DriverCarSchemaType = Static<typeof DriverCarSchema>
 
-export const CarByDriverIDSchema = Type.Object({
-  driverID: driverID,
+export const DriverCarIDSchema = Type.Object({
+  driverCarID: driverCarID,
 })
 
-export type CarByDriverIDSchemaType = Static<typeof CarByDriverIDSchema>
+export type DriverCarIDSchemaType = Static<typeof DriverCarIDSchema>
 
-export const DriverCarDateSchema = Type.Composite([
-  DriverCarSchema,
-  Type.Object({ createdAt: Type.Date(), updatedAt: Type.Date() }),
-])
+export const DriverCarDateSchema = Type.Composite([DriverCarSchema, CreatedAndUpdatedAT])
+
+export type DriverCarDateSchemaType = Static<typeof DriverCarDateSchema>
+
+export const DriverCarMessageSchema = Type.Object({
+  message: Type.String(),
+})
+
+export type DriverCarMessageSchemaType = Static<typeof DriverCarMessageSchema>
+
+export const ListDriverSchema = Type.Object({
+  search: Type.Optional(Type.String()),
+  limit: Type.Optional(Type.Number()),
+  page: Type.Optional(Type.Number()),
+  offset: Type.Optional(Type.Number()),
+})
+
+export type ListDriverSchemaType = Static<typeof ListDriverSchema>
+
+export const ListDriverCarReplySchema = Type.Object({
+  totalCars: Type.Integer(),
+  totalPage: Type.Integer(),
+  perPage: Type.Integer(),
+  page: Type.Integer(),
+  cars: Type.Array(DriverCarSchema),
+})
+
+export type ListDriverCarReplySchemaType = Static<typeof ListDriverCarReplySchema>

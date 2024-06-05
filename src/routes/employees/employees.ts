@@ -64,8 +64,6 @@ export const employees = async (fastify: FastifyInstance) => {
       },
     },
     async (req, rep) => {
-      const {} = req.body
-
       const storeIDs: StoreID[] = req.body.storeID.map((store) => StoreID(store))
       const employeeID = req.body.employeeID ? EmployeeID(req.body.employeeID) : undefined
       const employee: CreateEmployee = {

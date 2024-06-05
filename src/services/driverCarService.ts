@@ -28,12 +28,16 @@ export type CreateCar = {
   driverCarNotes?: DriverCarNotes
 }
 
-export type Car = CreateCar & { driverCarID: DriverCarID; createdAt: Date; updatedAt: Date }
+export type Car = {
+  carInfo: CreateCar & { driverCarID: DriverCarID }
+  dates: { createdAt: Date; updatedAt: Date }
+}
 
 export type CarsPaginated = {
   totalCars: ResultCount
   totalPage: Page
   perPage: Limit
+  page: Page
   cars: (CreateCar & {
     driverCarID: DriverCarID
   })[]
@@ -49,17 +53,21 @@ export async function putCar(car: CreateCar, driverCarID?: DriverCarID): Promise
     : await db.insert(driverCars).values(car).returning()
 
   return {
-    driverCarID: createdCar.driverCarID,
-    driverCarBrand: createdCar.driverCarBrand ?? undefined,
-    driverCarChassiNumber: createdCar.driverCarChassiNumber ?? undefined,
-    driverCarColor: createdCar.driverCarColor ?? undefined,
-    driverCarModel: createdCar.driverCarModel ?? undefined,
-    driverCarNotes: createdCar.driverCarNotes ?? undefined,
-    driverCarRegistrationNumber: createdCar.driverCarRegistrationNumber,
-    driverCarYear: createdCar.driverCarYear ?? undefined,
-    driverID: createdCar.driverID ?? undefined,
-    createdAt: createdCar.createdAt,
-    updatedAt: createdCar.updatedAt,
+    carInfo: {
+      driverCarID: createdCar.driverCarID,
+      driverCarBrand: createdCar.driverCarBrand ?? undefined,
+      driverCarChassiNumber: createdCar.driverCarChassiNumber ?? undefined,
+      driverCarColor: createdCar.driverCarColor ?? undefined,
+      driverCarModel: createdCar.driverCarModel ?? undefined,
+      driverCarNotes: createdCar.driverCarNotes ?? undefined,
+      driverCarRegistrationNumber: createdCar.driverCarRegistrationNumber,
+      driverCarYear: createdCar.driverCarYear ?? undefined,
+      driverID: createdCar.driverID ?? undefined,
+    },
+    dates: {
+      createdAt: createdCar.createdAt,
+      updatedAt: createdCar.updatedAt,
+    },
   }
 }
 
@@ -70,17 +78,21 @@ export async function deleteCar(driverCarID: DriverCarID): Promise<Car | undefin
     .returning()
 
   return {
-    driverCarID: deletedCar.driverCarID,
-    driverCarBrand: deletedCar.driverCarBrand ?? undefined,
-    driverCarChassiNumber: deletedCar.driverCarChassiNumber ?? undefined,
-    driverCarColor: deletedCar.driverCarColor ?? undefined,
-    driverCarModel: deletedCar.driverCarModel ?? undefined,
-    driverCarNotes: deletedCar.driverCarNotes ?? undefined,
-    driverCarRegistrationNumber: deletedCar.driverCarRegistrationNumber,
-    driverCarYear: deletedCar.driverCarYear ?? undefined,
-    driverID: deletedCar.driverID ?? undefined,
-    createdAt: deletedCar.createdAt,
-    updatedAt: deletedCar.updatedAt,
+    carInfo: {
+      driverCarID: deletedCar.driverCarID,
+      driverCarBrand: deletedCar.driverCarBrand ?? undefined,
+      driverCarChassiNumber: deletedCar.driverCarChassiNumber ?? undefined,
+      driverCarColor: deletedCar.driverCarColor ?? undefined,
+      driverCarModel: deletedCar.driverCarModel ?? undefined,
+      driverCarNotes: deletedCar.driverCarNotes ?? undefined,
+      driverCarRegistrationNumber: deletedCar.driverCarRegistrationNumber,
+      driverCarYear: deletedCar.driverCarYear ?? undefined,
+      driverID: deletedCar.driverID ?? undefined,
+    },
+    dates: {
+      createdAt: deletedCar.createdAt,
+      updatedAt: deletedCar.updatedAt,
+    },
   }
 }
 
@@ -91,17 +103,21 @@ export async function getCar(driverCarID: DriverCarID): Promise<Car | undefined>
     .where(eq(driverCars.driverCarID, driverCarID))
 
   return {
-    driverCarID: deletedCar.driverCarID,
-    driverCarBrand: deletedCar.driverCarBrand ?? undefined,
-    driverCarChassiNumber: deletedCar.driverCarChassiNumber ?? undefined,
-    driverCarColor: deletedCar.driverCarColor ?? undefined,
-    driverCarModel: deletedCar.driverCarModel ?? undefined,
-    driverCarNotes: deletedCar.driverCarNotes ?? undefined,
-    driverCarRegistrationNumber: deletedCar.driverCarRegistrationNumber,
-    driverCarYear: deletedCar.driverCarYear ?? undefined,
-    driverID: deletedCar.driverID ?? undefined,
-    createdAt: deletedCar.createdAt,
-    updatedAt: deletedCar.updatedAt,
+    carInfo: {
+      driverCarID: deletedCar.driverCarID,
+      driverCarBrand: deletedCar.driverCarBrand ?? undefined,
+      driverCarChassiNumber: deletedCar.driverCarChassiNumber ?? undefined,
+      driverCarColor: deletedCar.driverCarColor ?? undefined,
+      driverCarModel: deletedCar.driverCarModel ?? undefined,
+      driverCarNotes: deletedCar.driverCarNotes ?? undefined,
+      driverCarRegistrationNumber: deletedCar.driverCarRegistrationNumber,
+      driverCarYear: deletedCar.driverCarYear ?? undefined,
+      driverID: deletedCar.driverID ?? undefined,
+    },
+    dates: {
+      createdAt: deletedCar.createdAt,
+      updatedAt: deletedCar.updatedAt,
+    },
   }
 }
 
@@ -109,6 +125,7 @@ export async function getCarsPaginated(
   search: Search,
   limit = Limit(10),
   offset = Offset(0),
+  page = Page(1),
 ): Promise<CarsPaginated | undefined> {
   const condition = and(
     or(
@@ -163,6 +180,7 @@ export async function getCarsPaginated(
     totalCars: ResultCount(totalCars.count),
     totalPage: totalPage,
     perPage: limit,
+    page: page,
     cars: listCarsUndefined,
   }
 }

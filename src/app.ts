@@ -26,6 +26,9 @@ import { customers } from './routes/customers/customers.js'
 import { rentCar } from './routes/rentCar/rent-car.js'
 
 import { productsRoute } from './routes/product/products.js'
+
+import { driverCars } from './routes/driverCars/driverCars.js'
+
 import { qualificationsRoute } from './routes/qulifications/qualifcations.js'
 
 const defaultOptions = {
@@ -94,8 +97,8 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
   app.register(employees, { prefix: '/employees' })
   app.register(root, { prefix: '/' })
   app.register(customers, { prefix: '/customer' })
-  //settings
   app.register(rentCar, { prefix: '/rent-car' })
+  app.register(driverCars, { prefix: '/driver-car' })
   app.register(productsRoute, { prefix: '/product' })
   app.register(qualificationsRoute, { prefix: '/qualifications' })
 

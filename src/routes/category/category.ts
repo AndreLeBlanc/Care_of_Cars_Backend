@@ -28,7 +28,7 @@ import {
   getServiceCategoryByID,
   updateProductCategoryByID,
   updateServiceCategoryByID,
-} from '../../services/CategoryService.js'
+} from '../../services/categoryService.js'
 
 import {
   CreateServiceCategorySchema,
