@@ -325,6 +325,25 @@ export const TotalEmployees = make<TotalEmployees>()
 export type TotalPage = Brand<number, 'totalPage'>
 export const TotalPage = make<TotalPage>()
 
+export type DriverCarID = Brand<PositiveInteger<number>, 'driverID'>
+export const DriverCarID = make<DriverCarID>()
+export type DriverID = Brand<PositiveInteger<number>, 'driverID'>
+export const DriverID = make<DriverID>()
+export type DriverCarRegistrationNumber = Brand<string, 'driverCarRegistrationNumber'>
+export const DriverCarRegistrationNumber = make<DriverCarRegistrationNumber>()
+export type DriverCarBrand = Brand<string, 'driverCarBrand'>
+export const DriverCarBrand = make<DriverCarBrand>()
+export type DriverCarModel = Brand<string, 'driverCarModel'>
+export const DriverCarModel = make<DriverCarModel>()
+export type DriverCarColor = Brand<string, 'driverCarColor'>
+export const DriverCarColor = make<DriverCarColor>()
+export type DriverCarYear = Brand<PositiveInteger<number>, 'driverCarYear'>
+export const DriverCarYear = make<DriverCarYear>()
+export type DriverCarChassiNumber = Brand<string, 'driverCarChassiNumber'>
+export const DriverCarChassiNumber = make<DriverCarChassiNumber>()
+export type DriverCarNotes = Brand<string, 'driverCarNotes'>
+export const DriverCarNotes = make<DriverCarNotes>()
+
 export const colorForService = [
   'LightBlue',
   'Blue',
@@ -553,6 +572,7 @@ export const companycustomers = pgTable('companycustomers', {
 })
 
 export const drivers = pgTable('drivers', {
+  driverID: serial('driverID').$type<DriverID>().primaryKey(),
   customerOrgNumber: varchar('customerOrgNumber', { length: 11 })
     .$type<CustomerOrgNumber>()
     .references(() => companycustomers.customerOrgNumber, { onDelete: 'cascade' }),
@@ -574,7 +594,7 @@ export const drivers = pgTable('drivers', {
     .notNull(),
   driverFirstName: varchar('driverFirstName', { length: 128 }).$type<DriverFirstName>().notNull(),
   driverLastName: varchar('driverLastName', { length: 128 }).$type<DriverLastName>().notNull(),
-  driverEmail: varchar('driverEmail', { length: 256 }).$type<DriverEmail>().primaryKey(),
+  driverEmail: varchar('driverEmail', { length: 256 }).$type<DriverEmail>().notNull(),
   driverPhoneNumber: varchar('driverPhoneNumber', { length: 32 })
     .$type<DriverPhoneNumber>()
     .notNull(),
@@ -638,7 +658,26 @@ export const stores = pgTable('stores', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
-export const rentcars = pgTable('rentcars', {
+export const driverCars = pgTable('driverCars', {
+  driverCarID: serial('driverCarID').$type<DriverCarID>().primaryKey(),
+  driverID: integer('driverID')
+    .$type<DriverID>()
+    .references(() => stores.storeID, { onDelete: 'cascade' }),
+  driverCarRegistrationNumber: varchar('driverCarRegistrationNumber', { length: 11 })
+    .$type<DriverCarRegistrationNumber>()
+    .unique()
+    .notNull(),
+  driverCarBrand: varchar('driverCarBrand', { length: 128 }).$type<DriverCarBrand>(),
+  driverCarModel: varchar('driverCarModel', { length: 128 }).$type<DriverCarModel>(),
+  driverCarColor: varchar('driverCarColor', { length: 64 }).$type<DriverCarColor>(),
+  driverCarYear: integer('driverCarYear').$type<DriverCarYear>(),
+  driverCarChassiNumber: varchar('driverCarChassiNumber', { length: 24 })
+    .$type<DriverCarChassiNumber>()
+    .unique(),
+  driverCarNotes: varchar('driverCarNotes').$type<DriverCarNotes>(),
+  ...dbDates,
+})
+export const rentcars = pgTable('rentCars', {
   storeID: integer('storeID')
     .$type<StoreID>()
     .references(() => stores.storeID, { onDelete: 'cascade' })

@@ -17,6 +17,7 @@ import {
   DriverFirstName,
   DriverGDPRAccept,
   DriverHasCard,
+  DriverID,
   DriverISWarrantyCustomer,
   DriverKeyNumber,
   DriverLastName,
@@ -71,6 +72,7 @@ export type Company = CustomerCompanyCreate & {
   updatedAt: Date
 }
 export type Driver = DriverCreate & {
+  driverID: DriverID
   createdAt: Date
   updatedAt: Date
 }
@@ -83,6 +85,7 @@ export type CustomersPaginate = {
 }
 
 export type paginateDriverList = {
+  driverID: DriverID
   driverFirstName: DriverFirstName
   driverLastName: DriverLastName
   driverEmail: DriverEmail
@@ -147,20 +150,12 @@ export async function createCompany(
       })
   }
   const existingCompanyBranded: Company = {
-    customerOrgNumber: CustomerOrgNumber(existingCompany.customerOrgNumber),
-    customerCompanyName: CustomerCompanyName(existingCompany.customerComapanyName),
-    companyAddress: existingCompany.companyAddress
-      ? CompanyAddress(existingCompany.companyAddress)
-      : undefined,
-    companyAddressCity: existingCompany.companyAddressCity
-      ? CompanyAddressCity(existingCompany.companyAddressCity)
-      : undefined,
-    companyCountry: existingCompany.companyCountry
-      ? CompanyCountry(existingCompany.companyCountry)
-      : undefined,
-    companyZipCode: existingCompany.companyZipCode
-      ? CompanyZipCode(existingCompany.companyZipCode)
-      : undefined,
+    customerOrgNumber: existingCompany.customerOrgNumber,
+    customerCompanyName: existingCompany.customerComapanyName,
+    companyAddress: existingCompany.companyAddress ?? undefined,
+    companyAddressCity: existingCompany.companyAddressCity ?? undefined,
+    companyCountry: existingCompany.companyCountry ?? undefined,
+    companyZipCode: existingCompany.companyZipCode ?? undefined,
     createdAt: existingCompany.createdAt,
     updatedAt: existingCompany.updatedAt,
   }
@@ -205,6 +200,7 @@ export async function createCompanyDriver(
     .returning()
   return newDriver
     ? {
+        driverID: newDriver.driverID,
         customerOrgNumber: newDriver.customerOrgNumber ?? undefined,
         driverExternalNumber: newDriver.driverExternalNumber ?? undefined,
         driverGDPRAccept: newDriver.driverGDPRAccept,
@@ -258,6 +254,7 @@ export async function createNewDriver(driver: DriverCreate): Promise<Driver | un
 
   return newDriver
     ? {
+        driverID: newDriver.driverID,
         customerOrgNumber: newDriver.customerOrgNumber ?? undefined,
         driverExternalNumber: newDriver.driverExternalNumber ?? undefined,
         driverGDPRAccept: newDriver.driverGDPRAccept,
@@ -350,6 +347,7 @@ export async function editDriverDetails(driver: DriverCreate): Promise<Driver | 
     })
     .where(eq(drivers.driverEmail, driver.driverEmail))
     .returning({
+      driverID: drivers.driverID,
       driverExternalNumber: drivers.driverExternalNumber,
       driverGDPRAccept: drivers.driverGDPRAccept,
       driverISWarrantyDriver: drivers.driverISWarrantyDriver,
@@ -374,38 +372,37 @@ export async function editDriverDetails(driver: DriverCreate): Promise<Driver | 
 
   return updatedDriver
     ? {
+        driverID: updatedDriver.driverID,
         driverExternalNumber: updatedDriver.driverExternalNumber ?? undefined,
-        driverGDPRAccept: DriverGDPRAccept(updatedDriver.driverGDPRAccept),
-        driverISWarrantyDriver: DriverISWarrantyCustomer(updatedDriver.driverISWarrantyDriver),
-        driverAcceptsMarketing: DriverAcceptsMarketing(updatedDriver.driverAcceptsMarketing),
-        driverFirstName: DriverFirstName(updatedDriver.driverFirstName),
-        driverLastName: DriverLastName(updatedDriver.driverLastName),
-        driverEmail: DriverEmail(updatedDriver.driverEmail),
-        driverPhoneNumber: DriverPhoneNumber(updatedDriver.driverPhoneNumber),
-        driverAddress: DriverAddress(updatedDriver.driverAddress),
-        driverZipCode: DriverZipCode(updatedDriver.driverZipCode),
-        driverAddressCity: DriverAddressCity(updatedDriver.driverAddressCity),
-        driverHasCard: updatedDriver.driverHasCard
-          ? DriverHasCard(updatedDriver.driverHasCard)
-          : undefined,
-        driverCardValidTo: DriverCardValidTo(updatedDriver.driverCardValidTo),
-        driverCardNumber: CustomerCardNumber(updatedDriver.driverCardNumber),
-        driverKeyNumber: DriverKeyNumber(updatedDriver.driverKeyNumber),
-        driverNotesShared: DriverNotesShared(updatedDriver.driverNotesShared),
-        driverNotes: DriverNotes(updatedDriver.driverNotes),
-        driverCountry: DriverCountry(updatedDriver.driverCountry),
+        driverGDPRAccept: updatedDriver.driverGDPRAccept,
+        driverISWarrantyDriver: updatedDriver.driverISWarrantyDriver,
+        driverAcceptsMarketing: updatedDriver.driverAcceptsMarketing,
+        driverFirstName: updatedDriver.driverFirstName,
+        driverLastName: updatedDriver.driverLastName,
+        driverEmail: updatedDriver.driverEmail,
+        driverPhoneNumber: updatedDriver.driverPhoneNumber,
+        driverAddress: updatedDriver.driverAddress,
+        driverZipCode: updatedDriver.driverZipCode,
+        driverAddressCity: updatedDriver.driverAddressCity,
+        driverHasCard: updatedDriver.driverHasCard ?? undefined,
+        driverCardValidTo: updatedDriver.driverCardValidTo ?? undefined,
+        driverCardNumber: updatedDriver.driverCardNumber ?? undefined,
+        driverKeyNumber: updatedDriver.driverKeyNumber ?? undefined,
+        driverNotesShared: updatedDriver.driverNotesShared ?? undefined,
+        driverNotes: updatedDriver.driverNotes ?? undefined,
+        driverCountry: updatedDriver.driverCountry,
         createdAt: updatedDriver.createdAt,
         updatedAt: updatedDriver.updatedAt,
       }
     : undefined
 }
 
-export async function deleteDriver(driverEmail: DriverEmail): Promise<DriverEmail | undefined> {
+export async function deleteDriver(driverID: DriverID): Promise<DriverID> {
   const [deletedDriver] = await db
     .delete(drivers)
-    .where(eq(drivers.driverEmail, driverEmail))
-    .returning({ deletedEmail: drivers.driverEmail })
-  return deletedDriver ? DriverEmail(deletedDriver.deletedEmail) : undefined
+    .where(eq(drivers.driverID, driverID))
+    .returning({ driverID: drivers.driverID })
+  return deletedDriver.driverID
 }
 
 //Customer Paginate
@@ -514,6 +511,7 @@ export async function getDriversPaginate(
 
     const driverList = await tx
       .select({
+        driverID: drivers.driverID,
         driverFirstName: drivers.driverFirstName,
         driverLastName: drivers.driverLastName,
         driverEmail: drivers.driverEmail,
@@ -531,25 +529,13 @@ export async function getDriversPaginate(
     return { driverList, totalItems }
   })
 
-  const driversBrandedList = returnData.driverList.map((item) => {
-    return {
-      driverFirstName: DriverFirstName(item.driverFirstName),
-      driverLastName: DriverLastName(item.driverLastName),
-      driverEmail: DriverEmail(item.driverEmail),
-      driverPhoneNumber: DriverPhoneNumber(item.driverPhoneNumber),
-      driverAddress: DriverAddress(item.driverAddress),
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
-    }
-  })
-
   const totalPage = Math.ceil(returnData.totalItems.count / limit)
 
   return {
     totalItems: returnData.totalItems.count,
     totalPage,
     perPage: page,
-    data: driversBrandedList,
+    data: returnData.driverList,
   }
 }
 
@@ -571,29 +557,22 @@ export async function getCompanyById(orgNumber: CustomerOrgNumber): Promise<Comp
 
   return companyDetails
     ? {
-        customerOrgNumber: CustomerOrgNumber(companyDetails.customerOrgNumber),
-        customerCompanyName: CustomerCompanyName(companyDetails.customerComapanyName),
-        companyAddress: companyDetails.customerAddress
-          ? CompanyAddress(companyDetails.customerAddress)
-          : undefined,
-        companyAddressCity: companyDetails.customerAddressCity
-          ? CompanyAddressCity(companyDetails.customerAddressCity)
-          : undefined,
-        companyCountry: companyDetails.customerCountry
-          ? CompanyCountry(companyDetails.customerCountry)
-          : undefined,
-        companyZipCode: companyDetails.customerZipCode
-          ? CompanyZipCode(companyDetails.customerZipCode)
-          : undefined,
+        customerOrgNumber: companyDetails.customerOrgNumber,
+        customerCompanyName: companyDetails.customerComapanyName,
+        companyAddress: companyDetails.customerAddress ?? undefined,
+        companyAddressCity: companyDetails.customerAddressCity ?? undefined,
+        companyCountry: companyDetails.customerCountry ?? undefined,
+        companyZipCode: companyDetails.customerZipCode ?? undefined,
         createdAt: companyDetails.createdAt,
         updatedAt: companyDetails.updatedAt,
       }
     : undefined
 }
 
-export async function getDriverById(driverEmail: DriverEmail): Promise<Driver | undefined> {
+export async function getDriverById(driverID: DriverID): Promise<Driver | undefined> {
   const [driverDetails] = await db
     .select({
+      driverID: drivers.driverID,
       driverExternalNumber: drivers.driverExternalNumber,
       driverGDPRAccept: drivers.driverGDPRAccept,
       driverISWarrantyDriver: drivers.driverISWarrantyDriver,
@@ -616,9 +595,10 @@ export async function getDriverById(driverEmail: DriverEmail): Promise<Driver | 
       updatedAt: drivers.updatedAt,
     })
     .from(drivers)
-    .where(eq(drivers.driverEmail, driverEmail))
+    .where(eq(drivers.driverID, driverID))
   return driverDetails
     ? {
+        driverID: driverDetails.driverID,
         driverExternalNumber: driverDetails.driverExternalNumber ?? undefined,
         driverGDPRAccept: driverDetails.driverGDPRAccept,
         driverISWarrantyDriver: driverDetails.driverISWarrantyDriver,

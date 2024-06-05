@@ -1,5 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 
+export const driverID = Type.Integer({ minimum: 0 })
+
 export const addCustomerBody = Type.Object({
   companyOrgNumber: Type.String(),
   companyName: Type.String(),
@@ -47,11 +49,12 @@ export const getCompanyByOrgNumber = Type.Object({
   orgNumber: Type.String(),
 })
 
-export const getDriverByEmail = Type.Object({
-  driverEmail: Type.String(),
+export const getDriverByID = Type.Object({
+  driverID: driverID,
 })
 
 export const patchDriverBody = Type.Object({
+  driverID: driverID,
   driverExternalNumber: Type.Optional(Type.String()),
   driverGDPRAccept: Type.Boolean(),
   driverISWarrantyDriver: Type.Boolean(),
@@ -122,7 +125,7 @@ export type ListDriversQueryParamSchemaType = Static<typeof ListDriversQueryPara
 export type ListDriversCompanyQueryParamSchemaType = Static<
   typeof ListDriversCompanyQueryParamSchema
 >
-export type getDriverByEmailType = Static<typeof getDriverByEmail>
+export type getDriverByIDType = Static<typeof getDriverByID>
 export type getCompanyByOrgNumberType = Static<typeof getCompanyByOrgNumber>
 export type CreateCustomerType = Static<typeof addCustomerBody>
 export type PatchCompanyType = Static<typeof patchCompanyBody>
