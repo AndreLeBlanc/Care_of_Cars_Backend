@@ -1,4 +1,7 @@
 import {
+  CheckedInStatus,
+  EmployeeCheckIn,
+  EmployeeCheckOut,
   EmployeeComment,
   EmployeeHourlyRate,
   EmployeeHourlyRateCurrency,
@@ -41,6 +44,8 @@ export type Employee = EmployeeNoRate & {
   employeeHourlyRateDinero?: EmployeeHourlyRateDinero
   storeIDs: StoreID[]
   employeeID: EmployeeID
+  employeeCheckIn?: EmployeeCheckIn
+  employeeCheckOut?: EmployeeCheckOut
   createdAt: Date
   updatedAt: Date
 }
@@ -51,7 +56,21 @@ export type EmployeePaginated = {
   perPage: Limit
   employees: (EmployeeNoRate & {
     employeeHourlyRateDinero?: EmployeeHourlyRateDinero
+    employeeCheckIn?: EmployeeCheckIn
+    employeeCheckOut?: EmployeeCheckOut
   })[]
+}
+
+export type CheckInTimes = {
+  employeeID: EmployeeID
+  employeeCheckIn?: EmployeeCheckIn
+  employeeCheckOut?: EmployeeCheckOut
+}
+
+export type ListCheckInStatus = {
+  employeeID: EmployeeID
+  time: EmployeeCheckIn | EmployeeCheckOut | undefined
+  status: CheckedInStatus
 }
 
 function dineroDBReturn(
@@ -67,6 +86,69 @@ function dineroDBReturn(
     )
   }
   return undefined
+}
+
+export async function listCheckedinStatus(
+  storeID: StoreID,
+): Promise<ListCheckInStatus[] | undefined> {
+  const employeesList = await db
+    .select({
+      employeeID: employees.employeeID,
+      employeeCheckedIn: employees.employeeCheckedIn,
+      employeeCheckedOut: employees.employeeCheckedOut,
+    })
+    .from(employees)
+    .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
+    .where(eq(employeeStore.storeID, storeID))
+
+  function toListCheckinStatus(checkedin: string | null, checkedout: string | null) {
+    if (checkedin == null) return { time: undefined, status: 'CheckedOut' as CheckedInStatus }
+    if (checkedout == null || checkedout < checkedin)
+      return { status: 'CheckedIn' as CheckedInStatus, time: EmployeeCheckIn(checkedin) }
+    return { status: 'CheckedOut' as CheckedInStatus, time: EmployeeCheckOut(checkedout) }
+  }
+  const employeeCheckinStatus = employeesList.map((employee) => {
+    const status = toListCheckinStatus(employee.employeeCheckedIn, employee.employeeCheckedOut)
+    return {
+      employeeID: employee.employeeID,
+      time: status?.time,
+      status: status.status,
+    }
+  })
+  return employeeCheckinStatus
+}
+
+export async function checkInCheckOut(
+  employeeID: EmployeeID,
+  checkIn: CheckedInStatus,
+): Promise<CheckInTimes | undefined> {
+  const timestamp = new Date().toISOString()
+  if (timestamp != null) {
+    switch (checkIn) {
+      case 'CheckedIn':
+        const [setCheckinTime] = await db
+          .update(employees)
+          .set({ employeeCheckedIn: EmployeeCheckIn(timestamp) })
+          .where(eq(employees.employeeID, employeeID))
+          .returning({
+            employeeID: employees.employeeID,
+            employeeCheckedIn: employees.employeeCheckedIn ?? undefined,
+            employeeCheckedOut: employees.employeeCheckedOut ?? undefined,
+          })
+        return setCheckinTime
+      case 'CheckedOut':
+        const [setCheckOutTime] = await db
+          .update(employees)
+          .set({ employeeCheckedOut: EmployeeCheckOut(timestamp) })
+          .where(eq(employees.employeeID, employeeID))
+          .returning({
+            employeeID: employees.employeeID,
+            employeeCheckedIn: employees.employeeCheckedIn ?? undefined,
+            employeeCheckedOut: employees.employeeCheckedOut ?? undefined,
+          })
+        return setCheckOutTime
+    }
+  }
 }
 
 export async function putEmployee(
@@ -137,6 +219,8 @@ export async function getEmployee(employeeID: EmployeeID): Promise<Employee | un
       employeeHourlyRate: fetchedEmployee.employeeHourlyRate ?? undefined,
       employeePin: fetchedEmployee.employeePin ?? undefined,
       employeeComment: fetchedEmployee.employeeComment ?? undefined,
+      employeeCheckedIn: employees.employeeCheckedIn ?? undefined,
+      employeeCheckedOut: employees.employeeCheckedOut ?? undefined,
       createdAt: fetchedEmployee.createdAt,
       updatedAt: fetchedEmployee.updatedAt,
     }
@@ -197,6 +281,7 @@ export async function getEmployeesPaginate(
       .from(employees)
       .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
       .where(condition)
+
     const employeesList = await tx
       .select()
       .from(employees)
@@ -217,6 +302,8 @@ export async function getEmployeesPaginate(
         ),
         employeePin: employee.employees.employeePin ?? undefined,
         employeeComment: employee.employees.employeeComment ?? undefined,
+        employeeCheckIn: employee.employees.employeeCheckedIn ?? undefined,
+        employeeCheckOut: employee.employees.employeeCheckedOut ?? undefined,
         createdAt: employee.employees.createdAt,
         updatedAt: employee.employees.updatedAt,
       }

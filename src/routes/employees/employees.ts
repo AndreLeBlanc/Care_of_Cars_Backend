@@ -1,12 +1,18 @@
 import { FastifyInstance } from 'fastify'
 
 import {
+  CheckInTimesSchema,
+  CheckInTimesSchemaType,
   CreateEmployeeSchema,
   CreateEmployeeSchemaType,
+  EmployeeIDCheckinSchema,
+  EmployeeIDCheckinSchemaType,
   EmployeeIDSchema,
   EmployeeIDSchemaType,
   EmployeeMessageSchema,
   EmployeeMessageSchemaType,
+  ListCheckInStatusSchema,
+  ListCheckInStatusSchemaType,
   ListEmployeesReplySchema,
   ListEmployeesReplySchemaType,
   ListEmployeesSchema,
@@ -18,6 +24,7 @@ import {
 import { Currency } from 'dinero.js'
 
 import {
+  CheckedInStatus,
   EmployeeComment,
   EmployeeHourlyRate,
   EmployeeHourlyRateCurrency,
@@ -34,16 +41,87 @@ import {
 import { Limit, Offset, Page, Search } from '../../plugins/pagination.js'
 
 import {
+  CheckInTimes,
   CreateEmployee,
   Employee,
   EmployeePaginated,
+  ListCheckInStatus,
+  checkInCheckOut,
   deleteEmployee,
   getEmployee,
   getEmployeesPaginate,
+  listCheckedinStatus,
   putEmployee,
 } from '../../services/employeeService.js'
+import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema..js'
 
 export const employees = async (fastify: FastifyInstance) => {
+  fastify.post<{
+    Body: EmployeeIDCheckinSchemaType
+    Reply: CheckInTimesSchemaType | EmployeeMessageSchemaType
+  }>(
+    '/checkin',
+    {
+      preHandler: async (request, reply, done) => {
+        fastify.authorize(request, reply, PermissionTitle('checkin_checkout_employee'))
+        done()
+        return reply
+      },
+      schema: {
+        body: EmployeeIDCheckinSchema,
+        response: {
+          201: { ...EmployeeMessageSchema, ...CheckInTimesSchema },
+          504: EmployeeMessageSchema,
+        },
+      },
+    },
+    async (req, rep) => {
+      const employeeID = EmployeeID(req.body.employeeID)
+      const checkedInStatus = req.body.employeeCheckedOut as CheckedInStatus
+
+      const checkinStatus: CheckInTimes | undefined = await checkInCheckOut(
+        employeeID,
+        checkedInStatus,
+      )
+      if (checkinStatus == null) {
+        return rep.status(504).send({ message: "can't set employee checkin" })
+      }
+      return rep.status(201).send({ message: 'updated employee checkin', ...checkinStatus })
+    },
+  )
+
+  fastify.get<{
+    Params: StoreIDSchemaType
+    Reply: ListCheckInStatusSchemaType | EmployeeMessageSchemaType
+  }>(
+    '/checkin/:storeID',
+    {
+      preHandler: async (request, reply, done) => {
+        fastify.authorize(request, reply, PermissionTitle('list_checkin_status'))
+        done()
+        return reply
+      },
+      schema: {
+        params: StoreIDSchema,
+        response: {
+          200: ListCheckInStatusSchema,
+          404: EmployeeMessageSchema,
+        },
+      },
+    },
+    async (request, rep) => {
+      const storeID = StoreID(request.params.storeID)
+
+      const checkinStatusList: ListCheckInStatus[] | undefined = await listCheckedinStatus(storeID)
+      if (checkinStatusList == null) {
+        return rep.status(504).send({ message: "can't get employee checkin statuses" })
+      }
+      return rep
+        .status(200)
+        .send({ message: 'employee checkin statuses', statuses: checkinStatusList })
+    },
+  )
+
   fastify.put<{
     Body: CreateEmployeeSchemaType
     Reply: (EmployeeMessageSchemaType & SelectedEmployeeSchemaType) | EmployeeMessageSchemaType
