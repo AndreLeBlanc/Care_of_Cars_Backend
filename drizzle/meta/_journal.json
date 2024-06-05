@@ -8,6 +8,20 @@
       "when": 1717441642783,
       "tag": "0000_lucky_dexter_bennett",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1717518715237,
+      "tag": "0001_flimsy_ultimates",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1717582200962,
+      "tag": "0002_blushing_lady_deathstrike",
+      "breakpoints": true
     }
   ]
 }
