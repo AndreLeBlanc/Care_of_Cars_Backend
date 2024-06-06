@@ -101,11 +101,17 @@ export async function listCheckedinStatus(
     .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
     .where(eq(employeeStore.storeID, storeID))
 
-  function toListCheckinStatus(checkedin: string | null, checkedout: string | null) {
+  function toListCheckinStatus(checkedin: Date | null, checkedout: Date | null) {
     if (checkedin == null) return { time: undefined, status: 'CheckedOut' as CheckedInStatus }
     if (checkedout == null || checkedout < checkedin)
-      return { status: 'CheckedIn' as CheckedInStatus, time: EmployeeCheckIn(checkedin) }
-    return { status: 'CheckedOut' as CheckedInStatus, time: EmployeeCheckOut(checkedout) }
+      return {
+        status: 'CheckedIn' as CheckedInStatus,
+        time: EmployeeCheckIn(checkedin.toISOString()),
+      }
+    return {
+      status: 'CheckedOut' as CheckedInStatus,
+      time: EmployeeCheckOut(checkedout.toISOString()),
+    }
   }
   const employeeCheckinStatus = employeesList.map((employee) => {
     const status = toListCheckinStatus(employee.employeeCheckedIn, employee.employeeCheckedOut)
@@ -115,6 +121,7 @@ export async function listCheckedinStatus(
       status: status.status,
     }
   })
+  console.log(employeeCheckinStatus)
   return employeeCheckinStatus
 }
 
@@ -122,31 +129,48 @@ export async function checkInCheckOut(
   employeeID: EmployeeID,
   checkIn: CheckedInStatus,
 ): Promise<CheckInTimes | undefined> {
-  const timestamp = new Date().toISOString()
+  const timestamp: Date = new Date()
   if (timestamp != null) {
     switch (checkIn) {
       case 'CheckedIn':
         const [setCheckinTime] = await db
           .update(employees)
-          .set({ employeeCheckedIn: EmployeeCheckIn(timestamp) })
+          .set({ employeeCheckedIn: timestamp })
           .where(eq(employees.employeeID, employeeID))
           .returning({
             employeeID: employees.employeeID,
             employeeCheckedIn: employees.employeeCheckedIn ?? undefined,
             employeeCheckedOut: employees.employeeCheckedOut ?? undefined,
           })
-        return setCheckinTime
+
+        return {
+          employeeID: setCheckinTime.employeeID,
+          employeeCheckIn: setCheckinTime.employeeCheckedIn
+            ? EmployeeCheckIn(setCheckinTime.employeeCheckedIn.toISOString())
+            : undefined,
+          employeeCheckOut: setCheckinTime.employeeCheckedOut
+            ? EmployeeCheckOut(setCheckinTime.employeeCheckedOut.toISOString())
+            : undefined,
+        }
       case 'CheckedOut':
         const [setCheckOutTime] = await db
           .update(employees)
-          .set({ employeeCheckedOut: EmployeeCheckOut(timestamp) })
+          .set({ employeeCheckedOut: timestamp })
           .where(eq(employees.employeeID, employeeID))
           .returning({
             employeeID: employees.employeeID,
-            employeeCheckedIn: employees.employeeCheckedIn ?? undefined,
-            employeeCheckedOut: employees.employeeCheckedOut ?? undefined,
+            employeeCheckedIn: employees.employeeCheckedIn,
+            employeeCheckedOut: employees.employeeCheckedOut,
           })
-        return setCheckOutTime
+        return {
+          employeeID: setCheckOutTime.employeeID,
+          employeeCheckIn: setCheckOutTime.employeeCheckedIn
+            ? EmployeeCheckIn(setCheckOutTime.employeeCheckedIn.toISOString())
+            : undefined,
+          employeeCheckOut: setCheckOutTime.employeeCheckedOut
+            ? EmployeeCheckOut(setCheckOutTime.employeeCheckedOut.toISOString())
+            : undefined,
+        }
     }
   }
 }
@@ -204,6 +228,7 @@ export async function getEmployee(employeeID: EmployeeID): Promise<Employee | un
       .select()
       .from(employees)
       .where(eq(employees.employeeID, employeeID))
+    if (fetchedEmployee == null) return undefined
 
     const employeeStores = await tx
       .select()
@@ -219,8 +244,12 @@ export async function getEmployee(employeeID: EmployeeID): Promise<Employee | un
       employeeHourlyRate: fetchedEmployee.employeeHourlyRate ?? undefined,
       employeePin: fetchedEmployee.employeePin ?? undefined,
       employeeComment: fetchedEmployee.employeeComment ?? undefined,
-      employeeCheckedIn: employees.employeeCheckedIn ?? undefined,
-      employeeCheckedOut: employees.employeeCheckedOut ?? undefined,
+      employeeCheckedIn: employees.employeeCheckedIn
+        ? undefined
+        : EmployeeCheckIn(employees.employeeCheckedIn),
+      employeeCheckedOut: employees.employeeCheckedOut
+        ? undefined
+        : EmployeeCheckOut(employees.employeeCheckedOut),
       createdAt: fetchedEmployee.createdAt,
       updatedAt: fetchedEmployee.updatedAt,
     }
@@ -302,8 +331,12 @@ export async function getEmployeesPaginate(
         ),
         employeePin: employee.employees.employeePin ?? undefined,
         employeeComment: employee.employees.employeeComment ?? undefined,
-        employeeCheckIn: employee.employees.employeeCheckedIn ?? undefined,
-        employeeCheckOut: employee.employees.employeeCheckedOut ?? undefined,
+        employeeCheckIn: employee.employees.employeeCheckedIn
+          ? EmployeeCheckIn(employee.employees.employeeCheckedIn.toISOString())
+          : undefined,
+        employeeCheckOut: employee.employees.employeeCheckedOut
+          ? EmployeeCheckOut(employee.employees.employeeCheckedOut.toISOString())
+          : undefined,
         createdAt: employee.employees.createdAt,
         updatedAt: employee.employees.updatedAt,
       }

@@ -404,8 +404,8 @@ export const employees = pgTable('employees', {
   ).$type<EmployeeHourlyRateCurrency>(),
   employeePin: varchar('employeePin', { length: 4 }).$type<EmployeePin>(),
   employeeComment: varchar('employeeComment').$type<EmployeeComment>(),
-  employeeCheckedIn: timestamp('checkedIn', { mode: 'date' }).$type<EmployeeCheckIn>(),
-  employeeCheckedOut: timestamp('checkedOut', { mode: 'date' }).$type<EmployeeCheckOut>(),
+  employeeCheckedIn: timestamp('checkedIn'),
+  employeeCheckedOut: timestamp('checkedOut'),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })

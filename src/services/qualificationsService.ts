@@ -19,6 +19,8 @@ import { db } from '../config/db-connect.js'
 
 import { and, eq, ilike } from 'drizzle-orm'
 
+import { Either, left, right } from '../utils/helper.js'
+
 export type CreateQualificationsLocal = {
   storeID: StoreID
   localQualName: LocalQualName
@@ -79,16 +81,18 @@ export type UserGlobalQualifications = {
 export async function updateLocalQuals(
   localQual: CreateQualificationsLocal,
   localQualID?: LocalQualID,
-): Promise<QualificationsLocal | undefined> {
-  const [qual] = localQualID
-    ? await db
-        .update(qualificationsLocal)
-        .set(localQual)
-        .where(eq(qualificationsLocal.localQualID, localQualID))
-        .returning()
-    : await db.insert(qualificationsLocal).values(localQual).returning()
-  return qual
-    ? {
+): Promise<Either<string, QualificationsLocal>> {
+  try {
+    const [qual] = localQualID
+      ? await db
+          .update(qualificationsLocal)
+          .set(localQual)
+          .where(eq(qualificationsLocal.localQualID, localQualID))
+          .returning()
+      : await db.insert(qualificationsLocal).values(localQual).returning()
+
+    if (qual != null) {
+      return right({
         qual: {
           storeID: qual.storeID,
           localQualID: qual.localQualID,
@@ -98,8 +102,12 @@ export async function updateLocalQuals(
           createdAt: CreatedAt(qual.createdAt),
           updatedAt: UpdatedAt(qual.updatedAt),
         },
-      }
-    : undefined
+      })
+    }
+  } catch (e) {
+    return left("couldn't update local quals")
+  }
+  return left("couldn't update local quals")
 }
 
 export async function updateGlobalQuals(

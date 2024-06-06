@@ -57,6 +57,8 @@ import {
 
 import { Search } from '../../plugins/pagination.js'
 
+import { Either, match } from '../../utils/helper.js'
+
 export const qualificationsRoute = async (fastify: FastifyInstance) => {
   fastify.put<{
     Body: CreateQualificationsLocalSchemaType
@@ -88,25 +90,30 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
         localQualName: LocalQualName(req.body.localQualName),
       }
 
-      const putQual: QualificationsLocal | undefined = req.body.localQualID
+      const putQual: Either<string, QualificationsLocal> = req.body.localQualID
         ? await updateLocalQuals(qualification, LocalQualID(req.body.localQualID))
         : await updateLocalQuals(qualification)
-      if (putQual != null) {
-        return rep.status(201).send({
-          message: 'Qualification Created/updated successfully',
-          qualification: {
-            qual: putQual.qual,
-            dates: {
-              createdAt: putQual.dates.createdAt.toISOString(),
-              updatedAt: putQual.dates.updatedAt.toISOString(),
+
+      match(
+        putQual,
+        (qual: QualificationsLocal) => {
+          return rep.status(201).send({
+            message: 'Qualification Created/updated successfully',
+            qualification: {
+              qual: qual.qual,
+              dates: {
+                createdAt: qual.dates.createdAt.toISOString(),
+                updatedAt: qual.dates.updatedAt.toISOString(),
+              },
             },
-          },
-        })
-      } else {
-        return rep.status(504).send({
-          message: 'Fail to create or update local qualification',
-        })
-      }
+          })
+        },
+        () => {
+          return rep.status(504).send({
+            message: 'Fail to create or update local qualification',
+          })
+        },
+      )
     },
   )
 

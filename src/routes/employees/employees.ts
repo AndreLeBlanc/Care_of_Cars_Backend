@@ -83,6 +83,7 @@ export const employees = async (fastify: FastifyInstance) => {
         employeeID,
         checkedInStatus,
       )
+      console.log('checkinStatus', checkinStatus)
       if (checkinStatus == null) {
         return rep.status(504).send({ message: "can't set employee checkin" })
       }
@@ -113,12 +114,21 @@ export const employees = async (fastify: FastifyInstance) => {
       const storeID = StoreID(request.params.storeID)
 
       const checkinStatusList: ListCheckInStatus[] | undefined = await listCheckedinStatus(storeID)
+
+      console.log('status', checkinStatusList)
       if (checkinStatusList == null) {
-        return rep.status(504).send({ message: "can't get employee checkin statuses" })
+        return rep.status(404).send({ message: "can't get employee checkin statuses" })
       }
-      return rep
-        .status(200)
-        .send({ message: 'employee checkin statuses', statuses: checkinStatusList })
+      return rep.status(200).send({
+        message: 'employee checkin statuses',
+        statuses: checkinStatusList.map((emp) => {
+          return {
+            employeeID: emp.employeeID,
+            time: emp.time ? emp.time : undefined,
+            status: emp.status,
+          }
+        }),
+      })
     },
   )
 
@@ -196,7 +206,7 @@ export const employees = async (fastify: FastifyInstance) => {
       schema: {
         params: EmployeeIDSchema,
         response: {
-          201: { message: EmployeeMessageSchema, employee: SelectedEmployeeSchema },
+          201: { EmployeeMessageSchema, employee: SelectedEmployeeSchema },
           404: EmployeeMessageSchema,
         },
       },
@@ -215,7 +225,7 @@ export const employees = async (fastify: FastifyInstance) => {
   fastify.get<{
     Params: EmployeeIDSchemaType
     Reply:
-      | (EmployeeMessageSchemaType & { employee: SelectedEmployeeSchemaType })
+      | { message: EmployeeMessageSchemaType; employee: SelectedEmployeeSchemaType }
       | EmployeeMessageSchemaType
   }>(
     '/:employeeID',
@@ -229,7 +239,7 @@ export const employees = async (fastify: FastifyInstance) => {
       schema: {
         params: EmployeeIDSchema,
         response: {
-          201: { EmployeeMessageSchema, employee: SelectedEmployeeSchema },
+          200: { ...EmployeeMessageSchema, ...SelectedEmployeeSchema },
           404: EmployeeMessageSchema,
         },
       },
