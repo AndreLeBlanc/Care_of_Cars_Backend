@@ -319,6 +319,10 @@ export type EmployeePin = Brand<string, 'employeePin'>
 export const EmployeePin = make<EmployeePin>()
 export type EmployeeComment = Brand<string, 'employeeComment'>
 export const EmployeeComment = make<EmployeeComment>()
+export type EmployeeCheckIn = Brand<string, 'EmployeeCheckIn'>
+export const EmployeeCheckIn = make<EmployeeCheckIn>()
+export type EmployeeCheckOut = Brand<string, 'employeeCheckOut'>
+export const EmployeeCheckOut = make<EmployeeCheckOut>()
 
 export type TotalEmployees = Brand<number, 'totalEmployees'>
 export const TotalEmployees = make<TotalEmployees>()
@@ -343,6 +347,8 @@ export type DriverCarChassiNumber = Brand<string, 'driverCarChassiNumber'>
 export const DriverCarChassiNumber = make<DriverCarChassiNumber>()
 export type DriverCarNotes = Brand<string, 'driverCarNotes'>
 export const DriverCarNotes = make<DriverCarNotes>()
+
+export type CheckedInStatus = 'CheckedIn' | 'CheckedOut'
 
 export const colorForService = [
   'LightBlue',
@@ -398,6 +404,8 @@ export const employees = pgTable('employees', {
   ).$type<EmployeeHourlyRateCurrency>(),
   employeePin: varchar('employeePin', { length: 4 }).$type<EmployeePin>(),
   employeeComment: varchar('employeeComment').$type<EmployeeComment>(),
+  employeeCheckedIn: timestamp('checkedIn'),
+  employeeCheckedOut: timestamp('checkedOut'),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
