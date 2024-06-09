@@ -36,6 +36,7 @@ import {
   StoreCountry,
   StoreDescription,
   StoreEmail,
+  StoreFSkatt,
   StoreID,
   StoreMaxUsers,
   StoreName,
@@ -47,6 +48,8 @@ import {
   StoreStatus,
   StoreUsesCheckin,
   StoreUsesPIN,
+  StoreVatNumber,
+  StoreWebSite,
   StoreZipCode,
   SundayClose,
   SundayNote,
@@ -115,6 +118,9 @@ import {
   StoreOpeningHoursType,
   StoreOpeningHoursWithSpecial,
   StorePaginateReply,
+  StorePaginateReplyType,
+  StoreReplyMessage,
+  StoreReplyMessageType,
   StoreReplySchema,
   StoreReplySchemaType,
   StoreSpecialHoursSchema,
@@ -129,14 +135,14 @@ import {
   StoreWeeklyNotesType,
   WeekSchema,
   WeekSchemaType,
-  storeReplyMessage,
-  storeReplyMessageType,
 } from './storesSchema..js'
+
+import { Either, match } from '../../utils/helper.js'
 
 export async function stores(fastify: FastifyInstance) {
   fastify.put<{
     Body: StoreWeeklyNotesType
-    Reply: { message: storeReplyMessageType; notes: StoreWeeklyNotesType } | storeReplyMessageType
+    Reply: { message: StoreReplyMessageType; notes: StoreWeeklyNotesType } | StoreReplyMessageType
   }>(
     '/weekly-notes',
     {
@@ -154,7 +160,7 @@ export async function stores(fastify: FastifyInstance) {
       schema: {
         body: StoreWeeklyNotes,
         response: {
-          201: { storeReplyMessage, notes: StoreWeeklyNotes },
+          201: { StoreReplyMessage, notes: StoreWeeklyNotes },
         },
       },
     },
@@ -178,23 +184,29 @@ export async function stores(fastify: FastifyInstance) {
         sundayNote: request.body.sundayNote ? SundayNote(request.body.sundayNote) : undefined,
       }
 
-      const maybeWeekNotes: { notes: Notes; week: Week } | undefined = await updateWeeklyNotes(
-        notes,
-        week,
+      const maybeWeekNotes: Either<
+        string,
+        {
+          notes: Notes
+          week: Week
+        }
+      > = await updateWeeklyNotes(notes, week)
+      match(
+        maybeWeekNotes,
+        (notes) => {
+          reply.status(200).send({
+            message: { message: 'weekly notes inserted' },
+            notes: { week: notes.week.toISOString(), ...notes.notes },
+          })
+        },
+        (err) => reply.status(417).send({ message: err }),
       )
-      if (maybeWeekNotes != null) {
-        reply.status(200).send({
-          message: { message: 'weekly notes inserted' },
-          notes: { week: maybeWeekNotes.week.toISOString(), ...maybeWeekNotes.notes },
-        })
-      }
-      reply.status(417).send({ message: "Couldn't creat or update notes" })
     },
   )
 
   fastify.post<{
     Body: CreateStoreSchemaType
-    Reply: { message: storeReplyMessageType; store: StoreReplySchemaType } | storeReplyMessageType
+    Reply: (StoreReplyMessageType & { store: StoreReplySchemaType }) | StoreReplyMessageType
   }>(
     '/',
     {
@@ -212,12 +224,20 @@ export async function stores(fastify: FastifyInstance) {
       schema: {
         body: CreateStoreSchema,
         response: {
-          201: { storeReplyMessage, store: StoreReplySchema },
+          201: { StoreReplyMessage, store: StoreReplySchema },
+          417: StoreReplyMessage,
         },
       },
     },
     async (request, reply) => {
       const store: StoreCreate = {
+        storeWebSite: request.body.storeWebSite
+          ? StoreWebSite(request.body.storeWebSite)
+          : undefined,
+        storeVatNumber: request.body.storeVatNumber
+          ? StoreVatNumber(request.body.storeVatNumber)
+          : undefined,
+        storeFSkatt: StoreFSkatt(request.body.storeFSkatt),
         storeName: StoreName(request.body.storeName),
         storeOrgNumber: StoreOrgNumber(request.body.storeOrgNumber),
         storeStatus: StoreStatus(request.body.storeStatus),
@@ -231,27 +251,34 @@ export async function stores(fastify: FastifyInstance) {
           ? StoreDescription(request.body.storeDescription)
           : undefined,
       }
-      const createdStore:
-        | {
-            store: Store
-            paymentInfo: StorePaymentOptions | undefined
-            updatedAt: Date
-            createdAt: Date
-          }
-        | undefined = await createStore(store)
-      if (createdStore == null) {
-        return reply.status(417).send({ message: "couldn't create store" })
-      }
+      const createdStore: Either<
+        string,
+        {
+          store: Store
+          paymentInfo: StorePaymentOptions | undefined
+          updatedAt: Date
+          createdAt: Date
+        }
+      > = await createStore(store)
 
-      return reply.status(201).send({
-        message: 'store created',
-        store: {
-          ...createdStore.store,
-          createdAt: createdStore.createdAt.toISOString(),
-          updatedAt: createdStore.updatedAt.toISOString(),
-          storePaymentOptions: createdStore.paymentInfo,
+      match(
+        createdStore,
+
+        (newStore) => {
+          return reply.status(201).send({
+            message: 'store created',
+            store: {
+              ...newStore.store,
+              createdAt: newStore.createdAt.toISOString(),
+              updatedAt: newStore.updatedAt.toISOString(),
+              storePaymentOptions: newStore.paymentInfo,
+            },
+          })
         },
-      })
+        (err) => {
+          return reply.status(417).send({ message: err })
+        },
+      )
     },
   )
 
@@ -266,33 +293,48 @@ export async function stores(fastify: FastifyInstance) {
       schema: {
         params: StoreIDSchema,
         response: {
-          200: { storeReplyMessage, store: StoreReplySchema },
+          200: { StoreReplyMessage, store: StoreReplySchema },
+          404: StoreReplyMessage,
         },
       },
     },
     async (request, reply) => {
       const storeID = StoreID(request.params.storeID)
-      const deletedStore: { store: Store; createdAt: Date; updatedAt: Date } | undefined =
-        await deleteStore(storeID)
+      const deletedStore: Either<
+        string,
+        {
+          store: Store
+          createdAt: Date
+          updatedAt: Date
+        }
+      > = await deleteStore(storeID)
       if (deletedStore == undefined || deletedStore == null) {
         return reply.status(404).send({ message: "Store doesn't exist!" })
       }
-      return reply.status(200).send({
-        message: 'Store deleted',
-        store: {
-          ...deletedStore.store,
-          createdAt: deletedStore.createdAt.toISOString(),
-          updatedAt: deletedStore.updatedAt.toISOString(),
+      match(
+        deletedStore,
+        (store) => {
+          return reply.status(200).send({
+            message: 'Store deleted',
+            store: {
+              ...store.store,
+              createdAt: store.createdAt.toISOString(),
+              updatedAt: store.updatedAt.toISOString(),
+            },
+          })
         },
-      })
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
   fastify.delete<{
     Params: StoreIDWeekSchemaType
     Reply:
-      | (storeReplyMessageType & { notes: StoreNotesType } & WeekSchemaType)
-      | storeReplyMessageType
+      | (StoreReplyMessageType & { notes: StoreNotesType } & WeekSchemaType)
+      | StoreReplyMessageType
   }>(
     '/weekly-notes/:storeID/:week/',
     {
@@ -304,33 +346,39 @@ export async function stores(fastify: FastifyInstance) {
       schema: {
         params: StoreIDWeekSchema,
         response: {
-          200: { ...storeReplyMessage, notes: StoreNotes, ...WeekSchema },
+          200: { ...StoreReplyMessage, notes: StoreNotes, ...WeekSchema },
+          404: StoreReplyMessage,
         },
       },
     },
     async (request, reply) => {
       const storeID = StoreID(request.params.storeID)
       const week = Week(new Date(request.params.week))
-      const deletedNotes: { notes: Notes; week: Week } | undefined = await deleteWeeklyNotes(
+      const deletedNotes: Either<string, { notes: Notes; week: Week }> = await deleteWeeklyNotes(
         storeID,
         week,
       )
-      if (deletedNotes == null) {
-        return reply.status(404).send({ message: 'notes do not exist!' })
-      }
-      return reply.status(200).send({
-        message: 'Notes deleted',
-        notes: deletedNotes.notes,
-        week: deletedNotes.week.toISOString(),
-      })
+      match(
+        deletedNotes,
+        (notes) => {
+          return reply.status(200).send({
+            message: 'Notes deleted',
+            notes: notes.notes,
+            week: notes.week.toISOString(),
+          })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
   fastify.get<{
     Params: StoreIDWeekSchemaType
     Reply:
-      | (storeReplyMessageType & { notes: StoreNotesType } & WeekSchemaType)
-      | storeReplyMessageType
+      | (StoreReplyMessageType & { notes: StoreNotesType } & WeekSchemaType)
+      | StoreReplyMessageType
   }>(
     '/weekly-notes/:storeID/:week',
     {
@@ -342,29 +390,38 @@ export async function stores(fastify: FastifyInstance) {
       schema: {
         params: StoreIDWeekSchema,
         response: {
-          200: { storeReplyMessage, notes: StoreNotes, WeekSchema },
+          200: { StoreReplyMessage, notes: StoreNotes, WeekSchema },
+          404: StoreReplyMessage,
         },
       },
     },
     async (request, reply) => {
       const storeID = StoreID(request.params.storeID)
       const week = Week(new Date(request.params.week))
-      const getNotes: { notes: Notes; week: Week } | undefined = await getWeeklyNotes(storeID, week)
-      if (getNotes == null) {
-        return reply.status(404).send({ message: 'notes do not exist!' })
-      }
-      return reply.status(200).send({
-        message: 'Notes gotten',
-        notes: getNotes.notes,
-        week: getNotes.week.toISOString(),
-      })
+      const getNotes: Either<string, { notes: Notes; week: Week }> = await getWeeklyNotes(
+        storeID,
+        week,
+      )
+      match(
+        getNotes,
+        (weeklyNotes) => {
+          return reply.status(200).send({
+            message: 'Notes gotten',
+            notes: weeklyNotes.notes,
+            week: weeklyNotes.week.toISOString(),
+          })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
   fastify.patch<{
     Params: StoreIDSchemaType
     Body: StoreUpdateSchemaType
-    Reply: (storeReplyMessageType & { store: StoreUpdateReplySchemaType }) | storeReplyMessageType
+    Reply: (StoreReplyMessageType & { store: StoreUpdateReplySchemaType }) | StoreReplyMessageType
   }>(
     '/:storeID',
     {
@@ -383,7 +440,8 @@ export async function stores(fastify: FastifyInstance) {
         params: StoreIDSchema,
         body: StoreUpdateSchema,
         response: {
-          201: { storeReplyMessage, store: StoreUpdateReplySchema },
+          201: { StoreReplyMessage, store: StoreUpdateReplySchema },
+          404: StoreReplyMessage,
         },
       },
     },
@@ -392,6 +450,13 @@ export async function stores(fastify: FastifyInstance) {
       const storeID: StoreID = StoreID(request.params.storeID)
       const store: StoreUpdateCreate = {
         storeName: StoreName(request.body.storeName),
+        storeWebSite: request.body.storeWebSite
+          ? StoreWebSite(request.body.storeWebSite)
+          : undefined,
+        storeVatNumber: request.body.storeVatNumber
+          ? StoreVatNumber(request.body.storeVatNumber)
+          : undefined,
+        storeFSkatt: StoreFSkatt(request.body.storeFSkatt),
         storeOrgNumber: StoreOrgNumber(request.body.storeOrgNumber),
         storeStatus: StoreStatus(request.body.storeStatus),
         storeEmail: StoreEmail(request.body.storeEmail),
@@ -439,41 +504,47 @@ export async function stores(fastify: FastifyInstance) {
           }
         : undefined
 
-      let updatedStore: StoreWithSeparateDates | undefined
+      let updatedStore: Either<string, StoreWithSeparateDates>
       if (paymentPatch == null) {
         updatedStore = await updateStoreByStoreID(storeID, store)
       } else {
         updatedStore = await updateStoreByStoreID(storeID, store, paymentPatch)
       }
 
-      if (updatedStore == null) {
-        return reply.status(417).send({ message: "couldn't create store" })
-      }
-      return reply.status(201).send({
-        message: 'Store_updated',
-        store: {
-          store: updatedStore.store
-            ? {
-                ...updatedStore.store.store,
-                createdAt: updatedStore.store.createdAt.toISOString(),
-                updatedAt: updatedStore.store.updatedAt.toISOString(),
-              }
-            : undefined,
-          storePaymentOptions: updatedStore.paymentInfo
-            ? {
-                ...updatedStore.paymentInfo.storePaymentOptions,
-                createdAt: updatedStore.paymentInfo.createdAt.toISOString(),
-                updatedAt: updatedStore.paymentInfo.updatedAt.toISOString(),
-              }
-            : undefined,
+      match(
+        updatedStore,
+        (store) => {
+          return reply.status(201).send({
+            message: 'Store_updated',
+            store: {
+              store: store.store
+                ? {
+                    ...store.store.store,
+                    createdAt: store.store.createdAt.toISOString(),
+                    updatedAt: store.store.updatedAt.toISOString(),
+                  }
+                : undefined,
+              storePaymentOptions: store.paymentInfo
+                ? {
+                    ...store.paymentInfo.storePaymentOptions,
+                    createdAt: store.paymentInfo.createdAt.toISOString(),
+                    updatedAt: store.paymentInfo.updatedAt.toISOString(),
+                  }
+                : undefined,
+            },
+          })
         },
-      })
+
+        (err) => {
+          return reply.status(417).send({ message: err })
+        },
+      )
     },
   )
 
   fastify.get<{
     Params: StoreIDSchemaType
-    Reply: (storeReplyMessageType & { store: StoreUpdateReplySchemaType }) | storeReplyMessageType
+    Reply: (StoreReplyMessageType & { store: StoreUpdateReplySchemaType }) | StoreReplyMessageType
   }>(
     '/:storeID',
     {
@@ -486,40 +557,49 @@ export async function stores(fastify: FastifyInstance) {
       schema: {
         params: StoreIDSchema,
         response: {
-          200: { storeReplyMessage, store: StoreUpdateReplySchema },
+          200: { StoreReplyMessage, store: StoreUpdateReplySchema },
+          404: StoreReplyMessage,
         },
       },
     },
     async (request, reply) => {
       const storeID: StoreID = StoreID(request.params.storeID)
-      const fetchedStore: StoreWithSeparateDates = await getStoreByID(storeID)
-      if (fetchedStore == null) {
-        return reply.status(404).send({ message: 'store not found' })
-      }
-      return reply.status(200).send({
-        message: 'store  found',
+      const fetchedStore: Either<string, StoreWithSeparateDates> = await getStoreByID(storeID)
+      match(
+        fetchedStore,
+        (fetchedStore) => {
+          return reply.status(200).send({
+            message: 'store  found',
 
-        store: {
-          store: fetchedStore.store
-            ? {
-                ...fetchedStore.store.store,
-                createdAt: fetchedStore.store.createdAt.toISOString(),
-                updatedAt: fetchedStore.store.updatedAt.toISOString(),
-              }
-            : undefined,
-          storePaymentOptions: fetchedStore.paymentInfo
-            ? {
-                ...fetchedStore.paymentInfo.storePaymentOptions,
-                createdAt: fetchedStore.paymentInfo.createdAt.toISOString(),
-                updatedAt: fetchedStore.paymentInfo.updatedAt.toISOString(),
-              }
-            : undefined,
+            store: {
+              store: fetchedStore.store
+                ? {
+                    ...fetchedStore.store.store,
+                    createdAt: fetchedStore.store.createdAt.toISOString(),
+                    updatedAt: fetchedStore.store.updatedAt.toISOString(),
+                  }
+                : undefined,
+              storePaymentOptions: fetchedStore.paymentInfo
+                ? {
+                    ...fetchedStore.paymentInfo.storePaymentOptions,
+                    createdAt: fetchedStore.paymentInfo.createdAt.toISOString(),
+                    updatedAt: fetchedStore.paymentInfo.updatedAt.toISOString(),
+                  }
+                : undefined,
+            },
+          })
         },
-      })
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
-  fastify.get<{ Querystring: ListStoresQueryParamType }>(
+  fastify.get<{
+    Querystring: ListStoresQueryParamType
+    Reply: StorePaginateReplyType | StoreReplyMessageType
+  }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
@@ -537,6 +617,7 @@ export async function stores(fastify: FastifyInstance) {
         querystring: ListStoresQueryParam,
         response: {
           200: StorePaginateReply,
+          404: StoreReplyMessage,
         },
       },
     },
@@ -544,46 +625,54 @@ export async function stores(fastify: FastifyInstance) {
       const { search = '', limit = 10, page = 1 } = request.query
       const offset: Offset = fastify.findOffset(Limit(limit), Page(page))
 
-      const stores: StoresPaginated = await getStoresPaginate(
+      const stores: Either<string, StoresPaginated> = await getStoresPaginate(
         Search(search),
         Limit(limit),
         Page(page),
         offset,
       )
-      const message: ResponseMessage = fastify.responseMessage(
-        ModelName('stores'),
-        ResultCount(stores.data.length),
-      )
-      const requestUrl: RequestUrl = RequestUrl(
-        request.protocol + '://' + request.hostname + request.url,
-      )
-      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-        requestUrl,
-        Page(stores.totalPage),
-        Page(page),
-      )
-      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-        requestUrl,
-        Page(stores.totalPage),
-        Page(page),
-      )
+      match(
+        stores,
+        (stores) => {
+          const message: ResponseMessage = fastify.responseMessage(
+            ModelName('stores'),
+            ResultCount(stores.data.length),
+          )
+          const requestUrl: RequestUrl = RequestUrl(
+            request.protocol + '://' + request.hostname + request.url,
+          )
+          const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+            requestUrl,
+            Page(stores.totalPage),
+            Page(page),
+          )
+          const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+            requestUrl,
+            Page(stores.totalPage),
+            Page(page),
+          )
 
-      return reply.status(200).send({
-        message: message,
-        totalStores: stores.totalStores,
-        nextUrl: nextUrl,
-        previousUrl: previousUrl,
-        totalPage: stores.totalPage,
-        page: page,
-        limit: limit,
-        data: stores.data,
-      })
+          return reply.status(200).send({
+            message: message,
+            totalStores: stores.totalStores,
+            nextUrl: nextUrl,
+            previousUrl: previousUrl,
+            totalPage: stores.totalPage,
+            page: page,
+            limit: limit,
+            data: stores.data,
+          })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
   fastify.post<{
     Body: StoreOpeningHoursCreateType
-    Reply: StoreOpeningHoursType | storeReplyMessageType
+    Reply: StoreOpeningHoursType | StoreReplyMessageType
   }>(
     '/store-opening-hours',
     {
@@ -602,6 +691,7 @@ export async function stores(fastify: FastifyInstance) {
         body: StoreOpeningHoursCreate,
         response: {
           201: StoreOpeningHours,
+          404: StoreReplyMessage,
         },
       },
     },
@@ -638,18 +728,28 @@ export async function stores(fastify: FastifyInstance) {
         sundayClose: request.body.sundayClose ? SundayClose(request.body.sundayClose) : undefined,
       }
 
-      const updatedHours: WeekOpeningHours | undefined = await updateWeeklyOpeningHours(
+      const updatedHours: Either<string, WeekOpeningHours> = await updateWeeklyOpeningHours(
         storeID,
         store,
       )
-      if (updatedHours == null) {
-        return reply.status(417).send({ message: "couldn't create store opening hours" })
-      }
-      reply.status(201).send({ message: 'store opening hours updated', ...updatedHours })
+
+      match(
+        updatedHours,
+        (updatedHours: WeekOpeningHours) => {
+          return reply.status(201).send({ message: 'store opening hours updated', ...updatedHours })
+        },
+
+        (err) => {
+          return reply.status(417).send({ message: err })
+        },
+      )
     },
   )
 
-  fastify.delete<{ Params: StoreIDSchemaType }>(
+  fastify.delete<{
+    Params: StoreIDSchemaType
+    Reply: (StoreOpeningHoursCreateType & StoreReplyMessageType) | StoreReplyMessageType
+  }>(
     '/store-opening-hours/:storeID',
     {
       preHandler: async (request, reply, done) => {
@@ -661,26 +761,33 @@ export async function stores(fastify: FastifyInstance) {
         params: StoreIDSchema,
         response: {
           200: StoreOpeningHours,
+          404: StoreReplyMessage,
         },
       },
     },
     async (request, reply) => {
       const storeID = StoreID(request.params.storeID)
-      const deletedStore: WeekOpeningHours | undefined = await deleteWeeklyOpeningHours(storeID)
-      if (deletedStore == undefined || deletedStore == null) {
-        return reply.status(404).send({ message: "Store doesn't exist!" })
-      }
-      return reply.status(200).send({
-        message: 'Store deleted',
+      const deletedStore: Either<string, WeekOpeningHours> = await deleteWeeklyOpeningHours(storeID)
+      match(
+        deletedStore,
+        (deletedStore: WeekOpeningHours) => {
+          return reply.status(200).send({
+            message: 'Store deleted',
 
-        ...deletedStore,
-      })
+            ...deletedStore,
+          })
+        },
+
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
   fastify.post<{
     Body: StoreSpecialHoursSchemaCreateType
-    Reply: StoreSpecialHoursSchemaType | storeReplyMessageType
+    Reply: StoreSpecialHoursSchemaType | StoreReplyMessageType
   }>(
     '/store-special-opening-hours',
     {
@@ -699,6 +806,7 @@ export async function stores(fastify: FastifyInstance) {
         body: StoreSpecialHoursSchemaCreate,
         response: {
           201: StoreSpecialHoursSchema,
+          404: StoreReplyMessage,
         },
       },
     },
@@ -710,19 +818,27 @@ export async function stores(fastify: FastifyInstance) {
         dayClose: DayClose(request.body.dayClose),
       }
 
-      const updatedHours: StoreSpecialHours | undefined = await createSpecialOpeningHours(
+      const updatedHours: Either<string, StoreSpecialHours> = await createSpecialOpeningHours(
         storeSpecialHours,
       )
-      if (updatedHours == null) {
-        return reply.status(417).send({ message: "couldn't create store opening hours" })
-      }
-      reply.status(201).send({ message: 'store opening hours created', ...updatedHours })
+      match(
+        updatedHours,
+        (newOpeningHours: StoreSpecialHours) => {
+          return reply
+            .status(201)
+            .send({ message: 'store opening hours created', ...newOpeningHours })
+        },
+
+        (err) => {
+          return reply.status(417).send({ message: err })
+        },
+      )
     },
   )
 
   fastify.patch<{
     Body: StoreSpecialHoursSchemaType
-    Reply: StoreSpecialHoursSchemaType | storeReplyMessageType
+    Reply: StoreSpecialHoursSchemaType | StoreReplyMessageType
   }>(
     '/store-special-opening-hours',
     {
@@ -741,6 +857,7 @@ export async function stores(fastify: FastifyInstance) {
         body: StoreSpecialHoursSchema,
         response: {
           201: StoreSpecialHoursSchema,
+          404: StoreReplyMessage,
         },
       },
     },
@@ -752,19 +869,24 @@ export async function stores(fastify: FastifyInstance) {
         dayClose: DayClose(request.body.dayClose),
       }
 
-      const updatedHours: StoreSpecialHours | undefined = await updateSpecialOpeningHours(
+      const updatedHours: Either<string, StoreSpecialHours> = await updateSpecialOpeningHours(
         storeSpecialHours,
       )
-      if (updatedHours == null) {
-        return reply.status(417).send({ message: "couldn't create store opening hours" })
-      }
-      reply.status(201).send({ message: 'store opening hours updated', ...updatedHours })
+      match(
+        updatedHours,
+        (updatedHours) => {
+          return reply.status(201).send({ message: 'store opening hours updated', ...updatedHours })
+        },
+        (err) => {
+          return reply.status(417).send({ message: err })
+        },
+      )
     },
   )
 
   fastify.delete<{
     Params: StoreIDAndDaySchemaType
-    Reply: StoreSpecialHoursSchemaType | storeReplyMessageType
+    Reply: StoreSpecialHoursSchemaType | StoreReplyMessageType
   }>(
     '/store-special-opening-hours/:storeID/:day',
     {
@@ -783,6 +905,7 @@ export async function stores(fastify: FastifyInstance) {
         params: StoreIDAndDaySchema,
         response: {
           200: StoreSpecialHoursSchema,
+          404: StoreReplyMessage,
         },
       },
     },
@@ -790,18 +913,24 @@ export async function stores(fastify: FastifyInstance) {
       const storeID: StoreID = StoreID(request.params.storeID)
       const day: Day = Day(new Date(request.params.day))
 
-      const deletedHours: StoreSpecialHours | undefined =
+      const deletedHours: Either<string, StoreSpecialHours> =
         await deleteSpecialOpeningHoursByDayAndStore(day, storeID)
-      if (deletedHours == null) {
-        return reply.status(417).send({ message: "couldn't delete store opening hours" })
-      }
-      reply.status(200).send({ message: 'store opening hours deleted', ...deletedHours })
+      match(
+        deletedHours,
+        () => {
+          return reply.status(200).send({ message: 'store opening hours deleted', ...deletedHours })
+        },
+
+        (err) => {
+          return reply.status(417).send({ message: err })
+        },
+      )
     },
   )
 
   fastify.get<{
     Querystring: GetOpeningHoursType
-    Reply: StoreSpecialHoursSchemaType | storeReplyMessageType
+    Reply: StoreSpecialHoursSchemaType | StoreReplyMessageType
   }>(
     '/store-opening-hours',
     {
@@ -820,6 +949,7 @@ export async function stores(fastify: FastifyInstance) {
         querystring: GetOpeningHours,
         response: {
           200: StoreOpeningHoursWithSpecial,
+          404: StoreReplyMessage,
         },
       },
     },
@@ -828,13 +958,20 @@ export async function stores(fastify: FastifyInstance) {
       const from: Day = Day(new Date(request.query.from))
       const to: Day = Day(new Date(request.query.to))
 
-      const openingHours: OpeningHours | undefined = await getOpeningHours(storeID, from, to)
-      if (openingHours == null) {
-        return reply.status(417).send({ message: "couldn't get store opening hours" })
-      }
-      reply
-        .status(200)
-        .send({ message: 'store opening hours fetched', storeID: storeID, ...openingHours })
+      const openingHours: Either<string, OpeningHours> = await getOpeningHours(storeID, from, to)
+      match(
+        openingHours,
+
+        (openingHours: OpeningHours) => {
+          return reply
+            .status(200)
+            .send({ message: 'store opening hours fetched', storeID: storeID, ...openingHours })
+        },
+
+        (err) => {
+          return reply.status(417).send({ message: err })
+        },
+      )
     },
   )
 }

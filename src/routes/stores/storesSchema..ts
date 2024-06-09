@@ -2,7 +2,10 @@ import { Static, Type } from '@sinclair/typebox'
 
 import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 const storeName = Type.String()
-const storeOrgNumber = Type.String()
+const storeWebSite = Type.String()
+const storeVatNumber = Type.String({ maxLength: 32 })
+const storeFSkatt = Type.Boolean()
+const storeOrgNumber = Type.String({ maxLength: 11 })
 export const storeID = Type.Integer()
 const storeStatus = Type.Boolean()
 const storeEmail = Type.String({ format: 'email' })
@@ -32,6 +35,9 @@ const PaymentInfoSchema = Type.Object({
 
 export const CreateStoreSchema = Type.Object({
   storeName: storeName,
+  storeWebSite: Type.Optional(storeWebSite),
+  storeVatNumber: Type.Optional(storeVatNumber),
+  storeFSkatt: storeFSkatt,
   storeOrgNumber: storeOrgNumber,
   storeStatus: storeStatus,
   storeEmail: storeEmail,
@@ -112,11 +118,11 @@ export const StoreUpdateReplySchema = Type.Object({
 
 export type StoreUpdateReplySchemaType = Static<typeof StoreUpdateReplySchema>
 
-export const storeReplyMessage = Type.Object({
+export const StoreReplyMessage = Type.Object({
   message: Type.String(),
 })
 
-export type storeReplyMessageType = Static<typeof storeReplyMessage>
+export type StoreReplyMessageType = Static<typeof StoreReplyMessage>
 
 export const ListStoresQueryParam = Type.Object({
   search: Type.Optional(Type.String()),
