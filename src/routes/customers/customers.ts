@@ -1,24 +1,24 @@
 import { FastifyInstance } from 'fastify'
 
 import {
+  AddCustomerBodySchema,
   CreateCustomerType,
+  CreateDriverBodySchema,
   CreateDriverType,
+  GetCompanyByOrgNumberSchema,
+  GetCompanyByOrgNumberSchemaType,
+  GetDriverByIDSchema,
+  GetDriverByIDSchemaType,
   ListCustomersQueryParamSchema,
   ListCustomersQueryParamSchemaType,
   ListDriversCompanyQueryParamSchema,
   ListDriversCompanyQueryParamSchemaType,
   ListDriversQueryParamSchema,
   ListDriversQueryParamSchemaType,
+  PatchCompanyBodySchema,
   PatchCompanyType,
+  PatchDriverBodySchema,
   PatchDriverType,
-  addCustomerBody,
-  addDriverBody,
-  getCompanyByOrgNumber,
-  getCompanyByOrgNumberType,
-  getDriverByID,
-  getDriverByIDType,
-  patchCompanyBody,
-  patchDriverBody,
 } from './customerSchema.js'
 
 import {
@@ -156,7 +156,7 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        body: addCustomerBody,
+        body: AddCustomerBodySchema,
       },
     },
     async (req, rep) => {
@@ -244,7 +244,7 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        body: patchCompanyBody,
+        body: PatchCompanyBodySchema,
       },
     },
     async (request, reply) => {
@@ -275,7 +275,7 @@ export const customers = async (fastify: FastifyInstance) => {
   )
 
   //Get company by Id
-  fastify.get<{ Params: getCompanyByOrgNumberType }>(
+  fastify.get<{ Params: GetCompanyByOrgNumberSchemaType }>(
     '/:orgNumber',
     {
       preHandler: async (request, reply, done) => {
@@ -285,7 +285,7 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        params: getCompanyByOrgNumber,
+        params: GetCompanyByOrgNumberSchema,
       },
     },
     async (request, reply) => {
@@ -299,7 +299,7 @@ export const customers = async (fastify: FastifyInstance) => {
   )
 
   //Delete Company and drivers
-  fastify.delete<{ Params: getCompanyByOrgNumberType }>(
+  fastify.delete<{ Params: GetCompanyByOrgNumberSchemaType }>(
     '/:orgNumber',
     {
       preHandler: async (request, reply, done) => {
@@ -309,7 +309,7 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        params: getCompanyByOrgNumber,
+        params: GetCompanyByOrgNumberSchema,
       },
     },
     async (request, reply) => {
@@ -469,7 +469,7 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        body: addDriverBody,
+        body: CreateDriverBodySchema,
       },
     },
     async (req, rep) => {
@@ -497,7 +497,9 @@ export const customers = async (fastify: FastifyInstance) => {
 
       const driverDetails = {
         customerOrgNumber: CustomerOrgNumber(companyOrgNumber),
-        driverExternalNumber: DriverExternalNumber(driverExternalNumber),
+        driverExternalNumber: driverExternalNumber
+          ? DriverExternalNumber(driverExternalNumber)
+          : undefined,
         driverGDPRAccept: DriverGDPRAccept(driverGDPRAccept),
         driverISWarrantyDriver: DriverISWarrantyCustomer(driverISWarrantyDriver),
         driverAcceptsMarketing: DriverAcceptsMarketing(driverAcceptsMarketing),
@@ -509,10 +511,12 @@ export const customers = async (fastify: FastifyInstance) => {
         driverZipCode: DriverZipCode(driverZipCode),
         driverAddressCity: DriverAddressCity(driverAddressCity),
         driverHasCard: DriverHasCard(driverHasCard),
-        driverCardValidTo: DriverCardValidTo(new Date(driverCardValidTo)),
-        driverCardNumber: CustomerCardNumber(driverCardNumber),
-        driverKeyNumber: DriverKeyNumber(driverKeyNumber),
-        driverNotesShared: DriverNotesShared(driverNotesShared),
+        driverCardValidTo: driverCardValidTo
+          ? DriverCardValidTo(new Date(driverCardValidTo))
+          : undefined,
+        driverCardNumber: driverCardNumber ? CustomerCardNumber(driverCardNumber) : undefined,
+        driverKeyNumber: driverKeyNumber ? DriverKeyNumber(driverKeyNumber) : undefined,
+        driverNotesShared: driverNotesShared ? DriverNotesShared(driverNotesShared) : undefined,
         driverNotes: DriverNotes(driverNotes),
         driverCountry: DriverCountry(driverCountry),
       }
@@ -537,7 +541,7 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        body: patchDriverBody,
+        body: PatchDriverBodySchema,
       },
     },
     async (request, reply) => {
@@ -604,7 +608,7 @@ export const customers = async (fastify: FastifyInstance) => {
   )
 
   //Get by driver email
-  fastify.get<{ Params: getDriverByIDType }>(
+  fastify.get<{ Params: GetDriverByIDSchemaType }>(
     '/driver/:driverID',
     {
       preHandler: async (request, reply, done) => {
@@ -614,7 +618,7 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        params: getDriverByID,
+        params: GetDriverByIDSchema,
       },
     },
     async (request, reply) => {
@@ -628,7 +632,7 @@ export const customers = async (fastify: FastifyInstance) => {
   )
 
   //delete driver
-  fastify.delete<{ Params: getDriverByIDType }>(
+  fastify.delete<{ Params: GetDriverByIDSchemaType }>(
     '/driver/:driverID',
     {
       preHandler: async (request, reply, done) => {
@@ -638,7 +642,7 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        params: getDriverByID,
+        params: GetDriverByIDSchema,
       },
     },
     async (request, reply) => {

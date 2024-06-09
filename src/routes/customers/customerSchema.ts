@@ -2,104 +2,116 @@ import { Static, Type } from '@sinclair/typebox'
 
 export const driverID = Type.Integer({ minimum: 0 })
 
-export const addCustomerBody = Type.Object({
-  companyOrgNumber: Type.String(),
-  companyName: Type.String(),
-  companyReference: Type.String(),
-  companyEmail: Type.String({ format: 'email' }),
-  companyPhoneNumber: Type.String({
-    pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
-  }),
-  companyAddress: Type.String(),
-  companyZipCode: Type.String(),
-  companyAddressCity: Type.String(),
-  companyCountry: Type.String(),
-  driverExternalNumber: Type.String(),
-  driverGDPRAccept: Type.Boolean(),
-  driverISWarrantyDriver: Type.Boolean(),
-  driverAcceptsMarketing: Type.Boolean(),
-  driverFirstName: Type.String(),
-  driverLastName: Type.String(),
-  driverEmail: Type.String({ format: 'email' }),
-  driverPhoneNumber: Type.String({
-    pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
-  }),
-  driverAddress: Type.String(),
-  driverZipCode: Type.String(),
-  driverAddressCity: Type.String(),
-  driverCountry: Type.String(),
-  driverHasCard: Type.Boolean(),
-  driverCardNumber: Type.String(),
-  driverCardValidTo: Type.String({ format: 'date' }),
-  driverKeyNumber: Type.String(),
-  driverNotesShared: Type.String(),
-  driverNotes: Type.String(),
+const companyOrgNumber = Type.String({ maxLength: 11 })
+const companyName = Type.String({ maxLength: 255 })
+const companyReference = Type.String({ maxLength: 255 })
+const companyEmail = Type.String({ format: 'email' })
+const companyPhoneNumber = Type.String({
+  pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
+})
+const companyAddress = Type.String({ maxLength: 255 })
+const companyZipCode = Type.String({ maxLength: 16 })
+const companyAddressCity = Type.String({ maxLength: 255 })
+const companyCountry = Type.String({ maxLength: 255 })
+const driverExternalNumber = Type.String({ maxLength: 255 })
+const driverGDPRAccept = Type.Boolean()
+const driverISWarrantyDriver = Type.Boolean()
+const driverAcceptsMarketing = Type.Boolean()
+const driverFirstName = Type.String({ maxLength: 128 })
+const driverLastName = Type.String({ maxLength: 128 })
+const driverEmail = Type.String({ format: 'email' })
+const driverPhoneNumber = Type.String({
+  pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
+})
+const driverAddress = Type.String({ maxLength: 255 })
+const driverZipCode = Type.String({ maxLength: 16 })
+const driverAddressCity = Type.String({ maxLength: 255 })
+const driverCountry = Type.String({ maxLength: 255 })
+const customerCompanyName = Type.String({ maxLength: 255 })
+const driverHasCard = Type.Boolean()
+const driverCardNumber = Type.String({ maxLength: 255 })
+const driverCardValidTo = Type.String({ format: 'date' })
+const driverKeyNumber = Type.String({ maxLength: 255 })
+const driverNotesShared = Type.String()
+const driverNotes = Type.String()
+
+export const AddCustomerBodySchema = Type.Object({
+  companyOrgNumber: companyOrgNumber,
+  companyName: companyName,
+  companyReference: companyReference,
+  companyEmail: companyEmail,
+  companyPhoneNumber: companyPhoneNumber,
+  companyAddress: companyAddress,
+  companyZipCode: companyZipCode,
+  companyAddressCity: companyAddressCity,
+  companyCountry: companyCountry,
+  driverExternalNumber: driverExternalNumber,
+  driverGDPRAccept: driverGDPRAccept,
+  driverISWarrantyDriver: driverISWarrantyDriver,
+  driverAcceptsMarketing: driverAcceptsMarketing,
+  driverFirstName: driverFirstName,
+  driverLastName: driverLastName,
+  driverEmail: driverEmail,
+  driverPhoneNumber: driverPhoneNumber,
+  driverAddress: driverAddress,
+  driverZipCode: driverZipCode,
+  driverAddressCity: driverAddressCity,
+  driverCountry: driverCountry,
+  driverHasCard: driverHasCard,
+  driverCardNumber: driverCardNumber,
+  driverCardValidTo: driverCardValidTo,
+  driverKeyNumber: driverKeyNumber,
+  driverNotesShared: driverNotesShared,
+  driverNotes: driverNotes,
 })
 
-export const patchCompanyBody = Type.Object({
-  customerOrgNumber: Type.String(),
-  customerCompanyName: Type.String(),
-  companyAddress: Type.Optional(Type.String()),
-  companyZipCode: Type.Optional(Type.String()),
-  companyAddressCity: Type.Optional(Type.String()),
-  companyCountry: Type.Optional(Type.String()),
+export const PatchCompanyBodySchema = Type.Object({
+  customerOrgNumber: companyOrgNumber,
+  customerCompanyName: customerCompanyName,
+  companyAddress: companyAddress,
+  companyZipCode: companyZipCode,
+  companyAddressCity: companyAddressCity,
+  companyCountry: companyCountry,
 })
 
-export const getCompanyByOrgNumber = Type.Object({
+export const GetCompanyByOrgNumberSchema = Type.Object({
   orgNumber: Type.String(),
 })
 
-export const getDriverByID = Type.Object({
+export const GetDriverByIDSchema = Type.Object({
   driverID: driverID,
 })
 
-export const patchDriverBody = Type.Object({
-  driverID: driverID,
-  driverExternalNumber: Type.Optional(Type.String()),
-  driverGDPRAccept: Type.Boolean(),
-  driverISWarrantyDriver: Type.Boolean(),
-  driverAcceptsMarketing: Type.Boolean(),
-  driverFirstName: Type.String(),
-  driverLastName: Type.String(),
-  driverEmail: Type.String({ format: 'email' }),
-  driverPhoneNumber: Type.String({
-    pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
-  }),
-  driverAddress: Type.String(),
-  driverZipCode: Type.String(),
-  driverAddressCity: Type.String(),
-  driverCountry: Type.String(),
-  driverHasCard: Type.Boolean(),
-  driverCardNumber: Type.Optional(Type.String()),
-  driverCardValidTo: Type.Optional(Type.String({ format: 'date' })),
-  driverKeyNumber: Type.Optional(Type.String()),
-  driverNotesShared: Type.Optional(Type.String()),
-  driverNotes: Type.String(),
+const DriverBodySchema = Type.Object({
+  driverExternalNumber: Type.Optional(driverExternalNumber),
+  driverGDPRAccept: driverGDPRAccept,
+  driverISWarrantyDriver: driverISWarrantyDriver,
+  driverAcceptsMarketing: driverAcceptsMarketing,
+  driverFirstName: driverFirstName,
+  driverLastName: driverLastName,
+  driverEmail: driverEmail,
+  driverPhoneNumber: driverPhoneNumber,
+  driverAddress: driverAddress,
+  driverZipCode: driverZipCode,
+  driverAddressCity: driverAddressCity,
+  driverCountry: driverCountry,
+  driverHasCard: driverHasCard,
+  driverCardNumber: Type.Optional(driverCardNumber),
+  driverCardValidTo: Type.Optional(driverCardValidTo),
+  driverKeyNumber: Type.Optional(driverKeyNumber),
+  driverNotesShared: Type.Optional(driverNotesShared),
+  driverNotes: driverNotes,
 })
 
-export const addDriverBody = Type.Object({
-  companyOrgNumber: Type.String(),
-  driverExternalNumber: Type.String(),
-  driverGDPRAccept: Type.Boolean(),
-  driverISWarrantyDriver: Type.Boolean(),
-  driverAcceptsMarketing: Type.Boolean(),
-  driverFirstName: Type.String(),
-  driverLastName: Type.String(),
-  driverEmail: Type.String({ format: 'email' }),
-  driverPhoneNumber: Type.String({
-    pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
-  }),
-  driverAddress: Type.String(),
-  driverZipCode: Type.String(),
-  driverAddressCity: Type.String(),
-  driverCountry: Type.String(),
-  driverHasCard: Type.Boolean(),
-  driverCardNumber: Type.String(),
-  driverCardValidTo: Type.String({ format: 'date' }),
-  driverKeyNumber: Type.String(),
-  driverNotesShared: Type.String(),
-  driverNotes: Type.String(),
-})
+export const PatchDriverBodySchema = Type.Composite([
+  DriverBodySchema,
+  Type.Object({ driverID: driverID }),
+])
+
+export const CreateDriverBodySchema = Type.Composite([
+  DriverBodySchema,
+  Type.Object({ companyOrgNumber: companyOrgNumber }),
+])
 
 export const ListCustomersQueryParamSchema = Type.Object({
   search: Type.Optional(Type.String()),
@@ -125,9 +137,9 @@ export type ListDriversQueryParamSchemaType = Static<typeof ListDriversQueryPara
 export type ListDriversCompanyQueryParamSchemaType = Static<
   typeof ListDriversCompanyQueryParamSchema
 >
-export type getDriverByIDType = Static<typeof getDriverByID>
-export type getCompanyByOrgNumberType = Static<typeof getCompanyByOrgNumber>
-export type CreateCustomerType = Static<typeof addCustomerBody>
-export type PatchCompanyType = Static<typeof patchCompanyBody>
-export type PatchDriverType = Static<typeof patchDriverBody>
-export type CreateDriverType = Static<typeof addDriverBody>
+export type GetDriverByIDSchemaType = Static<typeof GetDriverByIDSchema>
+export type GetCompanyByOrgNumberSchemaType = Static<typeof GetCompanyByOrgNumberSchema>
+export type CreateCustomerType = Static<typeof AddCustomerBodySchema>
+export type PatchCompanyType = Static<typeof PatchCompanyBodySchema>
+export type PatchDriverType = Static<typeof PatchDriverBodySchema>
+export type CreateDriverType = Static<typeof CreateDriverBodySchema>

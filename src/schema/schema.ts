@@ -96,6 +96,12 @@ export type StorePlusgiro = Brand<string, 'storePlusgiro'>
 export const StorePlusgiro = make<StorePlusgiro>()
 export type StorePaymentdays = Brand<PositiveInteger<number>, 'storePaymentdays'>
 export const StorePaymentdays = make<StorePaymentdays>()
+export type StoreWebSite = Brand<string, 'storeWebSite'>
+export const StoreWebSite = make<StoreWebSite>()
+export type StoreVatNumber = Brand<string, 'storeVatNumber'>
+export const StoreVatNumber = make<StoreVatNumber>()
+export type StoreFSkatt = Brand<boolean, 'storeFSkatt'>
+export const StoreFSkatt = make<StoreFSkatt>()
 
 export type MondayOpen = Brand<string, 'mondayOpen'>
 export const MondayOpen = make<MondayOpen>()
@@ -587,7 +593,7 @@ export const drivers = pgTable('drivers', {
   driverExternalNumber: varchar('driverExternalNumber', {
     length: 256,
   }).$type<DriverExternalNumber>(),
-  companyReference: varchar('companyReference', { length: 256 }).$type<CompanyReference>(),
+  companyReference: varchar('companyReference', { length: 255 }).$type<CompanyReference>(),
   driverGDPRAccept: boolean('driverGDPRAccept')
     .$type<DriverGDPRAccept>()
     .default(DriverGDPRAccept(false))
@@ -640,6 +646,9 @@ export const stores = pgTable('stores', {
     .unique()
     .notNull(),
   storeName: varchar('storeName').$type<StoreName>().notNull().unique(),
+  storeWebSite: varchar('storeWebSite').$type<StoreWebSite>(),
+  storeVatNumber: varchar('storeVatNumber', { length: 32 }).$type<StoreVatNumber>(),
+  storeFSkatt: boolean('storeFSkatt').$type<StoreFSkatt>().notNull(),
   storeStatus: boolean('storeStatus').$type<StoreStatus>().notNull(),
   storeEmail: varchar('storeEmail').$type<StoreEmail>().notNull(),
   storePhone: varchar('storePhone').$type<StorePhone>().notNull(),

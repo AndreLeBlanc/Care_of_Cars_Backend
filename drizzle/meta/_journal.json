@@ -29,6 +29,13 @@
       "when": 1717622397113,
       "tag": "0003_smiling_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1717936784934,
+      "tag": "0004_wealthy_mephistopheles",
+      "breakpoints": true
     }
   ]
 }
