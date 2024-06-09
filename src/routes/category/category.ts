@@ -12,6 +12,7 @@ import {
 
 import {
   CreateProductCategory,
+  CreateServiceCategory,
   ProductCategory,
   ProductsCategoryPaginated,
   ServiceCategory,
@@ -54,6 +55,8 @@ import {
   Search,
 } from '../../plugins/pagination.js'
 
+import { Either, match } from '../../utils/helper.js'
+
 export async function serviceCategory(fastify: FastifyInstance) {
   //Get service categories
   fastify.get<{ Querystring: ListServiceCategoryQueryParamSchemaType }>(
@@ -80,45 +83,46 @@ export async function serviceCategory(fastify: FastifyInstance) {
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
-      const servicesPaginated: ServicesPaginated | undefined = await getServiceCategoriesPaginate(
-        brandedSearch,
-        brandedLimit,
-        brandedPage,
-        offset,
+      const servicesPaginated: Either<string, ServicesPaginated> =
+        await getServiceCategoriesPaginate(brandedSearch, brandedLimit, brandedPage, offset)
+
+      match(
+        servicesPaginated,
+
+        (servicesPaginated: ServicesPaginated) => {
+          const message: ResponseMessage = fastify.responseMessage(
+            ModelName('service category'),
+            ResultCount(servicesPaginated.data.length),
+          )
+          const requestUrl: RequestUrl = RequestUrl(
+            request.protocol + '://' + request.hostname + request.url,
+          )
+          const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+            requestUrl,
+            Page(servicesPaginated.totalPage),
+            Page(page),
+          )
+          const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+            requestUrl,
+            Page(servicesPaginated.totalPage),
+            Page(page),
+          )
+
+          return reply.status(200).send({
+            message: message,
+            totalItems: servicesPaginated.totalItems,
+            nextUrl: nextUrl,
+            previousUrl: previousUrl,
+            totalPage: servicesPaginated.totalPage,
+            page: page,
+            limit: limit,
+            data: servicesPaginated.data,
+          })
+        },
+        () => {
+          return reply.status(403).send({ message: "Can't find service Categories" })
+        },
       )
-
-      if (servicesPaginated == null) {
-        return reply.status(403).send({ message: "Can't find service Categories" })
-      } else {
-        const message: ResponseMessage = fastify.responseMessage(
-          ModelName('service category'),
-          ResultCount(servicesPaginated.data.length),
-        )
-        const requestUrl: RequestUrl = RequestUrl(
-          request.protocol + '://' + request.hostname + request.url,
-        )
-        const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-          requestUrl,
-          Page(servicesPaginated.totalPage),
-          Page(page),
-        )
-        const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-          requestUrl,
-          Page(servicesPaginated.totalPage),
-          Page(page),
-        )
-
-        return reply.status(200).send({
-          message: message,
-          totalItems: servicesPaginated.totalItems,
-          nextUrl: nextUrl,
-          previousUrl: previousUrl,
-          totalPage: servicesPaginated.totalPage,
-          page: page,
-          limit: limit,
-          data: servicesPaginated.data,
-        })
-      }
     },
   )
 
@@ -147,41 +151,46 @@ export async function serviceCategory(fastify: FastifyInstance) {
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
-      const productsCategory: ProductsCategoryPaginated | undefined =
+      const productsCategory: Either<string, ProductsCategoryPaginated> =
         await getProductCategoriesPaginate(brandedSearch, brandedLimit, brandedPage, offset)
 
-      if (productsCategory == null) {
-        return reply.status(403).send({ message: "Can't find service Categories" })
-      } else {
-        const message: ResponseMessage = fastify.responseMessage(
-          ModelName('Products category'),
-          ResultCount(productsCategory.data.length),
-        )
-        const requestUrl: RequestUrl = RequestUrl(
-          request.protocol + '://' + request.hostname + request.url,
-        )
-        const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-          requestUrl,
-          Page(productsCategory.totalPage),
-          Page(page),
-        )
-        const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-          requestUrl,
-          Page(productsCategory.totalPage),
-          Page(page),
-        )
+      match(
+        productsCategory,
 
-        return reply.status(200).send({
-          message: message,
-          totalItems: productsCategory.totalItems,
-          nextUrl: nextUrl,
-          previousUrl: previousUrl,
-          totalPage: productsCategory.totalPage,
-          page: page,
-          limit: limit,
-          data: productsCategory.data,
-        })
-      }
+        (productsCategory: ProductsCategoryPaginated) => {
+          const message: ResponseMessage = fastify.responseMessage(
+            ModelName('Products category'),
+            ResultCount(productsCategory.data.length),
+          )
+          const requestUrl: RequestUrl = RequestUrl(
+            request.protocol + '://' + request.hostname + request.url,
+          )
+          const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+            requestUrl,
+            Page(productsCategory.totalPage),
+            Page(page),
+          )
+          const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+            requestUrl,
+            Page(productsCategory.totalPage),
+            Page(page),
+          )
+
+          return reply.status(200).send({
+            message: message,
+            totalItems: productsCategory.totalItems,
+            nextUrl: nextUrl,
+            previousUrl: previousUrl,
+            totalPage: productsCategory.totalPage,
+            page: page,
+            limit: limit,
+            data: productsCategory.data,
+          })
+        },
+        () => {
+          return reply.status(403).send({ message: "Can't find service Categories" })
+        },
+      )
     },
   )
 
@@ -208,12 +217,19 @@ export async function serviceCategory(fastify: FastifyInstance) {
     async (request, reply) => {
       const { name, description = '' } = request.body
 
-      const serviceCategory = await createServiceCategory(
+      const serviceCategory: Either<string, CreateServiceCategory> = await createServiceCategory(
         ServiceCategoryName(name),
         ServiceCategoryDescription(description),
       )
-
-      reply.status(201).send({ message: 'Service Category created', serviceCategory })
+      match(
+        serviceCategory,
+        (serviceCategory: CreateServiceCategory) => {
+          return reply.status(201).send({ message: 'Service Category created', serviceCategory })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
   //Create Product category
@@ -239,12 +255,17 @@ export async function serviceCategory(fastify: FastifyInstance) {
     async (request, reply) => {
       const { name, description = '' } = request.body
 
-      const productCategory = await createProductCategory(
+      const productCategory: Either<string, CreateProductCategory> = await createProductCategory(
         ProductCategoryName(name),
         ProductCategoryDescription(description),
       )
-
-      reply.status(201).send({ message: 'Product Category created', productCategory })
+      match(
+        productCategory,
+        (prodCat) => reply.status(201).send({ message: 'Product Category created', prodCat }),
+        (err) => {
+          reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -269,11 +290,14 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id = ProductCategoryID(request.params.id)
-      const productCategory = await getProductCategoryByID(id)
-      if (productCategory == undefined || productCategory == null) {
-        return reply.status(404).send({ message: 'Product Category not found' })
-      }
-      reply.status(200).send({ productCategory })
+      const productCategory: Either<string, ProductCategory> = await getProductCategoryByID(id)
+      match(
+        productCategory,
+        (prodCat: ProductCategory) => reply.status(200).send({ prodCat }),
+        (err) => {
+          reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -298,11 +322,14 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id = ServiceCategoryID(request.params.id)
-      const serviceCategory = await getServiceCategoryByID(id)
-      if (serviceCategory == undefined || serviceCategory == null) {
-        return reply.status(404).send({ message: 'Service Category not found' })
-      }
-      reply.status(200).send({ serviceCategory: serviceCategory })
+      const serviceCategory: Either<string, ServiceCategory> = await getServiceCategoryByID(id)
+      match(
+        serviceCategory,
+        (servCat: ServiceCategory) => reply.status(200).send({ serviceCategory: servCat }),
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -336,8 +363,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
           .status(422)
           .send({ message: 'Provide at least one required property to update.' })
       } else {
-        const serviceCategory: UpdatedServiceCategory | undefined = await updateServiceCategoryByID(
-          {
+        const serviceCategory: Either<string, UpdatedServiceCategory> =
+          await updateServiceCategoryByID({
             serviceCategoryID: ServiceCategoryID(request.params.id),
             serviceCategoryName: request.body.name
               ? ServiceCategoryName(request.body.name)
@@ -345,13 +372,16 @@ export async function serviceCategory(fastify: FastifyInstance) {
             ServiceCategoryDescription: request.body.description
               ? ServiceCategoryDescription(request.body.description)
               : undefined,
+          })
+        match(
+          serviceCategory,
+          (servCat: UpdatedServiceCategory) =>
+            reply.status(201).send({ message: 'Service Category Updated', data: servCat }),
+          (err) => {
+            return reply.status(404).send({ message: err })
           },
         )
-        if (serviceCategory == null) {
-          return reply.status(404).send({ message: 'Service Category not found' })
-        }
       }
-      reply.status(201).send({ message: 'Service Category Updated', data: serviceCategory })
     },
   )
 
@@ -395,14 +425,17 @@ export async function serviceCategory(fastify: FastifyInstance) {
           productCategoryName: productCategoryName,
           productCategoryDescription: productCategoryDescription,
         }
-        const productCategory: UpdatedProductCategory | undefined = await updateProductCategoryByID(
-          makeProductCategory,
+        const productCategory: Either<string, UpdatedProductCategory> =
+          await updateProductCategoryByID(makeProductCategory)
+        match(
+          productCategory,
+          (prodCat: UpdatedProductCategory) =>
+            reply.status(201).send({ message: 'product Category Updated', data: prodCat }),
+          (err) => {
+            return reply.status(404).send({ message: err })
+          },
         )
-        if (productCategory == null) {
-          return reply.status(404).send({ message: 'product Category not found' })
-        }
       }
-      reply.status(201).send({ message: 'product Category Updated', data: serviceCategory })
     },
   )
 
@@ -427,11 +460,18 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id = ServiceCategoryID(request.params.id)
-      const deletedServiceCategory: ServiceCategory | undefined = await deleteServiceCategory(id)
-      if (deletedServiceCategory == undefined || deletedServiceCategory == null) {
-        return reply.status(404).send({ message: "Service Category doesn't exist!" })
-      }
-      return reply.status(200).send({ message: 'Service Category deleted', deletedServiceCategory })
+      const deletedServiceCategory: Either<string, ServiceCategory> = await deleteServiceCategory(
+        id,
+      )
+      match(
+        deletedServiceCategory,
+        (delServCat: ServiceCategory) => {
+          return reply.status(200).send({ message: 'Service Category deleted', delServCat })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -456,11 +496,18 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id = ProductCategoryID(request.params.id)
-      const deletedProductCategory: ProductCategory | undefined = await deleteProductCategory(id)
-      if (deletedProductCategory == undefined || deletedProductCategory == null) {
-        return reply.status(404).send({ message: "Product Category doesn't exist!" })
-      }
-      return reply.status(200).send({ message: 'Product Category deleted', deletedProductCategory })
+      const deletedProductCategory: Either<string, ProductCategory> = await deleteProductCategory(
+        id,
+      )
+      match(
+        deletedProductCategory,
+        (delProdCat: ProductCategory) => {
+          return reply.status(200).send({ message: 'Product Category deleted', delProdCat })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 }

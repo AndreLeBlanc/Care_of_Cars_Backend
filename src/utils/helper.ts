@@ -31,6 +31,13 @@ export interface Right<A> {
   readonly right: A
 }
 
+export function errorHandling(e: unknown): string {
+  if (e instanceof Error && e.message.startsWith('duplicate key')) {
+    return ''
+  }
+  return 'error'
+}
+
 /**
  * @category model
  * @since 2.0.0
