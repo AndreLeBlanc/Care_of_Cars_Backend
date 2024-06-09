@@ -527,7 +527,7 @@ export async function stores(fastify: FastifyInstance) {
               storePaymentOptions: store.paymentInfo
                 ? {
                     ...store.paymentInfo.storePaymentOptions,
-                    createdAt: store.paymentInfo.createdAt.toISOString(),git 
+                    createdAt: store.paymentInfo.createdAt.toISOString(),
                     updatedAt: store.paymentInfo.updatedAt.toISOString(),
                   }
                 : undefined,
