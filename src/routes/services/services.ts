@@ -13,16 +13,14 @@ import {
 } from './serviceSchema.js'
 
 import {
-  ServiceNoVariant,
   createService,
   getServiceById,
   getServicesPaginate,
-  updateServiceByID,
 } from '../../services/serviceService.js'
 
 import {
+  Award,
   PermissionTitle,
-  ServiceAward,
   ServiceCallInterval,
   ServiceCategoryID,
   ServiceCost,

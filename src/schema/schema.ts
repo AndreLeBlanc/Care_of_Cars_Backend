@@ -647,7 +647,7 @@ export const localServiceVariants = pgTable('localServiceVariants', {
   day3: time('day3').$type<ServiceDay3>(),
   day4: time('day4').$type<ServiceDay4>(),
   day5: time('day5').$type<ServiceDay5>(),
-  localServiceID: integer('serviceID')
+  localServiceID: integer('localServiceID')
     .$type<LocalServiceID>()
     .references(() => localServices.localServiceID, { onDelete: 'cascade' })
     .notNull(),

@@ -36,7 +36,7 @@ import Dinero from 'dinero.js'
 
 import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
-import { Either, errorHandling, left, match, right } from '../utils/helper.js'
+import { Either, Right, errorHandling, isRight, left, match, right } from '../utils/helper.js'
 
 type ServiceVariantBase = {
   name: ServiceName
@@ -48,15 +48,22 @@ type ServiceVariantBase = {
   day4?: ServiceDay4
   day5?: ServiceDay5
 }
-export type ServiceVariant = ServiceVariantBase & { serviceID: ServiceID }
-export type LocalServiceVariant = ServiceVariantBase & { localServiceID: LocalServiceID }
+export type ServiceVariant = ServiceVariantBase & {
+  serviceID: ServiceID
+  serviceVariantID?: ServiceID
+}
+export type LocalServiceVariant = ServiceVariantBase & {
+  localServiceID: LocalServiceID
+  serviceVariantID?: ServiceID
+}
 
 export type ServicesPaginated = {
-  totalItems: number
+  totalServices: number
+  totalLocalServices: number
   totalPage: number
   perPage: Page
   localServices: LocalServiceVariant[]
-  Services: ServiceVariant[]
+  services: ServiceVariant[]
 }
 
 export type ColorForService = (typeof colorForService)[number]
@@ -177,7 +184,9 @@ function isServiceID(serviceID: ServiceID | LocalServiceID): serviceID is Servic
   return (serviceID as ServiceID).__type__ === ' serviceID'
 }
 export async function createService(
-  service: ServiceCreate | LocalServiceCreate,
+  service:
+    | (ServiceCreate & { serviceID?: ServiceID })
+    | (LocalServiceCreate & { localServiceID?: LocalServiceID }),
 ): Promise<Either<string, Service | LocalService>> {
   const color: ColorForService = service.colorForService || 'None'
 
@@ -206,45 +215,68 @@ export async function createService(
 
   try {
     return await db.transaction(async (tx) => {
-      let insertedService
+      let insertedService: ServiceUnBranded
       if ('storeID' in service) {
-        insertedService = await tx
-          .insert(localServices)
-          .values({ ...addToService, storeID: service.storeID })
-          .returning()
+        ;[insertedService] = service.localServiceID
+          ? await tx
+              .update(localServices)
+              .set({ ...addToService, storeID: service.storeID })
+              .where(eq(localServices.localServiceID, service.localServiceID))
+              .returning()
+          : await tx
+              .insert(localServices)
+              .values({ ...addToService, storeID: service.storeID })
+              .returning()
       } else {
-        insertedService = await tx
-          .insert(services)
-          .values({ ...addToService })
-          .returning()
+        ;[insertedService] = service.serviceID
+          ? await tx
+              .update(services)
+              .set(addToService)
+              .where(eq(services.serviceID, service.serviceID))
+              .returning()
+          : await tx
+              .insert(services)
+              .values({ ...addToService })
+              .returning()
       }
-      const insertedServiceBranded: Either<string, Service | LocalService> = brander(
-        insertedService[0],
-      )
+      const insertedServiceBranded: Either<string, Service | LocalService> =
+        brander(insertedService)
 
-      if ('localServiceID' in insertedService[0] && 'localServiceVariants' in service) {
-        const serviceVariantArr = []
-        for (const serviceVariant of service.localServiceVariants || []) {
-          const variantCurrency = serviceVariant.cost.getCurrency()
-          const variantCost = ServiceCostNumber(serviceVariant.cost.getAmount())
-          serviceVariantArr.push({
-            localServiceID: insertedService[0].localServiceID,
-            name: serviceVariant.name,
-            cost: variantCost,
-            currency: variantCurrency,
-            award: serviceVariant.award,
-            day1: serviceVariant.day1,
-            day2: serviceVariant.day2,
-            day3: serviceVariant.day3,
-            day4: serviceVariant.day4,
-            day5: serviceVariant.day5,
-          })
-        }
-        const variants = await tx.insert(localServiceVariants).values(serviceVariantArr).returning()
+      if ('localServiceID' in insertedService && 'localServiceVariants' in service) {
+        const variCurrency = service.cost.getCurrency()
+        const variCost = ServiceCostNumber(service.cost.getAmount())
+        const serviceVariantArr = service.localServiceVariants.map((serviceVariant) => ({
+          serviceVariantID: serviceVariant.serviceVariantID,
+          localServiceID: insertedService.localServiceID,
+          name: serviceVariant.name,
+          cost: variCost,
+          currency: variCurrency,
+          award: serviceVariant.award,
+          day1: serviceVariant.day1,
+          day2: serviceVariant.day2,
+          day3: serviceVariant.day3,
+          day4: serviceVariant.day4,
+          day5: serviceVariant.day5,
+          updatedAt: new Date(),
+        }))
+
+        const variants = await Promise.all(
+          serviceVariantArr.map(async (serviceVariant) => {
+            if (serviceVariant.serviceVariantID) {
+              return await tx
+                .update(localServiceVariants)
+                .set(serviceVariant)
+                .where(eq(localServiceVariants.serviceVariantID, serviceVariant.serviceVariantID))
+                .returning()
+            } else {
+              return await tx.insert(localServiceVariants).values(serviceVariant).returning()
+            }
+          }),
+        )
 
         let variantsDinero: LocalServiceVariant[] = []
         if (variants != null) {
-          variantsDinero = variants.map((vari) => {
+          variantsDinero = variants.flat().map((vari) => {
             return {
               localServiceID: vari.localServiceID,
               name: vari.name,
@@ -268,30 +300,43 @@ export async function createService(
           (brandedService) => right({ ...brandedService, localServiceVariants: variantsDinero }),
           (err) => left(err),
         )
-      } else if ('serviceID' in insertedService[0] && 'serviceVariants' in service) {
-        const serviceVariantArr = []
-        for (const serviceVariant of service.serviceVariants || []) {
-          const variantCurrency = serviceVariant.cost.getCurrency()
-          const variantCost = ServiceCostNumber(serviceVariant.cost.getAmount())
-          serviceVariantArr.push({
-            serviceID: insertedService[0].serviceID,
-            name: serviceVariant.name,
-            cost: variantCost,
-            currency: variantCurrency,
-            award: serviceVariant.award,
-            day1: serviceVariant.day1,
-            day2: serviceVariant.day2,
-            day3: serviceVariant.day3,
-            day4: serviceVariant.day4,
-            day5: serviceVariant.day5,
-          })
-        }
-        const variants = await tx.insert(serviceVariants).values(serviceVariantArr).returning()
+      } else if ('serviceID' in insertedService && 'serviceVariants' in service) {
+        const variCurrency = service.cost.getCurrency()
+        const variCost = ServiceCostNumber(service.cost.getAmount())
+        const serviceVariantArr = service.serviceVariants.map((serviceVariant) => ({
+          serviceVariantID: serviceVariant.serviceVariantID,
+          serviceID: insertedService.serviceID,
+          name: serviceVariant.name,
+          cost: variCost,
+          currency: variCurrency,
+          award: serviceVariant.award,
+          day1: serviceVariant.day1,
+          day2: serviceVariant.day2,
+          day3: serviceVariant.day3,
+          day4: serviceVariant.day4,
+          day5: serviceVariant.day5,
+          updatedAt: new Date(),
+        }))
+
+        const variants = await Promise.all(
+          serviceVariantArr.map(async (serviceVariant) => {
+            if (serviceVariant.serviceVariantID) {
+              return await tx
+                .update(serviceVariants)
+                .set(serviceVariant)
+                .where(eq(serviceVariants.serviceVariantID, serviceVariant.serviceVariantID))
+                .returning()
+            } else {
+              return await tx.insert(serviceVariants).values(serviceVariant).returning()
+            }
+          }),
+        )
+
         let variantsDinero: ServiceVariant[] = []
         if (variants != null) {
-          variantsDinero = variants.map((vari) => {
+          variantsDinero = variants.flat().map((vari) => {
             return {
-              serviceID: vari.serviceVariantID,
+              serviceID: vari.serviceID,
               name: vari.name,
               cost: ServiceCostDinero(
                 Dinero({
@@ -329,7 +374,7 @@ export async function getServicesPaginate(
   orderBy: listServiceOrderByEnum,
   order: serviceOrderEnum,
   hidden: ServiceHidden = ServiceHidden(true),
-): Promise<ServicesPaginated> {
+): Promise<Either<string, ServicesPaginated>> {
   const condition = and(
     eq(services.hidden, hidden),
     or(
@@ -339,133 +384,134 @@ export async function getServicesPaginate(
       ilike(services.externalArticleNumber, '%' + search + '%'),
     ),
   )
-  let orderCondition = desc(services.serviceID)
-  if (order == serviceOrderEnum.desc) {
-    if (orderBy == listServiceOrderByEnum.name) {
-      orderCondition = desc(services.name)
-    } else if (orderBy == listServiceOrderByEnum.serviceCategoryID) {
-      orderCondition = desc(serviceCategories.serviceCategoryID)
-    } else {
-      orderCondition = desc(services.serviceID)
-    }
+
+  const localCondition = and(
+    eq(services.hidden, hidden),
+    or(
+      ilike(services.name, '%' + search + '%'),
+      ilike(services.itemNumber, '%' + search + '%'),
+      ilike(services.suppliersArticleNumber, '%' + search + '%'),
+      ilike(services.externalArticleNumber, '%' + search + '%'),
+    ),
+  )
+  let orderCondition
+
+  if (order === serviceOrderEnum.desc) {
+    orderCondition =
+      orderBy === listServiceOrderByEnum.name
+        ? desc(services.name)
+        : orderBy === listServiceOrderByEnum.serviceCategoryID
+        ? desc(serviceCategories.serviceCategoryID)
+        : desc(services.serviceID)
+  } else if (order === serviceOrderEnum.asc) {
+    orderCondition =
+      orderBy === listServiceOrderByEnum.name
+        ? asc(services.name)
+        : orderBy === listServiceOrderByEnum.serviceCategoryID
+        ? asc(serviceCategories.serviceCategoryID)
+        : asc(services.serviceID)
+  } else {
+    orderCondition = desc(services.serviceID) // Default to descending order by service ID
+  }
+  let orderConditionLocal
+
+  if (order === serviceOrderEnum.desc) {
+    orderConditionLocal =
+      orderBy === listServiceOrderByEnum.name
+        ? desc(services.name)
+        : orderBy === listServiceOrderByEnum.serviceCategoryID
+        ? desc(serviceCategories.serviceCategoryID)
+        : desc(localServices.localServiceID)
+  } else if (order === serviceOrderEnum.asc) {
+    orderConditionLocal =
+      orderBy === listServiceOrderByEnum.name
+        ? asc(localServices.name)
+        : orderBy === listServiceOrderByEnum.serviceCategoryID
+        ? asc(serviceCategories.serviceCategoryID)
+        : asc(localServices.localServiceID)
+  } else {
+    orderConditionLocal = desc(localServices.localServiceID) // Default to descending order by service ID
   }
 
-  if (order == serviceOrderEnum.asc) {
-    if (orderBy == listServiceOrderByEnum.name) {
-      orderCondition = asc(services.name)
-    } else if (orderBy == listServiceOrderByEnum.serviceCategoryID) {
-      orderCondition = asc(serviceCategories.serviceCategoryID)
-    } else {
-      orderCondition = asc(services.serviceID)
-    }
-  }
+  try {
+    const res = await db.transaction(async (tx) => {
+      const [totalItems] = await tx
+        .select({
+          count: sql`count(*)`.mapWith(Number).as('count'),
+        })
+        .from(services)
+        .where(condition)
 
-  const [totalItems] = await db
-    .select({
-      count: sql`count(*)`.mapWith(Number).as('count'),
-    })
-    .from(services)
-    .where(condition)
-
-  const servicesList = await db.query.services.findMany({
-    where: condition,
-    limit: limit || 10,
-    offset: offset || 0,
-    orderBy: orderCondition,
-    with: {
-      serviceCategories: true,
-      serviceVariants: true,
-    },
-  })
-  const totalPage: number = Math.ceil(totalItems.count / limit)
-
-  const serviceListBranded = servicesList.map((service) => {
-    return {
-      serviceName: service.name,
-      serviceCategoryID: service.serviceCategoryID,
-      serviceIncludeInAutomaticSms: service.includeInAutomaticSms ?? undefined,
-      serviceHidden: service.hidden ?? undefined,
-      serviceCallInterval: service.callInterval ?? undefined,
-      serviceColorForService: convertToColorEnum(service.colorForService),
-      serviceWarrantyCard: service.warrantyCard ?? undefined,
-      serviceItemNumber: service.itemNumber ?? undefined,
-      serviceSuppliersArticleNumber: service.suppliersArticleNumber ?? undefined,
-      serviceExternalArticleNumber: service.externalArticleNumber ?? undefined,
-      updatedAt: service.updatedAt,
-    }
-  })
-
-  return {
-    totalItems: totalItems.count,
-    totalPage,
-    perPage: page,
-    data: serviceListBranded,
-  }
-}
-
-export async function updateServiceByID(
-  id: ServiceID | LocalServiceID,
-  service: ServiceCreate | LocalServiceCreate,
-): Promise<Either<string, Service | LocalService>> {
-  const color: ColorForService = service.colorForService || 'None'
-
-  const currency = service.cost.getCurrency()
-  const cost = ServiceCostNumber(service.cost.getAmount())
-  const addToService = {
-    name: service.name,
-    serviceCategoryID: service.serviceCategoryID,
-    currency: currency,
-    cost: cost,
-    award: service.award,
-    includeInAutomaticSms: service.includeInAutomaticSms,
-    hidden: service.hidden,
-    callInterval: service.callInterval,
-    colorForService: color,
-    warrantyCard: service.warrantyCard,
-    itemNumber: service.itemNumber,
-    suppliersArticleNumber: service.suppliersArticleNumber,
-    externalArticleNumber: service.externalArticleNumber,
-    day1: service.day1,
-    day2: service.day2,
-    day3: service.day3,
-    day4: service.day4,
-    day5: service.day5,
-    updatedAt: new Date(),
-  }
-
-  if (isServiceID(id)) {
-  return await db.transaction(async (tx) => {
-    const [updatedService] = await tx
-      .update(services)
-      .set(addToService)
-      .where(eq(services.serviceID, id))
-      .returning()
-    if (updatedService == null) {
-      return undefined
-    }
-    //    delete all existing variants and insert fresh
-    for (const serviceVariant of service.serviceVariants || []) {
-      await tx.insert(serviceVariants).values({
-        name: serviceVariant.serviceName,
-        serviceID: updatedService.serviceID,
-        award: serviceVariant.serviceAward,
-        cost: serviceVariant.serviceCost,
-        day1: serviceVariant.serviceDay1,
-        day2: serviceVariant.serviceDay2,
-        day3: serviceVariant.serviceDay3,
-        day4: serviceVariant.serviceDay4,
-        day5: serviceVariant.serviceDay5,
+      const servicesList = await tx.query.services.findMany({
+        where: condition,
+        limit: limit || 10,
+        offset: offset || 0,
+        orderBy: orderCondition,
+        with: {
+          serviceCategories: true,
+          serviceVariants: true,
+        },
       })
-    }
-    const updatedServiceWithVariants = await tx.query.services.findFirst({
-      where: eq(services.serviceID, updatedService.serviceID),
-      with: {
-        serviceCategories: true,
-        serviceVariants: true,
-      },
+      const [totalServices] = await tx
+        .select({
+          count: sql`count(*)`.mapWith(Number).as('count'),
+        })
+        .from(services)
+        .where(condition)
+
+      const [totalLocalServices] = await tx
+        .select({
+          count: sql`count(*)`.mapWith(Number).as('count'),
+        })
+        .from(services)
+        .where(condition)
+
+      const localServicesList = await tx.query.localServices.findMany({
+        where: localCondition,
+        limit: limit || 10,
+        offset: offset || 0,
+        orderBy: orderConditionLocal,
+        with: {
+          serviceCategories: true,
+          localServiceVariants: true,
+        },
+      })
+
+      const branded = servicesList.map(brander)
+      const brandedRight: Right<Service | LocalService>[] = branded.filter(isRight)
+      const serviceListReady: Service[] = brandedRight.reduce<Service[]>((acc, x) => {
+        if ('serviceID' in x.right) {
+          acc.push(x.right)
+        }
+        return acc
+      }, [])
+
+      const brandedLocal = localServicesList.map(brander)
+      const brandedLocalRight: Right<Service | LocalService>[] = brandedLocal.filter(isRight)
+      const localServiceListReady: LocalService[] = brandedLocalRight.reduce<LocalService[]>(
+        (acc, x) => {
+          if ('localServiceID' in x.right) {
+            acc.push(x.right)
+          }
+          return acc
+        },
+        [],
+      )
+
+      const totalPage: number = Math.ceil(totalItems.count / limit)
+      return right({
+        totalServices: totalServices.count,
+        totalLocalServices: totalLocalServices.count,
+        totalPage,
+        perPage: page,
+        services: serviceListReady,
+        localServices: localServiceListReady,
+      })
     })
-    return [updatedServiceWithVariants]
-  })
+    return res
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
 export async function getServiceById(

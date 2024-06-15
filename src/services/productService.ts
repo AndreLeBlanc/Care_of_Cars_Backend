@@ -55,7 +55,7 @@ export type ProductsPaginate = {
   totalItems: number
   totalPage: number
   perPage: number
-  produts: Product[]
+  products: Product[]
   localProducts: LocalProduct[]
 }
 
