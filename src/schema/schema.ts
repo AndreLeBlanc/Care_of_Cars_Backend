@@ -240,6 +240,14 @@ export type ProductCost = Brand<number, 'productCost'>
 export const ProductCost = make<ProductCost>()
 export type ProductID = Brand<number, 'productID'>
 export const ProductID = make<ProductID>()
+export type LocalProductID = Brand<number, 'localProductID'>
+export const LocalProductID = make<LocalProductID>()
+export type ProductCostDinero = Brand<Dinero, 'productCostDinero'>
+export const ProductCostDinero = make<ProductCostDinero>()
+export type ProductCostNumber = Brand<number, 'productCostNumber'>
+export const ProductCostNumber = make<ProductCostNumber>()
+export type ProductCostCurrency = Brand<string, 'productCostCurrency'>
+export const ProductCostCurrency = make<ProductCostCurrency>()
 
 export type LocalQualID = Brand<PositiveInteger<number>, 'localQualID'>
 export const LocalQualID = make<LocalQualID>()
@@ -269,7 +277,7 @@ export const RentCarNumber = make<RentCarNumber>()
 
 export type ServiceIncludeInAutomaticSms = Brand<boolean, 'ServiceIncludeInAutomaticSms'>
 export const ServiceIncludeInAutomaticSms = make<ServiceIncludeInAutomaticSms>()
-export type ServiceHidden = Brand<boolean, 'ServiceHidden'>
+export type ServiceHidden = Brand<boolean, 'hidden'>
 export const ServiceHidden = make<ServiceHidden>()
 export type ServiceCallInterval = Brand<number, 'ServiceCallInterval'>
 export const ServiceCallInterval = make<ServiceCallInterval>()
@@ -283,22 +291,30 @@ export type ServiceExternalArticleNumber = Brand<string, 'ServiceExternalArticle
 export const ServiceExternalArticleNumber = make<ServiceExternalArticleNumber>()
 export type ServiceID = Brand<number, ' serviceID'>
 export const ServiceID = make<ServiceID>()
-export type ServiceName = Brand<string, ' serviceName'>
+export type LocalServiceID = Brand<number, ' localserviceID'>
+export const LocalServiceID = make<LocalServiceID>()
+export type ServiceName = Brand<string, 'serviceName'>
 export const ServiceName = make<ServiceName>()
-export type ServiceAward = Brand<number, ' serviceAward'>
-export const ServiceAward = make<ServiceAward>()
-export type ServiceCost = Brand<number, ' serviceCost'>
+export type ServiceCost = Brand<number, 'serviceCost'>
 export const ServiceCost = make<ServiceCost>()
-export type ServiceDay1 = Brand<string, ' serviceDay1'>
+export type ServiceDay1 = Brand<string, 'serviceDay1'>
 export const ServiceDay1 = make<ServiceDay1>()
-export type ServiceDay2 = Brand<string, ' serviceDay2'>
+export type ServiceDay2 = Brand<string, 'serviceDay2'>
 export const ServiceDay2 = make<ServiceDay2>()
-export type ServiceDay3 = Brand<string, ' serviceDay3'>
+export type ServiceDay3 = Brand<string, 'serviceDay3'>
 export const ServiceDay3 = make<ServiceDay3>()
-export type ServiceDay4 = Brand<string, ' serviceDay4'>
+export type ServiceDay4 = Brand<string, 'serviceDay4'>
 export const ServiceDay4 = make<ServiceDay4>()
-export type ServiceDay5 = Brand<string, ' serviceDay5'>
+export type ServiceDay5 = Brand<string, 'serviceDay5'>
 export const ServiceDay5 = make<ServiceDay5>()
+export type Award = Brand<number, 'award'>
+export const Award = make<Award>()
+export type ServiceCostDinero = Brand<Dinero, 'costDinero'>
+export const ServiceCostDinero = make<ServiceCostDinero>()
+export type ServiceCostNumber = Brand<number, 'serviceCostNumber'>
+export const ServiceCostNumber = make<ServiceCostNumber>()
+export type ServiceCostCurrency = Brand<Currency, 'serviceCostCurrency'>
+export const ServiceCostCurrency = make<ServiceCostCurrency>()
 
 export type RoleName = Brand<string, 'roleName'>
 export const RoleName = make<RoleName>()
@@ -512,28 +528,37 @@ export const colorForServicepgEnum = pgEnum('colorForService', colorForService)
 
 export const services = pgTable('services', {
   serviceID: serial('serviceID').$type<ServiceID>().primaryKey(),
+  name: varchar('name', { length: 256 }).$type<ServiceName>().notNull().unique(),
   serviceCategoryID: integer('serviceCategoryID')
     .$type<ServiceCategoryID>()
     .references(() => serviceCategories.serviceCategoryID)
     .notNull(),
-  name: varchar('name', { length: 256 }).$type<ServiceName>().notNull(),
+  currency: varchar('currency', { length: 5 }).notNull(),
+  cost: real('cost').$type<ServiceCostNumber>().notNull(),
   includeInAutomaticSms: boolean('includeInAutomaticSms')
     .$type<ServiceIncludeInAutomaticSms>()
     .notNull(),
-  hidden: boolean('hidden').$type<ServiceHidden>(),
+  hidden: boolean('hidden').$type<ServiceHidden>().notNull(),
   callInterval: integer('callInterval').$type<ServiceCallInterval>(),
   colorForService: varchar('colorForService').notNull(),
   warrantyCard: boolean('warrantyCard').$type<ServiceWarrantyCard>(),
-  itemNumber: varchar('itemNumber', { length: 256 }).$type<ServiceItemNumber>(),
+  itemNumber: varchar('itemNumber', { length: 256 }).$type<ServiceItemNumber>().unique(),
+  award: real('award').$type<Award>().notNull(),
   suppliersArticleNumber: varchar('suppliersArticleNumber', {
     length: 256,
   }).$type<ServiceSuppliersArticleNumber>(),
   externalArticleNumber: varchar('externalArticleNumber', {
     length: 256,
   }).$type<ServiceExternalArticleNumber>(),
+  day1: time('day1').$type<ServiceDay1>(),
+  day2: time('day2').$type<ServiceDay2>(),
+  day3: time('day3').$type<ServiceDay3>(),
+  day4: time('day4').$type<ServiceDay4>(),
+  day5: time('day5').$type<ServiceDay5>(),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
+
 export const servicesCategoryToServiceRelations = relations(serviceCategories, ({ many }) => ({
   services: many(services),
 }))
@@ -545,18 +570,86 @@ export const serviceToServiceCategoryRelations = relations(services, ({ one }) =
   }),
 }))
 
+export const localServices = pgTable('localServices', {
+  localServiceID: serial('localServiceID').$type<LocalServiceID>().primaryKey(),
+  serviceCategoryID: integer('serviceCategoryID')
+    .$type<ServiceCategoryID>()
+    .references(() => serviceCategories.serviceCategoryID)
+    .notNull(),
+  name: varchar('name', { length: 256 }).$type<ServiceName>().notNull(),
+  storeID: integer('storeID')
+    .$type<StoreID>()
+    .references(() => stores.storeID, { onDelete: 'cascade' })
+    .notNull(),
+  currency: varchar('currency', { length: 5 }).notNull(),
+  cost: real('cost').$type<ServiceCostNumber>().notNull(),
+  includeInAutomaticSms: boolean('includeInAutomaticSms')
+    .$type<ServiceIncludeInAutomaticSms>()
+    .notNull(),
+  hidden: boolean('hidden').$type<ServiceHidden>().notNull(),
+  callInterval: integer('callInterval').$type<ServiceCallInterval>(),
+  colorForService: varchar('colorForService').notNull(),
+  warrantyCard: boolean('warrantyCard').$type<ServiceWarrantyCard>(),
+  itemNumber: varchar('itemNumber', { length: 256 }).$type<ServiceItemNumber>(),
+  award: real('award').$type<Award>().notNull(),
+  suppliersArticleNumber: varchar('suppliersArticleNumber', {
+    length: 256,
+  }).$type<ServiceSuppliersArticleNumber>(),
+  externalArticleNumber: varchar('externalArticleNumber', {
+    length: 256,
+  }).$type<ServiceExternalArticleNumber>(),
+  day1: time('day1').$type<ServiceDay1>(),
+  day2: time('day2').$type<ServiceDay2>(),
+  day3: time('day3').$type<ServiceDay3>(),
+  day4: time('day4').$type<ServiceDay4>(),
+  day5: time('day5').$type<ServiceDay5>(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+})
+export const localServicesCategoryToServiceRelations = relations(serviceCategories, ({ many }) => ({
+  localServices: many(localServices),
+}))
+
+export const localServiceToServiceCategoryRelations = relations(services, ({ one }) => ({
+  serviceCategories: one(serviceCategories, {
+    fields: [services.serviceCategoryID],
+    references: [serviceCategories.serviceCategoryID],
+  }),
+}))
+
 export const serviceVariants = pgTable('serviceVariants', {
   serviceVariantID: serial('serviceVariantID').$type<ServiceID>().primaryKey(),
-  name: varchar('name', { length: 256 }).$type<ServiceName>(),
-  award: real('award').$type<ServiceAward>().notNull(),
-  cost: real('cost').$type<ServiceCost>().notNull(),
+  name: varchar('name', { length: 256 }).$type<ServiceName>().notNull(),
+  cost: real('cost').$type<ServiceCostNumber>().notNull(),
+  currency: varchar('currency', { length: 5 }).notNull(),
+  award: real('award').$type<Award>().notNull(),
   day1: time('day1').$type<ServiceDay1>(),
   day2: time('day2').$type<ServiceDay2>(),
   day3: time('day3').$type<ServiceDay3>(),
   day4: time('day4').$type<ServiceDay4>(),
   day5: time('day5').$type<ServiceDay5>(),
   serviceID: integer('serviceID')
+    .$type<ServiceID>()
     .references(() => services.serviceID)
+    .notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+})
+
+export const localServiceVariants = pgTable('localServiceVariants', {
+  serviceVariantID: serial('serviceVariantID').$type<ServiceID>().primaryKey(),
+  name: varchar('name', { length: 256 }).$type<ServiceName>().notNull(),
+  currency: varchar('currency', { length: 5 }).notNull(),
+  cost: real('cost').$type<ServiceCostNumber>().notNull(),
+  award: real('award').$type<Award>().notNull(),
+  day1: time('day1').$type<ServiceDay1>(),
+  day2: time('day2').$type<ServiceDay2>(),
+  day3: time('day3').$type<ServiceDay3>(),
+  day4: time('day4').$type<ServiceDay4>(),
+  day5: time('day5').$type<ServiceDay5>(),
+  localServiceID: integer('serviceID')
+    .$type<LocalServiceID>()
+    .references(() => localServices.localServiceID, { onDelete: 'cascade' })
     .notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
@@ -679,7 +772,7 @@ export const driverCars = pgTable('driverCars', {
   driverCarID: serial('driverCarID').$type<DriverCarID>().primaryKey(),
   driverID: integer('driverID')
     .$type<DriverID>()
-    .references(() => stores.storeID, { onDelete: 'cascade' }),
+    .references(() => drivers.driverID, { onDelete: 'cascade' }),
   driverCarRegistrationNumber: varchar('driverCarRegistrationNumber', { length: 11 })
     .$type<DriverCarRegistrationNumber>()
     .unique()
@@ -802,8 +895,10 @@ export const productCategories = pgTable('productCategories', {
 })
 
 export const products = pgTable('products', {
-  productId: serial('productId').$type<ProductID>().primaryKey(),
+  productID: serial('productID').$type<ProductID>().primaryKey(),
   productItemNumber: varchar('productItemNumber').$type<ProductItemNumber>().notNull(),
+  currency: varchar('currency', { length: 5 }).notNull(),
+  cost: real('cost').$type<ProductCostNumber>().notNull(),
   productCategoryID: integer('productCategoryID')
     .$type<ProductCategoryID>()
     .references(() => productCategories.productCategoryID)
@@ -818,19 +913,57 @@ export const products = pgTable('products', {
   productUpdateRelatedData: boolean('productUpdateRelatedData')
     .$type<ProductUpdateRelatedData>()
     .default(ProductUpdateRelatedData(false)),
+  award: real('award').$type<Award>().notNull(),
   productInventoryBalance: integer('productInventoryBalance').$type<ProductInventoryBalance>(),
-  productAward: integer('productAward').notNull(),
-  productCost: integer('productCost').notNull(),
   ...dbDates,
 })
 
 export const productCategoryToProductRelations = relations(productCategories, ({ many }) => ({
-  services: many(products),
+  products: many(products),
 }))
 
 export const productToCategoryRelations = relations(products, ({ one }) => ({
   productCategories: one(productCategories, {
     fields: [products.productCategoryID],
+    references: [productCategories.productCategoryID],
+  }),
+}))
+
+export const localProducts = pgTable('localProducts', {
+  storeID: integer('storeID')
+    .$type<StoreID>()
+    .references(() => stores.storeID, { onDelete: 'cascade' })
+    .notNull(),
+  localProductID: serial('localProductID').$type<LocalProductID>().primaryKey(),
+  productItemNumber: varchar('productItemNumber').$type<ProductItemNumber>().notNull(),
+  currency: varchar('currency', { length: 5 }).notNull(),
+  cost: real('cost').$type<ProductCostNumber>().notNull(),
+  productCategoryID: integer('productCategoryID')
+    .$type<ProductCategoryID>()
+    .references(() => productCategories.productCategoryID)
+    .notNull(),
+  productDescription: varchar('productDescription', { length: 512 }).$type<ProductDescription>(),
+  productSupplierArticleNumber: varchar(
+    'productSupplierArticleNumber',
+  ).$type<ProductSupplierArticleNumber>(),
+  productExternalArticleNumber: varchar(
+    'productExternalArticleNumber',
+  ).$type<ProductExternalArticleNumber>(),
+  productUpdateRelatedData: boolean('productUpdateRelatedData')
+    .$type<ProductUpdateRelatedData>()
+    .default(ProductUpdateRelatedData(false)),
+  award: real('award').$type<Award>().notNull(),
+  productInventoryBalance: integer('productInventoryBalance').$type<ProductInventoryBalance>(),
+  ...dbDates,
+})
+
+export const LocalProductCategoryToProductRelations = relations(productCategories, ({ many }) => ({
+  productCategories: many(localProducts),
+}))
+
+export const LocalroductToCategoryRelations = relations(localProducts, ({ one }) => ({
+  productCategories: one(productCategories, {
+    fields: [localProducts.productCategoryID],
     references: [productCategories.productCategoryID],
   }),
 }))

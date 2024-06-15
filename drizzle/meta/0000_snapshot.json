@@ -1,5 +1,5 @@
 {
-  "id": "711275ef-e58c-4396-9666-91e546c440e0",
+  "id": "01523356-c1a5-4f3d-b741-2739b808012c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -64,10 +64,123 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.driverCars": {
+      "name": "driverCars",
+      "schema": "",
+      "columns": {
+        "driverCarID": {
+          "name": "driverCarID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "driverID": {
+          "name": "driverID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverCarRegistrationNumber": {
+          "name": "driverCarRegistrationNumber",
+          "type": "varchar(11)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverCarBrand": {
+          "name": "driverCarBrand",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverCarModel": {
+          "name": "driverCarModel",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverCarColor": {
+          "name": "driverCarColor",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverCarYear": {
+          "name": "driverCarYear",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverCarChassiNumber": {
+          "name": "driverCarChassiNumber",
+          "type": "varchar(24)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverCarNotes": {
+          "name": "driverCarNotes",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "driverCars_driverID_stores_storeID_fk": {
+          "name": "driverCars_driverID_stores_storeID_fk",
+          "tableFrom": "driverCars",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "driverID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "driverCars_driverCarRegistrationNumber_unique": {
+          "name": "driverCars_driverCarRegistrationNumber_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "driverCarRegistrationNumber"
+          ]
+        },
+        "driverCars_driverCarChassiNumber_unique": {
+          "name": "driverCars_driverCarChassiNumber_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "driverCarChassiNumber"
+          ]
+        }
+      }
+    },
     "public.drivers": {
       "name": "drivers",
       "schema": "",
       "columns": {
+        "driverID": {
+          "name": "driverID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "customerOrgNumber": {
           "name": "customerOrgNumber",
           "type": "varchar(11)",
@@ -82,7 +195,7 @@
         },
         "companyReference": {
           "name": "companyReference",
-          "type": "varchar(256)",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },
@@ -122,7 +235,7 @@
         "driverEmail": {
           "name": "driverEmail",
           "type": "varchar(256)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "driverPhoneNumber": {
@@ -341,6 +454,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "checkedIn": {
+          "name": "checkedIn",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checkedOut": {
+          "name": "checkedOut",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
@@ -382,6 +507,386 @@
           ]
         }
       }
+    },
+    "public.localProducts": {
+      "name": "localProducts",
+      "schema": "",
+      "columns": {
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "localProductID": {
+          "name": "localProductID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "productItemNumber": {
+          "name": "productItemNumber",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost": {
+          "name": "cost",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productCategoryID": {
+          "name": "productCategoryID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productDescription": {
+          "name": "productDescription",
+          "type": "varchar(512)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "productSupplierArticleNumber": {
+          "name": "productSupplierArticleNumber",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "productExternalArticleNumber": {
+          "name": "productExternalArticleNumber",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "productUpdateRelatedData": {
+          "name": "productUpdateRelatedData",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "award": {
+          "name": "award",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productInventoryBalance": {
+          "name": "productInventoryBalance",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "localProducts_storeID_stores_storeID_fk": {
+          "name": "localProducts_storeID_stores_storeID_fk",
+          "tableFrom": "localProducts",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "localProducts_productCategoryID_productCategories_productCategoryID_fk": {
+          "name": "localProducts_productCategoryID_productCategories_productCategoryID_fk",
+          "tableFrom": "localProducts",
+          "tableTo": "productCategories",
+          "columnsFrom": [
+            "productCategoryID"
+          ],
+          "columnsTo": [
+            "productCategoryID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.localServiceVariants": {
+      "name": "localServiceVariants",
+      "schema": "",
+      "columns": {
+        "serviceVariantID": {
+          "name": "serviceVariantID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost": {
+          "name": "cost",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "award": {
+          "name": "award",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "day1": {
+          "name": "day1",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day2": {
+          "name": "day2",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3": {
+          "name": "day3",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day4": {
+          "name": "day4",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5": {
+          "name": "day5",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "serviceID": {
+          "name": "serviceID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "localServiceVariants_serviceID_localServices_localServiceID_fk": {
+          "name": "localServiceVariants_serviceID_localServices_localServiceID_fk",
+          "tableFrom": "localServiceVariants",
+          "tableTo": "localServices",
+          "columnsFrom": [
+            "serviceID"
+          ],
+          "columnsTo": [
+            "localServiceID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.localServices": {
+      "name": "localServices",
+      "schema": "",
+      "columns": {
+        "localServiceID": {
+          "name": "localServiceID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "serviceCategoryID": {
+          "name": "serviceCategoryID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cost": {
+          "name": "cost",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "includeInAutomaticSms": {
+          "name": "includeInAutomaticSms",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "callInterval": {
+          "name": "callInterval",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "colorForService": {
+          "name": "colorForService",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "warrantyCard": {
+          "name": "warrantyCard",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "itemNumber": {
+          "name": "itemNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "award": {
+          "name": "award",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "suppliersArticleNumber": {
+          "name": "suppliersArticleNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "externalArticleNumber": {
+          "name": "externalArticleNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day1": {
+          "name": "day1",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day2": {
+          "name": "day2",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3": {
+          "name": "day3",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day4": {
+          "name": "day4",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5": {
+          "name": "day5",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "localServices_serviceCategoryID_serviceCategories_serviceCategoryID_fk": {
+          "name": "localServices_serviceCategoryID_serviceCategories_serviceCategoryID_fk",
+          "tableFrom": "localServices",
+          "tableTo": "serviceCategories",
+          "columnsFrom": [
+            "serviceCategoryID"
+          ],
+          "columnsTo": [
+            "serviceCategoryID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     },
     "public.permissions": {
       "name": "permissions",
@@ -487,8 +992,8 @@
       "name": "products",
       "schema": "",
       "columns": {
-        "productId": {
-          "name": "productId",
+        "productID": {
+          "name": "productID",
           "type": "serial",
           "primaryKey": true,
           "notNull": true
@@ -496,6 +1001,18 @@
         "productItemNumber": {
           "name": "productItemNumber",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost": {
+          "name": "cost",
+          "type": "real",
           "primaryKey": false,
           "notNull": true
         },
@@ -530,23 +1047,17 @@
           "notNull": false,
           "default": false
         },
+        "award": {
+          "name": "award",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
         "productInventoryBalance": {
           "name": "productInventoryBalance",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
-        },
-        "productAward": {
-          "name": "productAward",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "productCost": {
-          "name": "productCost",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
         },
         "createdAt": {
           "name": "createdAt",
@@ -691,8 +1202,8 @@
         }
       }
     },
-    "public.rentcars": {
-      "name": "rentcars",
+    "public.rentCars": {
+      "name": "rentCars",
       "schema": "",
       "columns": {
         "storeID": {
@@ -754,9 +1265,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "rentcars_storeID_stores_storeID_fk": {
-          "name": "rentcars_storeID_stores_storeID_fk",
-          "tableFrom": "rentcars",
+        "rentCars_storeID_stores_storeID_fk": {
+          "name": "rentCars_storeID_stores_storeID_fk",
+          "tableFrom": "rentCars",
           "tableTo": "stores",
           "columnsFrom": [
             "storeID"
@@ -770,8 +1281,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "rentcars_rentCarRegistrationNumber_unique": {
-          "name": "rentcars_rentCarRegistrationNumber_unique",
+        "rentCars_rentCarRegistrationNumber_unique": {
+          "name": "rentCars_rentCarRegistrationNumber_unique",
           "nullsNotDistinct": false,
           "columns": [
             "rentCarRegistrationNumber"
@@ -951,16 +1462,22 @@
           "name": "name",
           "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": false
-        },
-        "award": {
-          "name": "award",
-          "type": "real",
-          "primaryKey": false,
           "notNull": true
         },
         "cost": {
           "name": "cost",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "award": {
+          "name": "award",
           "type": "real",
           "primaryKey": false,
           "notNull": true
@@ -1045,15 +1562,27 @@
           "primaryKey": true,
           "notNull": true
         },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "serviceCategoryID": {
           "name": "serviceCategoryID",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
-        "name": {
-          "name": "name",
-          "type": "varchar(256)",
+        "currency": {
+          "name": "currency",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost": {
+          "name": "cost",
+          "type": "real",
           "primaryKey": false,
           "notNull": true
         },
@@ -1067,7 +1596,7 @@
           "name": "hidden",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "callInterval": {
           "name": "callInterval",
@@ -1105,6 +1634,36 @@
           "primaryKey": false,
           "notNull": false
         },
+        "day1": {
+          "name": "day1",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day2": {
+          "name": "day2",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3": {
+          "name": "day3",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day4": {
+          "name": "day4",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5": {
+          "name": "day5",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
@@ -1137,7 +1696,22 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "services_name_unique": {
+          "name": "services_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        },
+        "services_itemNumber_unique": {
+          "name": "services_itemNumber_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "itemNumber"
+          ]
+        }
+      }
     },
     "public.storeopeninghours": {
       "name": "storeopeninghours",
@@ -1349,6 +1923,24 @@
         "storeName": {
           "name": "storeName",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "storeWebSite": {
+          "name": "storeWebSite",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storeVatNumber": {
+          "name": "storeVatNumber",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storeFSkatt": {
+          "name": "storeFSkatt",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": true
         },

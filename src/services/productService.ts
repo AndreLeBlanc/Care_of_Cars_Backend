@@ -1,8 +1,10 @@
 import {
+  Award,
   DbDateType,
-  ProductAward,
+  LocalProductID,
   ProductCategoryID,
-  ProductCost,
+  ProductCostDinero,
+  ProductCostNumber,
   ProductDescription,
   ProductExternalArticleNumber,
   ProductID,
@@ -10,270 +12,355 @@ import {
   ProductItemNumber,
   ProductSupplierArticleNumber,
   ProductUpdateRelatedData,
+  StoreID,
+  localProducts,
   products,
 } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
 
 import { desc, eq, ilike, or, sql } from 'drizzle-orm'
-import { Offset } from '../plugins/pagination.js'
 
-export type ProductAddType = {
+import { Limit, Offset, Page } from '../plugins/pagination.js'
+
+import { Either, errorHandling, left, right } from '../utils/helper.js'
+
+import Dinero from 'dinero.js'
+
+export type ProductBase = {
   productItemNumber: ProductItemNumber
+  cost: ProductCostDinero
   productCategoryID: ProductCategoryID
   productDescription?: ProductDescription
   productSupplierArticleNumber?: ProductSupplierArticleNumber
   productExternalArticleNumber?: ProductExternalArticleNumber
   productUpdateRelatedData?: ProductUpdateRelatedData
+  award: Award
   productInventoryBalance?: ProductInventoryBalance
-  productAward: ProductAward
-  productCost: ProductCost
-  productId?: ProductID
 }
 
-export type Product = ProductAddType & DbDateType
+export type ProductAdd = ProductBase & { currency: Dinero.Currency }
 
-export type ProductEdit = ProductAddType
+export type LocalProductAdd = ProductBase & {
+  localProductID?: LocalProductID
+  currency: Dinero.Currency
+}
+
+export type Product = ProductBase & { productID: ProductID } & DbDateType
+
+export type LocalProduct = ProductBase & { localProductID: LocalProductID } & DbDateType
+
+export type ProductEdit = ProductAdd
 
 export type ProductsPaginate = {
   totalItems: number
   totalPage: number
   perPage: number
-  data: Product[]
+  produts: Product[]
+  localProducts: LocalProduct[]
+}
+
+export type LocalOrGlobal = 'Local' | 'Global'
+
+type BrandMe = {
+  productItemNumber: ProductItemNumber
+  cost: ProductCostNumber
+  currency: string
+  productCategoryID: ProductCategoryID
+  productDescription: ProductDescription | null
+  productSupplierArticleNumber: ProductSupplierArticleNumber | null
+  productExternalArticleNumber: ProductExternalArticleNumber | null
+  productUpdateRelatedData: ProductUpdateRelatedData | null
+  award: Award
+  productInventoryBalance: ProductInventoryBalance | null
+} & DbDateType &
+  ({ productID: ProductID } | { localProductID: LocalProductID })
+
+function brander(newProduct: BrandMe): Either<string, Product | LocalProduct> {
+  let id: { localProductID: LocalProductID } | { productID: ProductID }
+  if ('productID' in newProduct) {
+    id = { productID: newProduct.productID }
+  } else {
+    id = { localProductID: newProduct.localProductID }
+  }
+  return newProduct
+    ? right({
+        ...{
+          productCategoryID: newProduct.productCategoryID,
+          productItemNumber: newProduct.productItemNumber,
+          award: newProduct.award,
+          cost: ProductCostDinero(
+            Dinero({
+              amount: newProduct.cost,
+              currency: newProduct.currency as Dinero.Currency,
+            }),
+          ),
+          productDescription: newProduct.productDescription ?? undefined,
+          productExternalArticleNumber: newProduct.productExternalArticleNumber ?? undefined,
+          productInventoryBalance: newProduct.productInventoryBalance ?? undefined,
+          productSupplierArticleNumber: newProduct.productSupplierArticleNumber ?? undefined,
+          productUpdateRelatedData: newProduct.productUpdateRelatedData ?? undefined,
+          createdAt: newProduct.createdAt,
+          updatedAt: newProduct.updatedAt,
+        },
+        ...id,
+      })
+    : left("couldn't add product")
+}
+
+function addValue(product: ProductBase) {
+  return {
+    productCategoryID: product.productCategoryID,
+    productItemNumber: product.productItemNumber,
+    cost: ProductCostNumber(product.cost.getAmount()),
+    currency: product.cost.getCurrency(),
+    award: product.award,
+    productDescription: product.productDescription,
+    productExternalArticleNumber: product.productExternalArticleNumber,
+    productInventoryBalance: product.productInventoryBalance,
+    productSupplierArticleNumber: product.productSupplierArticleNumber,
+    productUpdateRelatedData: product.productUpdateRelatedData,
+  }
+}
+
+function isProductID(id: ProductID | LocalProductID): id is ProductID {
+  return id.__type__ === 'productID'
 }
 
 //Add product
-export async function addProduct(data: ProductAddType): Promise<Product | undefined> {
-  const [newProduct] = await db
-    .insert(products)
-    .values({
-      productCategoryID: data.productCategoryID,
-      productItemNumber: data.productItemNumber,
-      productAward: data.productAward,
-      productCost: data.productCost,
-      productDescription: data.productDescription,
-      productExternalArticleNumber: data.productExternalArticleNumber,
-      productInventoryBalance: data.productInventoryBalance,
-      productSupplierArticleNumber: data.productSupplierArticleNumber,
-      productUpdateRelatedData: data.productUpdateRelatedData,
-    })
-    .returning()
-  return newProduct
-    ? {
-        productCategoryID: ProductCategoryID(newProduct.productCategoryID),
-        productItemNumber: ProductItemNumber(newProduct.productItemNumber),
-        productAward: ProductAward(newProduct.productAward),
-        productCost: ProductCost(newProduct.productCost),
-        productDescription: newProduct.productDescription
-          ? ProductDescription(newProduct.productDescription)
-          : undefined,
-        productExternalArticleNumber: newProduct.productExternalArticleNumber
-          ? ProductExternalArticleNumber(newProduct.productExternalArticleNumber)
-          : undefined,
-        productInventoryBalance: newProduct.productInventoryBalance
-          ? ProductInventoryBalance(newProduct.productInventoryBalance)
-          : undefined,
-        productSupplierArticleNumber: newProduct.productSupplierArticleNumber
-          ? ProductSupplierArticleNumber(newProduct.productSupplierArticleNumber)
-          : undefined,
-        productUpdateRelatedData: newProduct.productUpdateRelatedData
-          ? ProductUpdateRelatedData(newProduct.productUpdateRelatedData)
-          : undefined,
-        createdAt: newProduct.createdAt,
-        updatedAt: newProduct.updatedAt,
-      }
-    : undefined
+export async function addProduct(
+  product: ProductBase,
+  type: LocalOrGlobal,
+  storeID?: StoreID,
+): Promise<Either<string, Product | LocalProduct>> {
+  const add = addValue(product)
+  try {
+    if (type === 'Global') {
+      const [newProduct] = await db.insert(products).values(add).returning()
+      return brander(newProduct)
+    } else if (storeID != null) {
+      const [newProduct] = await db
+        .insert(localProducts)
+        .values({ ...add, storeID: storeID })
+        .returning()
+      return brander(newProduct)
+    } else {
+      return left('store not found')
+    }
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
 //edit product
-export async function editProduct(data: ProductAddType): Promise<ProductEdit | undefined> {
-  const [editProduct] = await db
-    .update(products)
-    .set({
-      productCategoryID: data.productCategoryID,
-      productAward: data.productAward,
-      productCost: data.productCost,
-      productDescription: data.productDescription,
-      productExternalArticleNumber: data.productExternalArticleNumber,
-      productInventoryBalance: data.productInventoryBalance,
-      productSupplierArticleNumber: data.productSupplierArticleNumber,
-      productUpdateRelatedData: data.productUpdateRelatedData,
-    })
-    .where(eq(products.productItemNumber, data.productItemNumber))
-    .returning({
-      productCategoryID: products.productCategoryID,
-      productItemNumber: products.productItemNumber,
-      productAward: products.productAward,
-      productCost: products.productCost,
-      productDescription: products.productDescription,
-      productExternalArticleNumber: products.productExternalArticleNumber,
-      productInventoryBalance: products.productInventoryBalance,
-      productSupplierArticleNumber: products.productSupplierArticleNumber,
-      productUpdateRelatedData: products.productUpdateRelatedData,
-    })
+export async function editProduct(
+  product: ProductBase,
+  id: LocalProductID | ProductID,
+): Promise<Either<string, Product | LocalProduct>> {
+  const add = addValue(product)
 
-  return editProduct
-    ? {
-        productCategoryID: ProductCategoryID(editProduct.productCategoryID),
-        productItemNumber: ProductItemNumber(editProduct.productItemNumber),
-        productAward: ProductAward(editProduct.productAward),
-        productCost: ProductCost(editProduct.productCost),
-        productDescription: editProduct.productDescription
-          ? ProductDescription(editProduct.productDescription)
-          : undefined,
-        productExternalArticleNumber: editProduct.productExternalArticleNumber
-          ? ProductExternalArticleNumber(editProduct.productExternalArticleNumber)
-          : undefined,
-        productInventoryBalance: editProduct.productInventoryBalance
-          ? ProductInventoryBalance(editProduct.productInventoryBalance)
-          : undefined,
-        productSupplierArticleNumber: editProduct.productSupplierArticleNumber
-          ? ProductSupplierArticleNumber(editProduct.productSupplierArticleNumber)
-          : undefined,
-        productUpdateRelatedData: editProduct.productUpdateRelatedData
-          ? ProductUpdateRelatedData(editProduct.productUpdateRelatedData)
-          : undefined,
-      }
-    : undefined
+  try {
+    if (isProductID(id)) {
+      const [editProduct] = await db
+        .update(products)
+        .set(add)
+        .where(eq(products.productID, id))
+        .returning()
+      return brander(editProduct)
+    } else {
+      const [editProduct] = await db
+        .update(localProducts)
+        .set(add)
+        .where(eq(localProducts.localProductID, id))
+        .returning()
+      return brander(editProduct)
+    }
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
 //Delete Product
-export async function deleteProductByItemNumber(
-  productItemNumber: ProductItemNumber,
-): Promise<ProductItemNumber | undefined> {
-  const [deletedProduct] = await db
-    .delete(products)
-    .where(eq(products.productItemNumber, productItemNumber))
-    .returning({ productItemNumber: products.productItemNumber })
-  return deletedProduct ? ProductItemNumber(deletedProduct.productItemNumber) : undefined
+export async function deleteProductByID(
+  id: ProductID | LocalProductID,
+): Promise<Either<string, ProductID | LocalProductID>> {
+  try {
+    if (isProductID(id)) {
+      const [deletedProduct] = await db
+        .delete(products)
+        .where(eq(products.productID, id))
+        .returning({ productID: products.productID })
+      return right(deletedProduct.productID)
+    } else {
+      const [deletedProduct] = await db
+        .delete(localProducts)
+        .where(eq(localProducts.localProductID, id))
+        .returning({ productID: localProducts.localProductID })
+      return right(deletedProduct.productID)
+    }
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
 //Get product by Id,
 export async function getProductById(
-  productItemNumber: ProductItemNumber,
-): Promise<Product | undefined> {
-  const [productData] = await db
-    .select({
-      productCategoryID: products.productCategoryID,
-      productItemNumber: products.productItemNumber,
-      productAward: products.productAward,
-      productCost: products.productCost,
-      productDescription: products.productDescription,
-      productExternalArticleNumber: products.productExternalArticleNumber,
-      productInventoryBalance: products.productInventoryBalance,
-      productSupplierArticleNumber: products.productSupplierArticleNumber,
-      productUpdateRelatedData: products.productUpdateRelatedData,
-      createdAt: products.createdAt,
-      updatedAt: products.updatedAt,
-    })
-    .from(products)
-    .where(eq(products.productItemNumber, productItemNumber))
-  return productData
-    ? {
-        productCategoryID: ProductCategoryID(productData.productCategoryID),
-        productItemNumber: ProductItemNumber(productData.productItemNumber),
-        productAward: ProductAward(productData.productAward),
-        productCost: ProductCost(productData.productCost),
-        productDescription: productData.productDescription
-          ? ProductDescription(productData.productDescription)
-          : undefined,
-        productExternalArticleNumber: productData.productExternalArticleNumber
-          ? ProductExternalArticleNumber(productData.productExternalArticleNumber)
-          : undefined,
-        productInventoryBalance: productData.productInventoryBalance
-          ? ProductInventoryBalance(productData.productInventoryBalance)
-          : undefined,
-        productSupplierArticleNumber: productData.productSupplierArticleNumber
-          ? ProductSupplierArticleNumber(productData.productSupplierArticleNumber)
-          : undefined,
-        productUpdateRelatedData: productData.productUpdateRelatedData
-          ? ProductUpdateRelatedData(productData.productUpdateRelatedData)
-          : undefined,
-        createdAt: productData.createdAt,
-        updatedAt: productData.updatedAt,
-      }
-    : undefined
+  id: ProductID | LocalProductID,
+): Promise<Either<string, Product | LocalProduct>> {
+  try {
+    if (isProductID(id)) {
+      const [productData] = await db.select().from(products).where(eq(products.productID, id))
+      return productData ? brander(productData) : left('Product Not Found')
+    } else {
+      const [productData] = await db
+        .select()
+        .from(localProducts)
+        .where(eq(localProducts.localProductID, id))
+      return productData ? brander(productData) : left('Product Not Found')
+    }
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
-//getProduct list
 export async function getProductsPaginated(
   search: string,
-  limit = 10,
-  page = 1,
+  limit = Limit(10),
+  page = Page(1),
   offset = Offset(0),
-): Promise<ProductsPaginate> {
-  const returnData = await db.transaction(async (tx) => {
-    const condition = or(
-      ilike(products.productItemNumber, '%' + search + '%'),
-      ilike(products.productCategoryID, '%' + search + '%'),
-      ilike(products.productExternalArticleNumber, '%' + search + '%'),
-      ilike(products.productDescription, '%' + search + '%'),
-      ilike(products.productSupplierArticleNumber, '%' + search + '%'),
-    )
+): Promise<Either<string, ProductsPaginate>> {
+  try {
+    const { totalItems, productList, localProductList } = await db.transaction(async (tx) => {
+      const condition = or(
+        ilike(products.productItemNumber, '%' + search + '%'),
+        ilike(products.productCategoryID, '%' + search + '%'),
+        ilike(products.productExternalArticleNumber, '%' + search + '%'),
+        ilike(products.productDescription, '%' + search + '%'),
+        ilike(products.productSupplierArticleNumber, '%' + search + '%'),
+        ilike(localProducts.productItemNumber, '%' + search + '%'),
+        ilike(localProducts.productCategoryID, '%' + search + '%'),
+        ilike(localProducts.productExternalArticleNumber, '%' + search + '%'),
+        ilike(localProducts.productDescription, '%' + search + '%'),
+        ilike(localProducts.productSupplierArticleNumber, '%' + search + '%'),
+      )
 
-    const [totalItems] = await tx
-      .select({
-        count: sql`count(*)`.mapWith(Number).as('count'),
-      })
-      .from(products)
-      .where(condition)
+      // Query for total items count
+      const [{ count: totalItems }] = await tx
+        .select({
+          count: sql`COUNT(*)`.mapWith(Number).as('count'),
+        })
+        .from(products)
+        .where(condition)
+        .unionAll(
+          tx
+            .select({
+              count: sql`COUNT(*)`.mapWith(Number).as('count'),
+            })
+            .from(localProducts)
+            .where(condition),
+        )
 
-    const productList = await tx
-      .select({
-        productId: products.productId,
-        productCategoryID: products.productCategoryID,
-        productItemNumber: products.productItemNumber,
-        productAward: products.productAward,
-        productCost: products.productCost,
-        productDescription: products.productDescription,
-        productExternalArticleNumber: products.productExternalArticleNumber,
-        productInventoryBalance: products.productInventoryBalance,
-        productSupplierArticleNumber: products.productSupplierArticleNumber,
-        productUpdateRelatedData: products.productUpdateRelatedData,
-        createdAt: products.createdAt,
-        updatedAt: products.updatedAt,
-      })
-      .from(products)
-      .where(condition)
-      .orderBy(desc(products.createdAt))
-      .limit(limit || 10)
-      .offset(offset || 0)
+      // Query for paginated products
+      const productList = await tx
+        .select({
+          productID: products.productID,
+          productCategoryID: products.productCategoryID,
+          productItemNumber: products.productItemNumber,
+          award: products.award,
+          cost: products.cost,
+          currency: products.currency,
+          productDescription: products.productDescription,
+          productExternalArticleNumber: products.productExternalArticleNumber,
+          productInventoryBalance: products.productInventoryBalance,
+          productSupplierArticleNumber: products.productSupplierArticleNumber,
+          productUpdateRelatedData: products.productUpdateRelatedData,
+          createdAt: products.createdAt,
+          updatedAt: products.updatedAt,
+        })
+        .from(products)
+        .where(condition)
+        .orderBy(desc(products.createdAt))
+        .limit(limit || 10)
+        .offset(offset || 0)
 
-    return { totalItems, productList }
-  })
+      const localProductList = await tx
+        .select({
+          localProductID: localProducts.localProductID, // Cast NULL to integer
+          productCategoryID: localProducts.productCategoryID,
+          productItemNumber: localProducts.productItemNumber,
+          award: localProducts.award,
+          cost: localProducts.cost,
+          currency: localProducts.currency,
+          productDescription: localProducts.productDescription,
+          productExternalArticleNumber: localProducts.productExternalArticleNumber,
+          productInventoryBalance: localProducts.productInventoryBalance,
+          productSupplierArticleNumber: localProducts.productSupplierArticleNumber,
+          productUpdateRelatedData: localProducts.productUpdateRelatedData,
+          createdAt: localProducts.createdAt,
+          updatedAt: localProducts.updatedAt,
+        })
+        .from(localProducts)
+        .where(condition)
+        .orderBy(desc(localProducts.createdAt))
+        .limit(limit || 10)
+        .offset(offset || 0)
 
-  const ProductsBrandedList = returnData.productList.map((item) => {
-    return {
-      productId: item.productId,
-      productCategoryID: ProductCategoryID(item.productCategoryID),
-      productItemNumber: ProductItemNumber(item.productItemNumber),
-      productAward: ProductAward(item.productAward),
-      productCost: ProductCost(item.productCost),
-      productDescription: item.productDescription
-        ? ProductDescription(item.productDescription)
-        : undefined,
-      productExternalArticleNumber: item.productExternalArticleNumber
-        ? ProductExternalArticleNumber(item.productExternalArticleNumber)
-        : undefined,
-      productInventoryBalance: item.productInventoryBalance
-        ? ProductInventoryBalance(item.productInventoryBalance)
-        : undefined,
-      productSupplierArticleNumber: item.productSupplierArticleNumber
-        ? ProductSupplierArticleNumber(item.productSupplierArticleNumber)
-        : undefined,
-      productUpdateRelatedData: item.productUpdateRelatedData
-        ? ProductUpdateRelatedData(item.productUpdateRelatedData)
-        : undefined,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
-    }
-  })
+      return { totalItems, productList, localProductList }
+    })
 
-  const totalPage = Math.ceil(returnData.totalItems.count / limit)
+    const productsBrandedList = productList.map((item) => {
+      return {
+        productID: item.productID,
+        productCategoryID: item.productCategoryID,
+        productItemNumber: item.productItemNumber,
+        award: item.award,
+        cost: ProductCostDinero(
+          Dinero({
+            amount: item.cost,
+            currency: item.currency as Dinero.Currency,
+          }),
+        ),
+        productDescription: item.productDescription ?? undefined,
+        productExternalArticleNumber: item.productExternalArticleNumber ?? undefined,
+        productInventoryBalance: item.productInventoryBalance ?? undefined,
+        productSupplierArticleNumber: item.productSupplierArticleNumber ?? undefined,
+        productUpdateRelatedData: item.productUpdateRelatedData ?? undefined,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      }
+    })
 
-  return {
-    totalItems: returnData.totalItems.count,
-    totalPage,
-    perPage: page,
-    data: ProductsBrandedList,
+    const localProductsBrandedList = localProductList.map((item) => {
+      return {
+        localProductID: item.localProductID,
+        productCategoryID: item.productCategoryID,
+        productItemNumber: item.productItemNumber,
+        award: item.award,
+        cost: ProductCostDinero(
+          Dinero({
+            amount: item.cost,
+            currency: item.currency as Dinero.Currency,
+          }),
+        ),
+        productDescription: item.productDescription ?? undefined,
+        productExternalArticleNumber: item.productExternalArticleNumber ?? undefined,
+        productInventoryBalance: item.productInventoryBalance ?? undefined,
+        productSupplierArticleNumber: item.productSupplierArticleNumber ?? undefined,
+        productUpdateRelatedData: item.productUpdateRelatedData ?? undefined,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      }
+    })
+
+    const totalPage = Math.ceil(totalItems / limit)
+
+    return right({
+      totalItems: totalItems,
+      totalPage,
+      perPage: page,
+      products: productsBrandedList,
+      localProducts: localProductsBrandedList,
+    })
+  } catch (e) {
+    return left(errorHandling(e))
   }
 }

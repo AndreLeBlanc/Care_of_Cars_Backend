@@ -1,5 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 
+export const CategoryIDSchema = Type.Number({ minimum: 1 })
+
 export const ListServiceCategoryQueryParamSchema = Type.Object({
   search: Type.Optional(Type.String()),
   limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
@@ -16,7 +18,7 @@ export const CreateServiceCategorySchema = Type.Object({
 export type CreateServiceCategorySchemaType = Static<typeof CreateServiceCategorySchema>
 
 export const getServiceCategoryByIDSchema = Type.Object({
-  id: Type.Number(),
+  id: CategoryIDSchema,
 })
 export type getServiceCategoryByIDType = Static<typeof getServiceCategoryByIDSchema>
 
