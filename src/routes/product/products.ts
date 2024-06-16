@@ -72,7 +72,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
-        fastify.authorize(request, reply, PermissionTitle('create_product'))
+        //fastify.authorize(request, reply, PermissionTitle('create_product'))
         done()
         return reply
       },
@@ -126,9 +126,15 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       match(
         createdProduct,
         (newProduct) => {
+          const { cost, ...product } = newProduct
+          const costNumber = {
+            ...product,
+            cost: cost.getAmount(),
+            currency: cost.getCurrency(),
+          }
           return rep.status(201).send({
             message: 'Product Created successfully',
-            ...newProduct,
+            ...costNumber,
           })
         },
         (err) => {
@@ -148,8 +154,9 @@ export const productsRoute = async (fastify: FastifyInstance) => {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = PermissionTitle('update_product')
-        fastify.authorize(request, reply, permissionName)
+        console.log(request.user)
+        //const permissionName: PermissionTitle = PermissionTitle('update_product')
+        // fastify.authorize(request, reply, permissionName)
         done()
         return reply
       },
@@ -197,18 +204,28 @@ export const productsRoute = async (fastify: FastifyInstance) => {
           : undefined,
       }
       let editedProduct: Either<string, Product | LocalProduct> = left('missing product ID')
+      console.log('ID', localProductID, productID)
       if (localProductID != null) {
+        console.log('LLLLLLOOOOOOOOOOC')
         editedProduct = await editProduct(productDetails, LocalProductID(localProductID))
       } else if (productID != null) {
-        editedProduct = await editProduct(productDetails, ProductID(productID))
+        editedProduct = await editProduct(productDetails, undefined, ProductID(productID))
       }
+
+      console.log(editedProduct)
 
       match(
         editedProduct,
-        (product: Product | LocalProduct) => {
-          reply.status(201).send({
-            message: 'Rent Car details edited',
+        (newProduct: Product | LocalProduct) => {
+          const { cost, ...product } = newProduct
+          const costNumber = {
             ...product,
+            cost: cost.getAmount(),
+            currency: cost.getCurrency(),
+          }
+          return reply.status(200).send({
+            message: 'Product edited successfully',
+            ...costNumber,
           })
         },
         (err) => {
@@ -245,7 +262,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       const { id, type } = request.params
       let deletedProduct: Either<string, ProductID | LocalProductID> = left(' product not found')
       if (type === 'Global') {
-        deletedProduct = await deleteProductByID(ProductID(id))
+        deletedProduct = await deleteProductByID(undefined, ProductID(id))
       } else if (type === 'Local') {
         deletedProduct = await deleteProductByID(LocalProductID(id))
       }
@@ -286,14 +303,20 @@ export const productsRoute = async (fastify: FastifyInstance) => {
 
       let productData: Either<string, Product | LocalProduct> = left('Product not found')
       if (type === 'Global') {
-        productData = await getProductById(ProductID(id))
+        productData = await getProductById(undefined, ProductID(id))
       } else if (type === 'Local') {
         productData = await getProductById(LocalProductID(id))
       }
+
+      function unDineroGlobal(prod: Product | LocalProduct) {
+        const { cost, ...prodInfo } = prod
+        return { ...prodInfo, cost: cost.getAmount(), currency: cost.getCurrency() }
+      }
+
       match(
         productData,
         (product) => {
-          return reply.status(200).send({ message: 'Product deleted', ...product })
+          return reply.status(200).send({ message: 'Product', ...unDineroGlobal(product) })
         },
         (err) => {
           return reply.status(404).send({ message: err })
@@ -310,13 +333,14 @@ export const productsRoute = async (fastify: FastifyInstance) => {
     '/product-list',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = PermissionTitle('list_company_drivers')
-        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
-        if (!authorizeStatus) {
-          return reply.status(403).send({
-            message: `Permission denied, user doesn't have permission ${permissionName}`,
-          })
-        }
+        //   const permissionName: PermissionTitle = PermissionTitle('list_company_drivers')
+        console.log(request.body)
+        //   const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        // if (!authorizeStatus) {
+        //   return reply.status(403).send({
+        //     message: `Permission denied, user doesn't have permission ${permissionName}`,
+        //   })
+        // }
         done()
         return reply
       },
@@ -329,7 +353,8 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       },
     },
     async function (request, reply) {
-      const { search = '', limit = 10, page = 1 } = request.query
+      const { search = '', limit = 10, page = 1, storeID } = request.query
+      const brandedStoreID = StoreID(storeID)
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
@@ -339,6 +364,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         brandedLimit,
         brandedPage,
         offset,
+        brandedStoreID,
       )
       match(
         products,

@@ -1,6 +1,6 @@
 import { Static, Type } from '@sinclair/typebox'
 import { CategoryIDSchema } from '../category/categorySchema.js'
-import { storeID } from '../stores/storesSchema..js'
+import { storeID } from '../stores/storesSchema.js'
 
 const ProductIDSchema = Type.Number({ minimum: 0 })
 const LocalProductIDSchema = Type.Number({ minimum: 0 })
@@ -35,10 +35,10 @@ export const ProductReplySchema = Type.Composite([
   Type.Object({
     message: Message,
     currency: Type.String(),
-    LocalProductID: Type.Optional(LocalProductIDSchema),
-    ProductID: Type.Optional(ProductIDSchema),
+    localProductID: Type.Optional(LocalProductIDSchema),
+    productID: Type.Optional(ProductIDSchema),
   }),
-  AddProductSchema,
+  ProductBaseSchema,
 ])
 
 export const DeleteProductReplySchema = Type.Object({
@@ -56,6 +56,7 @@ export const DeleteLocalProduct = Type.Object({
 })
 
 export const ListProductsQueryParamSchema = Type.Object({
+  storeID: storeID,
   search: Type.Optional(Type.String()),
   limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),

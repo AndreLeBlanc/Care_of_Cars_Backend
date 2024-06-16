@@ -18,7 +18,7 @@ import {
 } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
 
-import { desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
 
 import { Limit, Offset, Page } from '../plugins/pagination.js'
 
@@ -82,6 +82,7 @@ function brander(newProduct: BrandMe): Either<string, Product | LocalProduct> {
   } else {
     id = { localProductID: newProduct.localProductID }
   }
+
   return newProduct
     ? right({
         ...{
@@ -122,10 +123,6 @@ function addValue(product: ProductBase) {
   }
 }
 
-function isProductID(id: ProductID | LocalProductID): id is ProductID {
-  return id.__type__ === 'productID'
-}
-
 //Add product
 export async function addProduct(
   product: ProductBase,
@@ -154,26 +151,27 @@ export async function addProduct(
 //edit product
 export async function editProduct(
   product: ProductBase,
-  id: LocalProductID | ProductID,
+  localProductID?: LocalProductID,
+  productID?: ProductID,
 ): Promise<Either<string, Product | LocalProduct>> {
   const add = addValue(product)
-
   try {
-    if (isProductID(id)) {
+    if (productID != null) {
       const [editProduct] = await db
         .update(products)
         .set(add)
-        .where(eq(products.productID, id))
+        .where(eq(products.productID, productID))
         .returning()
       return brander(editProduct)
-    } else {
+    } else if (localProductID != null) {
       const [editProduct] = await db
         .update(localProducts)
         .set(add)
-        .where(eq(localProducts.localProductID, id))
+        .where(eq(localProducts.localProductID, localProductID))
         .returning()
       return brander(editProduct)
     }
+    return left('no product to update')
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -181,22 +179,24 @@ export async function editProduct(
 
 //Delete Product
 export async function deleteProductByID(
-  id: ProductID | LocalProductID,
+  localProductID?: LocalProductID,
+  productID?: ProductID,
 ): Promise<Either<string, ProductID | LocalProductID>> {
   try {
-    if (isProductID(id)) {
+    if (productID != null) {
       const [deletedProduct] = await db
         .delete(products)
-        .where(eq(products.productID, id))
+        .where(eq(products.productID, productID))
         .returning({ productID: products.productID })
       return right(deletedProduct.productID)
-    } else {
+    } else if (localProductID != null) {
       const [deletedProduct] = await db
         .delete(localProducts)
-        .where(eq(localProducts.localProductID, id))
+        .where(eq(localProducts.localProductID, localProductID))
         .returning({ productID: localProducts.localProductID })
       return right(deletedProduct.productID)
     }
+    return left('Product not found')
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -204,19 +204,24 @@ export async function deleteProductByID(
 
 //Get product by Id,
 export async function getProductById(
-  id: ProductID | LocalProductID,
+  localProductID?: LocalProductID,
+  productID?: ProductID,
 ): Promise<Either<string, Product | LocalProduct>> {
   try {
-    if (isProductID(id)) {
-      const [productData] = await db.select().from(products).where(eq(products.productID, id))
+    if (productID != null) {
+      const [productData] = await db
+        .select()
+        .from(products)
+        .where(eq(products.productID, productID))
       return productData ? brander(productData) : left('Product Not Found')
-    } else {
+    } else if (localProductID != null) {
       const [productData] = await db
         .select()
         .from(localProducts)
-        .where(eq(localProducts.localProductID, id))
+        .where(eq(localProducts.localProductID, localProductID))
       return productData ? brander(productData) : left('Product Not Found')
     }
+    return left('Product not found')
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -227,22 +232,25 @@ export async function getProductsPaginated(
   limit = Limit(10),
   page = Page(1),
   offset = Offset(0),
+  storeID: StoreID,
 ): Promise<Either<string, ProductsPaginate>> {
   try {
     const { totalItems, productList, localProductList } = await db.transaction(async (tx) => {
       const condition = or(
         ilike(products.productItemNumber, '%' + search + '%'),
-        ilike(products.productCategoryID, '%' + search + '%'),
         ilike(products.productExternalArticleNumber, '%' + search + '%'),
         ilike(products.productDescription, '%' + search + '%'),
         ilike(products.productSupplierArticleNumber, '%' + search + '%'),
-        ilike(localProducts.productItemNumber, '%' + search + '%'),
-        ilike(localProducts.productCategoryID, '%' + search + '%'),
-        ilike(localProducts.productExternalArticleNumber, '%' + search + '%'),
-        ilike(localProducts.productDescription, '%' + search + '%'),
-        ilike(localProducts.productSupplierArticleNumber, '%' + search + '%'),
       )
-
+      const conditionLocal = and(
+        eq(localProducts.storeID, storeID),
+        or(
+          ilike(localProducts.productItemNumber, '%' + search + '%'),
+          ilike(localProducts.productExternalArticleNumber, '%' + search + '%'),
+          ilike(localProducts.productDescription, '%' + search + '%'),
+          ilike(localProducts.productSupplierArticleNumber, '%' + search + '%'),
+        ),
+      )
       // Query for total items count
       const [{ count: totalItems }] = await tx
         .select({
@@ -256,7 +264,7 @@ export async function getProductsPaginated(
               count: sql`COUNT(*)`.mapWith(Number).as('count'),
             })
             .from(localProducts)
-            .where(condition),
+            .where(conditionLocal),
         )
 
       // Query for paginated products
@@ -299,7 +307,7 @@ export async function getProductsPaginated(
           updatedAt: localProducts.updatedAt,
         })
         .from(localProducts)
-        .where(condition)
+        .where(conditionLocal)
         .orderBy(desc(localProducts.createdAt))
         .limit(limit || 10)
         .offset(offset || 0)

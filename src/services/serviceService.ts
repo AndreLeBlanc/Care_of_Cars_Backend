@@ -5,6 +5,7 @@ import { listServiceOrderByEnum, serviceOrderEnum } from '../routes/services/ser
 
 import {
   Award,
+  ColorForService,
   LocalServiceID,
   ServiceCallInterval,
   ServiceCategoryID,
@@ -49,11 +50,11 @@ type ServiceVariantBase = {
   day5?: ServiceDay5
 }
 export type ServiceVariant = ServiceVariantBase & {
-  serviceID: ServiceID
+  serviceID?: ServiceID
   serviceVariantID?: ServiceID
 }
 export type LocalServiceVariant = ServiceVariantBase & {
-  localServiceID: LocalServiceID
+  localServiceID?: LocalServiceID
   serviceVariantID?: ServiceID
 }
 
@@ -62,13 +63,11 @@ export type ServicesPaginated = {
   totalLocalServices: number
   totalPage: number
   perPage: Page
-  localServices: LocalServiceVariant[]
-  services: ServiceVariant[]
+  localServices: (Omit<LocalService, 'colorForService'> & { colorForService: ColorForService })[]
+  services: (Omit<Service, 'colorForService'> & { colorForService: ColorForService })[]
 }
 
-export type ColorForService = (typeof colorForService)[number]
-
-type ServiceBase = {
+export type ServiceBase = {
   name: ServiceName
   cost: ServiceCostDinero
   award: Award
@@ -76,7 +75,7 @@ type ServiceBase = {
   includeInAutomaticSms: ServiceIncludeInAutomaticSms
   hidden: ServiceHidden
   callInterval?: ServiceCallInterval
-  colorForService?: ColorForService
+  colorForService: ColorForService
   warrantyCard?: ServiceWarrantyCard
   itemNumber?: ServiceItemNumber
   suppliersArticleNumber?: ServiceSuppliersArticleNumber
@@ -99,11 +98,11 @@ export type LocalServiceCreate = ServiceBase & {
 export type Service = ServiceCreate & { serviceID: ServiceID; serviceVariants: ServiceVariant[] }
 export type LocalService = LocalServiceCreate & { localServiceID: LocalServiceID }
 
-function convertToColorEnum(str: string): ColorForService | undefined {
+export function convertToColorEnum(str: string): ColorForService {
   if (colorForService.includes(str as ColorForService)) {
     return str as ColorForService
   }
-  return undefined
+  return 'None' as ColorForService
 }
 
 type ServiceUnBranded = {
@@ -116,7 +115,7 @@ type ServiceUnBranded = {
   includeInAutomaticSms: ServiceIncludeInAutomaticSms
   hidden: ServiceHidden
   callInterval: ServiceCallInterval | null
-  colorForService: string | null
+  colorForService: string
   warrantyCard: ServiceWarrantyCard | null
   itemNumber: ServiceItemNumber | null
   suppliersArticleNumber: ServiceSuppliersArticleNumber | null
@@ -164,7 +163,7 @@ function brander(rawService: ServiceUnBranded): Either<string, Service | LocalSe
           callInterval: rawService.callInterval ?? undefined,
           colorForService: rawService.colorForService
             ? convertToColorEnum(rawService.colorForService)
-            : undefined,
+            : ('None' as ColorForService),
           warrantyCard: rawService.warrantyCard ?? undefined,
           itemNumber: rawService.itemNumber ?? undefined,
           suppliersArticleNumber: rawService.suppliersArticleNumber ?? undefined,
@@ -367,6 +366,7 @@ export async function createService(
 }
 
 export async function getServicesPaginate(
+  storeID: StoreID,
   search: Search,
   limit = Limit(10),
   page = Page(1),
@@ -386,12 +386,12 @@ export async function getServicesPaginate(
   )
 
   const localCondition = and(
-    eq(services.hidden, hidden),
+    and(eq(localServices.storeID, storeID), eq(localServices.hidden, hidden)),
     or(
-      ilike(services.name, '%' + search + '%'),
-      ilike(services.itemNumber, '%' + search + '%'),
-      ilike(services.suppliersArticleNumber, '%' + search + '%'),
-      ilike(services.externalArticleNumber, '%' + search + '%'),
+      ilike(localServices.name, '%' + search + '%'),
+      ilike(localServices.itemNumber, '%' + search + '%'),
+      ilike(localServices.suppliersArticleNumber, '%' + search + '%'),
+      ilike(localServices.externalArticleNumber, '%' + search + '%'),
     ),
   )
   let orderCondition

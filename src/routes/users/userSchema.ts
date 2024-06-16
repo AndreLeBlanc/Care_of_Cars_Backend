@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 
 import { RoleID } from '../roles/roleSchema.js'
-import { storeID } from '../stores/storesSchema..js'
+import { storeID } from '../stores/storesSchema.js'
 
 const firstName = Type.String({ minLength: 3, maxLength: 128 })
 const lastName = Type.String({ minLength: 3, maxLength: 128 })

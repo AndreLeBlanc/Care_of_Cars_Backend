@@ -1,5 +1,5 @@
 {
-  "id": "01523356-c1a5-4f3d-b741-2739b808012c",
+  "id": "76eb84ac-4532-48de-aae3-9177329abe10",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -139,15 +139,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "driverCars_driverID_stores_storeID_fk": {
-          "name": "driverCars_driverID_stores_storeID_fk",
+        "driverCars_driverID_drivers_driverID_fk": {
+          "name": "driverCars_driverID_drivers_driverID_fk",
           "tableFrom": "driverCars",
-          "tableTo": "stores",
+          "tableTo": "drivers",
           "columnsFrom": [
             "driverID"
           ],
           "columnsTo": [
-            "storeID"
+            "driverID"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -658,7 +658,7 @@
           "name": "cost",
           "type": "real",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "award": {
           "name": "award",
@@ -696,8 +696,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "serviceID": {
-          "name": "serviceID",
+        "localServiceID": {
+          "name": "localServiceID",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -719,12 +719,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "localServiceVariants_serviceID_localServices_localServiceID_fk": {
-          "name": "localServiceVariants_serviceID_localServices_localServiceID_fk",
+        "localServiceVariants_localServiceID_localServices_localServiceID_fk": {
+          "name": "localServiceVariants_localServiceID_localServices_localServiceID_fk",
           "tableFrom": "localServiceVariants",
           "tableTo": "localServices",
           "columnsFrom": [
-            "serviceID"
+            "localServiceID"
           ],
           "columnsTo": [
             "localServiceID"
@@ -758,17 +758,23 @@
           "primaryKey": false,
           "notNull": true
         },
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "currency": {
           "name": "currency",
           "type": "varchar(5)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "cost": {
           "name": "cost",
           "type": "real",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "includeInAutomaticSms": {
           "name": "includeInAutomaticSms",
@@ -780,7 +786,7 @@
           "name": "hidden",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "callInterval": {
           "name": "callInterval",
@@ -882,6 +888,19 @@
             "serviceCategoryID"
           ],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "localServices_storeID_stores_storeID_fk": {
+          "name": "localServices_storeID_stores_storeID_fk",
+          "tableFrom": "localServices",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1468,7 +1487,7 @@
           "name": "cost",
           "type": "real",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "currency": {
           "name": "currency",
@@ -1621,6 +1640,12 @@
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false
+        },
+        "award": {
+          "name": "award",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
         },
         "suppliersArticleNumber": {
           "name": "suppliersArticleNumber",
