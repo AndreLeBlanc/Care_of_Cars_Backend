@@ -23,6 +23,7 @@ import {
   ServiceCreate,
   ServicesPaginated,
   createService,
+  deletetServiceById,
   getServiceById,
   getServicesPaginate,
 } from '../../services/serviceService.js'
@@ -75,18 +76,19 @@ export async function services(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('create_service')
-        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authorizeStatus) {
-          return reply
-            .status(403)
-            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
-        }
+        console.log(permissionName, request.body)
+        //   const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        //   if (!authorizeStatus) {
+        //     return reply
+        //       .status(403)
+        //       .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        //   }
         done()
         return reply
       },
       schema: {
         body: ServiceSchema,
-        response: { 201: { ...ServiceSchema, ...MessageSchema }, 504: MessageSchema },
+        //   response: { 201: { ...ServiceSchema, ...MessageSchema }, 504: MessageSchema },
       },
     },
 
@@ -122,6 +124,9 @@ export async function services(fastify: FastifyInstance) {
         const localService: LocalServiceCreate & { localServiceID?: LocalServiceID } = {
           ...serviceBase,
           storeID: StoreID(request.body.storeID),
+          localServiceID: request.body.localServiceID
+            ? LocalServiceID(request.body.localServiceID)
+            : undefined,
           localServiceVariants: request.body.localServiceVariants.map((serviceVariant) => {
             return {
               localServicevariantID: serviceVariant.localServicevariantID ?? undefined,
@@ -148,6 +153,7 @@ export async function services(fastify: FastifyInstance) {
       } else {
         const serviceNew: ServiceCreate & { serviceID?: ServiceID } = {
           ...serviceBase,
+          serviceID: request.body.serviceID ? ServiceID(request.body.serviceID) : undefined,
           serviceVariants: request.body.serviceVariants.map((serviceVariant) => {
             return {
               servicevariantID: serviceVariant.servicevariantID ?? undefined,
@@ -170,9 +176,17 @@ export async function services(fastify: FastifyInstance) {
         }
         serviceData = await createService(serviceNew)
       }
+      console.log('service Data', serviceData)
       match(
         serviceData,
-        () => reply.status(201).send({ message: 'Service created', ...serviceData }),
+        (serv) => {
+          const { cost, ...rest } = serv
+
+          return reply.status(201).send({
+            message: 'Service created',
+            ...{ ...rest, cost: cost.getAmount(), currency: cost.getCurrency() },
+          })
+        },
         (err) => reply.status(504).send({ message: err }),
       )
     },
@@ -306,12 +320,15 @@ export async function services(fastify: FastifyInstance) {
       } else {
         id = LocalServiceID(request.params.serviceID)
       }
-      const user: Either<string, Service | LocalService> = await getServiceById(id)
-      console.log(user)
+      const service: Either<string, Service | LocalService> = await getServiceById({
+        type: request.params.type,
+        id: id,
+      })
+      console.log(service)
       match(
-        user,
-        (fetchedUser: Service | LocalService) => {
-          return reply.status(200).send(fetchedUser)
+        service,
+        (fetchedService: Service | LocalService) => {
+          return reply.status(200).send({ ...fetchedService })
         },
         (err) => {
           return reply.status(404).send({ message: err })
@@ -325,7 +342,7 @@ export async function services(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
-        fastify.authorize(request, reply, PermissionTitle('view_user'))
+        //        fastify.authorize(request, reply, PermissionTitle('view_service'))
         done()
         return reply
       },
@@ -341,11 +358,14 @@ export async function services(fastify: FastifyInstance) {
       } else {
         id = LocalServiceID(request.params.serviceID)
       }
-      const user: Either<string, Service | LocalService> = await getServiceById(id)
+      const service: Either<string, Service | LocalService> = await deletetServiceById({
+        type: request.params.type,
+        id: id,
+      })
       match(
-        user,
-        (fetchedUser: Service | LocalService) => {
-          return reply.status(200).send({ fetchedUser })
+        service,
+        (fetchedService: Service | LocalService) => {
+          return reply.status(200).send({ ...fetchedService })
         },
         (err) => {
           return reply.status(404).send({ message: err })

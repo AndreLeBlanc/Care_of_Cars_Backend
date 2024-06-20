@@ -38,6 +38,7 @@ import Dinero from 'dinero.js'
 import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 import { Either, Right, errorHandling, isRight, left, match, right } from '../utils/helper.js'
+import { LocalOrGlobal } from './productService.js'
 
 type ServiceVariantBase = {
   name: ServiceName
@@ -179,9 +180,6 @@ function brander(rawService: ServiceUnBranded): Either<string, Service | LocalSe
     : left("couldn't add service")
 }
 
-function isServiceID(serviceID: ServiceID | LocalServiceID): serviceID is ServiceID {
-  return (serviceID as ServiceID).__type__ === ' serviceID'
-}
 export async function createService(
   service:
     | (ServiceCreate & { serviceID?: ServiceID })
@@ -227,6 +225,7 @@ export async function createService(
               .values({ ...addToService, storeID: service.storeID })
               .returning()
       } else {
+        console.log('service', service)
         ;[insertedService] = service.serviceID
           ? await tx
               .update(services)
@@ -473,7 +472,6 @@ export async function getServicesPaginate(
         orderBy: orderConditionLocal,
         with: {
           serviceCategories: true,
-          localServiceVariants: true,
         },
       })
 
@@ -514,14 +512,16 @@ export async function getServicesPaginate(
   }
 }
 
-export async function getServiceById(
-  serviceID: ServiceID | LocalServiceID,
-): Promise<Either<string, Service | LocalService>> {
+export async function getServiceById(serviceID: {
+  type: LocalOrGlobal
+  id: ServiceID | LocalServiceID
+}): Promise<Either<string, Service | LocalService>> {
   try {
     let servicesDetail
-    if (isServiceID(serviceID)) {
+    if (serviceID.type === 'Global') {
+      console.log('i am here')
       servicesDetail = await db.query.services.findFirst({
-        where: eq(services.serviceID, serviceID),
+        where: eq(services.serviceID, serviceID.id as ServiceID),
         with: {
           serviceCategories: true,
           serviceVariants: true,
@@ -529,10 +529,9 @@ export async function getServiceById(
       })
     } else {
       servicesDetail = await db.query.localServices.findFirst({
-        where: eq(localServices.localServiceID, serviceID),
+        where: eq(localServices.localServiceID, serviceID.id as LocalServiceID),
         with: {
           serviceCategories: true,
-          serviceVariants: true,
         },
       })
     }
@@ -542,20 +541,21 @@ export async function getServiceById(
   }
 }
 
-export async function deletetServiceById(
-  serviceID: ServiceID | LocalServiceID,
-): Promise<Either<string, Service | LocalService>> {
+export async function deletetServiceById(serviceID: {
+  type: LocalOrGlobal
+  id: ServiceID | LocalServiceID
+}): Promise<Either<string, Service | LocalService>> {
   try {
     let servicesDetail
-    if (isServiceID(serviceID)) {
+    if (serviceID.type === 'Global') {
       servicesDetail = await db
         .delete(services)
-        .where(eq(services.serviceID, serviceID))
+        .where(eq(services.serviceID, serviceID.id as ServiceID))
         .returning()
     } else {
       servicesDetail = await db
         .delete(localServices)
-        .where(eq(localServices.localServiceID, serviceID))
+        .where(eq(localServices.localServiceID, serviceID.id as LocalServiceID))
         .returning()
     }
     return servicesDetail ? brander(servicesDetail[0]) : left("Couldn't find service")

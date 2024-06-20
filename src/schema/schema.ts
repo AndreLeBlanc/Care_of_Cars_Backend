@@ -531,7 +531,7 @@ export const services = pgTable('services', {
   name: varchar('name', { length: 256 }).$type<ServiceName>().notNull().unique(),
   serviceCategoryID: integer('serviceCategoryID')
     .$type<ServiceCategoryID>()
-    .references(() => serviceCategories.serviceCategoryID)
+    .references(() => serviceCategories.serviceCategoryID, { onDelete: 'cascade' })
     .notNull(),
   currency: varchar('currency', { length: 5 }).notNull(),
   cost: real('cost').$type<ServiceCostNumber>().notNull(),
@@ -574,7 +574,7 @@ export const localServices = pgTable('localServices', {
   localServiceID: serial('localServiceID').$type<LocalServiceID>().primaryKey(),
   serviceCategoryID: integer('serviceCategoryID')
     .$type<ServiceCategoryID>()
-    .references(() => serviceCategories.serviceCategoryID)
+    .references(() => serviceCategories.serviceCategoryID, { onDelete: 'cascade' })
     .notNull(),
   name: varchar('name', { length: 256 }).$type<ServiceName>().notNull(),
   storeID: integer('storeID')
@@ -610,9 +610,9 @@ export const localServicesCategoryToServiceRelations = relations(serviceCategori
   localServices: many(localServices),
 }))
 
-export const localServiceToServiceCategoryRelations = relations(services, ({ one }) => ({
+export const localServiceToServiceCategoryRelations = relations(localServices, ({ one }) => ({
   serviceCategories: one(serviceCategories, {
-    fields: [services.serviceCategoryID],
+    fields: [localServices.serviceCategoryID],
     references: [serviceCategories.serviceCategoryID],
   }),
 }))

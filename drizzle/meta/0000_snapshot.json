@@ -1,5 +1,5 @@
 {
-  "id": "76eb84ac-4532-48de-aae3-9177329abe10",
+  "id": "b66f0b44-005a-4268-8f9a-ea0e9a3baee6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -887,7 +887,7 @@
           "columnsTo": [
             "serviceCategoryID"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "localServices_storeID_stores_storeID_fk": {
@@ -1716,7 +1716,7 @@
           "columnsTo": [
             "serviceCategoryID"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
