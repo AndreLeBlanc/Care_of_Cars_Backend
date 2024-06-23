@@ -1,7 +1,8 @@
 import { Static, Type } from '@sinclair/typebox'
 import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 import { storeID } from '../stores/storesSchema.js'
-import { userID } from '../users/userSchema.js'
+
+import { employeeID } from '../employees/employeesSchema.js'
 
 const localQualID = Type.Integer()
 const globalQualID = Type.Integer()
@@ -58,20 +59,20 @@ export type ListQualsReplySchemaType = Static<typeof ListQualsReplySchema>
 export const ListQualsSchema = Type.Object({
   search: Type.Optional(Type.String()),
   storeID: Type.Optional(storeID),
-  userID: Type.Optional(userID),
+  employeeID: Type.Optional(employeeID),
 })
 export type ListQualsSchemaType = Static<typeof ListQualsSchema>
 
-export const PutUserLocalQualSchema = Type.Composite([
-  Type.Object({ userID: userID }),
+export const PutEmployeeLocalQualSchema = Type.Composite([
+  Type.Object({ employeeID: employeeID }),
   LocalQualIDSchema,
 ])
 
-export type PutUserLocalQualSchemaType = Static<typeof PutUserLocalQualSchema>
+export type PutEmployeeLocalQualSchemaType = Static<typeof PutEmployeeLocalQualSchema>
 
-export const PutUserGlobalQualSchema = Type.Composite([
-  Type.Object({ userID: userID }),
+export const PutEmployeeGlobalQualSchema = Type.Composite([
+  Type.Object({ employeeID: employeeID }),
   GlobalQualIDSchema,
 ])
 
-export type PutUserGlobalQualSchemaType = Static<typeof PutUserGlobalQualSchema>
+export type PutEmployeeGlobalQualSchemaType = Static<typeof PutEmployeeGlobalQualSchema>

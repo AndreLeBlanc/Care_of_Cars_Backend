@@ -9,6 +9,7 @@ import {
   date,
   index,
   integer,
+  interval,
   numeric,
   pgEnum,
   pgTable,
@@ -325,6 +326,8 @@ export const RoleDescription = make<RoleDescription>()
 
 export type EmployeeID = Brand<number, 'employeeID'>
 export const EmployeeID = make<EmployeeID>()
+export type EmployeeSpceialHoursID = Brand<number, 'employeeSpceialHoursID'>
+export const EmployeeSpceialHoursID = make<EmployeeSpceialHoursID>()
 export type ShortUserName = Brand<string, 'ShortUserName'>
 export const ShortUserName = make<ShortUserName>()
 export type EmploymentNumber = Brand<string, 'employmentNumber'>
@@ -345,6 +348,56 @@ export type EmployeeCheckIn = Brand<string, 'EmployeeCheckIn'>
 export const EmployeeCheckIn = make<EmployeeCheckIn>()
 export type EmployeeCheckOut = Brand<string, 'employeeCheckOut'>
 export const EmployeeCheckOut = make<EmployeeCheckOut>()
+
+export type MondayStart = Brand<string, 'mondayStart'>
+export const MondayStart = make<MondayStart>()
+export type MondayStop = Brand<string, 'mondayStop'>
+export const MondayStop = make<MondayStop>()
+export type MondayBreak = Brand<string, 'mondayBreak'>
+export const MondayBreak = make<MondayBreak>()
+export type TuesdayStart = Brand<string, 'tuesdayStart'>
+export const TuesdayStart = make<TuesdayStart>()
+export type TuesdayStop = Brand<string, 'tuesdayStop'>
+export const TuesdayStop = make<TuesdayStop>()
+export type TuesdayBreak = Brand<string, 'tuesdayBreak'>
+export const TuesdayBreak = make<TuesdayBreak>()
+export type WednesdayStart = Brand<string, 'wednesdayStart'>
+export const WednesdayStart = make<WednesdayStart>()
+export type WednesdayStop = Brand<string, 'wednesdayStop'>
+export const WednesdayStop = make<WednesdayStop>()
+export type WednesdayBreak = Brand<string, 'wednesdayBreak'>
+export const WednesdayBreak = make<WednesdayBreak>()
+export type ThursdayStart = Brand<string, 'thursdayStart'>
+export const ThursdayStart = make<ThursdayStart>()
+export type ThursdayStop = Brand<string, 'thursdayStop'>
+export const ThursdayStop = make<ThursdayStop>()
+export type ThursdayBreak = Brand<string, 'thursdayBreak'>
+export const ThursdayBreak = make<ThursdayBreak>()
+export type FridayStart = Brand<string, 'fridayStart'>
+export const FridayStart = make<FridayStart>()
+export type FridayStop = Brand<string, 'fridayStop'>
+export const FridayStop = make<FridayStop>()
+export type FridayBreak = Brand<string, 'fridayBreak'>
+export const FridayBreak = make<FridayBreak>()
+export type SaturdayStart = Brand<string, 'saturdayStart'>
+export const SaturdayStart = make<SaturdayStart>()
+export type SaturdayStop = Brand<string, 'saturdayStop'>
+export const SaturdayStop = make<SaturdayStop>()
+export type SaturdayBreak = Brand<string, 'saturdayBreak'>
+export const SaturdayBreak = make<SaturdayBreak>()
+export type SundayStart = Brand<string, 'sundayStart'>
+export const SundayStart = make<SundayStart>()
+export type SundayStop = Brand<string, 'sundayStop'>
+export const SundayStop = make<SundayStop>()
+export type SundayBreak = Brand<string, 'sundayBreak'>
+export const SundayBreak = make<SundayBreak>()
+
+export type WorkTime = Brand<Date, 'workTime'>
+export const WorkTime = make<WorkTime>()
+export type WorkTimeDescription = Brand<string, 'workTimeDescription'>
+export const WorkTimeDescription = make<WorkTimeDescription>()
+export type Absence = Brand<string, 'absence'>
+export const Absence = make<Absence>()
 
 export type TotalEmployees = Brand<number, 'totalEmployees'>
 export const TotalEmployees = make<TotalEmployees>()
@@ -432,6 +485,65 @@ export const employees = pgTable('employees', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
+export const employeesRelations = relations(employees, ({ many }) => ({
+  employeeSpecialHours: many(employeeSpecialHours),
+  employeeWorkingHours: many(employeeWorkingHours),
+}))
+
+export const employeeWorkingHours = pgTable(
+  'employeeWorkingHours',
+  {
+    storeID: integer('storeID')
+      .$type<StoreID>()
+      .references(() => stores.storeID, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
+    employeeID: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
+    mondayStart: time('mondayStart').$type<MondayStart>(),
+    mondayStop: time('mondayStop').$type<MondayStop>(),
+    mondayBreak: interval('mondayBreak').$type<MondayBreak>(),
+    tuesdayStart: time('tuesdayStart').$type<TuesdayStart>(),
+    tuesdayStop: time('tuesdayStop').$type<TuesdayStop>(),
+    tuesdayBreak: interval('tuesdayBreak').$type<TuesdayBreak>(),
+    wednesdayStart: time('wednesdayStart').$type<WednesdayStart>(),
+    wednesdayStop: time('wednesdayStop').$type<WednesdayStop>(),
+    wednesdayBreak: interval('wednesdayBreak').$type<WednesdayBreak>(),
+    thursdayStart: time('thursdayStart').$type<ThursdayStart>(),
+    thursdayStop: time('thursdayStop').$type<ThursdayStop>(),
+    thursdayBreak: interval('thursdayBreak').$type<ThursdayBreak>(),
+    fridayStart: time('fridayStart').$type<FridayStart>(),
+    fridayStop: time('fridayStop').$type<FridayStop>(),
+    fridayBreak: interval('fridayBreak').$type<FridayBreak>(),
+    saturdayStart: time('saturdayStart').$type<SaturdayStart>(),
+    saturdayStop: time('saturdayStop').$type<SaturdayStop>(),
+    saturdayBreak: interval('saturdayBreak').$type<SaturdayBreak>(),
+    sundayStart: time('sundayStart').$type<SundayStart>(),
+    sundayStop: time('sundayStop').$type<SundayStop>(),
+    sundayBreak: interval('sundayBreak').$type<SundayBreak>(),
+    createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  },
+  (employeeWorkingHours) => {
+    return {
+      pk: primaryKey({ columns: [employeeWorkingHours.storeID, employeeWorkingHours.employeeID] }),
+      unq: unique('unique_employeeWorkingHours').on(
+        employeeWorkingHours.storeID,
+        employeeWorkingHours.employeeID,
+      ),
+    }
+  },
+)
+
+export const employeeWorkingHoursRelations = relations(employeeWorkingHours, ({ one }) => ({
+  employees: one(employees),
+}))
+
 export const employeeStore = pgTable(
   'employeeStore',
   {
@@ -455,6 +567,35 @@ export const employeeStore = pgTable(
   },
 )
 
+export const employeeSpecialHours = pgTable('employeeSpecialHours', {
+  employeeSpceialHoursID: integer('employeeSpceialHoursID')
+    .$type<EmployeeSpceialHoursID>()
+    .primaryKey(),
+  employeeID: integer('employeeID')
+    .$type<EmployeeID>()
+    .references(() => employees.employeeID, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
+  storeID: integer('storeID')
+    .$type<StoreID>()
+    .references(() => stores.storeID, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
+  start: date('start').$type<WorkTime>().notNull(),
+  end: date('end').$type<WorkTime>().notNull(),
+  description: varchar('description').$type<WorkTimeDescription>(),
+  absence: boolean('absence').$type<Absence>().notNull(),
+})
+
+export const employeeSpecialHoursRelations = relations(employeeSpecialHours, ({ one }) => ({
+  employees: one(employees, {
+    fields: [employeeSpecialHours.employeeID],
+    references: [employees.employeeID],
+  }),
+}))
+
 export const users = pgTable('users', {
   userID: serial('userID').$type<UserID>().primaryKey(),
   firstName: varchar('firstName', { length: 128 }).$type<UserFirstName>().notNull(),
@@ -473,6 +614,12 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
+export const userRelations = relations(users, ({ many }) => ({
+  userLocalQualifications: many(employeeLocalQualifications),
+  userGlobalQualifications: many(employeeGlobalQualifications),
+  stores: many(stores),
+}))
+
 export const roles = pgTable('roles', {
   roleID: serial('roleID').$type<RoleID>().primaryKey(),
   roleName: varchar('roleName', { length: 256 }).unique().notNull().$type<RoleName>(),
@@ -480,6 +627,10 @@ export const roles = pgTable('roles', {
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
+
+export const rolesRelations = relations(roles, ({ many }) => ({
+  permissions: many(permissions),
+}))
 
 export const permissions = pgTable('permissions', {
   permissionID: serial('permissionID').$type<PermissionID>().primaryKey(),
@@ -491,6 +642,10 @@ export const permissions = pgTable('permissions', {
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
+
+export const permissionsRelations = relations(permissions, ({ many }) => ({
+  roles: many(roles),
+}))
 
 export const roleToPermissions = pgTable(
   'roleToPermissions',
@@ -523,6 +678,11 @@ export const serviceCategories = pgTable('serviceCategories', {
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
+
+export const serviceCategoriesRelations = relations(serviceCategories, ({ many }) => ({
+  services: many(services),
+  localServices: many(localServices),
+}))
 
 export const colorForServicepgEnum = pgEnum('colorForService', colorForService)
 
@@ -559,15 +719,56 @@ export const services = pgTable('services', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
-export const servicesCategoryToServiceRelations = relations(serviceCategories, ({ many }) => ({
-  services: many(services),
-}))
-
 export const serviceToServiceCategoryRelations = relations(services, ({ one }) => ({
   serviceCategories: one(serviceCategories, {
     fields: [services.serviceCategoryID],
     references: [serviceCategories.serviceCategoryID],
   }),
+}))
+
+export const serviceLocalQualifications = pgTable(
+  'serviceLocalQualifications',
+  {
+    serviceID: integer('serviceID')
+      .$type<ServiceID>()
+      .references(() => services.serviceID)
+      .notNull(),
+    localQualID: integer('localQualID')
+      .$type<LocalQualID>()
+      .references(() => qualificationsLocal.localQualID)
+      .notNull(),
+  },
+  (serviceLocalQualifications) => {
+    return {
+      pk: primaryKey({
+        columns: [serviceLocalQualifications.localQualID, serviceLocalQualifications.serviceID],
+      }),
+    }
+  },
+)
+
+export const serviceLocalQualificationsRelations = relations(
+  serviceLocalQualifications,
+  ({ many }) => ({
+    services: many(services),
+    qualificationsLocal: many(qualificationsLocal),
+  }),
+)
+
+export const serviceQualifications = pgTable('serviceQualifications', {
+  serviceID: integer('serviceID')
+    .$type<ServiceID>()
+    .references(() => services.serviceID)
+    .notNull(),
+  globalQualID: integer('globalQualID')
+    .$type<GlobalQualID>()
+    .references(() => qualificationsGlobal.globalQualID)
+    .notNull(),
+})
+
+export const serviceQualificationsRelations = relations(serviceQualifications, ({ many }) => ({
+  services: many(services),
+  qualificationsGlobal: many(qualificationsGlobal),
 }))
 
 export const localServices = pgTable('localServices', {
@@ -606,6 +807,7 @@ export const localServices = pgTable('localServices', {
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
+
 export const localServicesCategoryToServiceRelations = relations(serviceCategories, ({ many }) => ({
   localServices: many(localServices),
 }))
@@ -616,6 +818,57 @@ export const localServiceToServiceCategoryRelations = relations(localServices, (
     references: [serviceCategories.serviceCategoryID],
   }),
 }))
+
+export const localServiceLocalQualifications = pgTable(
+  'localServiceLocalQualifications',
+  {
+    localServiceID: integer('localServiceID')
+      .$type<LocalServiceID>()
+      .references(() => localServices.localServiceID)
+      .notNull(),
+    localQualID: integer('localQualID')
+      .$type<LocalQualID>()
+      .references(() => qualificationsLocal.localQualID)
+      .notNull(),
+  },
+  (LocalServiceLocalQualifications) => {
+    return {
+      pk: primaryKey({
+        columns: [
+          LocalServiceLocalQualifications.localQualID,
+          LocalServiceLocalQualifications.localServiceID,
+        ],
+      }),
+    }
+  },
+)
+
+export const LocalServiceLocalQualificationsRelations = relations(
+  localServiceLocalQualifications,
+  ({ many }) => ({
+    localServices: many(localServices),
+    qualificationsLocal: many(qualificationsLocal),
+  }),
+)
+
+export const localServiceGlobalQualifications = pgTable('localServiceGlobalQualifications', {
+  localServiceID: integer('localServiceID')
+    .$type<LocalServiceID>()
+    .references(() => localServices.localServiceID)
+    .notNull(),
+  globalQualID: integer('globalQualID')
+    .$type<GlobalQualID>()
+    .references(() => qualificationsGlobal.globalQualID)
+    .notNull(),
+})
+
+export const localServiceGlobalQualificationsRelations = relations(
+  localServiceGlobalQualifications,
+  ({ many }) => ({
+    localServices: many(localServices),
+    qualificationsGlobal: many(qualificationsGlobal),
+  }),
+)
 
 export const serviceVariants = pgTable('serviceVariants', {
   serviceVariantID: serial('serviceVariantID').$type<ServiceID>().primaryKey(),
@@ -768,6 +1021,13 @@ export const stores = pgTable('stores', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
+export const storesRelations = relations(stores, ({ many }) => ({
+  rentcars: many(rentcars),
+  employees: many(employees),
+  storespecialhours: many(storespecialhours),
+  storeweeklynotes: many(storeweeklynotes),
+}))
+
 export const driverCars = pgTable('driverCars', {
   driverCarID: serial('driverCarID').$type<DriverCarID>().primaryKey(),
   driverID: integer('driverID')
@@ -787,6 +1047,7 @@ export const driverCars = pgTable('driverCars', {
   driverCarNotes: varchar('driverCarNotes').$type<DriverCarNotes>(),
   ...dbDates,
 })
+
 export const rentcars = pgTable('rentCars', {
   storeID: integer('storeID')
     .$type<StoreID>()
@@ -803,6 +1064,13 @@ export const rentcars = pgTable('rentCars', {
   rentCarNumber: integer('rentCarNumber').$type<RentCarNumber>(),
   ...dbDates,
 })
+
+export const rentcarsRelations = relations(rentcars, ({ one }) => ({
+  stores: one(stores, {
+    fields: [rentcars.storeID],
+    references: [stores.storeID],
+  }),
+}))
 
 export const storepaymentinfo = pgTable('storepaymentinfo', {
   storeID: integer('storeID')
@@ -1036,12 +1304,12 @@ export const qualificationsGlobal = pgTable('qualificationsGlobal', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 })
 
-export const userLocalQualifications = pgTable(
-  'userLocalQualifications',
+export const employeeLocalQualifications = pgTable(
+  'employeeLocalQualifications',
   {
-    userID: integer('userID')
-      .$type<UserID>()
-      .references(() => users.userID, { onDelete: 'cascade' })
+    employeeID: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'cascade' })
       .notNull(),
     localQualID: integer('localQualID')
       .$type<LocalQualID>()
@@ -1053,18 +1321,25 @@ export const userLocalQualifications = pgTable(
   (userLocalQualifications) => {
     return {
       pk: primaryKey({
-        columns: [userLocalQualifications.localQualID, userLocalQualifications.userID],
+        columns: [userLocalQualifications.localQualID, userLocalQualifications.employeeID],
       }),
     }
   },
 )
 
-export const userGlobalQualifications = pgTable(
-  'userGlobalQualifications',
+export const employeeLocalQualificationsRelations = relations(
+  employeeLocalQualifications,
+  ({ one }) => ({
+    users: one(employees),
+  }),
+)
+
+export const employeeGlobalQualifications = pgTable(
+  'employeeGlobalQualifications',
   {
-    userID: integer('userID')
-      .$type<UserID>()
-      .references(() => users.userID, { onDelete: 'cascade' })
+    employeeID: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'cascade' })
       .notNull(),
     globalQualID: integer('globalQualID')
       .$type<GlobalQualID>()
@@ -1073,10 +1348,13 @@ export const userGlobalQualifications = pgTable(
       })
       .notNull(),
   },
-  (userGlobalQualifications) => {
+  (employeeGlobalQualifications) => {
     return {
       pk: primaryKey({
-        columns: [userGlobalQualifications.globalQualID, userGlobalQualifications.userID],
+        columns: [
+          employeeGlobalQualifications.globalQualID,
+          employeeGlobalQualifications.employeeID,
+        ],
       }),
     }
   },

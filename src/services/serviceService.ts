@@ -6,6 +6,8 @@ import { listServiceOrderByEnum, serviceOrderEnum } from '../routes/services/ser
 import {
   Award,
   ColorForService,
+  GlobalQualID,
+  LocalQualID,
   LocalServiceID,
   ServiceCallInterval,
   ServiceCategoryID,
@@ -26,9 +28,13 @@ import {
   ServiceWarrantyCard,
   StoreID,
   colorForService,
+  localServiceGlobalQualifications,
+  localServiceLocalQualifications,
   localServiceVariants,
   localServices,
   serviceCategories,
+  serviceLocalQualifications,
+  serviceQualifications,
   serviceVariants,
   services,
 } from '../schema/schema.js'
@@ -50,10 +56,12 @@ type ServiceVariantBase = {
   day4?: ServiceDay4
   day5?: ServiceDay5
 }
+
 export type ServiceVariant = ServiceVariantBase & {
   serviceID?: ServiceID
   serviceVariantID?: ServiceID
 }
+
 export type LocalServiceVariant = ServiceVariantBase & {
   localServiceID?: LocalServiceID
   serviceVariantID?: ServiceID
@@ -98,6 +106,36 @@ export type LocalServiceCreate = ServiceBase & {
 
 export type Service = ServiceCreate & { serviceID: ServiceID; serviceVariants: ServiceVariant[] }
 export type LocalService = LocalServiceCreate & { localServiceID: LocalServiceID }
+
+export type LocalServiceLocalQual = {
+  localServiceID: LocalServiceID
+  localQualID: LocalQualID
+}
+
+export type LocalServiceGlobalQual = {
+  localServiceID: LocalServiceID
+  globalQualID: GlobalQualID
+}
+
+export type ServiceLocalQual = {
+  serviceID: ServiceID
+  localQualID: LocalQualID
+}
+
+export type ServiceGlobalQual = {
+  serviceID: ServiceID
+  globalQualID: GlobalQualID
+}
+
+export type LocalServiceQuals = {
+  localQuals: LocalQualID[]
+  globalQuals: GlobalQualID[]
+}
+
+export type GlobalServiceQuals = {
+  localQuals: LocalQualID[]
+  globalQuals: GlobalQualID[]
+}
 
 export function convertToColorEnum(str: string): ColorForService {
   if (colorForService.includes(str as ColorForService)) {
@@ -559,6 +597,194 @@ export async function deletetServiceById(serviceID: {
         .returning()
     }
     return servicesDetail ? brander(servicesDetail[0]) : left("Couldn't find service")
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function setServiceQualifications(
+  serviceQual: ServiceGlobalQual,
+): Promise<Either<string, ServiceGlobalQual>> {
+  try {
+    const [newQualForService] = await db
+      .insert(serviceQualifications)
+      .values(serviceQual)
+      .returning()
+    return newQualForService
+      ? right(newQualForService)
+      : left("couldn't assign qualification to service")
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function setServiceLocalQual(
+  serviceQual: ServiceLocalQual,
+): Promise<Either<string, ServiceLocalQual>> {
+  try {
+    const [newQualForService] = await db
+      .insert(serviceLocalQualifications)
+      .values(serviceQual)
+      .returning()
+    return newQualForService
+      ? right(newQualForService)
+      : left("couldn't assign local qualification to service")
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function setLocalServiceQualifications(
+  serviceQual: LocalServiceGlobalQual,
+): Promise<Either<string, LocalServiceGlobalQual>> {
+  try {
+    const [newQualForService] = await db
+      .insert(localServiceGlobalQualifications)
+      .values(serviceQual)
+      .returning()
+    return newQualForService
+      ? right(newQualForService)
+      : left("couldn't assign local qualification to service")
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function setLocalServiceLocalQual(
+  serviceQual: LocalServiceLocalQual,
+): Promise<Either<string, LocalServiceLocalQual>> {
+  try {
+    const [newQualForService] = await db
+      .insert(localServiceLocalQualifications)
+      .values(serviceQual)
+      .returning()
+    return newQualForService
+      ? right(newQualForService)
+      : left("couldn't assign local qualification to local service")
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function getServiceQualifications(
+  serviceID: ServiceID,
+): Promise<Either<string, GlobalServiceQuals>> {
+  try {
+    const newQualForService = await db
+      .select()
+      .from(serviceQualifications)
+      .where(and(eq(serviceQualifications.serviceID, serviceID)))
+      .fullJoin(serviceLocalQualifications, eq(serviceLocalQualifications.serviceID, serviceID))
+
+    const qualsList = newQualForService.reduce(
+      (acc, qual) => {
+        if (qual.serviceLocalQualifications != null) {
+          acc.localQuals.push(qual.serviceLocalQualifications.localQualID)
+        }
+        if (qual.serviceQualifications != null) {
+          acc.globalQuals.push(qual.serviceQualifications.globalQualID)
+        }
+        return acc
+      },
+      {
+        localQuals: [] as LocalQualID[],
+        globalQuals: [] as GlobalQualID[],
+      },
+    )
+    return qualsList ? right(qualsList) : left("Couldn't get qualifications ")
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function getLocalServiceQualifications(
+  localServiceID: LocalServiceID,
+): Promise<Either<string, LocalServiceQuals>> {
+  try {
+    const newQualForService = await db
+      .select()
+      .from(localServiceGlobalQualifications)
+      .where(and(eq(localServiceGlobalQualifications.localServiceID, localServiceID)))
+      .fullJoin(
+        localServiceLocalQualifications,
+        eq(localServiceLocalQualifications.localServiceID, localServiceID),
+      )
+
+    const qualsList = newQualForService.reduce(
+      (acc, qual) => {
+        if (qual.localServiceLocalQualifications != null) {
+          acc.localQuals.push(qual.localServiceLocalQualifications.localQualID)
+        }
+        if (qual.localServiceGlobalQualifications != null) {
+          acc.globalQuals.push(qual.localServiceGlobalQualifications.globalQualID)
+        }
+        return acc
+      },
+      {
+        localQuals: [] as LocalQualID[],
+        globalQuals: [] as GlobalQualID[],
+      },
+    )
+    return qualsList ? right(qualsList) : left("Couldn't get qualifications ")
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function deleteServiceQualifications(
+  serviceID: ServiceID,
+): Promise<Either<string, GlobalServiceQuals>> {
+  try {
+    const qualList = await db.transaction(async (tx) => {
+      const quals = await tx
+        .delete(serviceQualifications)
+        .where(eq(serviceQualifications.serviceID, serviceID))
+        .returning({ globalQuals: serviceQualifications.globalQualID })
+
+      const localQuals = await tx
+        .delete(serviceLocalQualifications)
+        .where(eq(serviceLocalQualifications.serviceID, serviceID))
+        .returning({ localQuals: serviceLocalQualifications.localQualID })
+      if (quals != null && localQuals != null) {
+        return right({
+          localQuals: localQuals.map((x) => x.localQuals),
+          globalQuals: quals.map((x) => x.globalQuals),
+        })
+      } else {
+        return left("couldn't find qualifications ")
+      }
+    })
+    return qualList
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function deleteLocalServiceQualifications(
+  localServiceID: LocalServiceID,
+): Promise<Either<string, LocalServiceQuals>> {
+  try {
+    const qualList = await db.transaction(async (tx) => {
+      const quals = await tx
+        .delete(localServiceGlobalQualifications)
+        .where(eq(localServiceGlobalQualifications.localServiceID, localServiceID))
+        .returning({ globalQuals: localServiceGlobalQualifications.globalQualID })
+
+      const localQuals = await tx
+        .delete(localServiceLocalQualifications)
+        .where(eq(localServiceLocalQualifications.localServiceID, localServiceID))
+        .returning({ localQuals: localServiceLocalQualifications.localQualID })
+
+      if (quals != null && localQuals != null) {
+        return right({
+          localQuals: localQuals.map((x) => x.localQuals),
+          globalQuals: quals.map((x) => x.globalQuals),
+        })
+      } else {
+        return left("couldn't find qualifications ")
+      }
+    })
+    return qualList
   } catch (e) {
     return left(errorHandling(e))
   }

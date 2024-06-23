@@ -1,6 +1,6 @@
 {
-  "id": "7807f00f-d109-4ec7-afae-5d64c50010d7",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "89e52425-738c-417d-8b75-02019ade987f",
+  "prevId": "7807f00f-d109-4ec7-afae-5d64c50010d7",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
@@ -456,75 +456,21 @@
       },
       "uniqueConstraints": {}
     },
-    "public.employees": {
-      "name": "employees",
+    "public.employeeWorkingHours": {
+      "name": "employeeWorkingHours",
       "schema": "",
       "columns": {
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "employeeID": {
           "name": "employeeID",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "shortUserName": {
-          "name": "shortUserName",
-          "type": "varchar(16)",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
-        },
-        "employmentNumber": {
-          "name": "employmentNumber",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "employeePersonalNumber": {
-          "name": "employeePersonalNumber",
-          "type": "varchar(16)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "signature": {
-          "name": "signature",
-          "type": "varchar(4)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "employeeHourlyRate": {
-          "name": "employeeHourlyRate",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "employeeHourlyRateCurrency": {
-          "name": "employeeHourlyRateCurrency",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "employeePin": {
-          "name": "employeePin",
-          "type": "varchar(4)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "employeeComment": {
-          "name": "employeeComment",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "checkedIn": {
-          "name": "checkedIn",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "checkedOut": {
-          "name": "checkedOut",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         },
         "mondayStart": {
           "name": "mondayStart",
@@ -649,6 +595,131 @@
         "sundayBreak": {
           "name": "sundayBreak",
           "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "employeeWorkingHours_storeID_stores_storeID_fk": {
+          "name": "employeeWorkingHours_storeID_stores_storeID_fk",
+          "tableFrom": "employeeWorkingHours",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "employeeWorkingHours_employeeID_employees_employeeID_fk": {
+          "name": "employeeWorkingHours_employeeID_employees_employeeID_fk",
+          "tableFrom": "employeeWorkingHours",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "employeeID"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "employeeWorkingHours_storeID_employeeID_pk": {
+          "name": "employeeWorkingHours_storeID_employeeID_pk",
+          "columns": [
+            "storeID",
+            "employeeID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.employees": {
+      "name": "employees",
+      "schema": "",
+      "columns": {
+        "employeeID": {
+          "name": "employeeID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "shortUserName": {
+          "name": "shortUserName",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "employmentNumber": {
+          "name": "employmentNumber",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "employeePersonalNumber": {
+          "name": "employeePersonalNumber",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "signature": {
+          "name": "signature",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "employeeHourlyRate": {
+          "name": "employeeHourlyRate",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employeeHourlyRateCurrency": {
+          "name": "employeeHourlyRateCurrency",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employeePin": {
+          "name": "employeePin",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employeeComment": {
+          "name": "employeeComment",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checkedIn": {
+          "name": "checkedIn",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checkedOut": {
+          "name": "checkedOut",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },

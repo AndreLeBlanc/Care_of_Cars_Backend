@@ -1,6 +1,8 @@
 import { Static, Type } from '@sinclair/typebox'
 
 import { storeID } from '../stores/storesSchema.js'
+
+import { GlobalQualIDSchema, LocalQualIDSchema } from '../qulifications/qualificationsSchema.js'
 const LocalServiceIDSchema = Type.Number({ minimum: 0 })
 const ServiceVariantIDSchema = Type.Number({ minimum: 0 })
 const ServiceIDSchema = Type.Number({ minimum: 0 })
@@ -145,3 +147,45 @@ export const ServicesPaginatedSchema = Type.Object({
 })
 
 export type ServicesPaginatedSchemaType = Static<typeof ServicesPaginatedSchema>
+
+export const LocalServiceLocalQualSchema = Type.Object({
+  localServiceID: LocalServiceIDSchema,
+  localQualID: LocalQualIDSchema,
+})
+
+export type LocalServiceLocalQualSchemaType = Static<typeof LocalServiceLocalQualSchema>
+
+export const LocalServiceGlobalQualSchema = Type.Object({
+  localServiceID: LocalServiceIDSchema,
+  globalQualID: GlobalQualIDSchema,
+})
+
+export type LocalServiceGlobalQualSchemaType = Static<typeof LocalServiceGlobalQualSchema>
+
+export const ServiceLocalQualSchema = Type.Object({
+  serviceID: ServiceIDSchema,
+  localQualID: LocalQualIDSchema,
+})
+
+export type ServiceLocalQualSchemaType = Static<typeof ServiceLocalQualSchema>
+
+export const ServiceGlobalQual = Type.Object({
+  serviceID: ServiceIDSchema,
+  globalQualID: GlobalQualIDSchema,
+})
+
+export type ServiceGlobalQualType = Static<typeof ServiceGlobalQual>
+
+export const LocalServiceQualsSchema = Type.Object({
+  localQuals: Type.Array(LocalQualIDSchema),
+  globalQuals: Type.Array(GlobalQualIDSchema),
+})
+
+export type LocalServiceQualsSchemType = Static<typeof LocalServiceQualsSchema>
+
+export const GlobalServiceQualsSchema = Type.Object({
+  localQuals: Type.Array(LocalQualIDSchema),
+  globalQuals: Type.Array(GlobalQualIDSchema),
+})
+
+export type GlobalServiceQualsSchemType = Static<typeof GlobalServiceQualsSchema>
