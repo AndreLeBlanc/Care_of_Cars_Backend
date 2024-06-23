@@ -57,6 +57,15 @@ CREATE TABLE IF NOT EXISTS "drivers" (
 	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "employeeSpecialHours" (
+	"employeeSpceialHoursID" integer PRIMARY KEY NOT NULL,
+	"employeeID" integer NOT NULL,
+	"start" timestamp NOT NULL,
+	"end" timestamp NOT NULL,
+	"description" varchar,
+	"absence" boolean NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "employeeStore" (
 	"storeID" integer NOT NULL,
 	"employeeID" integer NOT NULL,
@@ -75,6 +84,27 @@ CREATE TABLE IF NOT EXISTS "employees" (
 	"employeeComment" varchar,
 	"checkedIn" timestamp,
 	"checkedOut" timestamp,
+	"mondayStart" time,
+	"mondayStop" time,
+	"mondayBreak" interval,
+	"tuesdayStart" time,
+	"tuesdayStop" time,
+	"tuesdayBreak" interval,
+	"wednesdayStart" time,
+	"wednesdayStop" time,
+	"wednesdayBreak" interval,
+	"thursdayStart" time,
+	"thursdayStop" time,
+	"thursdayBreak" interval,
+	"fridayStart" time,
+	"fridayStop" time,
+	"fridayBreak" interval,
+	"saturdayStart" time,
+	"saturdayStop" time,
+	"saturdayBreak" interval,
+	"sundayStart" time,
+	"sundayStop" time,
+	"sundayBreak" interval,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "employees_employmentNumber_unique" UNIQUE("employmentNumber"),
@@ -393,6 +423,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "drivers" ADD CONSTRAINT "drivers_customerOrgNumber_companycustomers_customerOrgNumber_fk" FOREIGN KEY ("customerOrgNumber") REFERENCES "public"."companycustomers"("customerOrgNumber") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employeeSpecialHours" ADD CONSTRAINT "employeeSpecialHours_employeeID_employees_employeeID_fk" FOREIGN KEY ("employeeID") REFERENCES "public"."employees"("employeeID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

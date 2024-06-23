@@ -1,16 +1,16 @@
 import {
   CreatedAt,
+  EmployeeID,
   GlobalQualID,
   GlobalQualName,
   LocalQualID,
   LocalQualName,
   StoreID,
   UpdatedAt,
-  UserID,
+  employeeGlobalQualifications,
+  employeeLocalQualifications,
   qualificationsGlobal,
   qualificationsLocal,
-  userGlobalQualifications,
-  userLocalQualifications,
 } from '../schema/schema.js'
 
 import { Search } from '../plugins/pagination.js'
@@ -50,12 +50,12 @@ export type QualificationsLocal = {
   }
 }
 
-export type UserQualificationsGlobal = {
+export type EmployeeQualificationsGlobal = {
   globalQualID: GlobalQualID
   globalQualName: GlobalQualName
 }
 
-export type UserQualificationsLocal = {
+export type EmployeeQualificationsLocal = {
   storeID: StoreID
   localQualID: LocalQualID
   localQualName: LocalQualName
@@ -64,17 +64,17 @@ export type UserQualificationsLocal = {
 export type QualificationsListed = {
   totalLocalQuals: number
   totalGlobalQuals: number
-  localQuals: UserQualificationsLocal[]
-  globalQuals: UserQualificationsGlobal[]
+  localQuals: EmployeeQualificationsLocal[]
+  globalQuals: EmployeeQualificationsGlobal[]
 }
 
-export type UserLocalQualifications = {
-  userID: UserID
+export type EmployeeLocalQualifications = {
+  employeeID: EmployeeID
   localQualID: LocalQualID
 }
 
-export type UserGlobalQualifications = {
-  userID: UserID
+export type EmployeeGlobalQualifications = {
+  employeeID: EmployeeID
   globalQualID: LocalQualID
 }
 
@@ -235,11 +235,11 @@ export async function deleteGlobalQuals(
 export async function getQualifcations(
   search: Search,
   storeID?: StoreID,
-  userID?: UserID,
+  employeeID?: EmployeeID,
 ): Promise<Either<string, QualificationsListed>> {
   try {
     const quals = await db.transaction(async (tx) => {
-      const globalQualsList = userID
+      const globalQualsList = employeeID
         ? await tx
             .select({
               globalQualID: qualificationsGlobal.globalQualID,
@@ -247,13 +247,13 @@ export async function getQualifcations(
             })
             .from(qualificationsGlobal)
             .innerJoin(
-              userGlobalQualifications,
-              eq(userGlobalQualifications.globalQualID, qualificationsGlobal.globalQualID),
+              employeeGlobalQualifications,
+              eq(employeeGlobalQualifications.globalQualID, qualificationsGlobal.globalQualID),
             )
             .where(
               and(
                 ilike(qualificationsGlobal.globalQualName, '%' + search + '%'),
-                eq(userGlobalQualifications.userID, userID),
+                eq(employeeGlobalQualifications.employeeID, employeeID),
               ),
             )
         : await tx
@@ -262,7 +262,7 @@ export async function getQualifcations(
             .where(and(ilike(qualificationsGlobal.globalQualName, '%' + search + '%')))
 
       if (storeID != null) {
-        const localQualList = userID
+        const localQualList = employeeID
           ? await tx
               .select({
                 localQualID: qualificationsLocal.localQualID,
@@ -271,8 +271,8 @@ export async function getQualifcations(
               })
               .from(qualificationsLocal)
               .innerJoin(
-                userLocalQualifications,
-                eq(userLocalQualifications.localQualID, qualificationsLocal.localQualID),
+                employeeLocalQualifications,
+                eq(employeeLocalQualifications.localQualID, qualificationsLocal.localQualID),
               )
               .where(
                 and(
@@ -320,14 +320,14 @@ export async function getQualifcations(
   }
 }
 
-export async function setUserLocalQualification(
-  userID: UserID,
+export async function setEmployeeLocalQualification(
+  employeeID: EmployeeID,
   localQualID: LocalQualID,
-): Promise<Either<string, UserLocalQualifications>> {
+): Promise<Either<string, EmployeeLocalQualifications>> {
   try {
     const [insertLocalQual] = await db
-      .insert(userLocalQualifications)
-      .values({ userID: userID, localQualID: localQualID })
+      .insert(employeeLocalQualifications)
+      .values({ employeeID: employeeID, localQualID: localQualID })
       .returning()
     return right(insertLocalQual)
   } catch (e) {
@@ -335,18 +335,18 @@ export async function setUserLocalQualification(
   }
 }
 
-export async function setUserGlobalQualification(
-  userID: UserID,
+export async function setEmployeeGlobalQualification(
+  employeeID: EmployeeID,
   globalQualID: GlobalQualID,
-): Promise<Either<string, UserGlobalQualifications>> {
+): Promise<Either<string, EmployeeGlobalQualifications>> {
   try {
     const [insertGlobalQual] = await db
-      .insert(userGlobalQualifications)
-      .values({ userID: userID, globalQualID: globalQualID })
-      .returning({ globalQualID: userGlobalQualifications.globalQualID })
+      .insert(employeeGlobalQualifications)
+      .values({ employeeID: employeeID, globalQualID: globalQualID })
+      .returning({ globalQualID: employeeGlobalQualifications.globalQualID })
     return insertGlobalQual
       ? right({
-          userID: userID,
+          employeeID: employeeID,
           globalQualID: LocalQualID(insertGlobalQual.globalQualID),
         })
       : left('qualification not created')
@@ -355,23 +355,23 @@ export async function setUserGlobalQualification(
   }
 }
 
-export async function deleteUserLocalQualification(
-  userID: UserID,
+export async function deleteEmployeeLocalQualification(
+  employeeID: EmployeeID,
   localQualID: LocalQualID,
-): Promise<Either<string, UserLocalQualifications>> {
+): Promise<Either<string, EmployeeLocalQualifications>> {
   try {
     const [insertLocalQual] = await db
-      .delete(userLocalQualifications)
+      .delete(employeeLocalQualifications)
       .where(
         and(
-          eq(userLocalQualifications.userID, userID),
-          eq(userLocalQualifications.localQualID, localQualID),
+          eq(employeeLocalQualifications.employeeID, employeeID),
+          eq(employeeLocalQualifications.localQualID, localQualID),
         ),
       )
-      .returning({ localQualID: userLocalQualifications.localQualID })
+      .returning({ localQualID: employeeLocalQualifications.localQualID })
     return insertLocalQual
       ? right({
-          userID: userID,
+          employeeID: employeeID,
           localQualID: LocalQualID(insertLocalQual.localQualID),
         })
       : left('Qualification not found')
@@ -380,35 +380,38 @@ export async function deleteUserLocalQualification(
   }
 }
 
-export async function deleteUserGlobalQualification(
-  userID: UserID,
+export async function deleteEmployeeGlobalQualification(
+  employeeID: EmployeeID,
   globalQualID: GlobalQualID,
-): Promise<Either<string, UserGlobalQualifications>> {
+): Promise<Either<string, EmployeeGlobalQualifications>> {
   try {
     const [insertGlobalQual] = await db
-      .delete(userGlobalQualifications)
+      .delete(employeeGlobalQualifications)
       .where(
         and(
-          eq(userGlobalQualifications.userID, userID),
-          eq(userGlobalQualifications.globalQualID, globalQualID),
+          eq(employeeGlobalQualifications.employeeID, employeeID),
+          eq(employeeGlobalQualifications.globalQualID, globalQualID),
         ),
       )
-      .returning({ globalQualID: userGlobalQualifications.globalQualID })
+      .returning({ globalQualID: employeeGlobalQualifications.globalQualID })
     return insertGlobalQual
       ? right({
-          userID: userID,
+          employeeID: employeeID,
           globalQualID: LocalQualID(insertGlobalQual.globalQualID),
         })
-      : left('user or qualification not found')
+      : left('employee or qualification not found')
   } catch (e) {
     return left(errorHandling(e))
   }
 }
 
-export async function getUserQualifications(
-  userID: UserID,
+export async function getEmployeeQualifications(
+  employeeID: EmployeeID,
 ): Promise<
-  Either<string, { localQuals: UserQualificationsLocal[]; globalQuals: UserQualificationsGlobal[] }>
+  Either<
+    string,
+    { localQuals: EmployeeQualificationsLocal[]; globalQuals: EmployeeQualificationsGlobal[] }
+  >
 > {
   try {
     const quals = await db.transaction(async (tx) => {
@@ -418,24 +421,24 @@ export async function getUserQualifications(
           localQualID: qualificationsLocal.localQualID,
           localQualName: qualificationsLocal.localQualName,
         })
-        .from(userLocalQualifications)
+        .from(employeeLocalQualifications)
         .rightJoin(
           qualificationsLocal,
-          eq(userLocalQualifications.localQualID, qualificationsLocal.localQualID),
+          eq(employeeLocalQualifications.localQualID, qualificationsLocal.localQualID),
         )
-        .where(eq(userLocalQualifications.userID, userID))
+        .where(eq(employeeLocalQualifications.employeeID, employeeID))
 
       const globalQualsList = await tx
         .select({
           globalQualID: qualificationsGlobal.globalQualID,
           globalQualName: qualificationsGlobal.globalQualName,
         })
-        .from(userGlobalQualifications)
+        .from(employeeGlobalQualifications)
         .rightJoin(
           qualificationsGlobal,
-          eq(userGlobalQualifications.globalQualID, qualificationsLocal.localQualID),
+          eq(employeeGlobalQualifications.globalQualID, qualificationsLocal.localQualID),
         )
-        .where(eq(userGlobalQualifications.userID, userID))
+        .where(eq(employeeGlobalQualifications.employeeID, employeeID))
       return { localQualsList, globalQualsList }
     })
 
