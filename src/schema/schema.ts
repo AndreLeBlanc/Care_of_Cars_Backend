@@ -394,6 +394,8 @@ export const SundayBreak = make<SundayBreak>()
 
 export type WorkTime = Brand<Date, 'workTime'>
 export const WorkTime = make<WorkTime>()
+export type WorkDuration = Brand<number, 'workDuration'>
+export const WorkDuration = make<WorkDuration>()
 export type WorkTimeDescription = Brand<string, 'workTimeDescription'>
 export const WorkTimeDescription = make<WorkTimeDescription>()
 export type Absence = Brand<string, 'absence'>

@@ -4,8 +4,8 @@ import { storeID } from '../stores/storesSchema.js'
 
 import { employeeID } from '../employees/employeesSchema.js'
 
-const localQualID = Type.Integer()
-const globalQualID = Type.Integer()
+export const localQualID = Type.Integer()
+export const globalQualID = Type.Integer()
 export const LocalQualIDSchema = Type.Object({ localQualID })
 export type LocalQualIDSchemaType = Static<typeof LocalQualIDSchema>
 export const GlobalQualIDSchema = Type.Object({ globalQualID: globalQualID })

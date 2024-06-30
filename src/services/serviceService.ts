@@ -733,18 +733,25 @@ export async function getLocalServiceQualifications(
 
 export async function deleteServiceQualifications(
   serviceID: ServiceID,
+  localQualID?: LocalQualID,
+  globalQualID?: GlobalQualID,
 ): Promise<Either<string, GlobalServiceQuals>> {
   try {
     const qualList = await db.transaction(async (tx) => {
-      const quals = await tx
-        .delete(serviceQualifications)
-        .where(eq(serviceQualifications.serviceID, serviceID))
-        .returning({ globalQuals: serviceQualifications.globalQualID })
-
-      const localQuals = await tx
-        .delete(serviceLocalQualifications)
-        .where(eq(serviceLocalQualifications.serviceID, serviceID))
-        .returning({ localQuals: serviceLocalQualifications.localQualID })
+      let quals: { globalQuals: GlobalQualID }[] = []
+      let localQuals: { localQuals: LocalQualID }[] = []
+      if (globalQualID != null) {
+        quals = await tx
+          .delete(serviceQualifications)
+          .where(eq(serviceQualifications.serviceID, serviceID))
+          .returning({ globalQuals: serviceQualifications.globalQualID })
+      }
+      if (localQualID != null) {
+        localQuals = await tx
+          .delete(serviceLocalQualifications)
+          .where(eq(serviceLocalQualifications.serviceID, serviceID))
+          .returning({ localQuals: serviceLocalQualifications.localQualID })
+      }
       if (quals != null && localQuals != null) {
         return right({
           localQuals: localQuals.map((x) => x.localQuals),
@@ -762,19 +769,25 @@ export async function deleteServiceQualifications(
 
 export async function deleteLocalServiceQualifications(
   localServiceID: LocalServiceID,
+  localQualID?: LocalQualID,
+  globalQualID?: GlobalQualID,
 ): Promise<Either<string, LocalServiceQuals>> {
   try {
     const qualList = await db.transaction(async (tx) => {
-      const quals = await tx
-        .delete(localServiceGlobalQualifications)
-        .where(eq(localServiceGlobalQualifications.localServiceID, localServiceID))
-        .returning({ globalQuals: localServiceGlobalQualifications.globalQualID })
-
-      const localQuals = await tx
-        .delete(localServiceLocalQualifications)
-        .where(eq(localServiceLocalQualifications.localServiceID, localServiceID))
-        .returning({ localQuals: localServiceLocalQualifications.localQualID })
-
+      let quals: { globalQuals: GlobalQualID }[] = []
+      let localQuals: { localQuals: LocalQualID }[] = []
+      if (globalQualID != null) {
+        quals = await tx
+          .delete(localServiceGlobalQualifications)
+          .where(eq(localServiceGlobalQualifications.localServiceID, localServiceID))
+          .returning({ globalQuals: localServiceGlobalQualifications.globalQualID })
+      }
+      if (localQualID != null) {
+        localQuals = await tx
+          .delete(localServiceLocalQualifications)
+          .where(eq(localServiceLocalQualifications.localServiceID, localServiceID))
+          .returning({ localQuals: localServiceLocalQualifications.localQualID })
+      }
       if (quals != null && localQuals != null) {
         return right({
           localQuals: localQuals.map((x) => x.localQuals),

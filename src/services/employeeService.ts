@@ -40,13 +40,15 @@ import {
   WednesdayBreak,
   WednesdayStart,
   WednesdayStop,
+  WorkDuration,
   WorkTime,
   WorkTimeDescription,
+  employeeGlobalQualifications,
+  employeeLocalQualifications,
   employeeSpecialHours,
   employeeStore,
   employeeWorkingHours,
   employees,
-  userGlobalQualifications,
 } from '../schema/schema.js'
 
 import Dinero from 'dinero.js'
@@ -79,6 +81,46 @@ export type WorkingHours = {
   sundayStart?: SundayStart
   sundayStop?: SundayStop
   sundayBreak?: SundayBreak
+}
+
+type WorkingHoursID = WorkingHours & { employeeID: EmployeeID } & { special: SpecialWorkingHours[] }
+
+export type WorkingHoursIDTotal = {
+  employeeInfo: WorkingHoursID[]
+  totalTimes: {
+    monday: WorkDuration
+    tuesday: WorkDuration
+    wednesday: WorkDuration
+    thursday: WorkDuration
+    friday: WorkDuration
+    saturday: WorkDuration
+    sunday: WorkDuration
+  }
+}
+
+export type WorkingHoursNull = {
+  employeeID: EmployeeID
+  mondayStart?: MondayStart | null
+  mondayStop?: MondayStop | null
+  mondayBreak?: MondayBreak | null
+  tuesdayStart?: TuesdayStart | null
+  tuesdayStop?: TuesdayStop | null
+  tuesdayBreak?: TuesdayBreak | null
+  wednesdayStart?: WednesdayStart | null
+  wednesdayStop?: WednesdayStop | null
+  wednesdayBreak?: WednesdayBreak | null
+  thursdayStart?: ThursdayStart | null
+  thursdayStop?: ThursdayStop | null
+  thursdayBreak?: ThursdayBreak | null
+  fridayStart?: FridayStart | null
+  fridayStop?: FridayStop | null
+  fridayBreak?: FridayBreak | null
+  saturdayStart?: SaturdayStart | null
+  saturdayStop?: SaturdayStop | null
+  saturdayBreak?: SaturdayBreak | null
+  sundayStart?: SundayStart | null
+  sundayStop?: SundayStop | null
+  sundayBreak?: SundayBreak | null
 }
 
 export type SpecialWorkingHours = {
@@ -325,7 +367,7 @@ export async function getEmployeeWorkingHours(
   }
 }
 
-export async function getEmployeeSpecialWorkingHours(
+export async function getEmployeeSpecialWorkingHoursByID(
   employeeSpceialHoursID: EmployeeSpceialHoursID,
 ): Promise<Either<string, SpecialWorkingHours>> {
   try {
@@ -333,6 +375,31 @@ export async function getEmployeeSpecialWorkingHours(
       .select()
       .from(employeeSpecialHours)
       .where(eq(employeeSpecialHours.employeeSpceialHoursID, employeeSpceialHoursID))
+    return fetchedWorkingHours
+      ? right({
+          employeeSpceialHoursID: fetchedWorkingHours.employeeSpceialHoursID,
+          employeeID: fetchedWorkingHours.employeeID,
+          storeID: fetchedWorkingHours.storeID,
+          start: fetchedWorkingHours.start,
+          end: fetchedWorkingHours.end,
+          description: fetchedWorkingHours.description ?? undefined,
+          absence: fetchedWorkingHours.absence,
+        })
+      : left("couldn't fetch special working hours")
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function getEmployeeSpecialWorkingHoursByDates(
+  begin: WorkTime,
+  end: WorkTime,
+): Promise<Either<string, SpecialWorkingHours>> {
+  try {
+    const [fetchedWorkingHours] = await db
+      .select()
+      .from(employeeSpecialHours)
+      .where(and(lte(employeeSpecialHours.start, end), gte(employeeSpecialHours.end, begin)))
     return fetchedWorkingHours
       ? right({
           employeeSpceialHoursID: fetchedWorkingHours.employeeSpceialHoursID,
@@ -421,69 +488,440 @@ export async function deleteEmployeeWorkingHours(
   }
 }
 
+type Res = {
+  employeeSpceialHoursID: EmployeeSpceialHoursID
+  employeeID: EmployeeID
+  storeID: StoreID
+  start: WorkTime
+  end: WorkTime
+  description: WorkTimeDescription | undefined | null
+  absence: Absence
+}
+
+function intervalToMilliseconds(interval: string): number {
+  // Define the conversion factors
+  const MS_PER_SECOND = 1000
+  const MS_PER_MINUTE = 60 * MS_PER_SECOND
+  const MS_PER_HOUR = 60 * MS_PER_MINUTE
+  const MS_PER_DAY = 24 * MS_PER_HOUR
+  const MS_PER_MONTH = 30 * MS_PER_DAY // Approximate, adjust as necessary
+  const MS_PER_YEAR = 365 * MS_PER_DAY // Approximate, adjust as necessary
+
+  // Regex to parse the interval string
+  const regex =
+    /(\d+)\s*years?|(\d+)\s*months?|(\d+)\s*days?|(\d+)\s*hours?|(\d+)\s*minutes?|(\d+)\s*seconds?/g
+  let match
+  let totalMilliseconds = 0
+
+  // Iterate over all matches and convert each to milliseconds
+  while ((match = regex.exec(interval)) !== null) {
+    if (match[1]) {
+      totalMilliseconds += parseInt(match[1]) * MS_PER_YEAR
+    } else if (match[2]) {
+      totalMilliseconds += parseInt(match[2]) * MS_PER_MONTH
+    } else if (match[3]) {
+      totalMilliseconds += parseInt(match[3]) * MS_PER_DAY
+    } else if (match[4]) {
+      totalMilliseconds += parseInt(match[4]) * MS_PER_HOUR
+    } else if (match[5]) {
+      totalMilliseconds += parseInt(match[5]) * MS_PER_MINUTE
+    } else if (match[6]) {
+      totalMilliseconds += parseInt(match[6]) * MS_PER_SECOND
+    }
+  }
+
+  return totalMilliseconds
+}
+
+function firstDayOfWeek(t: WorkTime, startDay: WorkTime): WorkDuration {
+  const dayOfWeek = startDay.getDay(),
+    diff = dayOfWeek >= 1 ? dayOfWeek - 1 : 6 - dayOfWeek
+
+  startDay.setDate(t.getDate() - diff)
+  startDay.setHours(0, 0, 0, 0)
+  return WorkDuration(new Date(t > startDay ? t : startDay).getTime())
+}
+
+function lastDayOfWeek(t: WorkTime, endDay: WorkTime): WorkDuration {
+  const dayOfWeek = 6 - endDay.getDay()
+
+  endDay.setDate(endDay.getDate() - dayOfWeek)
+  endDay.setHours(0, 0, 0, 0)
+  return WorkDuration(new Date(t < endDay ? t : endDay).getTime())
+}
+
+function calcTime(
+  startDay: WorkTime,
+  employeeSpecialTimes: Res[],
+  fetchedWorkingHours: (WorkingHoursNull | null)[],
+): Either<string, WorkingHoursIDTotal> {
+  if (fetchedWorkingHours.includes(null)) {
+    return left("can't get working hours")
+  } else {
+    const regularTimes = fetchedWorkingHours.reduce<WorkingHoursID[]>((acc, time) => {
+      if (time !== null) {
+        acc.push({
+          employeeID: time.employeeID,
+          mondayStart: time.mondayStart ?? undefined,
+          mondayStop: time.mondayStop ?? undefined,
+          mondayBreak: time.mondayBreak ?? undefined,
+          tuesdayStart: time.tuesdayStart ?? undefined,
+          tuesdayStop: time.tuesdayStop ?? undefined,
+          tuesdayBreak: time.tuesdayBreak ?? undefined,
+          wednesdayStart: time.wednesdayStart ?? undefined,
+          wednesdayStop: time.wednesdayStop ?? undefined,
+          wednesdayBreak: time.wednesdayBreak ?? undefined,
+          thursdayStart: time.thursdayStart ?? undefined,
+          thursdayStop: time.thursdayStop ?? undefined,
+          thursdayBreak: time.thursdayBreak ?? undefined,
+          fridayStart: time.fridayStart ?? undefined,
+          fridayStop: time.fridayStop ?? undefined,
+          fridayBreak: time.fridayBreak ?? undefined,
+          saturdayStart: time.saturdayStart ?? undefined,
+          saturdayStop: time.saturdayStop ?? undefined,
+          saturdayBreak: time.saturdayBreak ?? undefined,
+          sundayStart: time.sundayStart ?? undefined,
+          sundayStop: time.sundayStop ?? undefined,
+          sundayBreak: time.sundayBreak ?? undefined,
+          special: employeeSpecialTimes.reduce<SpecialWorkingHours[]>((t, emp: Res) => {
+            if (emp.employeeID === time.employeeID) {
+              t.push({
+                employeeSpceialHoursID: emp.employeeSpceialHoursID,
+                employeeID: emp.employeeID,
+                storeID: emp.storeID,
+                start: emp.start,
+                end: emp.end,
+                description: emp.description ?? undefined,
+                absence: emp.absence,
+              })
+            }
+            return t
+          }, [] as SpecialWorkingHours[]),
+        })
+      }
+      return acc
+    }, [])
+
+    type DayOfWeek =
+      | 'monday'
+      | 'tuesday'
+      | 'wednesday'
+      | 'thursday'
+      | 'friday'
+      | 'saturday'
+      | 'sunday'
+    const worktimes: WorkingHoursIDTotal = {
+      employeeInfo: regularTimes,
+      totalTimes: {
+        monday: WorkDuration(0),
+        tuesday: WorkDuration(0),
+        wednesday: WorkDuration(0),
+        thursday: WorkDuration(0),
+        friday: WorkDuration(0),
+        saturday: WorkDuration(0),
+        sunday: WorkDuration(0),
+      },
+    }
+
+    regularTimes.map((emp) => {
+      const mondayStart = emp.mondayStart
+        ? WorkDuration(new Date(emp.mondayStart).getTime())
+        : undefined
+      const mondayStop = emp.mondayStop
+        ? WorkDuration(new Date(emp.mondayStop).getTime())
+        : undefined
+      const tuesdayStart = emp.tuesdayStart
+        ? WorkDuration(new Date(emp.tuesdayStart).getTime())
+        : undefined
+      const tuesdayStop = emp.tuesdayStop
+        ? WorkDuration(new Date(emp.tuesdayStop).getTime())
+        : undefined
+      const wednesdayStart = emp.wednesdayStart
+        ? WorkDuration(new Date(emp.wednesdayStart).getTime())
+        : undefined
+      const wednesdayStop = emp.wednesdayStop
+        ? WorkDuration(new Date(emp.wednesdayStop).getTime())
+        : undefined
+      const thursdayStart = emp.thursdayStart
+        ? WorkDuration(new Date(emp.thursdayStart).getTime())
+        : undefined
+      const thursdayStop = emp.thursdayStop
+        ? WorkDuration(new Date(emp.thursdayStop).getTime())
+        : undefined
+      const fridayStart = emp.fridayStart
+        ? WorkDuration(new Date(emp.fridayStart).getTime())
+        : undefined
+      const fridayStop = emp.fridayStop
+        ? WorkDuration(new Date(emp.fridayStop).getTime())
+        : undefined
+      const saturdayStart = emp.saturdayStart
+        ? WorkDuration(new Date(emp.saturdayStart).getTime())
+        : undefined
+      const saturdayStop = emp.saturdayStop
+        ? WorkDuration(new Date(emp.saturdayStop).getTime())
+        : undefined
+      const sundayStart = emp.sundayStart
+        ? WorkDuration(new Date(emp.sundayStart).getTime())
+        : undefined
+      const sundayStop = emp.sundayStop
+        ? WorkDuration(new Date(emp.sundayStop).getTime())
+        : undefined
+
+      function isNotNullOrUndefined<T>(value: T | null | undefined): value is T {
+        return value !== null && value !== undefined
+      }
+
+      const shifts: { time: WorkDuration; shift: string }[] = [
+        { time: mondayStart, shift: 'start' },
+        { time: mondayStop, shift: 'stop' },
+        { time: tuesdayStart, shift: 'start' },
+        { time: tuesdayStop, shift: 'stop' },
+        { time: wednesdayStart, shift: 'start' },
+        { time: wednesdayStop, shift: 'stop' },
+        { time: thursdayStart, shift: 'start' },
+        { time: thursdayStop, shift: 'stop' },
+        { time: fridayStart, shift: 'start' },
+        { time: fridayStop, shift: 'stop' },
+        { time: saturdayStart, shift: 'start' },
+        { time: saturdayStop, shift: 'stop' },
+        { time: sundayStart, shift: 'start' },
+        { time: sundayStop, shift: 'stop' },
+      ].filter((x): x is { time: WorkDuration; shift: string } => isNotNullOrUndefined(x.time))
+
+      emp.special.map((hours) => {
+        shifts.push({
+          time: firstDayOfWeek(hours.start, startDay),
+          shift: hours.absence ? 'stop' : 'start',
+        })
+        shifts.push({
+          time: lastDayOfWeek(hours.end, startDay),
+          shift: hours.absence ? 'start' : 'stop',
+        })
+      })
+
+      shifts.sort((a, b) => {
+        if (a.time < b.time) {
+          return -1
+        }
+        if (a.time > b.time) {
+          return 1
+        }
+        return 0
+      })
+      const dayOfWeek = startDay.getDay(),
+        diff = dayOfWeek >= 1 ? dayOfWeek - 1 : 6 - dayOfWeek
+
+      let currDate = WorkDuration(new Date(startDay.getDate() - diff).setHours(23, 59, 59))
+      let st = null
+      let i = 0
+      let day = 0
+
+      function incrementToNextDay(timestamp: WorkDuration): WorkDuration {
+        const date = new Date(timestamp)
+        date.setDate(date.getDate() + 1)
+        date.setHours(0, 0, 0, 0)
+        return WorkDuration(date.getTime())
+      }
+      const daysOfWeek: DayOfWeek[] = [
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+        'sunday',
+      ]
+
+      while (i < shifts.length) {
+        if (shifts[i].shift === 'start') {
+          if (shifts[i].time > currDate) {
+            currDate = incrementToNextDay(currDate)
+            i = i - 1
+          } else {
+            st = shifts[i].time
+          }
+        } else if (shifts[i].time > currDate && st != null) {
+          worktimes.totalTimes[daysOfWeek[day]] = WorkDuration(
+            worktimes.totalTimes[daysOfWeek[day]] + currDate - st,
+          )
+          currDate = incrementToNextDay(currDate)
+          st = currDate
+          currDate = WorkDuration(new Date(currDate).setHours(23, 59, 59))
+          day = day + 1
+        } else if (st != null) {
+          worktimes.totalTimes[daysOfWeek[day]] = WorkDuration(
+            worktimes.totalTimes[daysOfWeek[day]] + shifts[i].time - st,
+          )
+          st = null
+          day = day + 1
+        }
+        i++
+      }
+
+      const startString = emp.mondayStart
+      const endString = emp.mondayStop
+      const breakString = emp.mondayBreak
+
+      if (startString != undefined && endString != undefined) {
+        const startMS = new Date(startString).getTime()
+        const endMS = new Date(endString).getTime()
+        worktimes.totalTimes.monday = WorkDuration(
+          worktimes.totalTimes.monday +
+            (endMS - startMS - (breakString ? intervalToMilliseconds(breakString) : 0)),
+        )
+      }
+    })
+    return right(worktimes)
+  }
+}
+
 export async function listWorkingEmployees(
   storeID: StoreID,
-  day: WorkTime,
+  startDay: WorkTime,
   quals: GlobalQualID[],
   localQuals: LocalQualID[],
 ) {
+  const endDay = WorkTime(new Date())
+  endDay.setDate(endDay.getDate() + 7)
+
   try {
     const createdEmployeeWithStores = await db.transaction(async (tx) => {
-      let employeeTimes
-      if (quals.length > 0) {
-        employeeTimes = await await tx
-          .select()
+      let employeeSpecialTimes: Res[] = []
+      let fetchedWorkingHours: (WorkingHoursNull | null)[] = []
+
+      if (quals.length > 0 && localQuals.length > 0) {
+        employeeSpecialTimes = await tx
+          .select({
+            employeeSpceialHoursID: employeeSpecialHours.employeeSpceialHoursID,
+            employeeID: employeeSpecialHours.employeeID,
+            storeID: employeeSpecialHours.storeID,
+            start: employeeSpecialHours.start,
+            end: employeeSpecialHours.end,
+            description: employeeSpecialHours.description,
+            absence: employeeSpecialHours.absence,
+          })
           .from(employeeSpecialHours)
           .innerJoin(
-            userGlobalQualifications,
-            eq(userGlobalQualifications.employeeID, employeeSpecialHours.employeeID),
+            employeeGlobalQualifications,
+            eq(employeeGlobalQualifications.employeeID, employeeSpecialHours.employeeID),
+          )
+          .innerJoin(
+            employeeLocalQualifications,
+            eq(employeeLocalQualifications.employeeID, employeeSpecialHours.employeeID),
           )
           .where(
             and(
               eq(employeeSpecialHours.storeID, storeID),
-              gte(employeeSpecialHours.start, day),
-              lte(employeeSpecialHours.end, day),
+              gte(employeeSpecialHours.start, endDay),
+              lte(employeeSpecialHours.end, startDay),
             ),
           )
 
-        tx.execute(
-          sql`  SELECT .*
-        FROM employeeSpecialHours e
-        JOIN userGlobalQualifications q ON e.employeeID = q.employeeID
-        WHERE e.storeID = ${storeID}
-          AND e.start >= ${day}
-          AND e."end" <= ${day}
-          AND q.globalQualID = ANY(${quals}::int[])`,
-        )
-      }
+        fetchedWorkingHours = (
+          await db
+            .select()
+            .from(employeeWorkingHours)
+            .innerJoin(
+              employeeGlobalQualifications,
+              eq(employeeGlobalQualifications.employeeID, employeeWorkingHours.employeeID),
+            )
+            .innerJoin(
+              employeeLocalQualifications,
+              eq(employeeLocalQualifications.employeeID, employeeWorkingHours.employeeID),
+            )
+            .where(and(eq(employeeWorkingHours.storeID, storeID)))
+        ).map((x) => x.employeeWorkingHours)
+      } else if (quals.length > 0) {
+        employeeSpecialTimes = await tx
+          .select({
+            employeeSpceialHoursID: employeeSpecialHours.employeeSpceialHoursID,
+            employeeID: employeeSpecialHours.employeeID,
+            storeID: employeeSpecialHours.storeID,
+            start: employeeSpecialHours.start,
+            end: employeeSpecialHours.end,
+            description: employeeSpecialHours.description,
+            absence: employeeSpecialHours.absence,
+          })
+          .from(employeeSpecialHours)
+          .innerJoin(
+            employeeGlobalQualifications,
+            eq(employeeGlobalQualifications.employeeID, employeeSpecialHours.employeeID),
+          )
+          .where(
+            and(
+              eq(employeeSpecialHours.storeID, storeID),
+              gte(employeeSpecialHours.start, endDay),
+              lte(employeeSpecialHours.end, startDay),
+            ),
+          )
 
-      if (localQuals.length > 0) {
-        employeeTimes = await tx.execute(
-          sql`  SELECT .*
-        FROM employeeSpecialHours e
-        JOIN userLocalQualifications q ON e.employeeID = q.employeeID
-        WHERE e.storeID = ${storeID}
-          AND e.start >= ${day}
-          AND e."end" <= ${day}
-          AND q.LocalQualID = ANY(${localQuals}::int[])`,
-        )
-      }
+        fetchedWorkingHours = (
+          await db
+            .select()
+            .from(employeeWorkingHours)
+            .innerJoin(
+              employeeGlobalQualifications,
+              eq(employeeGlobalQualifications.employeeID, employeeWorkingHours.employeeID),
+            )
+            .where(and(eq(employeeWorkingHours.storeID, storeID)))
+        ).map((x) => x.employeeWorkingHours)
+      } else if (localQuals.length > 0) {
+        employeeSpecialTimes = await tx
+          .select({
+            employeeSpceialHoursID: employeeSpecialHours.employeeSpceialHoursID,
+            employeeID: employeeSpecialHours.employeeID,
+            storeID: employeeSpecialHours.storeID,
+            start: employeeSpecialHours.start,
+            end: employeeSpecialHours.end,
+            description: employeeSpecialHours.description,
+            absence: employeeSpecialHours.absence,
+          })
+          .from(employeeSpecialHours)
+          .innerJoin(
+            employeeLocalQualifications,
+            eq(employeeLocalQualifications.employeeID, employeeSpecialHours.employeeID),
+          )
+          .where(
+            and(
+              eq(employeeSpecialHours.storeID, storeID),
+              gte(employeeSpecialHours.start, endDay),
+              lte(employeeSpecialHours.end, startDay),
+            ),
+          )
 
-      if (quals.length === 0 && localQuals.length === 0) {
-        employeeTimes = tx
-          .select()
+        fetchedWorkingHours = (
+          await db
+            .select()
+            .from(employeeWorkingHours)
+            .innerJoin(
+              employeeGlobalQualifications,
+              eq(employeeGlobalQualifications.employeeID, employeeWorkingHours.employeeID),
+            )
+            .where(and(eq(employeeWorkingHours.storeID, storeID)))
+        ).map((x) => x.employeeWorkingHours)
+      } else {
+        employeeSpecialTimes = await tx
+          .select({
+            employeeSpceialHoursID: employeeSpecialHours.employeeSpceialHoursID,
+            employeeID: employeeSpecialHours.employeeID,
+            storeID: employeeSpecialHours.storeID,
+            start: employeeSpecialHours.start,
+            end: employeeSpecialHours.end,
+            description: employeeSpecialHours.description,
+            absence: employeeSpecialHours.absence,
+          })
           .from(employeeSpecialHours)
           .where(
             and(
               eq(employeeSpecialHours.storeID, storeID),
-              gte(employeeSpecialHours.start, day),
-              lte(employeeSpecialHours.end, day),
+              gte(employeeSpecialHours.start, endDay),
+              lte(employeeSpecialHours.end, startDay),
             ),
           )
       }
-
-      console.log(employeeTimes)
+      return { special: employeeSpecialTimes, regular: fetchedWorkingHours }
     })
+    return calcTime(startDay, createdEmployeeWithStores.special, createdEmployeeWithStores.regular)
   } catch (e) {
     return left(errorHandling(e))
   }
