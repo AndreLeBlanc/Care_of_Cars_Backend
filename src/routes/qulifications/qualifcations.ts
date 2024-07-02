@@ -12,10 +12,10 @@ import {
   ListQualsSchemaType,
   LocalQualIDSchema,
   LocalQualIDSchemaType,
-  PutUserGlobalQualSchema,
-  PutUserGlobalQualSchemaType,
-  PutUserLocalQualSchema,
-  PutUserLocalQualSchemaType,
+  PutEmployeeGlobalQualSchema,
+  PutEmployeeGlobalQualSchemaType,
+  PutEmployeeLocalQualSchema,
+  PutEmployeeLocalQualSchemaType,
   QualificationMessage,
   QualificationMessageType,
   QualificationsGlobalSchema,
@@ -27,32 +27,32 @@ import {
 import {
   CreateQualificationsGlobal,
   CreateQualificationsLocal,
+  EmployeeGlobalQualifications,
+  EmployeeLocalQualifications,
   QualificationsGlobal,
   QualificationsListed,
   QualificationsLocal,
-  UserGlobalQualifications,
-  UserLocalQualifications,
+  deleteEmployeeGlobalQualification,
+  deleteEmployeeLocalQualification,
   deleteGlobalQuals,
   deleteLocalQuals,
-  deleteUserGlobalQualification,
-  deleteUserLocalQualification,
   getGlobalQual,
   getLocalQual,
   getQualifcations,
-  setUserGlobalQualification,
-  setUserLocalQualification,
+  setEmployeeGlobalQualification,
+  setEmployeeLocalQualification,
   updateGlobalQuals,
   updateLocalQuals,
 } from '../../services/qualificationsService.js'
 
 import {
+  EmployeeID,
   GlobalQualID,
   GlobalQualName,
   LocalQualID,
   LocalQualName,
   PermissionTitle,
   StoreID,
-  UserID,
 } from '../../schema/schema.js'
 
 import { Search } from '../../plugins/pagination.js'
@@ -69,7 +69,6 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
     '/local',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('put_local_qualification'))
         done()
         return reply
@@ -123,7 +122,6 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
     '/global',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('put_global_qualification'))
         done()
         return reply
@@ -313,7 +311,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply.status(403).send({
-            message: `Permission denied, user doesn't have permission ${permissionName}`,
+            message: `Permission denied, employee doesn't have permission ${permissionName}`,
           })
         }
         done()
@@ -325,17 +323,17 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
       },
     },
     async function (request, reply) {
-      const { search = '', storeID, userID } = request.query
+      const { search = '', storeID, employeeID } = request.query
       const brandedSearch = Search(search)
       let result: Either<string, QualificationsListed>
-      if (userID == null) {
+      if (employeeID == null) {
         result = storeID
           ? await getQualifcations(brandedSearch, StoreID(storeID))
           : await getQualifcations(brandedSearch)
       } else {
         result = storeID
-          ? await getQualifcations(brandedSearch, StoreID(storeID), UserID(userID))
-          : await getQualifcations(brandedSearch, undefined, UserID(userID))
+          ? await getQualifcations(brandedSearch, StoreID(storeID), EmployeeID(employeeID))
+          : await getQualifcations(brandedSearch, undefined, EmployeeID(employeeID))
       }
 
       match(
@@ -357,35 +355,32 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
   )
 
   fastify.post<{
-    Body: PutUserLocalQualSchemaType
+    Body: PutEmployeeLocalQualSchemaType
     Reply:
-      | { message: QualificationMessageType; qualification: PutUserLocalQualSchemaType }
+      | { message: QualificationMessageType; qualification: PutEmployeeLocalQualSchemaType }
       | { message: QualificationMessageType }
   }>(
     '/local-qual',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
-        fastify.authorize(request, reply, PermissionTitle('put_user_local_qualification'))
+        fastify.authorize(request, reply, PermissionTitle('put_employee_local_qualification'))
         done()
         return reply
       },
       schema: {
-        body: PutUserLocalQualSchema,
+        body: PutEmployeeLocalQualSchema,
         response: {
-          201: { message: QualificationMessage, qualification: PutUserLocalQualSchema },
+          201: { message: QualificationMessage, qualification: PutEmployeeLocalQualSchema },
           504: { message: QualificationMessage },
         },
       },
     },
     async (req, rep) => {
-      const userID = UserID(req.body.userID)
+      const employeeID = EmployeeID(req.body.employeeID)
       const localQualID = LocalQualID(req.body.localQualID)
 
-      const putQual: Either<string, UserLocalQualifications> = await setUserLocalQualification(
-        userID,
-        localQualID,
-      )
+      const putQual: Either<string, EmployeeLocalQualifications> =
+        await setEmployeeLocalQualification(employeeID, localQualID)
       match(
         putQual,
         (putQual) => {
@@ -404,35 +399,32 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
   )
 
   fastify.post<{
-    Body: PutUserGlobalQualSchemaType
+    Body: PutEmployeeGlobalQualSchemaType
     Reply:
-      | { message: QualificationMessageType; qualification: PutUserGlobalQualSchemaType }
+      | { message: QualificationMessageType; qualification: PutEmployeeGlobalQualSchemaType }
       | { message: QualificationMessageType }
   }>(
     '/global-qual',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
-        fastify.authorize(request, reply, PermissionTitle('put_user_global_qualification'))
+        fastify.authorize(request, reply, PermissionTitle('put_employee_global_qualification'))
         done()
         return reply
       },
       schema: {
-        body: PutUserGlobalQualSchema,
+        body: PutEmployeeGlobalQualSchema,
         response: {
-          201: { message: QualificationMessage, qualification: PutUserGlobalQualSchema },
+          201: { message: QualificationMessage, qualification: PutEmployeeGlobalQualSchema },
           504: { message: QualificationMessage },
         },
       },
     },
     async (req, rep) => {
-      const userID = UserID(req.body.userID)
+      const employeeID = EmployeeID(req.body.employeeID)
       const globalQualID = GlobalQualID(req.body.globalQualID)
 
-      const putQual: Either<string, UserGlobalQualifications> = await setUserGlobalQualification(
-        userID,
-        globalQualID,
-      )
+      const putQual: Either<string, EmployeeGlobalQualifications> =
+        await setEmployeeGlobalQualification(employeeID, globalQualID)
       match(
         putQual,
         (putQual) => {
@@ -451,33 +443,32 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
   )
 
   fastify.delete<{
-    Body: PutUserLocalQualSchemaType
+    Body: PutEmployeeLocalQualSchemaType
     Reply:
-      | { message: QualificationMessageType; qualification: PutUserLocalQualSchemaType }
+      | { message: QualificationMessageType; qualification: PutEmployeeLocalQualSchemaType }
       | { message: QualificationMessageType }
   }>(
     '/local-qual',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
-        fastify.authorize(request, reply, PermissionTitle('delete_user_local_qualification'))
+        fastify.authorize(request, reply, PermissionTitle('delete_employee_local_qualification'))
         done()
         return reply
       },
       schema: {
-        body: PutUserLocalQualSchema,
+        body: PutEmployeeLocalQualSchema,
         response: {
-          201: { message: QualificationMessage, qualification: PutUserLocalQualSchema },
+          201: { message: QualificationMessage, qualification: PutEmployeeLocalQualSchema },
           504: { message: QualificationMessage },
         },
       },
     },
     async (req, rep) => {
-      const userID = UserID(req.body.userID)
+      const employeeID = EmployeeID(req.body.employeeID)
       const localQualID = LocalQualID(req.body.localQualID)
 
-      const deleteQual: Either<string, UserLocalQualifications> =
-        await deleteUserLocalQualification(userID, localQualID)
+      const deleteQual: Either<string, EmployeeLocalQualifications> =
+        await deleteEmployeeLocalQualification(employeeID, localQualID)
       match(
         deleteQual,
         (deleteQual) => {
@@ -496,33 +487,32 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
   )
 
   fastify.delete<{
-    Body: PutUserGlobalQualSchemaType
+    Body: PutEmployeeGlobalQualSchemaType
     Reply:
-      | { message: QualificationMessageType; qualification: PutUserGlobalQualSchemaType }
+      | { message: QualificationMessageType; qualification: PutEmployeeGlobalQualSchemaType }
       | { message: QualificationMessageType }
   }>(
     '/global-qual',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
-        fastify.authorize(request, reply, PermissionTitle('delete_user_global_qualification'))
+        fastify.authorize(request, reply, PermissionTitle('delete_employee_global_qualification'))
         done()
         return reply
       },
       schema: {
-        body: PutUserGlobalQualSchema,
+        body: PutEmployeeGlobalQualSchema,
         response: {
-          201: { message: QualificationMessage, qualification: PutUserGlobalQualSchema },
+          201: { message: QualificationMessage, qualification: PutEmployeeGlobalQualSchema },
           504: { message: QualificationMessage },
         },
       },
     },
     async (req, rep) => {
-      const userID = UserID(req.body.userID)
+      const employeeID = EmployeeID(req.body.employeeID)
       const globalQualID = GlobalQualID(req.body.globalQualID)
 
-      const deleteQual: Either<string, UserGlobalQualifications> =
-        await deleteUserGlobalQualification(userID, globalQualID)
+      const deleteQual: Either<string, EmployeeGlobalQualifications> =
+        await deleteEmployeeGlobalQualification(employeeID, globalQualID)
       match(
         deleteQual,
         (deleteQual) => {

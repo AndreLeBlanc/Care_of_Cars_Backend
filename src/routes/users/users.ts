@@ -69,7 +69,7 @@ import {
   ResultCount,
   Search,
 } from '../../plugins/pagination.js'
-import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema..js'
+import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema.js'
 
 export async function users(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListUserQueryParamType }>(

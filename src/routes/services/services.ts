@@ -3,9 +3,12 @@ import { FastifyInstance } from 'fastify'
 import {
   ListServiceQueryParamSchema,
   ListServiceQueryParamSchemaType,
+  MessageSchema,
+  MessageSchemaType,
   ServiceSchema,
   ServiceSchemaType,
-  colorForService,
+  ServicesPaginatedSchema,
+  ServicesPaginatedSchemaType,
   getServiceByIDSchema,
   getServiceByIDSchemaType,
   listServiceOrderByEnum,
@@ -13,19 +16,26 @@ import {
 } from './serviceSchema.js'
 
 import {
-  ServiceNoVariant,
+  LocalService,
+  LocalServiceCreate,
+  Service,
+  ServiceBase,
+  ServiceCreate,
+  ServicesPaginated,
   createService,
+  deletetServiceById,
   getServiceById,
   getServicesPaginate,
-  updateServiceByID,
 } from '../../services/serviceService.js'
 
 import {
+  Award,
+  ColorForService,
+  LocalServiceID,
   PermissionTitle,
-  ServiceAward,
   ServiceCallInterval,
   ServiceCategoryID,
-  ServiceCost,
+  ServiceCostDinero,
   ServiceDay1,
   ServiceDay2,
   ServiceDay3,
@@ -39,23 +49,153 @@ import {
   ServiceName,
   ServiceSuppliersArticleNumber,
   ServiceWarrantyCard,
+  StoreID,
 } from '../../schema/schema.js'
 
 import {
   Limit,
-  ModelName,
   NextPageUrl,
   Offset,
   Page,
   PreviousPageUrl,
   RequestUrl,
-  ResponseMessage,
   ResultCount,
   Search,
 } from '../../plugins/pagination.js'
 
+import Dinero from 'dinero.js'
+
+import { Either, match } from '../../utils/helper.js'
+
 export async function services(fastify: FastifyInstance) {
-  fastify.get<{ Querystring: ListServiceQueryParamSchemaType }>(
+  fastify.put<{
+    Body: ServiceSchemaType
+    Reply: (ServiceSchemaType & MessageSchemaType) | MessageSchemaType
+  }>(
+    '/',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName = PermissionTitle('create_service')
+        console.log(permissionName, request.body)
+        //   const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        //   if (!authorizeStatus) {
+        //     return reply
+        //       .status(403)
+        //       .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        //   }
+        done()
+        return reply
+      },
+      schema: {
+        body: ServiceSchema,
+        //   response: { 201: { ...ServiceSchema, ...MessageSchema }, 504: MessageSchema },
+      },
+    },
+
+    async (request, reply) => {
+      let serviceData: Either<string, Service | LocalService>
+      const serviceBase: ServiceBase = {
+        name: ServiceName(request.body.name),
+        cost: ServiceCostDinero(
+          Dinero({ amount: request.body.cost, currency: request.body.currency as Dinero.Currency }),
+        ),
+        award: Award(request.body.award),
+        serviceCategoryID: ServiceCategoryID(request.body.serviceCategoryID),
+        includeInAutomaticSms: ServiceIncludeInAutomaticSms(request.body.includeInAutomaticSms),
+        hidden: ServiceHidden(request.body.hidden),
+        callInterval: request.body.callInterval
+          ? ServiceCallInterval(request.body.callInterval)
+          : undefined,
+        colorForService: request.body.colorForService as ColorForService,
+        warrantyCard: request.body.warrantyCard
+          ? ServiceWarrantyCard(request.body.warrantyCard)
+          : undefined,
+        itemNumber: request.body.itemNumber
+          ? ServiceItemNumber(request.body.itemNumber)
+          : undefined,
+        suppliersArticleNumber: request.body.suppliersArticleNumber
+          ? ServiceSuppliersArticleNumber(request.body.suppliersArticleNumber)
+          : undefined,
+        externalArticleNumber: request.body.externalArticleNumber
+          ? ServiceExternalArticleNumber(request.body.externalArticleNumber)
+          : undefined,
+      }
+      if (request.body.storeID != null) {
+        const localService: LocalServiceCreate & { localServiceID?: LocalServiceID } = {
+          ...serviceBase,
+          storeID: StoreID(request.body.storeID),
+          localServiceID: request.body.localServiceID
+            ? LocalServiceID(request.body.localServiceID)
+            : undefined,
+          localServiceVariants: request.body.localServiceVariants.map((serviceVariant) => {
+            return {
+              localServicevariantID: serviceVariant.localServicevariantID ?? undefined,
+              localServiceID: serviceVariant.localServiceID
+                ? LocalServiceID(serviceVariant.localServiceID)
+                : undefined,
+              name: ServiceName(serviceVariant.name),
+              award: Award(serviceVariant.award),
+              cost: ServiceCostDinero(
+                Dinero({
+                  amount: serviceVariant.cost,
+                  currency: serviceVariant.currency as Dinero.Currency,
+                }),
+              ),
+              day1: serviceVariant.day1 ? ServiceDay1(serviceVariant.day1) : undefined,
+              day2: serviceVariant.day2 ? ServiceDay2(serviceVariant.day2) : undefined,
+              day3: serviceVariant.day3 ? ServiceDay3(serviceVariant.day3) : undefined,
+              day4: serviceVariant.day4 ? ServiceDay4(serviceVariant.day4) : undefined,
+              day5: serviceVariant.day5 ? ServiceDay5(serviceVariant.day5) : undefined,
+            }
+          }),
+        }
+        serviceData = await createService(localService)
+      } else {
+        const serviceNew: ServiceCreate & { serviceID?: ServiceID } = {
+          ...serviceBase,
+          serviceID: request.body.serviceID ? ServiceID(request.body.serviceID) : undefined,
+          serviceVariants: request.body.serviceVariants.map((serviceVariant) => {
+            return {
+              servicevariantID: serviceVariant.servicevariantID ?? undefined,
+              serviceID: serviceVariant.serviceID ? ServiceID(serviceVariant.serviceID) : undefined,
+              name: ServiceName(serviceVariant.name),
+              award: Award(serviceVariant.award),
+              cost: ServiceCostDinero(
+                Dinero({
+                  amount: serviceVariant.cost,
+                  currency: serviceVariant.currency as Dinero.Currency,
+                }),
+              ),
+              day1: serviceVariant.day1 ? ServiceDay1(serviceVariant.day1) : undefined,
+              day2: serviceVariant.day2 ? ServiceDay2(serviceVariant.day2) : undefined,
+              day3: serviceVariant.day3 ? ServiceDay3(serviceVariant.day3) : undefined,
+              day4: serviceVariant.day4 ? ServiceDay4(serviceVariant.day4) : undefined,
+              day5: serviceVariant.day5 ? ServiceDay5(serviceVariant.day5) : undefined,
+            }
+          }),
+        }
+        serviceData = await createService(serviceNew)
+      }
+      console.log('service Data', serviceData)
+      match(
+        serviceData,
+        (serv) => {
+          const { cost, ...rest } = serv
+
+          return reply.status(201).send({
+            message: 'Service created',
+            ...{ ...rest, cost: cost.getAmount(), currency: cost.getCurrency() },
+          })
+        },
+        (err) => reply.status(504).send({ message: err }),
+      )
+    },
+  )
+
+  fastify.get<{
+    Querystring: ListServiceQueryParamSchemaType
+    Reply: (MessageSchemaType & ServicesPaginatedSchemaType) | MessageSchemaType
+  }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
@@ -71,10 +211,12 @@ export async function services(fastify: FastifyInstance) {
       },
       schema: {
         querystring: ListServiceQueryParamSchema,
+        response: { 200: { ...MessageSchema, ...ServicesPaginatedSchema }, 504: MessageSchema },
       },
     },
-    async function (request) {
+    async function (request, reply) {
       const {
+        storeID,
         search = '',
         limit = 10,
         page = 1,
@@ -83,12 +225,14 @@ export async function services(fastify: FastifyInstance) {
         hidden = false,
       } = request.query
 
+      const brandedStoreID = StoreID(storeID)
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
       const brandedHidden = ServiceHidden(hidden)
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
-      const result = await getServicesPaginate(
+      const servicesPaginated: Either<string, ServicesPaginated> = await getServicesPaginate(
+        brandedStoreID,
         brandedSearch,
         brandedLimit,
         brandedPage,
@@ -97,190 +241,65 @@ export async function services(fastify: FastifyInstance) {
         order,
         brandedHidden,
       )
-      const message: ResponseMessage = fastify.responseMessage(
-        ModelName('services'),
-        ResultCount(result.data.length),
-      )
-      const requestUrl: RequestUrl = RequestUrl(
-        request.protocol + '://' + request.hostname + request.url,
-      )
-      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        brandedPage,
-      )
-      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        brandedPage,
-      )
+      match(
+        servicesPaginated,
+        (services: ServicesPaginated) => {
+          const requestUrl: RequestUrl = RequestUrl(
+            request.protocol + '://' + request.hostname + request.url,
+          )
+          const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+            requestUrl,
+            Page(services.totalPage),
+            brandedPage,
+          )
+          const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+            requestUrl,
+            Page(services.totalPage),
+            brandedPage,
+          )
+          const servicesWithCost = services.services.map((serv) => {
+            const { cost, ...service } = serv
+            return {
+              ...service,
+              cost: cost.getAmount(),
+              currency: cost.getCurrency(),
+            }
+          })
 
-      return {
-        message: message,
-        totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl: previousUrl,
-        totalPage: result.totalPage,
-        page: brandedPage,
-        limit: limit,
-        data: result.data,
-      }
+          const localServicesWithCost = services.localServices.map((serv) => {
+            const { cost, ...service } = serv
+            return {
+              ...service,
+              cost: cost.getAmount(),
+              currency: cost.getCurrency(),
+            }
+          })
+
+          return reply.status(200).send({
+            message: 'services',
+            totalServices: ResultCount(services.services.length),
+            totalLocalServices: ResultCount(services.localServices.length),
+            totalPage: Page(services.totalPage),
+            perPage: Page(services.perPage),
+            localServices: localServicesWithCost,
+            services: servicesWithCost,
+            requestUrl: requestUrl,
+            nextUrl: nextUrl,
+            previousUrl: previousUrl,
+          })
+        },
+        (err) => {
+          return reply.status(504).send({ message: err })
+        },
+      )
     },
   )
-  fastify.post<{ Body: ServiceSchemaType; Reply: object }>(
-    '/',
-    {
-      preHandler: async (request, reply, done) => {
-        const permissionName = PermissionTitle('create_service')
-        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authorizeStatus) {
-          return reply
-            .status(403)
-            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
-        }
-        done()
-        return reply
-      },
-      schema: {
-        body: ServiceSchema,
-        response: {},
-      },
-    },
 
-    async (request, reply) => {
-      const service = {
-        serviceName: ServiceName(request.body.serviceName),
-        serviceCategoryID: ServiceCategoryID(request.body.serviceCategoryID),
-        serviceIncludeInAutomaticSms: ServiceIncludeInAutomaticSms(
-          request.body.serviceIncludeInAutomaticSms,
-        ),
-        serviceHidden: request.body.serviceHidden
-          ? ServiceHidden(request.body.serviceHidden)
-          : undefined,
-        serviceCallInterval: ServiceCallInterval(request.body.serviceCallInterval),
-        serviceColorForService: request.body.serviceColorForService as colorForService,
-        serviceWarrantyCard: request.body.serviceWarrantyCard
-          ? ServiceWarrantyCard(request.body.serviceWarrantyCard)
-          : undefined,
-        serviceItemNumber: request.body.serviceItemNumber
-          ? ServiceItemNumber(request.body.serviceItemNumber)
-          : undefined,
-        serviceSuppliersArticleNumber: request.body.serviceSuppliersArticleNumber
-          ? ServiceSuppliersArticleNumber(request.body.serviceSuppliersArticleNumber)
-          : undefined,
-        serviceExternalArticleNumber: request.body.serviceExternalArticleNumber
-          ? ServiceExternalArticleNumber(request.body.serviceExternalArticleNumber)
-          : undefined,
-        serviceVariants: request.body.serviceVariants.map((serviceVariant) => {
-          return {
-            serviceName: ServiceName(serviceVariant.name),
-            serviceAward: ServiceAward(serviceVariant.award),
-            serviceCost: ServiceCost(serviceVariant.cost),
-            serviceDay1: serviceVariant.serviceDay1
-              ? ServiceDay1(serviceVariant.serviceDay1)
-              : undefined,
-            serviceDay2: serviceVariant.serviceDay2
-              ? ServiceDay2(serviceVariant.serviceDay2)
-              : undefined,
-            serviceDay3: serviceVariant.serviceDay3
-              ? ServiceDay3(serviceVariant.serviceDay3)
-              : undefined,
-            serviceDay4: serviceVariant.serviceDay4
-              ? ServiceDay4(serviceVariant.serviceDay4)
-              : undefined,
-            serviceDay5: serviceVariant.serviceDay5
-              ? ServiceDay5(serviceVariant.serviceDay5)
-              : undefined,
-          }
-        }),
-      }
-      const serviceData: ServiceID = await createService(service)
-      reply.status(201).send({ message: 'Service created', data: serviceData })
-    },
-  )
-  fastify.patch<{
-    Body: ServiceSchemaType
-    Reply: object
+  fastify.get<{
     Params: getServiceByIDSchemaType
+    // Reply: (ServiceSchemaType & MessageSchemaType) | MessageSchemaType
   }>(
-    '/:serviceID',
-    {
-      preHandler: async (request, reply, done) => {
-        const permissionName = PermissionTitle('update_service')
-        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
-        if (!authorizeStatus) {
-          return reply
-            .status(403)
-            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
-        }
-        done()
-        return reply
-      },
-      schema: {
-        body: ServiceSchema,
-        params: getServiceByIDSchema,
-      },
-    },
-    async (request, reply) => {
-      if (Object.keys(request.body).length == 0) {
-        return reply.status(422).send({ message: 'Provide at least one column to update.' })
-      }
-      const serviceData = {
-        serviceName: ServiceName(request.body.serviceName),
-        serviceCategoryID: ServiceCategoryID(request.body.serviceCategoryID),
-        serviceIncludeInAutomaticSms: ServiceIncludeInAutomaticSms(
-          request.body.serviceIncludeInAutomaticSms,
-        ),
-        serviceHidden: request.body.serviceHidden
-          ? ServiceHidden(request.body.serviceHidden)
-          : undefined,
-        serviceCallInterval: ServiceCallInterval(request.body.serviceCallInterval),
-        serviceColorForService: request.body.serviceColorForService,
-        serviceWarrantyCard: request.body.serviceWarrantyCard
-          ? ServiceWarrantyCard(request.body.serviceWarrantyCard)
-          : undefined,
-        serviceItemNumber: request.body.serviceItemNumber
-          ? ServiceItemNumber(request.body.serviceItemNumber)
-          : undefined,
-        serviceSuppliersArticleNumber: request.body.serviceSuppliersArticleNumber
-          ? ServiceSuppliersArticleNumber(request.body.serviceSuppliersArticleNumber)
-          : undefined,
-        serviceExternalArticleNumber: request.body.serviceExternalArticleNumber
-          ? ServiceExternalArticleNumber(request.body.serviceExternalArticleNumber)
-          : undefined,
-        serviceVariants: request.body.serviceVariants.map((serviceVariant) => {
-          return {
-            serviceName: ServiceName(serviceVariant.name),
-            serviceAward: ServiceAward(serviceVariant.award),
-            serviceCost: ServiceCost(serviceVariant.cost),
-            serviceDay1: serviceVariant.serviceDay1
-              ? ServiceDay1(serviceVariant.serviceDay1)
-              : undefined,
-            serviceDay2: serviceVariant.serviceDay2
-              ? ServiceDay2(serviceVariant.serviceDay2)
-              : undefined,
-            serviceDay3: serviceVariant.serviceDay3
-              ? ServiceDay3(serviceVariant.serviceDay3)
-              : undefined,
-            serviceDay4: serviceVariant.serviceDay4
-              ? ServiceDay4(serviceVariant.serviceDay4)
-              : undefined,
-            serviceDay5: serviceVariant.serviceDay5
-              ? ServiceDay5(serviceVariant.serviceDay5)
-              : undefined,
-          }
-        }),
-      }
-      const service = await updateServiceByID(ServiceID(request.params.serviceID), serviceData)
-      if (service == undefined) {
-        return reply.status(404).send({ message: 'Service not found' })
-      }
-      reply.status(201).send({ message: 'Service Updated', data: service })
-    },
-  )
-
-  fastify.get<{ Params: getServiceByIDSchemaType }>(
-    '/:serviceID',
+    '/:serviceID/:type',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
@@ -291,15 +310,67 @@ export async function services(fastify: FastifyInstance) {
 
       schema: {
         params: getServiceByIDSchema,
+        response: {},
       },
     },
     async (request, reply) => {
-      const id = ServiceID(request.params.serviceID)
-      const user: ServiceNoVariant | undefined = await getServiceById(id)
-      if (user == null) {
-        return reply.status(404).send({ message: 'user not found' })
+      let id: ServiceID | LocalServiceID
+      if (request.params.type === 'Global') {
+        id = ServiceID(request.params.serviceID)
+      } else {
+        id = LocalServiceID(request.params.serviceID)
       }
-      return reply.status(200).send(user)
+      const service: Either<string, Service | LocalService> = await getServiceById({
+        type: request.params.type,
+        id: id,
+      })
+      console.log(service)
+      match(
+        service,
+        (fetchedService: Service | LocalService) => {
+          return reply.status(200).send({ ...fetchedService })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.delete<{ Params: getServiceByIDSchemaType }>(
+    '/:serviceID/:type',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        //        fastify.authorize(request, reply, PermissionTitle('view_service'))
+        done()
+        return reply
+      },
+
+      schema: {
+        params: getServiceByIDSchema,
+      },
+    },
+    async (request, reply) => {
+      let id: ServiceID | LocalServiceID
+      if (request.params.type === 'Global') {
+        id = ServiceID(request.params.serviceID)
+      } else {
+        id = LocalServiceID(request.params.serviceID)
+      }
+      const service: Either<string, Service | LocalService> = await deletetServiceById({
+        type: request.params.type,
+        id: id,
+      })
+      match(
+        service,
+        (fetchedService: Service | LocalService) => {
+          return reply.status(200).send({ ...fetchedService })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 }

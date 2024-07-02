@@ -135,7 +135,7 @@ import {
   StoreWeeklyNotesType,
   WeekSchema,
   WeekSchemaType,
-} from './storesSchema..js'
+} from './storesSchema.js'
 
 import { Either, match } from '../../utils/helper.js'
 

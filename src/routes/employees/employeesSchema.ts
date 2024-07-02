@@ -1,9 +1,9 @@
 import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 
 import { Static, Type } from '@sinclair/typebox'
-import { storeID } from '../stores/storesSchema..js'
+import { storeID } from '../stores/storesSchema.js'
 
-const employeeID = Type.Integer()
+export const employeeID = Type.Integer()
 const shortUserName = Type.String({ maxLength: 4 })
 const employmentNumber = Type.String({ maxLength: 128 })
 const employeePersonalNumber = Type.String({ maxLength: 16 })

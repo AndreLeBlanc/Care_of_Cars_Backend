@@ -53,7 +53,7 @@ import {
   listCheckedinStatus,
   putEmployee,
 } from '../../services/employeeService.js'
-import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema..js'
+import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema.js'
 
 export const employees = async (fastify: FastifyInstance) => {
   fastify.post<{
