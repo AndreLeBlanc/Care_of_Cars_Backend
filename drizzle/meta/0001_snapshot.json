@@ -1,6 +1,6 @@
 {
-  "id": "3b33692e-2ecf-4e49-a0b4-e6295d50513e",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "89e52425-738c-417d-8b75-02019ade987f",
+  "prevId": "7807f00f-d109-4ec7-afae-5d64c50010d7",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
@@ -143,8 +143,12 @@
           "name": "driverCars_driverID_drivers_driverID_fk",
           "tableFrom": "driverCars",
           "tableTo": "drivers",
-          "columnsFrom": ["driverID"],
-          "columnsTo": ["driverID"],
+          "columnsFrom": [
+            "driverID"
+          ],
+          "columnsTo": [
+            "driverID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -154,12 +158,16 @@
         "driverCars_driverCarRegistrationNumber_unique": {
           "name": "driverCars_driverCarRegistrationNumber_unique",
           "nullsNotDistinct": false,
-          "columns": ["driverCarRegistrationNumber"]
+          "columns": [
+            "driverCarRegistrationNumber"
+          ]
         },
         "driverCars_driverCarChassiNumber_unique": {
           "name": "driverCars_driverCarChassiNumber_unique",
           "nullsNotDistinct": false,
-          "columns": ["driverCarChassiNumber"]
+          "columns": [
+            "driverCarChassiNumber"
+          ]
         }
       }
     },
@@ -318,171 +326,12 @@
           "name": "drivers_customerOrgNumber_companycustomers_customerOrgNumber_fk",
           "tableFrom": "drivers",
           "tableTo": "companycustomers",
-          "columnsFrom": ["customerOrgNumber"],
-          "columnsTo": ["customerOrgNumber"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.employeeGlobalQualifications": {
-      "name": "employeeGlobalQualifications",
-      "schema": "",
-      "columns": {
-        "employeeID": {
-          "name": "employeeID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "globalQualID": {
-          "name": "globalQualID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "employeeGlobalQualifications_employeeID_employees_employeeID_fk": {
-          "name": "employeeGlobalQualifications_employeeID_employees_employeeID_fk",
-          "tableFrom": "employeeGlobalQualifications",
-          "tableTo": "employees",
-          "columnsFrom": ["employeeID"],
-          "columnsTo": ["employeeID"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "employeeGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk": {
-          "name": "employeeGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk",
-          "tableFrom": "employeeGlobalQualifications",
-          "tableTo": "qualificationsGlobal",
-          "columnsFrom": ["globalQualID"],
-          "columnsTo": ["globalQualID"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "employeeGlobalQualifications_globalQualID_employeeID_pk": {
-          "name": "employeeGlobalQualifications_globalQualID_employeeID_pk",
-          "columns": ["globalQualID", "employeeID"]
-        }
-      },
-      "uniqueConstraints": {}
-    },
-    "public.employeeLocalQualifications": {
-      "name": "employeeLocalQualifications",
-      "schema": "",
-      "columns": {
-        "employeeID": {
-          "name": "employeeID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "localQualID": {
-          "name": "localQualID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "employeeLocalQualifications_employeeID_employees_employeeID_fk": {
-          "name": "employeeLocalQualifications_employeeID_employees_employeeID_fk",
-          "tableFrom": "employeeLocalQualifications",
-          "tableTo": "employees",
-          "columnsFrom": ["employeeID"],
-          "columnsTo": ["employeeID"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "employeeLocalQualifications_localQualID_qualificationsLocal_localQualID_fk": {
-          "name": "employeeLocalQualifications_localQualID_qualificationsLocal_localQualID_fk",
-          "tableFrom": "employeeLocalQualifications",
-          "tableTo": "qualificationsLocal",
-          "columnsFrom": ["localQualID"],
-          "columnsTo": ["localQualID"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "employeeLocalQualifications_localQualID_employeeID_pk": {
-          "name": "employeeLocalQualifications_localQualID_employeeID_pk",
-          "columns": ["localQualID", "employeeID"]
-        }
-      },
-      "uniqueConstraints": {}
-    },
-    "public.employeeSpecialHours": {
-      "name": "employeeSpecialHours",
-      "schema": "",
-      "columns": {
-        "employeeSpecialHoursID": {
-          "name": "employeeSpecialHoursID",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "employeeID": {
-          "name": "employeeID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "storeID": {
-          "name": "storeID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "start": {
-          "name": "start",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "end": {
-          "name": "end",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "absence": {
-          "name": "absence",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "employeeSpecialHours_employeeID_employees_employeeID_fk": {
-          "name": "employeeSpecialHours_employeeID_employees_employeeID_fk",
-          "tableFrom": "employeeSpecialHours",
-          "tableTo": "employees",
-          "columnsFrom": ["employeeID"],
-          "columnsTo": ["employeeID"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "employeeSpecialHours_storeID_stores_storeID_fk": {
-          "name": "employeeSpecialHours_storeID_stores_storeID_fk",
-          "tableFrom": "employeeSpecialHours",
-          "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "customerOrgNumber"
+          ],
+          "columnsTo": [
+            "customerOrgNumber"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -573,8 +422,12 @@
           "name": "employeeStore_storeID_stores_storeID_fk",
           "tableFrom": "employeeStore",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -582,8 +435,12 @@
           "name": "employeeStore_employeeID_employees_employeeID_fk",
           "tableFrom": "employeeStore",
           "tableTo": "employees",
-          "columnsFrom": ["employeeID"],
-          "columnsTo": ["employeeID"],
+          "columnsFrom": [
+            "employeeID"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -591,7 +448,10 @@
       "compositePrimaryKeys": {
         "employeeStore_storeID_employeeID_pk": {
           "name": "employeeStore_storeID_employeeID_pk",
-          "columns": ["storeID", "employeeID"]
+          "columns": [
+            "storeID",
+            "employeeID"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -759,8 +619,12 @@
           "name": "employeeWorkingHours_storeID_stores_storeID_fk",
           "tableFrom": "employeeWorkingHours",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -768,8 +632,12 @@
           "name": "employeeWorkingHours_employeeID_employees_employeeID_fk",
           "tableFrom": "employeeWorkingHours",
           "tableTo": "employees",
-          "columnsFrom": ["employeeID"],
-          "columnsTo": ["employeeID"],
+          "columnsFrom": [
+            "employeeID"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -777,16 +645,13 @@
       "compositePrimaryKeys": {
         "employeeWorkingHours_storeID_employeeID_pk": {
           "name": "employeeWorkingHours_storeID_employeeID_pk",
-          "columns": ["storeID", "employeeID"]
+          "columns": [
+            "storeID",
+            "employeeID"
+          ]
         }
       },
-      "uniqueConstraints": {
-        "unique_employeeWorkingHours": {
-          "name": "unique_employeeWorkingHours",
-          "nullsNotDistinct": false,
-          "columns": ["storeID", "employeeID"]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.employees": {
       "name": "employees",
@@ -858,132 +723,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "mondayStart": {
-          "name": "mondayStart",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "mondayStop": {
-          "name": "mondayStop",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "mondayBreak": {
-          "name": "mondayBreak",
-          "type": "interval",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tuesdayStart": {
-          "name": "tuesdayStart",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tuesdayStop": {
-          "name": "tuesdayStop",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tuesdayBreak": {
-          "name": "tuesdayBreak",
-          "type": "interval",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "wednesdayStart": {
-          "name": "wednesdayStart",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "wednesdayStop": {
-          "name": "wednesdayStop",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "wednesdayBreak": {
-          "name": "wednesdayBreak",
-          "type": "interval",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "thursdayStart": {
-          "name": "thursdayStart",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "thursdayStop": {
-          "name": "thursdayStop",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "thursdayBreak": {
-          "name": "thursdayBreak",
-          "type": "interval",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "fridayStart": {
-          "name": "fridayStart",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "fridayStop": {
-          "name": "fridayStop",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "fridayBreak": {
-          "name": "fridayBreak",
-          "type": "interval",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "saturdayStart": {
-          "name": "saturdayStart",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "saturdayStop": {
-          "name": "saturdayStop",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "saturdayBreak": {
-          "name": "saturdayBreak",
-          "type": "interval",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sundayStart": {
-          "name": "sundayStart",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sundayStop": {
-          "name": "sundayStop",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sundayBreak": {
-          "name": "sundayBreak",
-          "type": "interval",
-          "primaryKey": false,
-          "notNull": false
-        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
@@ -1006,17 +745,23 @@
         "employees_employmentNumber_unique": {
           "name": "employees_employmentNumber_unique",
           "nullsNotDistinct": false,
-          "columns": ["employmentNumber"]
+          "columns": [
+            "employmentNumber"
+          ]
         },
         "employees_employeePersonalNumber_unique": {
           "name": "employees_employeePersonalNumber_unique",
           "nullsNotDistinct": false,
-          "columns": ["employeePersonalNumber"]
+          "columns": [
+            "employeePersonalNumber"
+          ]
         },
         "employees_signature_unique": {
           "name": "employees_signature_unique",
           "nullsNotDistinct": false,
-          "columns": ["signature"]
+          "columns": [
+            "signature"
+          ]
         }
       }
     },
@@ -1118,8 +863,12 @@
           "name": "localProducts_storeID_stores_storeID_fk",
           "tableFrom": "localProducts",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1127,100 +876,17 @@
           "name": "localProducts_productCategoryID_productCategories_productCategoryID_fk",
           "tableFrom": "localProducts",
           "tableTo": "productCategories",
-          "columnsFrom": ["productCategoryID"],
-          "columnsTo": ["productCategoryID"],
+          "columnsFrom": [
+            "productCategoryID"
+          ],
+          "columnsTo": [
+            "productCategoryID"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.localServiceGlobalQualifications": {
-      "name": "localServiceGlobalQualifications",
-      "schema": "",
-      "columns": {
-        "localServiceID": {
-          "name": "localServiceID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "globalQualID": {
-          "name": "globalQualID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "localServiceGlobalQualifications_localServiceID_localServices_localServiceID_fk": {
-          "name": "localServiceGlobalQualifications_localServiceID_localServices_localServiceID_fk",
-          "tableFrom": "localServiceGlobalQualifications",
-          "tableTo": "localServices",
-          "columnsFrom": ["localServiceID"],
-          "columnsTo": ["localServiceID"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "localServiceGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk": {
-          "name": "localServiceGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk",
-          "tableFrom": "localServiceGlobalQualifications",
-          "tableTo": "qualificationsGlobal",
-          "columnsFrom": ["globalQualID"],
-          "columnsTo": ["globalQualID"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.localServiceLocalQualifications": {
-      "name": "localServiceLocalQualifications",
-      "schema": "",
-      "columns": {
-        "localServiceID": {
-          "name": "localServiceID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "localQualID": {
-          "name": "localQualID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "localServiceLocalQualifications_localServiceID_localServices_localServiceID_fk": {
-          "name": "localServiceLocalQualifications_localServiceID_localServices_localServiceID_fk",
-          "tableFrom": "localServiceLocalQualifications",
-          "tableTo": "localServices",
-          "columnsFrom": ["localServiceID"],
-          "columnsTo": ["localServiceID"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "localServiceLocalQualifications_localQualID_qualificationsLocal_localQualID_fk": {
-          "name": "localServiceLocalQualifications_localQualID_qualificationsLocal_localQualID_fk",
-          "tableFrom": "localServiceLocalQualifications",
-          "tableTo": "qualificationsLocal",
-          "columnsFrom": ["localQualID"],
-          "columnsTo": ["localQualID"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "localServiceLocalQualifications_localQualID_localServiceID_pk": {
-          "name": "localServiceLocalQualifications_localQualID_localServiceID_pk",
-          "columns": ["localQualID", "localServiceID"]
-        }
-      },
       "uniqueConstraints": {}
     },
     "public.localServiceVariants": {
@@ -1314,8 +980,12 @@
           "name": "localServiceVariants_localServiceID_localServices_localServiceID_fk",
           "tableFrom": "localServiceVariants",
           "tableTo": "localServices",
-          "columnsFrom": ["localServiceID"],
-          "columnsTo": ["localServiceID"],
+          "columnsFrom": [
+            "localServiceID"
+          ],
+          "columnsTo": [
+            "localServiceID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1468,8 +1138,12 @@
           "name": "localServices_serviceCategoryID_serviceCategories_serviceCategoryID_fk",
           "tableFrom": "localServices",
           "tableTo": "serviceCategories",
-          "columnsFrom": ["serviceCategoryID"],
-          "columnsTo": ["serviceCategoryID"],
+          "columnsFrom": [
+            "serviceCategoryID"
+          ],
+          "columnsTo": [
+            "serviceCategoryID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1477,8 +1151,12 @@
           "name": "localServices_storeID_stores_storeID_fk",
           "tableFrom": "localServices",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1530,7 +1208,9 @@
         "permissions_permissionName_unique": {
           "name": "permissions_permissionName_unique",
           "nullsNotDistinct": false,
-          "columns": ["permissionName"]
+          "columns": [
+            "permissionName"
+          ]
         }
       }
     },
@@ -1578,7 +1258,9 @@
         "productCategories_name_unique": {
           "name": "productCategories_name_unique",
           "nullsNotDistinct": false,
-          "columns": ["name"]
+          "columns": [
+            "name"
+          ]
         }
       }
     },
@@ -1674,8 +1356,12 @@
           "name": "products_productCategoryID_productCategories_productCategoryID_fk",
           "tableFrom": "products",
           "tableTo": "productCategories",
-          "columnsFrom": ["productCategoryID"],
-          "columnsTo": ["productCategoryID"],
+          "columnsFrom": [
+            "productCategoryID"
+          ],
+          "columnsTo": [
+            "productCategoryID"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1721,7 +1407,9 @@
         "qualificationsGlobal_localQualName_unique": {
           "name": "qualificationsGlobal_localQualName_unique",
           "nullsNotDistinct": false,
-          "columns": ["localQualName"]
+          "columns": [
+            "localQualName"
+          ]
         }
       }
     },
@@ -1768,8 +1456,12 @@
           "name": "qualificationsLocal_storeID_stores_storeID_fk",
           "tableFrom": "qualificationsLocal",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1779,7 +1471,10 @@
         "qualificationsLocal_localQualName_storeID_unique": {
           "name": "qualificationsLocal_localQualName_storeID_unique",
           "nullsNotDistinct": false,
-          "columns": ["localQualName", "storeID"]
+          "columns": [
+            "localQualName",
+            "storeID"
+          ]
         }
       }
     },
@@ -1850,8 +1545,12 @@
           "name": "rentCars_storeID_stores_storeID_fk",
           "tableFrom": "rentCars",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1861,7 +1560,9 @@
         "rentCars_rentCarRegistrationNumber_unique": {
           "name": "rentCars_rentCarRegistrationNumber_unique",
           "nullsNotDistinct": false,
-          "columns": ["rentCarRegistrationNumber"]
+          "columns": [
+            "rentCarRegistrationNumber"
+          ]
         }
       }
     },
@@ -1902,8 +1603,12 @@
           "name": "roleToPermissions_permissionID_permissions_permissionID_fk",
           "tableFrom": "roleToPermissions",
           "tableTo": "permissions",
-          "columnsFrom": ["permissionID"],
-          "columnsTo": ["permissionID"],
+          "columnsFrom": [
+            "permissionID"
+          ],
+          "columnsTo": [
+            "permissionID"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1911,7 +1616,10 @@
       "compositePrimaryKeys": {
         "roleToPermissionID": {
           "name": "roleToPermissionID",
-          "columns": ["roleID", "permissionID"]
+          "columns": [
+            "roleID",
+            "permissionID"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -1960,7 +1668,9 @@
         "roles_roleName_unique": {
           "name": "roles_roleName_unique",
           "nullsNotDistinct": false,
-          "columns": ["roleName"]
+          "columns": [
+            "roleName"
+          ]
         }
       }
     },
@@ -2008,96 +1718,11 @@
         "serviceCategories_serviceCategoryName_unique": {
           "name": "serviceCategories_serviceCategoryName_unique",
           "nullsNotDistinct": false,
-          "columns": ["serviceCategoryName"]
+          "columns": [
+            "serviceCategoryName"
+          ]
         }
       }
-    },
-    "public.serviceLocalQualifications": {
-      "name": "serviceLocalQualifications",
-      "schema": "",
-      "columns": {
-        "serviceID": {
-          "name": "serviceID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "localQualID": {
-          "name": "localQualID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "serviceLocalQualifications_serviceID_services_serviceID_fk": {
-          "name": "serviceLocalQualifications_serviceID_services_serviceID_fk",
-          "tableFrom": "serviceLocalQualifications",
-          "tableTo": "services",
-          "columnsFrom": ["serviceID"],
-          "columnsTo": ["serviceID"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "serviceLocalQualifications_localQualID_qualificationsLocal_localQualID_fk": {
-          "name": "serviceLocalQualifications_localQualID_qualificationsLocal_localQualID_fk",
-          "tableFrom": "serviceLocalQualifications",
-          "tableTo": "qualificationsLocal",
-          "columnsFrom": ["localQualID"],
-          "columnsTo": ["localQualID"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "serviceLocalQualifications_localQualID_serviceID_pk": {
-          "name": "serviceLocalQualifications_localQualID_serviceID_pk",
-          "columns": ["localQualID", "serviceID"]
-        }
-      },
-      "uniqueConstraints": {}
-    },
-    "public.serviceQualifications": {
-      "name": "serviceQualifications",
-      "schema": "",
-      "columns": {
-        "serviceID": {
-          "name": "serviceID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "globalQualID": {
-          "name": "globalQualID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "serviceQualifications_serviceID_services_serviceID_fk": {
-          "name": "serviceQualifications_serviceID_services_serviceID_fk",
-          "tableFrom": "serviceQualifications",
-          "tableTo": "services",
-          "columnsFrom": ["serviceID"],
-          "columnsTo": ["serviceID"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "serviceQualifications_globalQualID_qualificationsGlobal_globalQualID_fk": {
-          "name": "serviceQualifications_globalQualID_qualificationsGlobal_globalQualID_fk",
-          "tableFrom": "serviceQualifications",
-          "tableTo": "qualificationsGlobal",
-          "columnsFrom": ["globalQualID"],
-          "columnsTo": ["globalQualID"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
     },
     "public.serviceVariants": {
       "name": "serviceVariants",
@@ -2190,8 +1815,12 @@
           "name": "serviceVariants_serviceID_services_serviceID_fk",
           "tableFrom": "serviceVariants",
           "tableTo": "services",
-          "columnsFrom": ["serviceID"],
-          "columnsTo": ["serviceID"],
+          "columnsFrom": [
+            "serviceID"
+          ],
+          "columnsTo": [
+            "serviceID"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2338,8 +1967,12 @@
           "name": "services_serviceCategoryID_serviceCategories_serviceCategoryID_fk",
           "tableFrom": "services",
           "tableTo": "serviceCategories",
-          "columnsFrom": ["serviceCategoryID"],
-          "columnsTo": ["serviceCategoryID"],
+          "columnsFrom": [
+            "serviceCategoryID"
+          ],
+          "columnsTo": [
+            "serviceCategoryID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2349,12 +1982,16 @@
         "services_name_unique": {
           "name": "services_name_unique",
           "nullsNotDistinct": false,
-          "columns": ["name"]
+          "columns": [
+            "name"
+          ]
         },
         "services_itemNumber_unique": {
           "name": "services_itemNumber_unique",
           "nullsNotDistinct": false,
-          "columns": ["itemNumber"]
+          "columns": [
+            "itemNumber"
+          ]
         }
       }
     },
@@ -2473,8 +2110,12 @@
           "name": "storeopeninghours_storeID_stores_storeID_fk",
           "tableFrom": "storeopeninghours",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2532,8 +2173,12 @@
           "name": "storepaymentinfo_storeID_stores_storeID_fk",
           "tableFrom": "storepaymentinfo",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2705,17 +2350,23 @@
         "stores_storeOrgNumber_unique": {
           "name": "stores_storeOrgNumber_unique",
           "nullsNotDistinct": false,
-          "columns": ["storeOrgNumber"]
+          "columns": [
+            "storeOrgNumber"
+          ]
         },
         "stores_storeName_unique": {
           "name": "stores_storeName_unique",
           "nullsNotDistinct": false,
-          "columns": ["storeName"]
+          "columns": [
+            "storeName"
+          ]
         },
         "stores_storeAddress_unique": {
           "name": "stores_storeAddress_unique",
           "nullsNotDistinct": false,
-          "columns": ["storeAddress"]
+          "columns": [
+            "storeAddress"
+          ]
         }
       }
     },
@@ -2751,12 +2402,16 @@
       "indexes": {
         "storeid_idx": {
           "name": "storeid_idx",
-          "columns": ["storeID"],
+          "columns": [
+            "storeID"
+          ],
           "isUnique": false
         },
         "day_idx": {
           "name": "day_idx",
-          "columns": ["day"],
+          "columns": [
+            "day"
+          ],
           "isUnique": false
         }
       },
@@ -2765,8 +2420,12 @@
           "name": "storespecialhours_storeID_stores_storeID_fk",
           "tableFrom": "storespecialhours",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2774,7 +2433,10 @@
       "compositePrimaryKeys": {
         "storespecialhours_storeID_day_pk": {
           "name": "storespecialhours_storeID_day_pk",
-          "columns": ["storeID", "day"]
+          "columns": [
+            "storeID",
+            "day"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -2850,8 +2512,12 @@
           "name": "storeweeklynotes_storeID_stores_storeID_fk",
           "tableFrom": "storeweeklynotes",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2859,14 +2525,20 @@
       "compositePrimaryKeys": {
         "storeweeklynotes_storeID_week_pk": {
           "name": "storeweeklynotes_storeID_week_pk",
-          "columns": ["storeID", "week"]
+          "columns": [
+            "storeID",
+            "week"
+          ]
         }
       },
       "uniqueConstraints": {
         "storeweeklynotes_storeID_week_unique": {
           "name": "storeweeklynotes_storeID_week_unique",
           "nullsNotDistinct": false,
-          "columns": ["storeID", "week"]
+          "columns": [
+            "storeID",
+            "week"
+          ]
         }
       }
     },
@@ -2893,8 +2565,12 @@
           "name": "userBelongsToStore_userID_users_userID_fk",
           "tableFrom": "userBelongsToStore",
           "tableTo": "users",
-          "columnsFrom": ["userID"],
-          "columnsTo": ["userID"],
+          "columnsFrom": [
+            "userID"
+          ],
+          "columnsTo": [
+            "userID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2902,8 +2578,12 @@
           "name": "userBelongsToStore_storeID_stores_storeID_fk",
           "tableFrom": "userBelongsToStore",
           "tableTo": "stores",
-          "columnsFrom": ["storeID"],
-          "columnsTo": ["storeID"],
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2911,7 +2591,124 @@
       "compositePrimaryKeys": {
         "userBelongsToStore_storeID_userID_pk": {
           "name": "userBelongsToStore_storeID_userID_pk",
-          "columns": ["storeID", "userID"]
+          "columns": [
+            "storeID",
+            "userID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.userGlobalQualifications": {
+      "name": "userGlobalQualifications",
+      "schema": "",
+      "columns": {
+        "userID": {
+          "name": "userID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "globalQualID": {
+          "name": "globalQualID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "userGlobalQualifications_userID_users_userID_fk": {
+          "name": "userGlobalQualifications_userID_users_userID_fk",
+          "tableFrom": "userGlobalQualifications",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userID"
+          ],
+          "columnsTo": [
+            "userID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "userGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk": {
+          "name": "userGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk",
+          "tableFrom": "userGlobalQualifications",
+          "tableTo": "qualificationsGlobal",
+          "columnsFrom": [
+            "globalQualID"
+          ],
+          "columnsTo": [
+            "globalQualID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "userGlobalQualifications_globalQualID_userID_pk": {
+          "name": "userGlobalQualifications_globalQualID_userID_pk",
+          "columns": [
+            "globalQualID",
+            "userID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.userLocalQualifications": {
+      "name": "userLocalQualifications",
+      "schema": "",
+      "columns": {
+        "userID": {
+          "name": "userID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "localQualID": {
+          "name": "localQualID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "userLocalQualifications_userID_users_userID_fk": {
+          "name": "userLocalQualifications_userID_users_userID_fk",
+          "tableFrom": "userLocalQualifications",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userID"
+          ],
+          "columnsTo": [
+            "userID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "userLocalQualifications_localQualID_qualificationsLocal_localQualID_fk": {
+          "name": "userLocalQualifications_localQualID_qualificationsLocal_localQualID_fk",
+          "tableFrom": "userLocalQualifications",
+          "tableTo": "qualificationsLocal",
+          "columnsFrom": [
+            "localQualID"
+          ],
+          "columnsTo": [
+            "localQualID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "userLocalQualifications_localQualID_userID_pk": {
+          "name": "userLocalQualifications_localQualID_userID_pk",
+          "columns": [
+            "localQualID",
+            "userID"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -2984,8 +2781,12 @@
           "name": "users_roleID_roles_roleID_fk",
           "tableFrom": "users",
           "tableTo": "roles",
-          "columnsFrom": ["roleID"],
-          "columnsTo": ["roleID"],
+          "columnsFrom": [
+            "roleID"
+          ],
+          "columnsTo": [
+            "roleID"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2995,7 +2796,9 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       }
     }

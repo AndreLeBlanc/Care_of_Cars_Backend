@@ -7,6 +7,7 @@ import {
   globalQualID,
   localQualID,
 } from '../qulifications/qualificationsSchema.js'
+
 const LocalServiceIDSchema = Type.Number({ minimum: 0 })
 const ServiceVariantIDSchema = Type.Number({ minimum: 0 })
 const ServiceIDSchema = Type.Number({ minimum: 0 })

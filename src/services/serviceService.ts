@@ -632,7 +632,7 @@ export async function setServiceLocalQual(
   } catch (e) {
     return left(errorHandling(e))
   }
-}
+}setEm
 
 export async function setLocalServiceQualifications(
   serviceQual: LocalServiceGlobalQual,
@@ -788,6 +788,7 @@ export async function deleteLocalServiceQualifications(
           .where(eq(localServiceLocalQualifications.localServiceID, localServiceID))
           .returning({ localQuals: localServiceLocalQualifications.localQualID })
       }
+
       if (quals != null && localQuals != null) {
         return right({
           localQuals: localQuals.map((x) => x.localQuals),
