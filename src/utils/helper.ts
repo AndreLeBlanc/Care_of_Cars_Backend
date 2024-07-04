@@ -7,6 +7,10 @@ export function isEmail(emailAddress: string) {
   return emailAddress?.match(regex)
 }
 
+export const employeeID = Type.Integer()
+export const localQualID = Type.Integer()
+export const globalQualID = Type.Integer()
+
 //@ts-ignore
 export type PositiveInteger<T extends number> = `${T}` extends '0' | `-${any}` | `${any}.${any}`
   ? never

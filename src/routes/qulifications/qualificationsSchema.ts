@@ -1,11 +1,8 @@
 import { Static, Type } from '@sinclair/typebox'
-import { CreatedAndUpdatedAT } from '../../utils/helper.js'
+
+import { CreatedAndUpdatedAT, employeeID, globalQualID, localQualID } from '../../utils/helper.js'
 import { storeID } from '../stores/storesSchema.js'
 
-import { employeeID } from '../employees/employeesSchema.js'
-
-export const localQualID = Type.Integer()
-export const globalQualID = Type.Integer()
 export const LocalQualIDSchema = Type.Object({ localQualID })
 export type LocalQualIDSchemaType = Static<typeof LocalQualIDSchema>
 export const GlobalQualIDSchema = Type.Object({ globalQualID: globalQualID })

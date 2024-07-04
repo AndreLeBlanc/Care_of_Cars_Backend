@@ -2,11 +2,9 @@ import { Static, Type } from '@sinclair/typebox'
 
 import { storeID } from '../stores/storesSchema.js'
 
-import {
-  LocalQualIDSchema,
-  globalQualID,
-  localQualID,
-} from '../qulifications/qualificationsSchema.js'
+import { LocalQualIDSchema } from '../qulifications/qualificationsSchema.js'
+
+import { globalQualID, localQualID } from '../../utils/helper.js'
 
 const LocalServiceIDSchema = Type.Number({ minimum: 0 })
 const ServiceVariantIDSchema = Type.Number({ minimum: 0 })

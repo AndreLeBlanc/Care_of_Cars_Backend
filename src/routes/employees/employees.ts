@@ -23,6 +23,7 @@ import {
   GetEmployeeWorkingHoursSchemaType,
   ListCheckInStatusSchema,
   ListCheckInStatusSchemaType,
+  ListEmployeeWorkingHoursSchemaType,
   ListEmployeesReplySchema,
   ListEmployeesReplySchemaType,
   ListEmployeesSchema,
@@ -49,6 +50,8 @@ import {
   FridayBreak,
   FridayStart,
   FridayStop,
+  GlobalQualID,
+  LocalQualID,
   MondayBreak,
   MondayStart,
   MondayStop,
@@ -86,6 +89,7 @@ import {
   SpecialWorkingHours,
   WorkingHours,
   WorkingHoursCreated,
+  WorkingHoursIDTotal,
   checkInCheckOut,
   deleteEmployee,
   deleteEmployeeWorkingHours,
@@ -95,6 +99,7 @@ import {
   getEmployeeWorkingHours,
   getEmployeesPaginate,
   listCheckedinStatus,
+  listWorkingEmployees,
   putEmployee,
   setEmployeeSpecialWorkingHours,
   setEmployeeWorkingHours,
@@ -718,6 +723,58 @@ export const employees = async (fastify: FastifyInstance) => {
         hours,
         (specialHours: SpecialWorkingHours) => {
           return reply.status(200).send({ message: 'employee working hours', ...specialHours })
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Body: ListEmployeeWorkingHoursSchemaType
+    Reply:
+      | ({ message: EmployeeMessageSchemaType } & SpecialWorkingHoursSchemaType)
+      | EmployeeMessageSchemaType
+  }>(
+    '/availableEmployees',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_employee_availablities')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply.status(403).send({
+            message: `Permission denied, user doesn't have permission ${permissionName}`,
+          })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: EmployeeSpceialHourByDateSchema,
+        response: {
+          200: { message: EmployeeMessageSchema, ...SpecialWorkingHoursSchema },
+          403: EmployeeMessageSchema,
+        },
+      },
+    },
+    async function (request, reply) {
+      const storeID = StoreID(request.body.storeID)
+      const startDay = WorkTime(new Date(request.body.startDay))
+      const quals = request.body.quals.map((qualification) => GlobalQualID(qualification))
+      const localQuals = request.body.localQuals.map((qualification) => LocalQualID(qualification))
+      const hours: Either<string, WorkingHoursIDTotal> = await listWorkingEmployees(
+        storeID,
+        startDay,
+        quals,
+        localQuals,
+      )
+      match(
+        hours,
+        (specialHours: WorkingHoursIDTotal) => {
+          return reply
+            .status(200)
+            .send({ message: 'employee special working hours', ...specialHours })
         },
         (err) => {
           return reply.status(403).send({ message: err })

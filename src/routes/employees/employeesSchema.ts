@@ -3,8 +3,9 @@ import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 import { Static, Type } from '@sinclair/typebox'
 import { storeID } from '../stores/storesSchema.js'
 
+import { employeeID, globalQualID, localQualID } from '../../utils/helper.js'
+
 const AbsenceSchema = Type.Boolean()
-export const employeeID = Type.Integer()
 const EmployeeSpceialHoursID = Type.Integer()
 const WorkTimeDescriptionSchema = Type.String()
 const workTimeSchema = Type.String({ format: 'time' })
@@ -41,6 +42,15 @@ export const EmployeeSpceialHourByDateSchema = Type.Object({
 })
 
 export type EmployeeSpceialHourByDateSchemaType = Static<typeof EmployeeSpceialHourByDateSchema>
+
+export const ListEmployeeWorkingHoursSchema = Type.Object({
+  storeID: storeID,
+  startDay: Type.String({ format: 'date' }),
+  quals: Type.Array(localQualID),
+  localQuals: Type.Array(globalQualID),
+})
+
+export type ListEmployeeWorkingHoursSchemaType = Static<typeof ListEmployeeWorkingHoursSchema>
 
 export const EmployeeMessageSchema = Type.Object({ message: Type.String() })
 export type EmployeeMessageSchemaType = Static<typeof EmployeeMessageSchema>
@@ -208,3 +218,18 @@ export const GetEmployeeWorkingHoursSchema = Type.Object({
 })
 
 export type GetEmployeeWorkingHoursSchemaType = Static<typeof GetEmployeeWorkingHoursSchema>
+
+export const WorkingHoursTotalSchema = Type.Object({
+  employeeInfo: Type.Array(
+    Type.Composite([EmployeeTimeSchema, Type.Object({ special: SpecialWorkingHoursSchema })]),
+  ),
+  totalTimes: Type.Object({
+    monday: Type.String({ format: 'time' }),
+    tuesday: Type.String({ format: 'time' }),
+    wednesday: Type.String({ format: 'time' }),
+    thursday: Type.String({ format: 'time' }),
+    friday: Type.String({ format: 'time' }),
+    saturday: Type.String({ format: 'time' }),
+    sunday: Type.String({ format: 'time' }),
+  }),
+})
