@@ -632,7 +632,7 @@ export async function setServiceLocalQual(
   } catch (e) {
     return left(errorHandling(e))
   }
-}setEm
+}
 
 export async function setLocalServiceQualifications(
   serviceQual: LocalServiceGlobalQual,
