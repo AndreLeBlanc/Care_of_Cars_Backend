@@ -326,7 +326,7 @@ export const RoleDescription = make<RoleDescription>()
 
 export type EmployeeID = Brand<number, 'employeeID'>
 export const EmployeeID = make<EmployeeID>()
-export type EmployeeSpceialHoursID = Brand<number, 'employeeSpceialHoursID'>
+export type EmployeeSpceialHoursID = Brand<number, 'employeeSpecialHoursID'>
 export const EmployeeSpceialHoursID = make<EmployeeSpceialHoursID>()
 export type ShortUserName = Brand<string, 'ShortUserName'>
 export const ShortUserName = make<ShortUserName>()
@@ -398,7 +398,7 @@ export type WorkDuration = Brand<number, 'workDuration'>
 export const WorkDuration = make<WorkDuration>()
 export type WorkTimeDescription = Brand<string, 'workTimeDescription'>
 export const WorkTimeDescription = make<WorkTimeDescription>()
-export type Absence = Brand<string, 'absence'>
+export type Absence = Brand<boolean, 'absence'>
 export const Absence = make<Absence>()
 
 export type TotalEmployees = Brand<number, 'totalEmployees'>
@@ -570,7 +570,7 @@ export const employeeStore = pgTable(
 )
 
 export const employeeSpecialHours = pgTable('employeeSpecialHours', {
-  employeeSpceialHoursID: integer('employeeSpceialHoursID')
+  employeeSpecialHoursID: serial('employeeSpecialHoursID')
     .$type<EmployeeSpceialHoursID>()
     .primaryKey(),
   employeeID: integer('employeeID')

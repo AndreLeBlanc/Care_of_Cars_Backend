@@ -525,7 +525,7 @@ export async function services(fastify: FastifyInstance) {
     Body: ServiceLocalQualSchemaType
     Reply: (MessageSchemaType & ServiceLocalQualSchemaType) | MessageSchemaType
   }>(
-    '/LocalServiceLocalQuals',
+    '/GlobalServiceLocalQuals',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)

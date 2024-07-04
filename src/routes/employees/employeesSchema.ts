@@ -3,7 +3,11 @@ import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 import { Static, Type } from '@sinclair/typebox'
 import { storeID } from '../stores/storesSchema.js'
 
+const AbsenceSchema = Type.Boolean()
 export const employeeID = Type.Integer()
+const EmployeeSpceialHoursID = Type.Integer()
+const WorkTimeDescriptionSchema = Type.String()
+const workTimeSchema = Type.String({ format: 'time' })
 const shortUserName = Type.String({ maxLength: 4 })
 const employmentNumber = Type.String({ maxLength: 128 })
 const employeePersonalNumber = Type.String({ maxLength: 16 })
@@ -23,6 +27,20 @@ const EmployeeSchema = Type.Object({
   employeePin: employeePin,
   employeeComment: employeeComment,
 })
+
+export const EmployeeSpceialHoursIDSchema = Type.Object({
+  employeeSpceialHoursID: EmployeeSpceialHoursID,
+})
+export type EmployeeSpceialHoursIDSchemaType = Static<typeof EmployeeSpceialHoursIDSchema>
+
+export const EmployeeSpceialHourByDateSchema = Type.Object({
+  employeeID: employeeID,
+  storeID: storeID,
+  begin: Type.String({ format: 'date' }),
+  end: Type.String({ format: 'date' }),
+})
+
+export type EmployeeSpceialHourByDateSchemaType = Static<typeof EmployeeSpceialHourByDateSchema>
 
 export const EmployeeMessageSchema = Type.Object({ message: Type.String() })
 export type EmployeeMessageSchemaType = Static<typeof EmployeeMessageSchema>
@@ -135,3 +153,58 @@ export const ListCheckInStatusSchema = Type.Composite([
 ])
 
 export type ListCheckInStatusSchemaType = Static<typeof ListCheckInStatusSchema>
+
+export const EmployeeTimeSchema = Type.Object({
+  employeeID: employeeID,
+  storeID: storeID,
+  mondayStart: Type.Optional(workTimeSchema),
+  mondayStop: Type.Optional(workTimeSchema),
+  mondayBreak: Type.Optional(workTimeSchema),
+  tuesdayStart: Type.Optional(workTimeSchema),
+  tuesdayStop: Type.Optional(workTimeSchema),
+  tuesdayBreak: Type.Optional(workTimeSchema),
+  wednesdayStart: Type.Optional(workTimeSchema),
+  wednesdayStop: Type.Optional(workTimeSchema),
+  wednesdayBreak: Type.Optional(workTimeSchema),
+  thursdayStart: Type.Optional(workTimeSchema),
+  thursdayStop: Type.Optional(workTimeSchema),
+  thursdayBreak: Type.Optional(workTimeSchema),
+  fridayStart: Type.Optional(workTimeSchema),
+  fridayStop: Type.Optional(workTimeSchema),
+  fridayBreak: Type.Optional(workTimeSchema),
+  saturdayStart: Type.Optional(workTimeSchema),
+  saturdayStop: Type.Optional(workTimeSchema),
+  saturdayBreak: Type.Optional(workTimeSchema),
+  sundayStart: Type.Optional(workTimeSchema),
+  sundayStop: Type.Optional(workTimeSchema),
+  sundayBreak: Type.Optional(workTimeSchema),
+})
+
+export type EmployeeTimeSchemaType = Static<typeof EmployeeTimeSchema>
+
+export const SpecialWorkingHoursSchema = Type.Object({
+  employeeSpecialHoursID: Type.Optional(EmployeeSpceialHoursID),
+  employeeID: employeeID,
+  storeID: storeID,
+  start: workTimeSchema,
+  end: workTimeSchema,
+  description: Type.Optional(WorkTimeDescriptionSchema),
+  absence: AbsenceSchema,
+})
+
+export type SpecialWorkingHoursSchemaType = Static<typeof SpecialWorkingHoursSchema>
+
+export const WorkingHoursIDTotalSchema = Type.Object({
+  employeeInfo: Type.Array(
+    Type.Object({ EmployeeTimeSchema, special: Type.Array(SpecialWorkingHoursSchema) }),
+  ),
+})
+
+export type WorkingHoursIDTotalSchemaType = Static<typeof WorkingHoursIDTotalSchema>
+
+export const GetEmployeeWorkingHoursSchema = Type.Object({
+  employeeID: employeeID,
+  storeID: storeID,
+})
+
+export type GetEmployeeWorkingHoursSchemaType = Static<typeof GetEmployeeWorkingHoursSchema>

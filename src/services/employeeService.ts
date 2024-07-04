@@ -83,7 +83,9 @@ export type WorkingHours = {
   sundayBreak?: SundayBreak
 }
 
-type WorkingHoursID = WorkingHours & { employeeID: EmployeeID } & { special: SpecialWorkingHours[] }
+type WorkingHoursID = WorkingHours & { employeeID: EmployeeID } & { storeID: StoreID } & {
+  special: SpecialWorkingHours[]
+}
 
 export type WorkingHoursIDTotal = {
   employeeInfo: WorkingHoursID[]
@@ -99,6 +101,7 @@ export type WorkingHoursIDTotal = {
 }
 
 export type WorkingHoursNull = {
+  storeID: StoreID
   employeeID: EmployeeID
   mondayStart?: MondayStart | null
   mondayStop?: MondayStop | null
@@ -124,7 +127,7 @@ export type WorkingHoursNull = {
 }
 
 export type SpecialWorkingHours = {
-  employeeSpceialHoursID: EmployeeSpceialHoursID
+  employeeSpecialHoursID?: EmployeeSpceialHoursID
   employeeID: EmployeeID
   storeID: StoreID
   start: WorkTime
@@ -133,7 +136,7 @@ export type SpecialWorkingHours = {
   absence: Absence
 }
 
-export type workingHoursCreated = WorkingHours & {
+export type WorkingHoursCreated = WorkingHours & {
   employeeID: EmployeeID
   storeID: StoreID
   createdAt: Date
@@ -207,7 +210,7 @@ export async function setEmployeeWorkingHours(
   employee: EmployeeID,
   storeID: StoreID,
   workingHours: WorkingHours,
-): Promise<Either<string, workingHoursCreated>> {
+): Promise<Either<string, WorkingHoursCreated>> {
   try {
     const employeeHours = await db.transaction(async (tx) => {
       const [employeeHasStore] = await tx
@@ -295,15 +298,24 @@ export async function setEmployeeSpecialWorkingHours(
 
       const [updatedWorkingHours] = await tx
         .insert(employeeSpecialHours)
-        .values(workingHours)
+        .values({
+          employeeSpecialHoursID: workingHours.employeeSpecialHoursID,
+          employeeID: workingHours.employeeID,
+          storeID: workingHours.storeID,
+          start: workingHours.start,
+          end: workingHours.end,
+          description: workingHours.description,
+          absence: workingHours.absence,
+        })
         .onConflictDoUpdate({
-          target: [employeeSpecialHours.storeID, employeeSpecialHours.employeeID],
+          target: [employeeSpecialHours.employeeSpecialHoursID],
           set: workingHours,
         })
         .returning()
+
       return updatedWorkingHours
         ? right({
-            employeeSpceialHoursID: updatedWorkingHours.employeeSpceialHoursID,
+            employeeSpecialHoursID: updatedWorkingHours.employeeSpecialHoursID,
             employeeID: updatedWorkingHours.employeeID,
             storeID: updatedWorkingHours.storeID,
             start: updatedWorkingHours.start,
@@ -322,7 +334,7 @@ export async function setEmployeeSpecialWorkingHours(
 export async function getEmployeeWorkingHours(
   employee: EmployeeID,
   storeID: StoreID,
-): Promise<Either<string, workingHoursCreated>> {
+): Promise<Either<string, WorkingHoursCreated>> {
   try {
     const [fetchedWorkingHours] = await db
       .select()
@@ -368,16 +380,16 @@ export async function getEmployeeWorkingHours(
 }
 
 export async function getEmployeeSpecialWorkingHoursByID(
-  employeeSpceialHoursID: EmployeeSpceialHoursID,
+  employeeSpecialHoursID: EmployeeSpceialHoursID,
 ): Promise<Either<string, SpecialWorkingHours>> {
   try {
     const [fetchedWorkingHours] = await db
       .select()
       .from(employeeSpecialHours)
-      .where(eq(employeeSpecialHours.employeeSpceialHoursID, employeeSpceialHoursID))
+      .where(eq(employeeSpecialHours.employeeSpecialHoursID, employeeSpecialHoursID))
     return fetchedWorkingHours
       ? right({
-          employeeSpceialHoursID: fetchedWorkingHours.employeeSpceialHoursID,
+          employeeSpecialHoursID: fetchedWorkingHours.employeeSpecialHoursID,
           employeeID: fetchedWorkingHours.employeeID,
           storeID: fetchedWorkingHours.storeID,
           start: fetchedWorkingHours.start,
@@ -392,6 +404,8 @@ export async function getEmployeeSpecialWorkingHoursByID(
 }
 
 export async function getEmployeeSpecialWorkingHoursByDates(
+  storeID: StoreID,
+  employeeID: EmployeeID,
   begin: WorkTime,
   end: WorkTime,
 ): Promise<Either<string, SpecialWorkingHours>> {
@@ -399,10 +413,17 @@ export async function getEmployeeSpecialWorkingHoursByDates(
     const [fetchedWorkingHours] = await db
       .select()
       .from(employeeSpecialHours)
-      .where(and(lte(employeeSpecialHours.start, end), gte(employeeSpecialHours.end, begin)))
+      .where(
+        and(
+          eq(employeeSpecialHours.employeeID, employeeID),
+          eq(employeeSpecialHours.storeID, storeID),
+          lte(employeeSpecialHours.start, end),
+          gte(employeeSpecialHours.end, begin),
+        ),
+      )
     return fetchedWorkingHours
       ? right({
-          employeeSpceialHoursID: fetchedWorkingHours.employeeSpceialHoursID,
+          employeeSpecialHoursID: fetchedWorkingHours.employeeSpecialHoursID,
           employeeID: fetchedWorkingHours.employeeID,
           storeID: fetchedWorkingHours.storeID,
           start: fetchedWorkingHours.start,
@@ -417,16 +438,16 @@ export async function getEmployeeSpecialWorkingHoursByDates(
 }
 
 export async function deleteEmployeeSpecialWorkingHours(
-  employeeSpceialHoursID: EmployeeSpceialHoursID,
+  employeeSpecialHoursID: EmployeeSpceialHoursID,
 ): Promise<Either<string, SpecialWorkingHours>> {
   try {
     const [deletedWorkingHours] = await db
       .delete(employeeSpecialHours)
-      .where(eq(employeeSpecialHours.employeeSpceialHoursID, employeeSpceialHoursID))
+      .where(eq(employeeSpecialHours.employeeSpecialHoursID, employeeSpecialHoursID))
       .returning()
     return deletedWorkingHours
       ? right({
-          employeeSpceialHoursID: deletedWorkingHours.employeeSpceialHoursID,
+          employeeSpecialHoursID: deletedWorkingHours.employeeSpecialHoursID,
           employeeID: deletedWorkingHours.employeeID,
           storeID: deletedWorkingHours.storeID,
           start: deletedWorkingHours.start,
@@ -443,7 +464,7 @@ export async function deleteEmployeeSpecialWorkingHours(
 export async function deleteEmployeeWorkingHours(
   employee: EmployeeID,
   storeID: StoreID,
-): Promise<Either<string, workingHoursCreated>> {
+): Promise<Either<string, WorkingHoursCreated>> {
   try {
     const [deletedWorkingHours] = await db
       .delete(employeeWorkingHours)
@@ -489,7 +510,7 @@ export async function deleteEmployeeWorkingHours(
 }
 
 type Res = {
-  employeeSpceialHoursID: EmployeeSpceialHoursID
+  employeeSpecialHoursID: EmployeeSpceialHoursID
   employeeID: EmployeeID
   storeID: StoreID
   start: WorkTime
@@ -562,6 +583,7 @@ function calcTime(
       if (time !== null) {
         acc.push({
           employeeID: time.employeeID,
+          storeID: time.storeID,
           mondayStart: time.mondayStart ?? undefined,
           mondayStop: time.mondayStop ?? undefined,
           mondayBreak: time.mondayBreak ?? undefined,
@@ -586,7 +608,7 @@ function calcTime(
           special: employeeSpecialTimes.reduce<SpecialWorkingHours[]>((t, emp: Res) => {
             if (emp.employeeID === time.employeeID) {
               t.push({
-                employeeSpceialHoursID: emp.employeeSpceialHoursID,
+                employeeSpecialHoursID: emp.employeeSpecialHoursID,
                 employeeID: emp.employeeID,
                 storeID: emp.storeID,
                 start: emp.start,
@@ -758,18 +780,34 @@ function calcTime(
         i++
       }
 
-      const startString = emp.mondayStart
-      const endString = emp.mondayStop
-      const breakString = emp.mondayBreak
-
-      if (startString != undefined && endString != undefined) {
-        const startMS = new Date(startString).getTime()
-        const endMS = new Date(endString).getTime()
-        worktimes.totalTimes.monday = WorkDuration(
-          worktimes.totalTimes.monday +
-            (endMS - startMS - (breakString ? intervalToMilliseconds(breakString) : 0)),
-        )
-      }
+      worktimes.totalTimes.monday = WorkDuration(
+        worktimes.totalTimes.monday +
+          (emp.mondayBreak ? intervalToMilliseconds(emp.mondayBreak) : 0),
+      )
+      worktimes.totalTimes.tuesday = WorkDuration(
+        worktimes.totalTimes.tuesday +
+          (emp.tuesdayBreak ? intervalToMilliseconds(emp.tuesdayBreak) : 0),
+      )
+      worktimes.totalTimes.wednesday = WorkDuration(
+        worktimes.totalTimes.wednesday +
+          (emp.wednesdayBreak ? intervalToMilliseconds(emp.wednesdayBreak) : 0),
+      )
+      worktimes.totalTimes.thursday = WorkDuration(
+        worktimes.totalTimes.thursday +
+          (emp.thursdayBreak ? intervalToMilliseconds(emp.thursdayBreak) : 0),
+      )
+      worktimes.totalTimes.friday = WorkDuration(
+        worktimes.totalTimes.friday +
+          (emp.fridayBreak ? intervalToMilliseconds(emp.fridayBreak) : 0),
+      )
+      worktimes.totalTimes.saturday = WorkDuration(
+        worktimes.totalTimes.saturday +
+          (emp.saturdayBreak ? intervalToMilliseconds(emp.saturdayBreak) : 0),
+      )
+      worktimes.totalTimes.sunday = WorkDuration(
+        worktimes.totalTimes.sunday +
+          (emp.sundayBreak ? intervalToMilliseconds(emp.sundayBreak) : 0),
+      )
     })
     return right(worktimes)
   }
@@ -780,7 +818,7 @@ export async function listWorkingEmployees(
   startDay: WorkTime,
   quals: GlobalQualID[],
   localQuals: LocalQualID[],
-) {
+): Promise<Either<string, WorkingHoursIDTotal>> {
   const endDay = WorkTime(new Date())
   endDay.setDate(endDay.getDate() + 7)
 
@@ -792,7 +830,7 @@ export async function listWorkingEmployees(
       if (quals.length > 0 && localQuals.length > 0) {
         employeeSpecialTimes = await tx
           .select({
-            employeeSpceialHoursID: employeeSpecialHours.employeeSpceialHoursID,
+            employeeSpecialHoursID: employeeSpecialHours.employeeSpecialHoursID,
             employeeID: employeeSpecialHours.employeeID,
             storeID: employeeSpecialHours.storeID,
             start: employeeSpecialHours.start,
@@ -834,7 +872,7 @@ export async function listWorkingEmployees(
       } else if (quals.length > 0) {
         employeeSpecialTimes = await tx
           .select({
-            employeeSpceialHoursID: employeeSpecialHours.employeeSpceialHoursID,
+            employeeSpecialHoursID: employeeSpecialHours.employeeSpecialHoursID,
             employeeID: employeeSpecialHours.employeeID,
             storeID: employeeSpecialHours.storeID,
             start: employeeSpecialHours.start,
@@ -868,7 +906,7 @@ export async function listWorkingEmployees(
       } else if (localQuals.length > 0) {
         employeeSpecialTimes = await tx
           .select({
-            employeeSpceialHoursID: employeeSpecialHours.employeeSpceialHoursID,
+            employeeSpecialHoursID: employeeSpecialHours.employeeSpecialHoursID,
             employeeID: employeeSpecialHours.employeeID,
             storeID: employeeSpecialHours.storeID,
             start: employeeSpecialHours.start,
@@ -902,7 +940,7 @@ export async function listWorkingEmployees(
       } else {
         employeeSpecialTimes = await tx
           .select({
-            employeeSpceialHoursID: employeeSpecialHours.employeeSpceialHoursID,
+            employeeSpecialHoursID: employeeSpecialHours.employeeSpecialHoursID,
             employeeID: employeeSpecialHours.employeeID,
             storeID: employeeSpecialHours.storeID,
             start: employeeSpecialHours.start,
@@ -929,39 +967,42 @@ export async function listWorkingEmployees(
 
 export async function listCheckedinStatus(
   storeID: StoreID,
-): Promise<ListCheckInStatus[] | undefined> {
-  const employeesList = await db
-    .select({
-      employeeID: employees.employeeID,
-      employeeCheckedIn: employees.employeeCheckedIn,
-      employeeCheckedOut: employees.employeeCheckedOut,
-    })
-    .from(employees)
-    .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
-    .where(eq(employeeStore.storeID, storeID))
+): Promise<Either<string, ListCheckInStatus[]>> {
+  try {
+    const employeesList = await db
+      .select({
+        employeeID: employees.employeeID,
+        employeeCheckedIn: employees.employeeCheckedIn,
+        employeeCheckedOut: employees.employeeCheckedOut,
+      })
+      .from(employees)
+      .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
+      .where(eq(employeeStore.storeID, storeID))
 
-  function toListCheckinStatus(checkedin: Date | null, checkedout: Date | null) {
-    if (checkedin == null) return { time: undefined, status: 'CheckedOut' as CheckedInStatus }
-    if (checkedout == null || checkedout < checkedin)
+    function toListCheckinStatus(checkedin: Date | null, checkedout: Date | null) {
+      if (checkedin == null) return { time: undefined, status: 'CheckedOut' as CheckedInStatus }
+      if (checkedout == null || checkedout < checkedin)
+        return {
+          status: 'CheckedIn' as CheckedInStatus,
+          time: EmployeeCheckIn(checkedin.toISOString()),
+        }
       return {
-        status: 'CheckedIn' as CheckedInStatus,
-        time: EmployeeCheckIn(checkedin.toISOString()),
+        status: 'CheckedOut' as CheckedInStatus,
+        time: EmployeeCheckOut(checkedout.toISOString()),
       }
-    return {
-      status: 'CheckedOut' as CheckedInStatus,
-      time: EmployeeCheckOut(checkedout.toISOString()),
     }
+    const employeeCheckinStatus = employeesList.map((employee) => {
+      const status = toListCheckinStatus(employee.employeeCheckedIn, employee.employeeCheckedOut)
+      return {
+        employeeID: employee.employeeID,
+        time: status?.time,
+        status: status.status,
+      }
+    })
+    return right(employeeCheckinStatus)
+  } catch (e) {
+    return left(errorHandling(e))
   }
-  const employeeCheckinStatus = employeesList.map((employee) => {
-    const status = toListCheckinStatus(employee.employeeCheckedIn, employee.employeeCheckedOut)
-    return {
-      employeeID: employee.employeeID,
-      time: status?.time,
-      status: status.status,
-    }
-  })
-  console.log(employeeCheckinStatus)
-  return employeeCheckinStatus
 }
 
 export async function checkInCheckOut(
@@ -1018,112 +1059,130 @@ export async function putEmployee(
   stores: StoreID[],
   employee: CreateEmployee,
   employeeID?: EmployeeID,
-): Promise<Employee | undefined> {
+): Promise<Either<string, Employee>> {
   if (stores.length < 1) {
-    return undefined
+    return left('no store given')
   }
-  const createdEmployeeWithStores = await db.transaction(async (tx) => {
-    const [createdEmployee] = employeeID
-      ? await tx
-          .update(employees)
-          .set(employee)
-          .where(eq(employees.employeeID, employeeID))
-          .returning()
-      : await db.insert(employees).values(employee).returning()
+  try {
+    const createdEmployeeWithStores = await db.transaction(async (tx) => {
+      const [createdEmployee] = employeeID
+        ? await tx
+            .update(employees)
+            .set(employee)
+            .where(eq(employees.employeeID, employeeID))
+            .returning()
+        : await db.insert(employees).values(employee).returning()
 
-    const employeeIDStoreID = stores.map((store) => {
-      return { storeID: store, employeeID: createdEmployee.employeeID }
+      const employeeIDStoreID = stores.map((store) => {
+        return { storeID: store, employeeID: createdEmployee.employeeID }
+      })
+
+      const employeeStores = await tx
+        .insert(employeeStore)
+        .values(employeeIDStoreID)
+        .onConflictDoNothing()
+        .returning({ storeID: employeeStore.storeID })
+
+      const createdEmployeeWithNull = {
+        employeeID: createdEmployee.employeeID,
+        shortUserName: createdEmployee.shortUserName,
+        employmentNumber: createdEmployee.employmentNumber,
+        employeePersonalNumber: createdEmployee.employeePersonalNumber,
+        signature: createdEmployee.signature,
+        employeeHourlyRateDinero: dineroDBReturn(
+          createdEmployee.employeeHourlyRate,
+          createdEmployee.employeeHourlyRateCurrency,
+        ),
+        employeePin: createdEmployee.employeePin ?? undefined,
+        employeeComment: createdEmployee.employeeComment ?? undefined,
+        createdAt: createdEmployee.createdAt,
+        updatedAt: createdEmployee.updatedAt,
+      }
+      return { ...createdEmployeeWithNull, storeIDs: employeeStores.map((row) => row.storeID) }
     })
-
-    const employeeStores = await tx
-      .insert(employeeStore)
-      .values(employeeIDStoreID)
-      .onConflictDoNothing()
-      .returning({ storeID: employeeStore.storeID })
-
-    const createdEmployeeWithNull = {
-      employeeID: createdEmployee.employeeID,
-      shortUserName: createdEmployee.shortUserName,
-      employmentNumber: createdEmployee.employmentNumber,
-      employeePersonalNumber: createdEmployee.employeePersonalNumber,
-      signature: createdEmployee.signature,
-      employeeHourlyRateDinero: dineroDBReturn(
-        createdEmployee.employeeHourlyRate,
-        createdEmployee.employeeHourlyRateCurrency,
-      ),
-      employeePin: createdEmployee.employeePin ?? undefined,
-      employeeComment: createdEmployee.employeeComment ?? undefined,
-      createdAt: createdEmployee.createdAt,
-      updatedAt: createdEmployee.updatedAt,
-    }
-    return { ...createdEmployeeWithNull, storeIDs: employeeStores.map((row) => row.storeID) }
-  })
-  return createdEmployeeWithStores
+    return right(createdEmployeeWithStores)
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
-export async function getEmployee(employeeID: EmployeeID): Promise<Employee | undefined> {
-  const fetchedEmployeeWithStores = await db.transaction(async (tx) => {
-    const [fetchedEmployee] = await tx
-      .select()
-      .from(employees)
-      .where(eq(employees.employeeID, employeeID))
-    if (fetchedEmployee == null) return undefined
+export async function getEmployee(employeeID: EmployeeID): Promise<Either<string, Employee>> {
+  try {
+    const fetchedEmployeeWithStores = await db.transaction(async (tx) => {
+      const [fetchedEmployee] = await tx
+        .select()
+        .from(employees)
+        .where(eq(employees.employeeID, employeeID))
+      if (fetchedEmployee == null) return undefined
 
-    const employeeStores = await tx
-      .select()
-      .from(employeeStore)
-      .where(eq(employeeStore.employeeID, employeeID))
+      const employeeStores = await tx
+        .select()
+        .from(employeeStore)
+        .where(eq(employeeStore.employeeID, employeeID))
 
-    const fetchedEmployeeWithNull = {
-      employeeID: fetchedEmployee.employeeID,
-      shortUserName: fetchedEmployee.shortUserName,
-      employmentNumber: fetchedEmployee.employmentNumber,
-      employeePersonalNumber: fetchedEmployee.employeePersonalNumber,
-      signature: fetchedEmployee.signature,
-      employeeHourlyRate: fetchedEmployee.employeeHourlyRate ?? undefined,
-      employeePin: fetchedEmployee.employeePin ?? undefined,
-      employeeComment: fetchedEmployee.employeeComment ?? undefined,
-      employeeCheckedIn: employees.employeeCheckedIn
-        ? undefined
-        : EmployeeCheckIn(employees.employeeCheckedIn),
-      employeeCheckedOut: employees.employeeCheckedOut
-        ? undefined
-        : EmployeeCheckOut(employees.employeeCheckedOut),
-      createdAt: fetchedEmployee.createdAt,
-      updatedAt: fetchedEmployee.updatedAt,
+      const fetchedEmployeeWithNull = {
+        employeeID: fetchedEmployee.employeeID,
+        shortUserName: fetchedEmployee.shortUserName,
+        employmentNumber: fetchedEmployee.employmentNumber,
+        employeePersonalNumber: fetchedEmployee.employeePersonalNumber,
+        signature: fetchedEmployee.signature,
+        employeeHourlyRate: fetchedEmployee.employeeHourlyRate ?? undefined,
+        employeePin: fetchedEmployee.employeePin ?? undefined,
+        employeeComment: fetchedEmployee.employeeComment ?? undefined,
+        employeeCheckedIn: employees.employeeCheckedIn
+          ? undefined
+          : EmployeeCheckIn(employees.employeeCheckedIn),
+        employeeCheckedOut: employees.employeeCheckedOut
+          ? undefined
+          : EmployeeCheckOut(employees.employeeCheckedOut),
+        createdAt: fetchedEmployee.createdAt,
+        updatedAt: fetchedEmployee.updatedAt,
+      }
+      return { ...fetchedEmployeeWithNull, storeIDs: employeeStores.map((row) => row.storeID) }
+    })
+    if (fetchedEmployeeWithStores == null) {
+      return left('employee not found')
     }
-    return { ...fetchedEmployeeWithNull, storeIDs: employeeStores.map((row) => row.storeID) }
-  })
-  return fetchedEmployeeWithStores
+    return right(fetchedEmployeeWithStores)
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
-export async function deleteEmployee(employeeID: EmployeeID): Promise<Employee | undefined> {
-  const deletedEmployeeWithStores = await db.transaction(async (tx) => {
-    const employeeStores = await tx
-      .delete(employeeStore)
-      .where(eq(employeeStore.employeeID, employeeID))
-      .returning()
+export async function deleteEmployee(employeeID: EmployeeID): Promise<Either<string, Employee>> {
+  try {
+    const deletedEmployeeWithStores = await db.transaction(async (tx) => {
+      const employeeStores = await tx
+        .delete(employeeStore)
+        .where(eq(employeeStore.employeeID, employeeID))
+        .returning()
 
-    const [deletedEmployee] = await tx
-      .delete(employees)
-      .where(eq(employees.employeeID, employeeID))
-      .returning()
+      const [deletedEmployee] = await tx
+        .delete(employees)
+        .where(eq(employees.employeeID, employeeID))
+        .returning()
 
-    const deletedEmployeeWithNull = {
-      employeeID: deletedEmployee.employeeID,
-      shortUserName: deletedEmployee.shortUserName,
-      employmentNumber: deletedEmployee.employmentNumber,
-      employeePersonalNumber: deletedEmployee.employeePersonalNumber,
-      signature: deletedEmployee.signature,
-      employeeHourlyRate: deletedEmployee.employeeHourlyRate ?? undefined,
-      employeePin: deletedEmployee.employeePin ?? undefined,
-      employeeComment: deletedEmployee.employeeComment ?? undefined,
-      createdAt: deletedEmployee.createdAt,
-      updatedAt: deletedEmployee.updatedAt,
+      const deletedEmployeeWithNull = {
+        employeeID: deletedEmployee.employeeID,
+        shortUserName: deletedEmployee.shortUserName,
+        employmentNumber: deletedEmployee.employmentNumber,
+        employeePersonalNumber: deletedEmployee.employeePersonalNumber,
+        signature: deletedEmployee.signature,
+        employeeHourlyRate: deletedEmployee.employeeHourlyRate ?? undefined,
+        employeePin: deletedEmployee.employeePin ?? undefined,
+        employeeComment: deletedEmployee.employeeComment ?? undefined,
+        createdAt: deletedEmployee.createdAt,
+        updatedAt: deletedEmployee.updatedAt,
+      }
+      return { ...deletedEmployeeWithNull, storeIDs: employeeStores.map((row) => row.storeID) }
+    })
+    if (deletedEmployeeWithStores == null) {
+      return left('employee not found')
     }
-    return { ...deletedEmployeeWithNull, storeIDs: employeeStores.map((row) => row.storeID) }
-  })
-  return deletedEmployeeWithStores
+    return right(deletedEmployeeWithStores)
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
 export async function getEmployeesPaginate(
@@ -1132,63 +1191,67 @@ export async function getEmployeesPaginate(
   limit = Limit(10),
   page = Page(1),
   offset = Offset(0),
-): Promise<EmployeePaginated | undefined> {
-  const { totalEmployees, listedEmployeeWithNull } = await db.transaction(async (tx) => {
-    const condition = and(
-      or(
-        ilike(employees.shortUserName, '%' + search + '%'),
-        ilike(employees.employeePersonalNumber, '%' + search + '%'),
-        ilike(employees.signature, '%' + search + '%'),
-      ),
-      eq(employeeStore.storeID, store),
-    )
-    const [totalEmployees] = await tx
-      .select({
-        count: sql`count(*)`.mapWith(Number).as('count'),
-      })
-      .from(employees)
-      .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
-      .where(condition)
-
-    const employeesList = await tx
-      .select()
-      .from(employees)
-      .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
-      .where(condition)
-      .limit(limit || 10)
-      .offset(offset || 0)
-    const listedEmployeeWithNull = employeesList.map((employee) => {
-      return {
-        employeeID: employee.employees.employeeID,
-        shortUserName: employee.employees.shortUserName,
-        employmentNumber: employee.employees.employmentNumber,
-        employeePersonalNumber: employee.employees.employeePersonalNumber,
-        signature: employee.employees.signature,
-        employeeHourlyRateDinero: dineroDBReturn(
-          employee.employees.employeeHourlyRate,
-          employee.employees.employeeHourlyRateCurrency,
+): Promise<Either<string, EmployeePaginated>> {
+  try {
+    const { totalEmployees, listedEmployeeWithNull } = await db.transaction(async (tx) => {
+      const condition = and(
+        or(
+          ilike(employees.shortUserName, '%' + search + '%'),
+          ilike(employees.employeePersonalNumber, '%' + search + '%'),
+          ilike(employees.signature, '%' + search + '%'),
         ),
-        employeePin: employee.employees.employeePin ?? undefined,
-        employeeComment: employee.employees.employeeComment ?? undefined,
-        employeeCheckIn: employee.employees.employeeCheckedIn
-          ? EmployeeCheckIn(employee.employees.employeeCheckedIn.toISOString())
-          : undefined,
-        employeeCheckOut: employee.employees.employeeCheckedOut
-          ? EmployeeCheckOut(employee.employees.employeeCheckedOut.toISOString())
-          : undefined,
-        createdAt: employee.employees.createdAt,
-        updatedAt: employee.employees.updatedAt,
-      }
+        eq(employeeStore.storeID, store),
+      )
+      const [totalEmployees] = await tx
+        .select({
+          count: sql`count(*)`.mapWith(Number).as('count'),
+        })
+        .from(employees)
+        .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
+        .where(condition)
+
+      const employeesList = await tx
+        .select()
+        .from(employees)
+        .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
+        .where(condition)
+        .limit(limit || 10)
+        .offset(offset || 0)
+      const listedEmployeeWithNull = employeesList.map((employee) => {
+        return {
+          employeeID: employee.employees.employeeID,
+          shortUserName: employee.employees.shortUserName,
+          employmentNumber: employee.employees.employmentNumber,
+          employeePersonalNumber: employee.employees.employeePersonalNumber,
+          signature: employee.employees.signature,
+          employeeHourlyRateDinero: dineroDBReturn(
+            employee.employees.employeeHourlyRate,
+            employee.employees.employeeHourlyRateCurrency,
+          ),
+          employeePin: employee.employees.employeePin ?? undefined,
+          employeeComment: employee.employees.employeeComment ?? undefined,
+          employeeCheckIn: employee.employees.employeeCheckedIn
+            ? EmployeeCheckIn(employee.employees.employeeCheckedIn.toISOString())
+            : undefined,
+          employeeCheckOut: employee.employees.employeeCheckedOut
+            ? EmployeeCheckOut(employee.employees.employeeCheckedOut.toISOString())
+            : undefined,
+          createdAt: employee.employees.createdAt,
+          updatedAt: employee.employees.updatedAt,
+        }
+      })
+
+      return { totalEmployees, listedEmployeeWithNull }
     })
+    const totalPage = Math.ceil(totalEmployees.count / limit)
 
-    return { totalEmployees, listedEmployeeWithNull }
-  })
-  const totalPage = Math.ceil(totalEmployees.count / limit)
-
-  return {
-    totalEmployees: ResultCount(totalEmployees.count),
-    totalPage: Page(totalPage),
-    perPage: Limit(page),
-    employees: listedEmployeeWithNull,
+    return right({
+      totalEmployees: ResultCount(totalEmployees.count),
+      totalPage: Page(totalPage),
+      perPage: Limit(page),
+      employees: listedEmployeeWithNull,
+    })
+  } catch (e) {
+    return left(errorHandling(e))
   }
 }

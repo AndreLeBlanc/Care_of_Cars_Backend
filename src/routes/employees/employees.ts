@@ -1,5 +1,7 @@
 import { FastifyInstance } from 'fastify'
 
+import { Either, match } from '../../utils/helper.js'
+
 import {
   CheckInTimesSchema,
   CheckInTimesSchemaType,
@@ -11,6 +13,14 @@ import {
   EmployeeIDSchemaType,
   EmployeeMessageSchema,
   EmployeeMessageSchemaType,
+  EmployeeSpceialHourByDateSchema,
+  EmployeeSpceialHourByDateSchemaType,
+  EmployeeSpceialHoursIDSchema,
+  EmployeeSpceialHoursIDSchemaType,
+  EmployeeTimeSchema,
+  EmployeeTimeSchemaType,
+  GetEmployeeWorkingHoursSchema,
+  GetEmployeeWorkingHoursSchemaType,
   ListCheckInStatusSchema,
   ListCheckInStatusSchemaType,
   ListEmployeesReplySchema,
@@ -19,11 +29,14 @@ import {
   ListEmployeesSchemaType,
   SelectedEmployeeSchema,
   SelectedEmployeeSchemaType,
+  SpecialWorkingHoursSchema,
+  SpecialWorkingHoursSchemaType,
 } from './employeesSchema.js'
 
 import { Currency } from 'dinero.js'
 
 import {
+  Absence,
   CheckedInStatus,
   EmployeeComment,
   EmployeeHourlyRate,
@@ -31,11 +44,35 @@ import {
   EmployeeID,
   EmployeePersonalNumber,
   EmployeePin,
+  EmployeeSpceialHoursID,
   EmploymentNumber,
+  FridayBreak,
+  FridayStart,
+  FridayStop,
+  MondayBreak,
+  MondayStart,
+  MondayStop,
   PermissionTitle,
+  SaturdayBreak,
+  SaturdayStart,
+  SaturdayStop,
   ShortUserName,
   Signature,
   StoreID,
+  SundayBreak,
+  SundayStart,
+  SundayStop,
+  ThursdayBreak,
+  ThursdayStart,
+  ThursdayStop,
+  TuesdayBreak,
+  TuesdayStart,
+  TuesdayStop,
+  WednesdayBreak,
+  WednesdayStart,
+  WednesdayStop,
+  WorkTime,
+  WorkTimeDescription,
 } from '../../schema/schema.js'
 
 import { Limit, Offset, Page, Search } from '../../plugins/pagination.js'
@@ -46,12 +83,21 @@ import {
   Employee,
   EmployeePaginated,
   ListCheckInStatus,
+  SpecialWorkingHours,
+  WorkingHours,
+  WorkingHoursCreated,
   checkInCheckOut,
   deleteEmployee,
+  deleteEmployeeWorkingHours,
   getEmployee,
+  getEmployeeSpecialWorkingHoursByDates,
+  getEmployeeSpecialWorkingHoursByID,
+  getEmployeeWorkingHours,
   getEmployeesPaginate,
   listCheckedinStatus,
   putEmployee,
+  setEmployeeSpecialWorkingHours,
+  setEmployeeWorkingHours,
 } from '../../services/employeeService.js'
 import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema.js'
 
@@ -113,22 +159,28 @@ export const employees = async (fastify: FastifyInstance) => {
     async (request, rep) => {
       const storeID = StoreID(request.params.storeID)
 
-      const checkinStatusList: ListCheckInStatus[] | undefined = await listCheckedinStatus(storeID)
+      const checkinStatusList: Either<string, ListCheckInStatus[]> = await listCheckedinStatus(
+        storeID,
+      )
 
-      console.log('status', checkinStatusList)
-      if (checkinStatusList == null) {
-        return rep.status(404).send({ message: "can't get employee checkin statuses" })
-      }
-      return rep.status(200).send({
-        message: 'employee checkin statuses',
-        statuses: checkinStatusList.map((emp) => {
-          return {
-            employeeID: emp.employeeID,
-            time: emp.time ? emp.time : undefined,
-            status: emp.status,
-          }
-        }),
-      })
+      match(
+        checkinStatusList,
+        (statuses: ListCheckInStatus[]) => {
+          return rep.status(200).send({
+            message: 'employee checkin statuses',
+            statuses: statuses.map((emp) => {
+              return {
+                employeeID: emp.employeeID,
+                time: emp.time ? emp.time : undefined,
+                status: emp.status,
+              }
+            }),
+          })
+        },
+        (err) => {
+          return rep.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -170,22 +222,25 @@ export const employees = async (fastify: FastifyInstance) => {
         employeeComment: EmployeeComment(req.body.employeeComment),
       }
 
-      const createdEmployee: Employee | undefined = await putEmployee(
+      const createdEmployee: Either<string, Employee> = await putEmployee(
         storeIDs,
         employee,
         employeeID,
       )
-      if (putEmployee != null) {
-        return rep.status(201).send({
-          message: 'Employee Created/updated successfully',
-
-          ...createdEmployee,
-        })
-      } else {
-        return rep.status(504).send({
-          message: 'Fail to create or update employee',
-        })
-      }
+      match(
+        createdEmployee,
+        (employee: Employee) => {
+          return rep.status(201).send({
+            message: 'Employee Created/updated successfully',
+            ...employee,
+          })
+        },
+        (err) => {
+          return rep.status(504).send({
+            message: err,
+          })
+        },
+      )
     },
   )
 
@@ -212,13 +267,18 @@ export const employees = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const deletedEmployee: Employee | undefined = await deleteEmployee(
+      const deletedEmployee: Either<string, Employee> = await deleteEmployee(
         EmployeeID(request.params.employeeID),
       )
-      if (deletedEmployee == null) {
-        return reply.status(404).send({ message: "Employee doesn't exist!" })
-      }
-      return reply.status(200).send({ message: 'Employee deleted', ...deletedEmployee })
+      match(
+        deletedEmployee,
+        (employee: Employee) => {
+          return reply.status(200).send({ message: 'Employee deleted', ...employee })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -245,13 +305,18 @@ export const employees = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const fetchedEmployee: Employee | undefined = await getEmployee(
+      const fetchedEmployee: Either<string, Employee> = await getEmployee(
         EmployeeID(request.params.employeeID),
       )
-      if (fetchedEmployee == null) {
-        return reply.status(404).send({ message: "Employee doesn't exist!" })
-      }
-      return reply.status(200).send({ message: 'Employee fetched', ...fetchedEmployee })
+      match(
+        fetchedEmployee,
+        (employee: Employee) => {
+          return reply.status(200).send({ message: 'Employee fetched', ...employee })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -277,24 +342,387 @@ export const employees = async (fastify: FastifyInstance) => {
         response: { 200: ListEmployeesReplySchema, 403: EmployeeMessageSchema },
       },
     },
-    async function (request) {
+    async function (request, reply) {
       const { search = '', storeID, limit, page, offset } = request.query
       const brandedStore = StoreID(storeID)
       const brandedSearch = Search(search)
       const brandedLimit = limit ? Limit(limit) : undefined
       const brandedPage = page ? Page(page) : undefined
       const brandedOffset = offset ? Offset(offset) : undefined
-      const employees: EmployeePaginated | undefined = await getEmployeesPaginate(
+      const employees: Either<string, EmployeePaginated> = await getEmployeesPaginate(
         brandedStore,
         brandedSearch,
         brandedLimit,
         brandedPage,
         brandedOffset,
       )
-      return {
-        message: 'Employees',
-        ...employees,
+
+      match(
+        employees,
+        (employeeList: EmployeePaginated) => {
+          return reply.status(200).send({ message: 'Employee fetched', ...employeeList })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.put<{
+    Body: EmployeeTimeSchemaType
+    Reply: (EmployeeMessageSchemaType & EmployeeTimeSchemaType) | EmployeeMessageSchemaType
+  }>(
+    '/workingHours',
+    {
+      preHandler: async (request, reply, done) => {
+        fastify.authorize(request, reply, PermissionTitle('put_employee_workhours'))
+        done()
+        return reply
+      },
+      schema: {
+        body: EmployeeTimeSchema,
+        response: {
+          201: { ...EmployeeMessageSchema, ...EmployeeTimeSchema },
+          504: EmployeeMessageSchema,
+        },
+      },
+    },
+    async (req, rep) => {
+      const storeID: StoreID = StoreID(req.body.storeID)
+      const employeeID = EmployeeID(req.body.employeeID)
+      const workingHours: WorkingHours = {
+        mondayStart: req.body.mondayStart ? MondayStart(req.body.mondayStart) : undefined,
+        mondayStop: req.body.mondayStop ? MondayStop(req.body.mondayStop) : undefined,
+        mondayBreak: req.body.mondayBreak ? MondayBreak(req.body.mondayBreak) : undefined,
+        tuesdayStart: req.body.tuesdayStart ? TuesdayStart(req.body.tuesdayStart) : undefined,
+        tuesdayStop: req.body.tuesdayStop ? TuesdayStop(req.body.tuesdayStop) : undefined,
+        tuesdayBreak: req.body.tuesdayBreak ? TuesdayBreak(req.body.tuesdayBreak) : undefined,
+        wednesdayStart: req.body.wednesdayStart
+          ? WednesdayStart(req.body.wednesdayStart)
+          : undefined,
+        wednesdayStop: req.body.wednesdayStop ? WednesdayStop(req.body.wednesdayStop) : undefined,
+        wednesdayBreak: req.body.wednesdayBreak
+          ? WednesdayBreak(req.body.wednesdayBreak)
+          : undefined,
+        thursdayStart: req.body.thursdayStart ? ThursdayStart(req.body.thursdayStart) : undefined,
+        thursdayStop: req.body.thursdayStop ? ThursdayStop(req.body.thursdayStop) : undefined,
+        thursdayBreak: req.body.thursdayBreak ? ThursdayBreak(req.body.thursdayBreak) : undefined,
+        fridayStart: req.body.fridayStart ? FridayStart(req.body.fridayStart) : undefined,
+        fridayStop: req.body.fridayStop ? FridayStop(req.body.fridayStop) : undefined,
+        fridayBreak: req.body.fridayBreak ? FridayBreak(req.body.fridayBreak) : undefined,
+        saturdayStart: req.body.saturdayStart ? SaturdayStart(req.body.saturdayStart) : undefined,
+        saturdayStop: req.body.saturdayStop ? SaturdayStop(req.body.saturdayStop) : undefined,
+        saturdayBreak: req.body.saturdayBreak ? SaturdayBreak(req.body.saturdayBreak) : undefined,
+        sundayStart: req.body.sundayStart ? SundayStart(req.body.sundayStart) : undefined,
+        sundayStop: req.body.sundayStop ? SundayStop(req.body.sundayStop) : undefined,
+        sundayBreak: req.body.sundayBreak ? SundayBreak(req.body.sundayBreak) : undefined,
       }
+      const createdWorkingHours: Either<string, WorkingHoursCreated> =
+        await setEmployeeWorkingHours(employeeID, storeID, workingHours)
+      match(
+        createdWorkingHours,
+
+        (workHours: WorkingHoursCreated) => {
+          return rep.status(201).send({
+            message: 'Employee work hours Created/updated successfully',
+
+            ...workHours,
+          })
+        },
+        (err) => {
+          return rep.status(504).send({
+            message: err,
+          })
+        },
+      )
+    },
+  )
+
+  fastify.put<{
+    Body: SpecialWorkingHoursSchemaType
+    Reply: (SpecialWorkingHoursSchemaType & EmployeeMessageSchemaType) | EmployeeMessageSchemaType
+  }>(
+    '/specialHours',
+    {
+      preHandler: async (request, reply, done) => {
+        fastify.authorize(request, reply, PermissionTitle('put_employee_specialhours'))
+        done()
+        return reply
+      },
+      schema: {
+        body: SpecialWorkingHoursSchema,
+        response: {
+          201: { ...EmployeeMessageSchema, ...SpecialWorkingHoursSchema },
+          504: EmployeeMessageSchema,
+        },
+      },
+    },
+    async (req, rep) => {
+      const hours: SpecialWorkingHours = {
+        storeID: StoreID(req.body.storeID),
+        employeeID: EmployeeID(req.body.employeeID),
+        employeeSpecialHoursID: req.body.employeeSpecialHoursID
+          ? EmployeeSpceialHoursID(req.body.employeeSpecialHoursID)
+          : undefined,
+        start: WorkTime(new Date(req.body.start)),
+        end: WorkTime(new Date(req.body.end)),
+        description: req.body.description ? WorkTimeDescription(req.body.description) : undefined,
+        absence: Absence(req.body.absence),
+      }
+
+      const createdSpecialWorkingHours: Either<string, SpecialWorkingHours> =
+        await setEmployeeSpecialWorkingHours(hours)
+      match(
+        createdSpecialWorkingHours,
+
+        (workHours: SpecialWorkingHours) => {
+          return rep.status(201).send({
+            message: 'Employee special work hours Created/updated successfully',
+
+            ...workHours,
+          })
+        },
+        (err) => {
+          return rep.status(504).send({
+            message: err,
+          })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Querystring: GetEmployeeWorkingHoursSchemaType
+    Reply:
+      | ({ message: EmployeeMessageSchemaType } & EmployeeTimeSchemaType)
+      | EmployeeMessageSchemaType
+  }>(
+    '/workHours/:employeeID/:storeID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_employee_working_hours')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply.status(403).send({
+            message: `Permission denied, user doesn't have permission ${permissionName}`,
+          })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: GetEmployeeWorkingHoursSchema,
+        response: {
+          200: { message: EmployeeMessageSchema, ...EmployeeTimeSchema },
+          403: EmployeeMessageSchema,
+        },
+      },
+    },
+    async function (request, reply) {
+      const employeeID = EmployeeID(request.query.employeeID)
+      const storeID = StoreID(request.query.storeID)
+      const hours: Either<string, WorkingHoursCreated> = await getEmployeeWorkingHours(
+        employeeID,
+        storeID,
+      )
+      match(
+        hours,
+        (workHours: WorkingHoursCreated) => {
+          return reply.status(200).send({ message: 'employee working hours', ...workHours })
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.delete<{
+    Querystring: GetEmployeeWorkingHoursSchemaType
+    Reply:
+      | ({ message: EmployeeMessageSchemaType } & EmployeeTimeSchemaType)
+      | EmployeeMessageSchemaType
+  }>(
+    '/workHours/:employeeID/:storeID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('delete_employee_working_hours')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply.status(403).send({
+            message: `Permission denied, user doesn't have permission ${permissionName}`,
+          })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: GetEmployeeWorkingHoursSchema,
+        response: {
+          200: { message: EmployeeMessageSchema, ...EmployeeTimeSchema },
+          403: EmployeeMessageSchema,
+        },
+      },
+    },
+    async function (request, reply) {
+      const employeeID = EmployeeID(request.query.employeeID)
+      const storeID = StoreID(request.query.storeID)
+      const hours: Either<string, WorkingHoursCreated> = await deleteEmployeeWorkingHours(
+        employeeID,
+        storeID,
+      )
+      match(
+        hours,
+        (workHours: WorkingHoursCreated) => {
+          return reply.status(200).send({ message: 'deleted employee working hours', ...workHours })
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Querystring: EmployeeSpceialHoursIDSchemaType
+    Reply:
+      | ({ message: EmployeeMessageSchemaType } & SpecialWorkingHoursSchemaType)
+      | EmployeeMessageSchemaType
+  }>(
+    '/specialHours/:employeeSpecialHoursID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle(
+          'get_employee_special_working_hours',
+        )
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply.status(403).send({
+            message: `Permission denied, user doesn't have permission ${permissionName}`,
+          })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: EmployeeSpceialHoursIDSchema,
+        response: {
+          200: { message: EmployeeMessageSchema, ...SpecialWorkingHoursSchema },
+          403: EmployeeMessageSchema,
+        },
+      },
+    },
+    async function (request, reply) {
+      const hoursID = EmployeeSpceialHoursID(request.query.employeeSpceialHoursID)
+      const hours: Either<string, SpecialWorkingHours> = await getEmployeeSpecialWorkingHoursByID(
+        hoursID,
+      )
+      match(
+        hours,
+        (specialHours: SpecialWorkingHours) => {
+          return reply.status(200).send({ message: 'employee working hours', ...specialHours })
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Querystring: EmployeeSpceialHourByDateSchemaType
+    Reply:
+      | ({ message: EmployeeMessageSchemaType } & SpecialWorkingHoursSchemaType)
+      | EmployeeMessageSchemaType
+  }>(
+    '/specialHours/:storeID/:employeeID/:begin/:end',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle(
+          'get_employee_special_working_hours_by_date',
+        )
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply.status(403).send({
+            message: `Permission denied, user doesn't have permission ${permissionName}`,
+          })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: EmployeeSpceialHourByDateSchema,
+        response: {
+          200: { message: EmployeeMessageSchema, ...SpecialWorkingHoursSchema },
+          403: EmployeeMessageSchema,
+        },
+      },
+    },
+    async function (request, reply) {
+      const employeeID = EmployeeID(request.query.employeeID)
+      const storeID = StoreID(request.query.storeID)
+      const begin = WorkTime(new Date(request.query.begin))
+      const end = WorkTime(new Date(request.query.end))
+      const hours: Either<string, SpecialWorkingHours> =
+        await getEmployeeSpecialWorkingHoursByDates(storeID, employeeID, begin, end)
+      match(
+        hours,
+        (specialHours: SpecialWorkingHours) => {
+          return reply
+            .status(200)
+            .send({ message: 'employee special working hours', ...specialHours })
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.delete<{
+    Querystring: EmployeeSpceialHoursIDSchemaType
+    Reply:
+      | ({ message: EmployeeMessageSchemaType } & SpecialWorkingHoursSchemaType)
+      | EmployeeMessageSchemaType
+  }>(
+    '/specialHours/:employeeSpecialHoursID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle(
+          'delete_employee_special_working_hours',
+        )
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply.status(403).send({
+            message: `Permission denied, user doesn't have permission ${permissionName}`,
+          })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: EmployeeSpceialHoursIDSchema,
+        response: {
+          200: { message: EmployeeMessageSchema, ...SpecialWorkingHoursSchema },
+          403: EmployeeMessageSchema,
+        },
+      },
+    },
+    async function (request, reply) {
+      const hoursID = EmployeeSpceialHoursID(request.query.employeeSpceialHoursID)
+      const hours: Either<string, SpecialWorkingHours> = await getEmployeeSpecialWorkingHoursByID(
+        hoursID,
+      )
+      match(
+        hours,
+        (specialHours: SpecialWorkingHours) => {
+          return reply.status(200).send({ message: 'employee working hours', ...specialHours })
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
     },
   )
 }
