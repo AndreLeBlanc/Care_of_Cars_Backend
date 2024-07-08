@@ -37,6 +37,7 @@ import {
   TuesdayBreak,
   TuesdayStart,
   TuesdayStop,
+  UserID,
   WednesdayBreak,
   WednesdayStart,
   WednesdayStop,
@@ -144,6 +145,7 @@ export type WorkingHoursCreated = WorkingHours & {
 }
 
 type EmployeeNoRate = {
+  userID: UserID
   employeeID?: EmployeeID
   shortUserName: ShortUserName
   employmentNumber: EmploymentNumber
@@ -1084,6 +1086,7 @@ export async function putEmployee(
         .returning({ storeID: employeeStore.storeID })
 
       const createdEmployeeWithNull = {
+        userID: createdEmployee.userID,
         employeeID: createdEmployee.employeeID,
         shortUserName: createdEmployee.shortUserName,
         employmentNumber: createdEmployee.employmentNumber,
@@ -1121,6 +1124,7 @@ export async function getEmployee(employeeID: EmployeeID): Promise<Either<string
         .where(eq(employeeStore.employeeID, employeeID))
 
       const fetchedEmployeeWithNull = {
+        userID: fetchedEmployee.userID,
         employeeID: fetchedEmployee.employeeID,
         shortUserName: fetchedEmployee.shortUserName,
         employmentNumber: fetchedEmployee.employmentNumber,
@@ -1163,6 +1167,7 @@ export async function deleteEmployee(employeeID: EmployeeID): Promise<Either<str
         .returning()
 
       const deletedEmployeeWithNull = {
+        userID: deletedEmployee.userID,
         employeeID: deletedEmployee.employeeID,
         shortUserName: deletedEmployee.shortUserName,
         employmentNumber: deletedEmployee.employmentNumber,
@@ -1219,6 +1224,7 @@ export async function getEmployeesPaginate(
         .offset(offset || 0)
       const listedEmployeeWithNull = employeesList.map((employee) => {
         return {
+          userID: employee.employees.userID,
           employeeID: employee.employees.employeeID,
           shortUserName: employee.employees.shortUserName,
           employmentNumber: employee.employees.employmentNumber,

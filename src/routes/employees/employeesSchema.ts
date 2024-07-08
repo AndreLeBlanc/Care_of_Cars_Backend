@@ -2,6 +2,7 @@ import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 
 import { Static, Type } from '@sinclair/typebox'
 import { storeID } from '../stores/storesSchema.js'
+import { userID } from '../users/userSchema.js'
 
 import { employeeID, globalQualID, localQualID } from '../../utils/helper.js'
 
@@ -17,10 +18,10 @@ const employeeHourlyRate = Type.Optional(Type.Number({ minimum: 0 }))
 const employeePin = Type.String()
 const employeeComment = Type.String()
 const EmployeeHourlyRateCurrency = Type.Optional(Type.String())
-const EmployeeHourlyRate = Type.Optional(Type.Number())
 const employeeCheckedIn = Type.String({ format: 'date' })
 const employeeCheckedOut = Type.String({ format: 'date' })
 const EmployeeSchema = Type.Object({
+  userID: userID,
   shortUserName: shortUserName,
   employmentNumber: employmentNumber,
   employeePersonalNumber: employeePersonalNumber,
@@ -64,8 +65,7 @@ export const CreateEmployeeSchema = Type.Composite([
     storeID: Type.Array(storeID, { minItems: 1 }),
     employeeID: Type.Optional(employeeID),
     EmployeeHourlyRateCurrency: Type.Optional(EmployeeHourlyRateCurrency),
-    employeeHourlyRate: employeeHourlyRate,
-    EmployeeHourlyRate: Type.Optional(EmployeeHourlyRate),
+    employeeHourlyRate: Type.Optional(employeeHourlyRate),
   }),
 ])
 
@@ -90,7 +90,7 @@ export const SelectedEmployeeSchema = Type.Composite([
     employeeID: employeeID,
     storeIDs: Type.Array(storeID),
     EmployeeHourlyRateCurrency: EmployeeHourlyRateCurrency,
-    EmployeeHourlyRateDinero: EmployeeHourlyRate,
+    EmployeeHourlyRateDinero: employeeHourlyRate,
     employeeCheckedIn: Type.Optional(employeeCheckedIn),
     employeeCheckedOut: Type.Optional(employeeCheckedOut),
   }),

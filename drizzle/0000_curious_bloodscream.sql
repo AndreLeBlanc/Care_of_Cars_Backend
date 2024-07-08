@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS "employeeLocalQualifications" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "employeeSpecialHours" (
-	"employeeSpecialHoursID" integer PRIMARY KEY NOT NULL,
+	"employeeSpecialHoursID" serial PRIMARY KEY NOT NULL,
 	"employeeID" integer NOT NULL,
 	"storeID" integer NOT NULL,
 	"start" date NOT NULL,
@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS "employeeWorkingHours" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "employees" (
+	"userID" integer NOT NULL,
 	"employeeID" serial PRIMARY KEY NOT NULL,
 	"shortUserName" varchar(16) NOT NULL,
 	"employmentNumber" varchar(128) NOT NULL,
@@ -129,6 +130,7 @@ CREATE TABLE IF NOT EXISTS "employees" (
 	"checkedOut" timestamp,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "employees_userID_unique" UNIQUE("userID"),
 	CONSTRAINT "employees_employmentNumber_unique" UNIQUE("employmentNumber"),
 	CONSTRAINT "employees_employeePersonalNumber_unique" UNIQUE("employeePersonalNumber"),
 	CONSTRAINT "employees_signature_unique" UNIQUE("signature")
@@ -515,6 +517,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "employeeWorkingHours" ADD CONSTRAINT "employeeWorkingHours_employeeID_employees_employeeID_fk" FOREIGN KEY ("employeeID") REFERENCES "public"."employees"("employeeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employees" ADD CONSTRAINT "employees_userID_users_userID_fk" FOREIGN KEY ("userID") REFERENCES "public"."users"("userID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

@@ -71,6 +71,7 @@ import {
   TuesdayBreak,
   TuesdayStart,
   TuesdayStop,
+  UserID,
   WednesdayBreak,
   WednesdayStart,
   WednesdayStop,
@@ -212,6 +213,7 @@ export const employees = async (fastify: FastifyInstance) => {
       const storeIDs: StoreID[] = req.body.storeID.map((store) => StoreID(store))
       const employeeID = req.body.employeeID ? EmployeeID(req.body.employeeID) : undefined
       const employee: CreateEmployee = {
+        userID: UserID(req.body.userID),
         employeeID: employeeID,
         shortUserName: ShortUserName(req.body.shortUserName),
         employmentNumber: EmploymentNumber(req.body.employmentNumber),

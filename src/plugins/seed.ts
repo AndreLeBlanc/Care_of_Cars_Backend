@@ -10,6 +10,8 @@ import { LocalService, Service, ServiceCreate, createService } from '../services
 
 import { CreateServiceCategory, createServiceCategory } from '../services/categoryService.js'
 
+import { CreateProductCategory, createProductCategory } from '../services/categoryService.js'
+
 import { CreatedRole, createRole } from '../services/roleService.js'
 import { CreatedUser, createUser, generatePasswordHash } from '../services/userService.js'
 
@@ -18,6 +20,8 @@ import Dinero from 'dinero.js'
 import {
   Award,
   IsSuperAdmin,
+  ProductCategoryDescription,
+  ProductCategoryName,
   RoleDescription,
   RoleID,
   RoleName,
@@ -160,8 +164,14 @@ export default fp<SupportPluginOptions>(async () => {
           ServiceCategoryName('seeded products'),
           ServiceCategoryDescription('Products created during seed'),
         )
-
         console.log('created service category status: ', catService)
+
+        const catProduct: Either<string, CreateProductCategory> = await createProductCategory(
+          ProductCategoryName('seeded products'),
+          ProductCategoryDescription('Products created during seed'),
+        )
+        console.log('created product category status: ', catProduct)
+
         match(
           catService,
           async (cat: CreateServiceCategory) => {

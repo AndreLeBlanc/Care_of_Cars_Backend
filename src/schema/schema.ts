@@ -25,7 +25,6 @@ import {
 } from 'drizzle-orm/pg-core'
 
 import { Currency, Dinero } from 'dinero.js'
-
 export type UserID = Brand<number, 'userID'>
 export const UserID = make<UserID>()
 export type UserPassword = Brand<string, ' userPassword'>
@@ -464,6 +463,13 @@ const dbDates = {
 }
 
 export const employees = pgTable('employees', {
+  userID: integer('userID')
+    .$type<UserID>()
+    .references(() => users.userID, {
+      onDelete: 'cascade',
+    })
+    .notNull()
+    .unique(),
   employeeID: serial('employeeID').$type<EmployeeID>().primaryKey(),
   shortUserName: varchar('shortUserName', { length: 16 }).$type<ShortUserName>().notNull(),
   employmentNumber: varchar('employmentNumber', { length: 128 })
