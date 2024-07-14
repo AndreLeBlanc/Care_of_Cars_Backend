@@ -3,8 +3,8 @@ import fc from 'fast-check'
 
 import { after, before, describe, it } from 'node:test'
 import assert from 'assert'
-import { buildApp } from '../../src/app'
-import { initDrizzle } from '../../src/config/db-connect'
+import { buildApp } from '../../src/app.js'
+import { initDrizzle } from '../../src/config/db-connect.js'
 
 let jwt = ''
 describe('POST /users/login HTTP', async () => {
@@ -44,12 +44,13 @@ describe('POST /users/login HTTP', async () => {
             headers: {
               Authorization: jwt,
             },
-            payload: { PermissionName: name, description: description },
+            payload: { permissionTitle: name, description: description },
           })
 
           const parsedResponse = JSON.parse(response.body)
+          console.log('parsedResponse', parsedResponse)
           permissionIDs.push(parsedResponse.data.permissionID)
-          assert.deepStrictEqual(parsedResponse.data.permissionName, name)
+          assert.deepStrictEqual(parsedResponse.data.permissionTitle, name)
           assert.deepStrictEqual(parsedResponse.data.permissionDescription, description)
           assert.deepStrictEqual(parsedResponse.message, 'Permission created')
           assert.strictEqual(response.statusCode, 201)
@@ -62,7 +63,7 @@ describe('POST /users/login HTTP', async () => {
             },
           })
           const parsedGetResponse = JSON.parse(getResponse.body)
-          assert.deepStrictEqual(parsedGetResponse.permissionName, name)
+          assert.deepStrictEqual(parsedGetResponse.permissionTitle, name)
           assert.deepStrictEqual(parsedGetResponse.permissionDescription, description)
           assert.strictEqual(getResponse.statusCode, 200)
         },
