@@ -10,6 +10,7 @@ const AbsenceSchema = Type.Boolean()
 const EmployeeSpceialHoursID = Type.Integer()
 const WorkTimeDescriptionSchema = Type.String()
 const workTimeSchema = Type.String({ format: 'time' })
+const workDateTimeSchema = Type.String({ format: 'date-time' })
 const shortUserName = Type.String({ maxLength: 4 })
 const employmentNumber = Type.String({ maxLength: 128 })
 const employeePersonalNumber = Type.String({ maxLength: 16 })
@@ -47,8 +48,8 @@ export type EmployeeSpceialHourByDateSchemaType = Static<typeof EmployeeSpceialH
 export const ListEmployeeWorkingHoursSchema = Type.Object({
   storeID: storeID,
   startDay: Type.String({ format: 'date' }),
-  quals: Type.Array(localQualID),
-  localQuals: Type.Array(globalQualID),
+  quals: Type.Optional(Type.Array(localQualID)),
+  localQuals: Type.Optional(Type.Array(globalQualID)),
 })
 
 export type ListEmployeeWorkingHoursSchemaType = Static<typeof ListEmployeeWorkingHoursSchema>
@@ -192,14 +193,20 @@ export const EmployeeTimeSchema = Type.Object({
 
 export type EmployeeTimeSchemaType = Static<typeof EmployeeTimeSchema>
 
-export const SpecialWorkingHoursSchema = Type.Object({
+export const SpecialHoursSchema = Type.Object({
   employeeSpecialHoursID: Type.Optional(EmployeeSpceialHoursID),
   employeeID: employeeID,
   storeID: storeID,
-  start: workTimeSchema,
-  end: workTimeSchema,
+  start: workDateTimeSchema,
+  end: workDateTimeSchema,
   description: Type.Optional(WorkTimeDescriptionSchema),
   absence: AbsenceSchema,
+})
+
+export type SpecialHoursSchemaType = Static<typeof SpecialHoursSchema>
+
+export const SpecialWorkingHoursSchema = Type.Object({
+  specialHours: Type.Array(SpecialHoursSchema),
 })
 
 export type SpecialWorkingHoursSchemaType = Static<typeof SpecialWorkingHoursSchema>
@@ -221,15 +228,17 @@ export type GetEmployeeWorkingHoursSchemaType = Static<typeof GetEmployeeWorking
 
 export const WorkingHoursTotalSchema = Type.Object({
   employeeInfo: Type.Array(
-    Type.Composite([EmployeeTimeSchema, Type.Object({ special: SpecialWorkingHoursSchema })]),
+    Type.Composite([EmployeeTimeSchema, Type.Object({ special: Type.Array(SpecialHoursSchema) })]),
   ),
   totalTimes: Type.Object({
-    monday: Type.String({ format: 'time' }),
-    tuesday: Type.String({ format: 'time' }),
-    wednesday: Type.String({ format: 'time' }),
-    thursday: Type.String({ format: 'time' }),
-    friday: Type.String({ format: 'time' }),
-    saturday: Type.String({ format: 'time' }),
-    sunday: Type.String({ format: 'time' }),
+    monday: Type.String(),
+    tuesday: Type.String(),
+    wednesday: Type.String(),
+    thursday: Type.String(),
+    friday: Type.String(),
+    saturday: Type.String(),
+    sunday: Type.String(),
   }),
 })
+
+export type WorkingHoursTotalSchemaType = Static<typeof WorkingHoursTotalSchema>

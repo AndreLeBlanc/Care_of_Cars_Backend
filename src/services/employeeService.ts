@@ -1,4 +1,4 @@
-import { Either, errorHandling, left, right } from '../utils/helper.js'
+import { Either, errorHandling, left, right, timeStringToMS } from '../utils/helper.js'
 
 import {
   Absence,
@@ -208,11 +208,38 @@ function dineroDBReturn(
   return undefined
 }
 
+function validateWorkingHours(hours: WorkingHours): boolean {
+  const days = [
+    { start: hours.mondayStart, stop: hours.mondayStop, break: hours.mondayBreak },
+    { start: hours.tuesdayStart, stop: hours.tuesdayStop, break: hours.tuesdayBreak },
+    { start: hours.wednesdayStart, stop: hours.wednesdayStop, break: hours.wednesdayBreak },
+    { start: hours.thursdayStart, stop: hours.thursdayStop, break: hours.thursdayBreak },
+    { start: hours.fridayStart, stop: hours.fridayStop, break: hours.fridayBreak },
+    { start: hours.saturdayStart, stop: hours.saturdayStop, break: hours.saturdayBreak },
+    { start: hours.sundayStart, stop: hours.sundayStop, break: hours.sundayBreak },
+  ]
+
+  for (const day of days) {
+    if (day.start != null && day.stop != null) {
+    }
+    if (day.start != null && day.stop == null) {
+      return false
+    }
+    if (day.start == null && (day.stop != null || day.break != null)) {
+      return false
+    }
+  }
+  return true
+}
+
 export async function setEmployeeWorkingHours(
   employee: EmployeeID,
   storeID: StoreID,
   workingHours: WorkingHours,
 ): Promise<Either<string, WorkingHoursCreated>> {
+  if (!validateWorkingHours(workingHours)) {
+    return left('working hours are invalid. Start times may be later than stop times')
+  }
   try {
     const employeeHours = await db.transaction(async (tx) => {
       const [employeeHasStore] = await tx
@@ -280,8 +307,8 @@ export async function setEmployeeWorkingHours(
 }
 
 export async function setEmployeeSpecialWorkingHours(
-  workingHours: SpecialWorkingHours,
-): Promise<Either<string, SpecialWorkingHours>> {
+  workingHours: SpecialWorkingHours[],
+): Promise<Either<string, { specialHours: SpecialWorkingHours[] }>> {
   try {
     const employeeHours = await db.transaction(async (tx) => {
       const [employeeHasStore] = await tx
@@ -289,8 +316,8 @@ export async function setEmployeeSpecialWorkingHours(
         .from(employeeStore)
         .where(
           and(
-            eq(employeeStore.storeID, workingHours.storeID),
-            eq(employeeStore.employeeID, workingHours.employeeID),
+            eq(employeeStore.storeID, workingHours[0].storeID),
+            eq(employeeStore.employeeID, workingHours[0].employeeID),
           ),
         )
 
@@ -298,32 +325,32 @@ export async function setEmployeeSpecialWorkingHours(
         return left('Employee is not associated with the store')
       }
 
-      const [updatedWorkingHours] = await tx
+      const updatedWorkingHours = await tx
         .insert(employeeSpecialHours)
-        .values({
-          employeeSpecialHoursID: workingHours.employeeSpecialHoursID,
-          employeeID: workingHours.employeeID,
-          storeID: workingHours.storeID,
-          start: workingHours.start,
-          end: workingHours.end,
-          description: workingHours.description,
-          absence: workingHours.absence,
-        })
+        .values(workingHours)
         .onConflictDoUpdate({
-          target: [employeeSpecialHours.employeeSpecialHoursID],
-          set: workingHours,
+          target: employeeSpecialHours.employeeSpecialHoursID,
+          set: {
+            employeeID: sql`"excluded"."employeeID"`,
+            storeID: sql`"excluded"."storeID"`,
+            start: sql`"excluded"."start"`,
+            end: sql`"excluded"."end"`,
+            description: sql`"excluded"."description"`,
+            absence: sql`"excluded"."absence"`,
+          },
         })
         .returning()
-
       return updatedWorkingHours
         ? right({
-            employeeSpecialHoursID: updatedWorkingHours.employeeSpecialHoursID,
-            employeeID: updatedWorkingHours.employeeID,
-            storeID: updatedWorkingHours.storeID,
-            start: updatedWorkingHours.start,
-            end: updatedWorkingHours.end,
-            description: updatedWorkingHours.description ?? undefined,
-            absence: updatedWorkingHours.absence,
+            specialHours: updatedWorkingHours.map((hours) => ({
+              employeeSpecialHoursID: hours.employeeSpecialHoursID,
+              employeeID: hours.employeeID,
+              storeID: hours.storeID,
+              start: hours.start,
+              end: hours.end,
+              description: hours.description ?? undefined,
+              absence: hours.absence,
+            })),
           })
         : left("couldn't update or create special working hours")
     })
@@ -410,9 +437,9 @@ export async function getEmployeeSpecialWorkingHoursByDates(
   employeeID: EmployeeID,
   begin: WorkTime,
   end: WorkTime,
-): Promise<Either<string, SpecialWorkingHours>> {
+): Promise<Either<string, { specialHours: SpecialWorkingHours[] }>> {
   try {
-    const [fetchedWorkingHours] = await db
+    const fetchedWorkingHours = await db
       .select()
       .from(employeeSpecialHours)
       .where(
@@ -425,13 +452,15 @@ export async function getEmployeeSpecialWorkingHoursByDates(
       )
     return fetchedWorkingHours
       ? right({
-          employeeSpecialHoursID: fetchedWorkingHours.employeeSpecialHoursID,
-          employeeID: fetchedWorkingHours.employeeID,
-          storeID: fetchedWorkingHours.storeID,
-          start: fetchedWorkingHours.start,
-          end: fetchedWorkingHours.end,
-          description: fetchedWorkingHours.description ?? undefined,
-          absence: fetchedWorkingHours.absence,
+          specialHours: fetchedWorkingHours.map((hours) => ({
+            employeeSpecialHoursID: hours.employeeSpecialHoursID,
+            employeeID: hours.employeeID,
+            storeID: hours.storeID,
+            start: hours.start,
+            end: hours.end,
+            description: hours.description ?? undefined,
+            absence: hours.absence,
+          })),
         })
       : left("couldn't fetch special working hours")
   } catch (e) {
@@ -648,48 +677,20 @@ function calcTime(
     }
 
     regularTimes.map((emp) => {
-      const mondayStart = emp.mondayStart
-        ? WorkDuration(new Date(emp.mondayStart).getTime())
-        : undefined
-      const mondayStop = emp.mondayStop
-        ? WorkDuration(new Date(emp.mondayStop).getTime())
-        : undefined
-      const tuesdayStart = emp.tuesdayStart
-        ? WorkDuration(new Date(emp.tuesdayStart).getTime())
-        : undefined
-      const tuesdayStop = emp.tuesdayStop
-        ? WorkDuration(new Date(emp.tuesdayStop).getTime())
-        : undefined
-      const wednesdayStart = emp.wednesdayStart
-        ? WorkDuration(new Date(emp.wednesdayStart).getTime())
-        : undefined
-      const wednesdayStop = emp.wednesdayStop
-        ? WorkDuration(new Date(emp.wednesdayStop).getTime())
-        : undefined
-      const thursdayStart = emp.thursdayStart
-        ? WorkDuration(new Date(emp.thursdayStart).getTime())
-        : undefined
-      const thursdayStop = emp.thursdayStop
-        ? WorkDuration(new Date(emp.thursdayStop).getTime())
-        : undefined
-      const fridayStart = emp.fridayStart
-        ? WorkDuration(new Date(emp.fridayStart).getTime())
-        : undefined
-      const fridayStop = emp.fridayStop
-        ? WorkDuration(new Date(emp.fridayStop).getTime())
-        : undefined
-      const saturdayStart = emp.saturdayStart
-        ? WorkDuration(new Date(emp.saturdayStart).getTime())
-        : undefined
-      const saturdayStop = emp.saturdayStop
-        ? WorkDuration(new Date(emp.saturdayStop).getTime())
-        : undefined
-      const sundayStart = emp.sundayStart
-        ? WorkDuration(new Date(emp.sundayStart).getTime())
-        : undefined
-      const sundayStop = emp.sundayStop
-        ? WorkDuration(new Date(emp.sundayStop).getTime())
-        : undefined
+      const mondayStart = timeStringToMS(emp.mondayStart)
+      const mondayStop = timeStringToMS(emp.mondayStop)
+      const tuesdayStart = timeStringToMS(emp.tuesdayStart)
+      const tuesdayStop = timeStringToMS(emp.tuesdayStop)
+      const wednesdayStart = timeStringToMS(emp.wednesdayStart)
+      const wednesdayStop = timeStringToMS(emp.wednesdayStop)
+      const thursdayStart = timeStringToMS(emp.thursdayStart)
+      const thursdayStop = timeStringToMS(emp.thursdayStop)
+      const fridayStart = timeStringToMS(emp.fridayStart)
+      const fridayStop = timeStringToMS(emp.fridayStop)
+      const saturdayStart = timeStringToMS(emp.saturdayStart)
+      const saturdayStop = timeStringToMS(emp.saturdayStop)
+      const sundayStart = timeStringToMS(emp.sundayStart)
+      const sundayStop = timeStringToMS(emp.sundayStop)
 
       function isNotNullOrUndefined<T>(value: T | null | undefined): value is T {
         return value !== null && value !== undefined
@@ -782,14 +783,17 @@ function calcTime(
         i++
       }
 
-      worktimes.totalTimes.monday = WorkDuration(
-        worktimes.totalTimes.monday +
-          (emp.mondayBreak ? intervalToMilliseconds(emp.mondayBreak) : 0),
-      )
-      worktimes.totalTimes.tuesday = WorkDuration(
-        worktimes.totalTimes.tuesday +
-          (emp.tuesdayBreak ? intervalToMilliseconds(emp.tuesdayBreak) : 0),
-      )
+      function undefinedIsZero(num: number | undefined): number {
+        return num ? num : 0
+      }
+
+      ;(worktimes.totalTimes.monday = WorkDuration(
+        worktimes.totalTimes.monday - undefinedIsZero(timeStringToMS(emp.mondayBreak)),
+      )),
+        (worktimes.totalTimes.tuesday = WorkDuration(
+          worktimes.totalTimes.tuesday +
+            (emp.tuesdayBreak ? intervalToMilliseconds(emp.tuesdayBreak) : 0),
+        ))
       worktimes.totalTimes.wednesday = WorkDuration(
         worktimes.totalTimes.wednesday +
           (emp.wednesdayBreak ? intervalToMilliseconds(emp.wednesdayBreak) : 0),
@@ -958,9 +962,15 @@ export async function listWorkingEmployees(
               lte(employeeSpecialHours.end, startDay),
             ),
           )
+
+        fetchedWorkingHours = await db
+          .select()
+          .from(employeeWorkingHours)
+          .where(and(eq(employeeWorkingHours.storeID, storeID)))
       }
       return { special: employeeSpecialTimes, regular: fetchedWorkingHours }
     })
+
     return calcTime(startDay, createdEmployeeWithStores.special, createdEmployeeWithStores.regular)
   } catch (e) {
     return left(errorHandling(e))
@@ -1222,6 +1232,7 @@ export async function getEmployeesPaginate(
         .where(condition)
         .limit(limit || 10)
         .offset(offset || 0)
+
       const listedEmployeeWithNull = employeesList.map((employee) => {
         return {
           userID: employee.employees.userID,

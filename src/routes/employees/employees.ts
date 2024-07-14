@@ -23,6 +23,7 @@ import {
   GetEmployeeWorkingHoursSchemaType,
   ListCheckInStatusSchema,
   ListCheckInStatusSchemaType,
+  ListEmployeeWorkingHoursSchema,
   ListEmployeeWorkingHoursSchemaType,
   ListEmployeesReplySchema,
   ListEmployeesReplySchemaType,
@@ -30,8 +31,12 @@ import {
   ListEmployeesSchemaType,
   SelectedEmployeeSchema,
   SelectedEmployeeSchemaType,
+  SpecialHoursSchema,
+  SpecialHoursSchemaType,
   SpecialWorkingHoursSchema,
   SpecialWorkingHoursSchemaType,
+  WorkingHoursTotalSchema,
+  WorkingHoursTotalSchemaType,
 } from './employeesSchema.js'
 
 import { Currency } from 'dinero.js'
@@ -466,24 +471,24 @@ export const employees = async (fastify: FastifyInstance) => {
       },
     },
     async (req, rep) => {
-      const hours: SpecialWorkingHours = {
-        storeID: StoreID(req.body.storeID),
-        employeeID: EmployeeID(req.body.employeeID),
-        employeeSpecialHoursID: req.body.employeeSpecialHoursID
-          ? EmployeeSpceialHoursID(req.body.employeeSpecialHoursID)
+      const specialHours: SpecialWorkingHours[] = req.body.specialHours.map((hours) => ({
+        storeID: StoreID(hours.storeID),
+        employeeID: EmployeeID(hours.employeeID),
+        employeeSpecialHoursID: hours.employeeSpecialHoursID
+          ? EmployeeSpceialHoursID(hours.employeeSpecialHoursID)
           : undefined,
-        start: WorkTime(new Date(req.body.start)),
-        end: WorkTime(new Date(req.body.end)),
-        description: req.body.description ? WorkTimeDescription(req.body.description) : undefined,
-        absence: Absence(req.body.absence),
-      }
+        start: WorkTime(new Date(hours.start)),
+        end: WorkTime(new Date(hours.end)),
+        description: hours.description ? WorkTimeDescription(hours.description) : undefined,
+        absence: Absence(hours.absence),
+      }))
 
-      const createdSpecialWorkingHours: Either<string, SpecialWorkingHours> =
-        await setEmployeeSpecialWorkingHours(hours)
+      const createdSpecialWorkingHours: Either<string, { specialHours: SpecialWorkingHours[] }> =
+        await setEmployeeSpecialWorkingHours(specialHours)
       match(
         createdSpecialWorkingHours,
 
-        (workHours: SpecialWorkingHours) => {
+        (workHours: { specialHours: SpecialWorkingHours[] }) => {
           return rep.status(201).send({
             message: 'Employee special work hours Created/updated successfully',
 
@@ -505,7 +510,7 @@ export const employees = async (fastify: FastifyInstance) => {
       | ({ message: EmployeeMessageSchemaType } & EmployeeTimeSchemaType)
       | EmployeeMessageSchemaType
   }>(
-    '/workHours/:employeeID/:storeID',
+    '/workHours/',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('get_employee_working_hours')
@@ -551,7 +556,7 @@ export const employees = async (fastify: FastifyInstance) => {
       | ({ message: EmployeeMessageSchemaType } & EmployeeTimeSchemaType)
       | EmployeeMessageSchemaType
   }>(
-    '/workHours/:employeeID/:storeID',
+    '/workHours',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('delete_employee_working_hours')
@@ -594,10 +599,10 @@ export const employees = async (fastify: FastifyInstance) => {
   fastify.get<{
     Querystring: EmployeeSpceialHoursIDSchemaType
     Reply:
-      | ({ message: EmployeeMessageSchemaType } & SpecialWorkingHoursSchemaType)
+      | ({ message: EmployeeMessageSchemaType } & SpecialHoursSchemaType)
       | EmployeeMessageSchemaType
   }>(
-    '/specialHours/:employeeSpecialHoursID',
+    '/specialHours',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle(
@@ -615,7 +620,7 @@ export const employees = async (fastify: FastifyInstance) => {
       schema: {
         querystring: EmployeeSpceialHoursIDSchema,
         response: {
-          200: { message: EmployeeMessageSchema, ...SpecialWorkingHoursSchema },
+          200: { message: EmployeeMessageSchema, ...SpecialHoursSchema },
           403: EmployeeMessageSchema,
         },
       },
@@ -643,7 +648,7 @@ export const employees = async (fastify: FastifyInstance) => {
       | ({ message: EmployeeMessageSchemaType } & SpecialWorkingHoursSchemaType)
       | EmployeeMessageSchemaType
   }>(
-    '/specialHours/:storeID/:employeeID/:begin/:end',
+    '/specialHoursByDate',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle(
@@ -671,11 +676,11 @@ export const employees = async (fastify: FastifyInstance) => {
       const storeID = StoreID(request.query.storeID)
       const begin = WorkTime(new Date(request.query.begin))
       const end = WorkTime(new Date(request.query.end))
-      const hours: Either<string, SpecialWorkingHours> =
+      const hours: Either<string, { specialHours: SpecialWorkingHours[] }> =
         await getEmployeeSpecialWorkingHoursByDates(storeID, employeeID, begin, end)
       match(
         hours,
-        (specialHours: SpecialWorkingHours) => {
+        (specialHours: { specialHours: SpecialWorkingHours[] }) => {
           return reply
             .status(200)
             .send({ message: 'employee special working hours', ...specialHours })
@@ -734,9 +739,9 @@ export const employees = async (fastify: FastifyInstance) => {
   )
 
   fastify.get<{
-    Body: ListEmployeeWorkingHoursSchemaType
+    Querystring: ListEmployeeWorkingHoursSchemaType
     Reply:
-      | ({ message: EmployeeMessageSchemaType } & SpecialWorkingHoursSchemaType)
+      | ({ message: EmployeeMessageSchemaType } & WorkingHoursTotalSchemaType)
       | EmployeeMessageSchemaType
   }>(
     '/availableEmployees',
@@ -753,27 +758,47 @@ export const employees = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        querystring: EmployeeSpceialHourByDateSchema,
+        querystring: ListEmployeeWorkingHoursSchema,
         response: {
-          200: { message: EmployeeMessageSchema, ...SpecialWorkingHoursSchema },
+          200: { message: EmployeeMessageSchema, ...WorkingHoursTotalSchema },
           403: EmployeeMessageSchema,
         },
       },
     },
     async function (request, reply) {
-      const storeID = StoreID(request.body.storeID)
-      const startDay = WorkTime(new Date(request.body.startDay))
-      const quals = request.body.quals.map((qualification) => GlobalQualID(qualification))
-      const localQuals = request.body.localQuals.map((qualification) => LocalQualID(qualification))
+      const storeID = StoreID(request.query.storeID)
+      const startDay = WorkTime(new Date(request.query.startDay))
+      const quals = request.query.quals
+        ? request.query.quals.map((qualification) => GlobalQualID(qualification))
+        : []
+      const localQuals = request.query.localQuals
+        ? request.query.localQuals.map((qualification) => LocalQualID(qualification))
+        : []
       const hours: Either<string, WorkingHoursIDTotal> = await listWorkingEmployees(
         storeID,
         startDay,
         quals,
         localQuals,
       )
+
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
+      console.log('hours')
       match(
         hours,
         (specialHours: WorkingHoursIDTotal) => {
+          console.log(specialHours.employeeInfo)
+
           return reply
             .status(200)
             .send({ message: 'employee special working hours', ...specialHours })
