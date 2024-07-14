@@ -51,7 +51,7 @@ echo "DDDDDDDDDDDDDDDDDDDDDDDDDDD"
 echo "DDDDDDDDDDDDDDDDDDDDDDDDDDD"
 echo "DDDDDDDDDDDDDDDDDDDDDDDDDDD"
 # Run tests
-#sudo docker-compose up --abort-on-container-exit test postgres 
+sudo docker-compose up --abort-on-container-exit test postgres 
 test_status=$?
 
 # Stop and remove containers
