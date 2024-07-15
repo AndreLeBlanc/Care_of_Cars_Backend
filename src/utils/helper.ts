@@ -7,6 +7,27 @@ export function isEmail(emailAddress: string) {
   return emailAddress?.match(regex)
 }
 
+export const employeeID = Type.Integer()
+export const localQualID = Type.Integer()
+export const globalQualID = Type.Integer()
+
+export function timeStringToMS(time: string | undefined): number | undefined {
+  if (time == undefined) {
+    return undefined
+  }
+  const parts = time.split(':')
+  if (parts[0].length != 2 && parts[1].length != 2 && parts[2].length != 2) {
+    return undefined
+  } else {
+    const hours = Number(parts[0])
+    const mins = Number(parts[1])
+    const secs = Number(parts[2])
+    if (0 <= hours && hours <= 24 && 0 <= mins && mins <= 60 && 0 <= secs && secs <= 60)
+      return hours * 3600000 + mins * 60000 + secs * 1000
+  }
+  return undefined
+}
+
 //@ts-ignore
 export type PositiveInteger<T extends number> = `${T}` extends '0' | `-${any}` | `${any}.${any}`
   ? never

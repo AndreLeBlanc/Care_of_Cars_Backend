@@ -57,11 +57,24 @@ CREATE TABLE IF NOT EXISTS "drivers" (
 	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "employeeSpecialHours" (
-	"employeeSpceialHoursID" integer PRIMARY KEY NOT NULL,
+CREATE TABLE IF NOT EXISTS "employeeGlobalQualifications" (
 	"employeeID" integer NOT NULL,
-	"start" timestamp NOT NULL,
-	"end" timestamp NOT NULL,
+	"globalQualID" integer NOT NULL,
+	CONSTRAINT "employeeGlobalQualifications_globalQualID_employeeID_pk" PRIMARY KEY("globalQualID","employeeID")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "employeeLocalQualifications" (
+	"employeeID" integer NOT NULL,
+	"localQualID" integer NOT NULL,
+	CONSTRAINT "employeeLocalQualifications_localQualID_employeeID_pk" PRIMARY KEY("localQualID","employeeID")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "employeeSpecialHours" (
+	"employeeSpecialHoursID" serial PRIMARY KEY NOT NULL,
+	"employeeID" integer NOT NULL,
+	"storeID" integer NOT NULL,
+	"start" date NOT NULL,
+	"end" date NOT NULL,
 	"description" varchar,
 	"absence" boolean NOT NULL
 );
@@ -72,18 +85,9 @@ CREATE TABLE IF NOT EXISTS "employeeStore" (
 	CONSTRAINT "employeeStore_storeID_employeeID_pk" PRIMARY KEY("storeID","employeeID")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "employees" (
-	"employeeID" serial PRIMARY KEY NOT NULL,
-	"shortUserName" varchar(16) NOT NULL,
-	"employmentNumber" varchar(128) NOT NULL,
-	"employeePersonalNumber" varchar(16) NOT NULL,
-	"signature" varchar(4) NOT NULL,
-	"employeeHourlyRate" numeric,
-	"employeeHourlyRateCurrency" varchar,
-	"employeePin" varchar(4),
-	"employeeComment" varchar,
-	"checkedIn" timestamp,
-	"checkedOut" timestamp,
+CREATE TABLE IF NOT EXISTS "employeeWorkingHours" (
+	"storeID" integer NOT NULL,
+	"employeeID" integer NOT NULL,
 	"mondayStart" time,
 	"mondayStop" time,
 	"mondayBreak" interval,
@@ -107,6 +111,26 @@ CREATE TABLE IF NOT EXISTS "employees" (
 	"sundayBreak" interval,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "employeeWorkingHours_storeID_employeeID_pk" PRIMARY KEY("storeID","employeeID"),
+	CONSTRAINT "unique_employeeWorkingHours" UNIQUE("storeID","employeeID")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "employees" (
+	"userID" integer NOT NULL,
+	"employeeID" serial PRIMARY KEY NOT NULL,
+	"shortUserName" varchar(16) NOT NULL,
+	"employmentNumber" varchar(128) NOT NULL,
+	"employeePersonalNumber" varchar(16) NOT NULL,
+	"signature" varchar(4) NOT NULL,
+	"employeeHourlyRate" numeric,
+	"employeeHourlyRateCurrency" varchar,
+	"employeePin" varchar(4),
+	"employeeComment" varchar,
+	"checkedIn" timestamp,
+	"checkedOut" timestamp,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "employees_userID_unique" UNIQUE("userID"),
 	CONSTRAINT "employees_employmentNumber_unique" UNIQUE("employmentNumber"),
 	CONSTRAINT "employees_employeePersonalNumber_unique" UNIQUE("employeePersonalNumber"),
 	CONSTRAINT "employees_signature_unique" UNIQUE("signature")
@@ -127,6 +151,17 @@ CREATE TABLE IF NOT EXISTS "localProducts" (
 	"productInventoryBalance" integer,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "localServiceGlobalQualifications" (
+	"localServiceID" integer NOT NULL,
+	"globalQualID" integer NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "localServiceLocalQualifications" (
+	"localServiceID" integer NOT NULL,
+	"localQualID" integer NOT NULL,
+	CONSTRAINT "localServiceLocalQualifications_localQualID_localServiceID_pk" PRIMARY KEY("localQualID","localServiceID")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "localServiceVariants" (
@@ -260,6 +295,17 @@ CREATE TABLE IF NOT EXISTS "serviceCategories" (
 	CONSTRAINT "serviceCategories_serviceCategoryName_unique" UNIQUE("serviceCategoryName")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "serviceLocalQualifications" (
+	"serviceID" integer NOT NULL,
+	"localQualID" integer NOT NULL,
+	CONSTRAINT "serviceLocalQualifications_localQualID_serviceID_pk" PRIMARY KEY("localQualID","serviceID")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "serviceQualifications" (
+	"serviceID" integer NOT NULL,
+	"globalQualID" integer NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "serviceVariants" (
 	"serviceVariantID" serial PRIMARY KEY NOT NULL,
 	"name" varchar(256) NOT NULL,
@@ -390,18 +436,6 @@ CREATE TABLE IF NOT EXISTS "userBelongsToStore" (
 	CONSTRAINT "userBelongsToStore_storeID_userID_pk" PRIMARY KEY("storeID","userID")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "userGlobalQualifications" (
-	"userID" integer NOT NULL,
-	"globalQualID" integer NOT NULL,
-	CONSTRAINT "userGlobalQualifications_globalQualID_userID_pk" PRIMARY KEY("globalQualID","userID")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "userLocalQualifications" (
-	"userID" integer NOT NULL,
-	"localQualID" integer NOT NULL,
-	CONSTRAINT "userLocalQualifications_localQualID_userID_pk" PRIMARY KEY("localQualID","userID")
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"userID" serial PRIMARY KEY NOT NULL,
 	"firstName" varchar(128) NOT NULL,
@@ -428,7 +462,37 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "employeeGlobalQualifications" ADD CONSTRAINT "employeeGlobalQualifications_employeeID_employees_employeeID_fk" FOREIGN KEY ("employeeID") REFERENCES "public"."employees"("employeeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employeeGlobalQualifications" ADD CONSTRAINT "employeeGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk" FOREIGN KEY ("globalQualID") REFERENCES "public"."qualificationsGlobal"("globalQualID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employeeLocalQualifications" ADD CONSTRAINT "employeeLocalQualifications_employeeID_employees_employeeID_fk" FOREIGN KEY ("employeeID") REFERENCES "public"."employees"("employeeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employeeLocalQualifications" ADD CONSTRAINT "employeeLocalQualifications_localQualID_qualificationsLocal_localQualID_fk" FOREIGN KEY ("localQualID") REFERENCES "public"."qualificationsLocal"("localQualID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "employeeSpecialHours" ADD CONSTRAINT "employeeSpecialHours_employeeID_employees_employeeID_fk" FOREIGN KEY ("employeeID") REFERENCES "public"."employees"("employeeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employeeSpecialHours" ADD CONSTRAINT "employeeSpecialHours_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "public"."stores"("storeID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -446,6 +510,24 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "employeeWorkingHours" ADD CONSTRAINT "employeeWorkingHours_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "public"."stores"("storeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employeeWorkingHours" ADD CONSTRAINT "employeeWorkingHours_employeeID_employees_employeeID_fk" FOREIGN KEY ("employeeID") REFERENCES "public"."employees"("employeeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employees" ADD CONSTRAINT "employees_userID_users_userID_fk" FOREIGN KEY ("userID") REFERENCES "public"."users"("userID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "localProducts" ADD CONSTRAINT "localProducts_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "public"."stores"("storeID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -453,6 +535,30 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "localProducts" ADD CONSTRAINT "localProducts_productCategoryID_productCategories_productCategoryID_fk" FOREIGN KEY ("productCategoryID") REFERENCES "public"."productCategories"("productCategoryID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "localServiceGlobalQualifications" ADD CONSTRAINT "localServiceGlobalQualifications_localServiceID_localServices_localServiceID_fk" FOREIGN KEY ("localServiceID") REFERENCES "public"."localServices"("localServiceID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "localServiceGlobalQualifications" ADD CONSTRAINT "localServiceGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk" FOREIGN KEY ("globalQualID") REFERENCES "public"."qualificationsGlobal"("globalQualID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "localServiceLocalQualifications" ADD CONSTRAINT "localServiceLocalQualifications_localServiceID_localServices_localServiceID_fk" FOREIGN KEY ("localServiceID") REFERENCES "public"."localServices"("localServiceID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "localServiceLocalQualifications" ADD CONSTRAINT "localServiceLocalQualifications_localQualID_qualificationsLocal_localQualID_fk" FOREIGN KEY ("localQualID") REFERENCES "public"."qualificationsLocal"("localQualID") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -495,6 +601,30 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "roleToPermissions" ADD CONSTRAINT "roleToPermissions_permissionID_permissions_permissionID_fk" FOREIGN KEY ("permissionID") REFERENCES "public"."permissions"("permissionID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "serviceLocalQualifications" ADD CONSTRAINT "serviceLocalQualifications_serviceID_services_serviceID_fk" FOREIGN KEY ("serviceID") REFERENCES "public"."services"("serviceID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "serviceLocalQualifications" ADD CONSTRAINT "serviceLocalQualifications_localQualID_qualificationsLocal_localQualID_fk" FOREIGN KEY ("localQualID") REFERENCES "public"."qualificationsLocal"("localQualID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "serviceQualifications" ADD CONSTRAINT "serviceQualifications_serviceID_services_serviceID_fk" FOREIGN KEY ("serviceID") REFERENCES "public"."services"("serviceID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "serviceQualifications" ADD CONSTRAINT "serviceQualifications_globalQualID_qualificationsGlobal_globalQualID_fk" FOREIGN KEY ("globalQualID") REFERENCES "public"."qualificationsGlobal"("globalQualID") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -543,30 +673,6 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "userBelongsToStore" ADD CONSTRAINT "userBelongsToStore_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "public"."stores"("storeID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "userGlobalQualifications" ADD CONSTRAINT "userGlobalQualifications_userID_users_userID_fk" FOREIGN KEY ("userID") REFERENCES "public"."users"("userID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "userGlobalQualifications" ADD CONSTRAINT "userGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk" FOREIGN KEY ("globalQualID") REFERENCES "public"."qualificationsGlobal"("globalQualID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "userLocalQualifications" ADD CONSTRAINT "userLocalQualifications_userID_users_userID_fk" FOREIGN KEY ("userID") REFERENCES "public"."users"("userID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "userLocalQualifications" ADD CONSTRAINT "userLocalQualifications_localQualID_qualificationsLocal_localQualID_fk" FOREIGN KEY ("localQualID") REFERENCES "public"."qualificationsLocal"("localQualID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
