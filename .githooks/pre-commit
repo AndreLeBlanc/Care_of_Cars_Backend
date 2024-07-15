@@ -17,7 +17,7 @@ echo "$FILES" | xargs git add
 sudo docker-compose build test postgres
 
 # Run tests
-docker-compose up --abort-on-container-exit test postgres 
+ docker-compose up --abort-on-container-exit test postgres 
 test_status=$?
 
 # Stop and remove containers
