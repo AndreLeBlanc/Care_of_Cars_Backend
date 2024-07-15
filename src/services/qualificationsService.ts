@@ -86,7 +86,7 @@ export async function updateLocalQuals(
     const [qual] = localQualID
       ? await db
           .update(qualificationsLocal)
-          .set(localQual)
+          .set({ ...localQual, updatedAt: new Date() })
           .where(eq(qualificationsLocal.localQualID, localQualID))
           .returning()
       : await db.insert(qualificationsLocal).values(localQual).returning()
@@ -118,7 +118,7 @@ export async function updateGlobalQuals(
     const [qual] = globalQualID
       ? await db
           .update(qualificationsGlobal)
-          .set(globalQual)
+          .set({ ...globalQual, updatedAt: new Date() })
           .where(eq(qualificationsGlobal.globalQualID, globalQualID))
           .returning()
       : await db

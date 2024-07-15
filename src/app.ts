@@ -48,7 +48,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
     origin: true, //we can replace this later with our fe domain
     allowedHeaders: ['Content-Type', 'authorization', 'x-journey-mode'],
     credentials: true,
-    methods: ['GET', 'PATCH', 'POST', 'DELETE'],
+    methods: ['GET', 'PATCH', 'POST', 'DELETE', 'PUT'],
   })
   app.register(fastifySwagger, {
     // https://community.smartbear.com/discussions/swaggerostools/how-to-show-authorize-button-on-oas-3-swagger-in-javascript/234650

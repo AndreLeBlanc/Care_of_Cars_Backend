@@ -824,7 +824,6 @@ export async function updateStoreByStoreID(
             updatedAt: storepaymentinfo.updatedAt,
           })
       }
-      console.log(updatedPaymentInfo)
       return { updatedStore, updatedPaymentInfo }
     })
     return right({
