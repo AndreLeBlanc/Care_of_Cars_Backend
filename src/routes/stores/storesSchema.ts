@@ -188,10 +188,9 @@ export const StoreOpeningHours = Type.Composite([
 export type StoreOpeningHoursType = Static<typeof StoreOpeningHours>
 
 export const StoreSpecialHoursSchemaCreate = Type.Object({
-  storeID: storeID,
-  day: day,
-  dayOpen: openingTime,
-  dayClose: openingTime,
+  specialHours: Type.Array(
+    Type.Object({ storeID: storeID, day: day, dayOpen: openingTime, dayClose: openingTime }),
+  ),
 })
 
 export type StoreSpecialHoursSchemaCreateType = Static<typeof StoreSpecialHoursSchemaCreate>
@@ -224,8 +223,12 @@ export const ReturnedOpeningHours = Type.Object({
 export type ReturnedOpeningHoursType = Static<typeof ReturnedOpeningHours>
 
 export const StoreOpeningHoursWithSpecial = Type.Object({
+  message: Type.String(),
+  storeID: storeID,
   weekyOpeningHours: Type.Optional(StoreOpeningHoursCreate),
-  specialOpeningHours: Type.Array(StoreSpecialHoursSchema),
+  specialHours: Type.Array(
+    Type.Object({ storeID: storeID, day: day, dayOpen: openingTime, dayClose: openingTime }),
+  ),
 })
 
 export type StoreOpeningHoursWithSpecialType = Static<typeof StoreOpeningHoursWithSpecial>
