@@ -120,6 +120,32 @@ export async function getCar(driverCarID: DriverCarID): Promise<Car | undefined>
     },
   }
 }
+export async function getCarByReg(
+  driverCarReg: DriverCarRegistrationNumber,
+): Promise<Car | undefined> {
+  const [deletedCar] = await db
+    .select()
+    .from(driverCars)
+    .where(eq(driverCars.driverCarRegistrationNumber, driverCarReg))
+
+  return {
+    carInfo: {
+      driverCarID: deletedCar.driverCarID,
+      driverCarBrand: deletedCar.driverCarBrand ?? undefined,
+      driverCarChassiNumber: deletedCar.driverCarChassiNumber ?? undefined,
+      driverCarColor: deletedCar.driverCarColor ?? undefined,
+      driverCarModel: deletedCar.driverCarModel ?? undefined,
+      driverCarNotes: deletedCar.driverCarNotes ?? undefined,
+      driverCarRegistrationNumber: deletedCar.driverCarRegistrationNumber,
+      driverCarYear: deletedCar.driverCarYear ?? undefined,
+      driverID: deletedCar.driverID ?? undefined,
+    },
+    dates: {
+      createdAt: deletedCar.createdAt,
+      updatedAt: deletedCar.updatedAt,
+    },
+  }
+}
 
 export async function getCarsPaginated(
   search: Search,

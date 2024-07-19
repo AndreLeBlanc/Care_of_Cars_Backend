@@ -939,10 +939,11 @@ export const drivers = pgTable('drivers', {
     .notNull(),
   driverFirstName: varchar('driverFirstName', { length: 128 }).$type<DriverFirstName>().notNull(),
   driverLastName: varchar('driverLastName', { length: 128 }).$type<DriverLastName>().notNull(),
-  driverEmail: varchar('driverEmail', { length: 256 }).$type<DriverEmail>().notNull(),
+  driverEmail: varchar('driverEmail', { length: 256 }).$type<DriverEmail>().notNull().unique(),
   driverPhoneNumber: varchar('driverPhoneNumber', { length: 32 })
     .$type<DriverPhoneNumber>()
-    .notNull(),
+    .notNull()
+    .unique(),
   driverAddress: varchar('driverAddress', { length: 256 }).$type<DriverAddress>().notNull(),
   driverZipCode: varchar('driverZipCode', { length: 16 }).$type<DriverZipCode>().notNull(),
   driverAddressCity: varchar('driverAddressCity', { length: 256 })
@@ -965,7 +966,6 @@ export const driverRelations = relations(drivers, ({ one }) => ({
     references: [companycustomers.customerOrgNumber],
   }),
 }))
-
 export const companycustomersRelations = relations(companycustomers, ({ many }) => ({
   drivers: many(drivers),
 }))
