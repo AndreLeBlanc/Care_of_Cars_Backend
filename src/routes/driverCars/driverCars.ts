@@ -43,6 +43,8 @@ import {
 
 import { Limit, Offset, Page, Search } from '../../plugins/pagination.js'
 
+import { Either, match } from '../../utils/helper.js'
+
 export const driverCars = async (fastify: FastifyInstance) => {
   fastify.put<{
     Body: DriverCarSchemaType
@@ -78,17 +80,22 @@ export const driverCars = async (fastify: FastifyInstance) => {
         driverCarNotes: DriverCarNotes(req.body.driverCarNotes),
       }
 
-      const car: Car | undefined = await putCar(newCar, driverCarID)
+      const car: Either<string, Car> = await putCar(newCar, driverCarID)
 
-      if (car != null) {
-        return rep.status(201).send({
-          message: 'driver car created/modified successfully',
-          ...car.carInfo,
-          createdAt: car.dates.createdAt.toISOString(),
-          updatedAt: car.dates.updatedAt.toISOString(),
-        })
-      }
-      return rep.status(504).send({ message: 'couldnt create or modify driver car' })
+      match(
+        car,
+        (newCar: Car) => {
+          return rep.status(201).send({
+            message: 'driver car created/modified successfully',
+            ...newCar.carInfo,
+            createdAt: newCar.dates.createdAt.toISOString(),
+            updatedAt: newCar.dates.updatedAt.toISOString(),
+          })
+        },
+        (err) => {
+          return rep.status(504).send({ message: err })
+        },
+      )
     },
   )
 
@@ -113,16 +120,21 @@ export const driverCars = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const fetchedCar: Car | undefined = await getCar(DriverCarID(request.params.driverCarID))
-      if (fetchedCar == null) {
-        return reply.status(404).send({ message: "driver car doesn't exist!" })
-      }
-      return reply.status(200).send({
-        message: 'car fetched',
-        ...fetchedCar.carInfo,
-        createdAt: fetchedCar.dates.createdAt.toISOString(),
-        updatedAt: fetchedCar.dates.updatedAt.toISOString(),
-      })
+      const fetchedCar: Either<string, Car> = await getCar(DriverCarID(request.params.driverCarID))
+      match(
+        fetchedCar,
+        (car: Car) => {
+          return reply.status(200).send({
+            message: 'car fetched',
+            ...car.carInfo,
+            createdAt: car.dates.createdAt.toISOString(),
+            updatedAt: car.dates.updatedAt.toISOString(),
+          })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -147,18 +159,23 @@ export const driverCars = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const fetchedCar: Car | undefined = await getCarByReg(
+      const fetchedCar: Either<string, Car> = await getCarByReg(
         DriverCarRegistrationNumber(request.params.driverCarReg),
       )
-      if (fetchedCar == null) {
-        return reply.status(404).send({ message: "driver car doesn't exist!" })
-      }
-      return reply.status(200).send({
-        message: 'car fetched',
-        ...fetchedCar.carInfo,
-        createdAt: fetchedCar.dates.createdAt.toISOString(),
-        updatedAt: fetchedCar.dates.updatedAt.toISOString(),
-      })
+      match(
+        fetchedCar,
+        (car: Car) => {
+          return reply.status(200).send({
+            message: 'car fetched',
+            ...car.carInfo,
+            createdAt: car.dates.createdAt.toISOString(),
+            updatedAt: car.dates.updatedAt.toISOString(),
+          })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -183,16 +200,23 @@ export const driverCars = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const deletedCar: Car | undefined = await deleteCar(DriverCarID(request.params.driverCarID))
-      if (deletedCar == null) {
-        return reply.status(404).send({ message: "driver car doesn't exist!" })
-      }
-      return reply.status(200).send({
-        message: 'car deleted',
-        ...deletedCar.carInfo,
-        createdAt: deletedCar.dates.createdAt.toISOString(),
-        updatedAt: deletedCar.dates.updatedAt.toISOString(),
-      })
+      const deletedCar: Either<string, Car> = await deleteCar(
+        DriverCarID(request.params.driverCarID),
+      )
+      match(
+        deletedCar,
+        (car: Car) => {
+          return reply.status(200).send({
+            message: 'car fetched',
+            ...car.carInfo,
+            createdAt: car.dates.createdAt.toISOString(),
+            updatedAt: car.dates.updatedAt.toISOString(),
+          })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -224,20 +248,24 @@ export const driverCars = async (fastify: FastifyInstance) => {
       const brandedLimit = limit ? Limit(limit) : undefined
       const brandedPage = page ? Page(page) : undefined
       const brandedOffset = offset ? Offset(offset) : undefined
-      const cars: CarsPaginated | undefined = await getCarsPaginated(
+      const cars: Either<string, CarsPaginated> = await getCarsPaginated(
         brandedSearch,
         brandedLimit,
         brandedOffset,
         brandedPage,
       )
-      if (cars != null) {
-        return rep.status(200).send({
-          message: 'driver cars',
-          ...cars,
-        })
-      } else {
-        rep.status(403).send({ message: 'could list driver cars' })
-      }
+      match(
+        cars,
+        (carsList: CarsPaginated) => {
+          return rep.status(200).send({
+            message: 'driver cars',
+            ...carsList,
+          })
+        },
+        (err) => {
+          rep.status(403).send({ message: err })
+        },
+      )
     },
   )
 }
