@@ -27,7 +27,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./certs:/etc/letsencrypt/live/xn--rdamlen-hxa3m.se
+      - /etc/letsencrypt:/etc/letsencrypt
 
   devapp:
     build:
