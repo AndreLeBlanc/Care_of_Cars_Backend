@@ -41,7 +41,9 @@ dotenv.config()
 export interface AppOptions extends FastifyServerOptions {}
 // Pass --options via CLI arguments in command to enable these options.
 
-const isHttps = fs.existsSync('.../privkey.pem') && fs.existsSync('.../fullchain.pem')
+const isHttps =
+  fs.existsSync('/etc/letsencrypt/live/xn--rdamlen-hxa3m.se/privkey.pem') &&
+  fs.existsSync('/etc/letsencrypt/live/xn--rdamlen-hxa3m.se/fullchain.pem')
 
 export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
   const app: FastifyInstance = fastify({
@@ -50,8 +52,8 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
     ...(isHttps
       ? {
           https: {
-            key: fs.readFileSync('.../privkey.pem'),
-            cert: fs.readFileSync('.../fullchain.pem'),
+            key: fs.readFileSync('/etc/letsencrypt/live/xn--rdamlen-hxa3m.se/privkey.pem'),
+            cert: fs.readFileSync('/etc/letsencrypt/live/xn--rdamlen-hxa3m.se/fullchain.pem'),
           },
         }
       : null),
