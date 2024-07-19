@@ -36,6 +36,8 @@ import {
   Search,
 } from '../../plugins/pagination.js'
 
+import { Either, match } from '../../utils/helper.js'
+
 export async function permissions(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(
     '/',
@@ -55,48 +57,57 @@ export async function permissions(fastify: FastifyInstance) {
         querystring: ListPermissionQueryParamSchema,
       },
     },
-    async function (request) {
+    async function (request, res) {
       const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
-      const result: PermissionsPaginate = await getPermissionsPaginate(
+      const permissionList: Either<string, PermissionsPaginate> = await getPermissionsPaginate(
         brandedSearch,
         brandedLimit,
         brandedPage,
         offset,
       )
-      const message: ResponseMessage = fastify.responseMessage(
-        ModelName('Permissions'),
-        ResultCount(result.data.length),
-      )
-      const requestUrl: RequestUrl = RequestUrl(
-        request.protocol + '://' + request.hostname + request.url,
-      )
-      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
-      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
+      match(
+        permissionList,
+        (perms: PermissionsPaginate) => {
+          const message: ResponseMessage = fastify.responseMessage(
+            ModelName('Permissions'),
+            ResultCount(perms.data.length),
+          )
+          const requestUrl: RequestUrl = RequestUrl(
+            request.protocol + '://' + request.hostname + request.url,
+          )
+          const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+            requestUrl,
+            Page(perms.totalPage),
+            Page(page),
+          )
+          const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+            requestUrl,
+            Page(perms.totalPage),
+            Page(page),
+          )
 
-      return {
-        message: message,
-        totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl: previousUrl,
-        totalPage: result.totalPage,
-        page: page,
-        limit: limit,
-        data: result.data,
-      }
+          return res.status(200).send({
+            message: message,
+            totalItems: perms.totalItems,
+            nextUrl: nextUrl,
+            previousUrl: previousUrl,
+            totalPage: perms.totalPage,
+            page: page,
+            limit: limit,
+            data: perms.data,
+          })
+        },
+        (err) => {
+          return res.status(404).send({ message: err })
+        },
+      )
     },
   )
+
   fastify.post<{ Body: CreatePermissionSchemaType; Reply: object }>(
     '/',
 
@@ -119,13 +130,22 @@ export async function permissions(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const { permissionTitle, description = '' } = request.body
-      const Permission: PermissionIDDescName = await createPermission(
+      const permission: Either<string, PermissionIDDescName> = await createPermission(
         PermissionTitle(permissionTitle),
         PermissionDescription(description),
       )
-      reply.status(201).send({ message: 'Permission created', data: Permission })
+      match(
+        permission,
+        (perm: PermissionIDDescName) => {
+          return reply.status(201).send({ message: 'Permission created', data: perm })
+        },
+        (err) => {
+          return reply.status(504).send({ message: err })
+        },
+      )
     },
   )
+
   fastify.get<{ Params: getPermissionByIDType }>(
     '/:permissionID',
     {
@@ -146,13 +166,19 @@ export async function permissions(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id: PermissionID = PermissionID(request.params.permissionID)
-      const Permission: Permission | undefined = await getPermissionByID(id)
-      if (Permission == null || Permission === undefined) {
-        return reply.status(404).send({ message: 'Permission not found' })
-      }
-      reply.status(200).send(Permission)
+      const permission: Either<string, Permission> = await getPermissionByID(id)
+      match(
+        permission,
+        (perm: Permission) => {
+          reply.status(200).send(perm)
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
+
   fastify.patch<{ Body: PatchPermissionSchemaType; Reply: object; Params: getPermissionByIDType }>(
     '/:permissionID',
     {
@@ -178,19 +204,25 @@ export async function permissions(fastify: FastifyInstance) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
 
-      const Permission: Permission = await updatePermissionByID({
+      const permission: Either<string, Permission> = await updatePermissionByID({
         permissionID: PermissionID(request.params.permissionID),
         permissionTitle: PermissionTitle(request.body.permissionTitle),
         permissionDescription: request.body.description
           ? PermissionDescription(request.body.description)
           : null,
       })
-      if (Permission === undefined || Permission === null) {
-        return reply.status(404).send({ message: 'Permission not found' })
-      }
-      reply.status(201).send({ message: 'Permission Updated', data: Permission })
+      match(
+        permission,
+        (perm: Permission) => {
+          reply.status(201).send(perm)
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
+
   fastify.delete<{ Params: getPermissionByIDType }>(
     '/:permissionID',
     {
@@ -211,11 +243,16 @@ export async function permissions(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id: PermissionID = PermissionID(request.params.permissionID)
-      const deletedPermission: Permission | undefined = await deletePermission(id)
-      if (deletedPermission == null) {
-        return reply.status(404).send({ message: "Permission doesn't exist!" })
-      }
-      return reply.status(200).send({ message: 'Permission deleted' })
+      const deletedPermission: Either<string, Permission> = await deletePermission(id)
+      match(
+        deletedPermission,
+        (perm: Permission) => {
+          return reply.status(200).send({ message: 'Permission deleted', ...perm })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 }

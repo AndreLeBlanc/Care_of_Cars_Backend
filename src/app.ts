@@ -1,5 +1,7 @@
 import { fastifyJwt } from '@fastify/jwt'
 
+import fs from 'node:fs'
+
 import * as dotenv from 'dotenv'
 import { FastifyInstance, FastifyServerOptions, fastify } from 'fastify'
 import cors from '@fastify/cors'
@@ -39,8 +41,21 @@ dotenv.config()
 export interface AppOptions extends FastifyServerOptions {}
 // Pass --options via CLI arguments in command to enable these options.
 
+const isHttps = fs.existsSync('.../privkey.pem') && fs.existsSync('.../fullchain.pem')
+
 export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
-  const app: FastifyInstance = fastify({ ...defaultOptions, ...options })
+  const app: FastifyInstance = fastify({
+    ...defaultOptions,
+    ...options,
+    ...(isHttps
+      ? {
+          https: {
+            key: fs.readFileSync('.../privkey.pem'),
+            cert: fs.readFileSync('.../fullchain.pem'),
+          },
+        }
+      : null),
+  })
 
   // Place here your custom code!
 
