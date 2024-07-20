@@ -98,7 +98,7 @@ export default fp<SupportPluginOptions>(async () => {
         const passwordHash = await generatePasswordHash(
           UserPassword(process.env.SUPER_ADMIN_PASSWORD),
         )
-        const user: CreatedUser = await createUser(
+        const user: Either<string, CreatedUser> = await createUser(
           UserFirstName('SuperAdmin'),
           UserLastName('SuperAdmin'),
           UserEmail(process.env.SUPER_ADMIN_EMAIL),
@@ -111,7 +111,7 @@ export default fp<SupportPluginOptions>(async () => {
           RoleName('testRole'),
           RoleDescription('second test user'),
         )
-        const userSecond: CreatedUser = await createUser(
+        const userSecond: Either<string, CreatedUser> = await createUser(
           UserFirstName('SuperAdmin'),
           UserLastName('SuperAdmin'),
           UserEmail('27CM@HOTMAIL.COM'),
