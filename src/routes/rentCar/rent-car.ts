@@ -46,6 +46,8 @@ import {
   Search,
 } from '../../plugins/pagination.js'
 
+import { Either, match } from '../../utils/helper.js'
+
 export const rentCar = async (fastify: FastifyInstance) => {
   //Create Rent Cars
   fastify.post<{ Body: AddCustomerType; Reply: object }>(
@@ -86,18 +88,21 @@ export const rentCar = async (fastify: FastifyInstance) => {
         rentCarNumber: rentCarNumber ? RentCarNumber(rentCarNumber) : undefined,
       }
 
-      const createdRentCar: RentCar | undefined = await createRentCar(rentCarDetails)
-      if (createdRentCar !== undefined) {
-        return rep.status(201).send({
-          message: 'Rent Car Created successfully',
-          data: createdRentCar,
-        })
-      } else {
-        return rep.status(201).send({
-          message: 'Rent car already exist',
-          existingData: true,
-        })
-      }
+      const createdRentCar: Either<string, RentCar> = await createRentCar(rentCarDetails)
+      match(
+        createdRentCar,
+        (car: RentCar) => {
+          return rep.status(201).send({
+            message: 'Rent Car Created successfully',
+            data: car,
+          })
+        },
+        (err) => {
+          return rep.status(404).send({
+            message: err,
+          })
+        },
+      )
     },
   )
 
@@ -120,47 +125,56 @@ export const rentCar = async (fastify: FastifyInstance) => {
         querystring: ListRentCarQueryParamSchema,
       },
     },
-    async function (request) {
+    async function (request, reply) {
       const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
-      const result: RentCarsPaginate = await getRentCarPaginate(
+      const carsList: Either<string, RentCarsPaginate> = await getRentCarPaginate(
         brandedSearch,
         brandedLimit,
         brandedPage,
         offset,
       )
+      match(
+        carsList,
+        (cars: RentCarsPaginate) => {
+          const message: ResponseMessage = fastify.responseMessage(
+            ModelName('Company Drivers'),
+            ResultCount(cars.data.length),
+          )
+          const requestUrl: RequestUrl = RequestUrl(
+            request.protocol + '://' + request.hostname + request.url,
+          )
+          const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+            requestUrl,
+            Page(cars.totalPage),
+            Page(page),
+          )
+          const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+            requestUrl,
+            Page(cars.totalPage),
+            Page(page),
+          )
 
-      const message: ResponseMessage = fastify.responseMessage(
-        ModelName('Company Drivers'),
-        ResultCount(result.data.length),
+          return reply.status(200).send({
+            message,
+            totalItems: cars.totalItems,
+            nextUrl: nextUrl,
+            previousUrl,
+            totalPage: cars.totalPage,
+            page: page,
+            limit: limit,
+            data: cars.data,
+          })
+        },
+        (err) => {
+          return reply.status(504).send({
+            message: err,
+          })
+        },
       )
-      const requestUrl: RequestUrl = RequestUrl(
-        request.protocol + '://' + request.hostname + request.url,
-      )
-      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
-      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
-
-      return {
-        message,
-        totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl,
-        totalPage: result.totalPage,
-        page: page,
-        limit: limit,
-        data: result.data,
-      }
     },
   )
 
@@ -197,19 +211,22 @@ export const rentCar = async (fastify: FastifyInstance) => {
         rentCarNumber: rentCarNumber ? RentCarNumber(rentCarNumber) : undefined,
       }
 
-      const editedRentCarDetails: RentCar | undefined = await editRentCar(rentCarEditDetails)
+      const editedRentCarDetails: Either<string, RentCar> = await editRentCar(rentCarEditDetails)
 
-      if (editedRentCarDetails) {
-        reply.status(201).send({
-          message: 'Rent Car details edited',
-          editedRentCarDetails,
-        })
-      } else {
-        reply.status(201).send({
-          message: 'Failed to edit Rent Car details',
-          editedRentCarDetails,
-        })
-      }
+      match(
+        editedRentCarDetails,
+        (rentalCar: RentCar) => {
+          reply.status(201).send({
+            message: 'Rent Car details edited',
+            rentalCar,
+          })
+        },
+        (err) => {
+          reply.status(404).send({
+            message: err,
+          })
+        },
+      )
     },
   )
 
@@ -229,15 +246,17 @@ export const rentCar = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const { regNumber } = request.params
-      const deletedRentCar: RentCarRegistrationNumber | undefined = await deleteRentCarByRegNumber(
-        RentCarRegistrationNumber(regNumber),
+      const deletedRentCar: Either<string, RentCarRegistrationNumber> =
+        await deleteRentCarByRegNumber(RentCarRegistrationNumber(regNumber))
+      match(
+        deletedRentCar,
+        (rentCar: RentCarRegistrationNumber) => {
+          return reply.status(200).send({ message: 'Rent Car deleted', deletedRegNumber: rentCar })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
       )
-      if (deletedRentCar == null) {
-        return reply.status(404).send({ message: "Rent Car doesn't exist!" })
-      }
-      return reply
-        .status(200)
-        .send({ message: 'Rent Car deleted', deletedRegNumber: deletedRentCar })
     },
   )
 
@@ -257,13 +276,18 @@ export const rentCar = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const { regNumber } = request.params
-      const rentCarDetails: RentCar | undefined = await getRentCarByID(
+      const rentCarDetails: Either<string, RentCar> = await getRentCarByID(
         RentCarRegistrationNumber(regNumber),
       )
-      if (rentCarDetails == null) {
-        return reply.status(404).send({ message: "Rent Car doesn't exist!" })
-      }
-      return reply.status(200).send({ message: 'Rent Car found', rentCarDetails })
+      match(
+        rentCarDetails,
+        (rentCar: RentCar) => {
+          return reply.status(200).send({ message: 'Rent Car found', rentCar })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 }
