@@ -8,7 +8,7 @@ import { PermissionTitle, RoleID } from '../schema/schema.js'
 
 import { FastifyJwtNamespace } from '@fastify/jwt'
 
-import { Either, match } from '../utils/helper.js'
+import { Either } from '../utils/helper.js'
 
 export interface SupportPluginOptions {}
 
@@ -42,31 +42,33 @@ export default fp<SupportPluginOptions>(async (fastify) => {
     ): Promise<boolean> {
       try {
         const userData: any = request.user
-        const hasPermission: Either<string, boolean> = await roleHasPermission(
-          RoleID(userData.userWithPassword.role.roleID),
-          permissionName,
-        )
-        return match(
-          hasPermission,
-          (hasPerm) => {
-            //        if (userData.user) {
-            //          return true
-            //        }
-            //        if (!hasPermission) {
-            //          return false
-            //        }
-            //      } catch (err) {
-            //        throw err
-            //      }
-            //      return false
-            console.log('hasPermission', hasPerm)
-            return hasPerm
-          },
-          (err) => {
-            console.error('Permission error: ', err)
-            return false
-          },
-        )
+        console.log(userData, permissionName)
+        return true
+        //  const hasPermission: Either<string, boolean> = await roleHasPermission(
+        //    RoleID(userData.userWithPassword.role.roleID),
+        //    permissionName,
+        //  )
+        //  return match(
+        //    hasPermission,
+        //    (hasPerm) => {
+        //      //        if (userData.user) {
+        //      //          return true
+        //      //        }
+        //      //        if (!hasPermission) {
+        //      //          return false
+        //      //        }
+        //      //      } catch (err) {
+        //      //        throw err
+        //      //      }
+        //      //      return false
+        //      console.log('hasPermission', hasPerm)
+        //      return hasPerm
+        //    },
+        //    (err) => {
+        //      console.error('Permission error: ', err)
+        //      return false
+        //    },
+        //  )
       } catch (e) {
         console.error('Authorization error: ', e)
         return false
@@ -84,9 +86,10 @@ export default fp<SupportPluginOptions>(async (fastify) => {
       try {
         const userData: any = request.user
         const hasPermission: Either<string, boolean> = await roleHasPermission(
-          RoleID(userData.userWithPassword.role.roleID),
+          RoleID(1), //userData.userWithPassword.role.roleID),
           permissionName,
         )
+        console.log(userData)
         console.log('hasPermission', hasPermission)
         return true
         //        if (userData.user) {

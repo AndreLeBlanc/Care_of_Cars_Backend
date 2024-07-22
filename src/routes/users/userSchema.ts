@@ -52,6 +52,7 @@ export const PatchUserSchema = Type.Object({
   firstName: firstName,
   lastName: lastName,
   email: userEmail,
+  roleID: RoleID,
 })
 
 export const PatchUserPassword = Type.Object({

@@ -132,6 +132,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
         RoleName(roleName),
         RoleDescription(description),
       )
+
       match(
         role,
         (fetchedRole) => {

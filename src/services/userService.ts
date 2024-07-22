@@ -26,6 +26,7 @@ export type UserStore = {
 export type UserInfo = {
   userID: UserID
   firstName: UserFirstName
+  roleID: RoleID
   lastName: UserLastName
   email: UserEmail
   createdAt: Date
@@ -37,6 +38,7 @@ export type PatchUserInfo = {
   firstName: UserFirstName
   lastName: UserLastName
   email: UserEmail
+  roleID: RoleID
 }
 
 export type userInfoPassword = UserInfo & {
@@ -116,6 +118,7 @@ export async function getUsersPaginate(
           firstName: users.firstName,
           lastName: users.lastName,
           email: users.email,
+          roleID: users.roleID,
           createdAt: users.createdAt,
           updatedAt: users.updatedAt,
         })
@@ -174,6 +177,7 @@ export async function getUserByID(
         firstName: users.firstName,
         lastName: users.lastName,
         email: users.email,
+        roleID: users.roleID,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
         ...(checkPassword ? { password: users.password } : {}),
@@ -198,6 +202,7 @@ export async function updateUserByID(user: PatchUserInfo): Promise<Either<string
         firstName: users.firstName,
         lastName: users.lastName,
         email: users.email,
+        roleID: users.roleID,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       })
@@ -222,6 +227,7 @@ export async function updateUserPasswordByID(
         firstName: users.firstName,
         lastName: users.lastName,
         email: users.email,
+        roleID: users.roleID,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       })
@@ -248,6 +254,7 @@ export async function DeleteUser(userID: UserID): Promise<Either<string, UserWit
       firstName: users.firstName,
       lastName: users.lastName,
       email: users.email,
+      roleID: users.roleID,
       isSuperAdmin: users.isSuperAdmin,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,

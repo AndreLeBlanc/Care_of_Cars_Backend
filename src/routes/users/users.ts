@@ -296,6 +296,7 @@ export async function users(fastify: FastifyInstance) {
         lastName: UserLastName(userData.lastName),
         userID: UserID(request.params.userID),
         email: UserEmail(userData.email),
+        roleID: RoleID(userData.roleID),
       }
 
       const user: Either<string, UserInfo> = await updateUserByID(patchData)
