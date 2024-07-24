@@ -1,6 +1,6 @@
 {
-  "id": "7f760ab2-b0e1-44ad-9167-b3d453dad574",
-  "prevId": "04a4aa8f-1264-4978-be54-afc908485a0b",
+  "id": "99425a67-1bbf-4dcf-a21e-bdd1f9fd705e",
+  "prevId": "7f760ab2-b0e1-44ad-9167-b3d453dad574",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
@@ -1500,6 +1500,78 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "day1": {
+          "name": "day1",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day1Work": {
+          "name": "day1Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employeeID": {
+          "name": "employeeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day2": {
+          "name": "day2",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3": {
+          "name": "day3",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day4": {
+          "name": "day4",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5": {
+          "name": "day5",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost": {
+          "name": "cost",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "discount": {
+          "name": "discount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vatFree": {
+          "name": "vatFree",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "orderNotes": {
+          "name": "orderNotes",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -1541,6 +1613,19 @@
             "serviceVariantID"
           ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "orderServices_employeeID_employees_employeeID_fk": {
+          "name": "orderServices_employeeID_employees_employeeID_fk",
+          "tableFrom": "orderServices",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "employeeID"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },

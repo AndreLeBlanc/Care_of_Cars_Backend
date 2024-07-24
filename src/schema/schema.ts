@@ -7,6 +7,7 @@ import { relations } from 'drizzle-orm'
 import {
   boolean,
   date,
+  foreignKey,
   index,
   integer,
   interval,
@@ -274,6 +275,10 @@ export type RentCarNotes = Brand<string, 'rentCarNotes'>
 export const RentCarNotes = make<RentCarNotes>()
 export type RentCarNumber = Brand<number, 'rentCarNumber'>
 export const RentCarNumber = make<RentCarNumber>()
+export type BookingStart = Brand<Date, 'bookingStart'>
+export const BookingStart = make<BookingStart>()
+export type BookingEnd = Brand<Date, 'bookingEnd'>
+export const BookingEnd = make<BookingEnd>()
 
 export type ServiceIncludeInAutomaticSms = Brand<boolean, 'ServiceIncludeInAutomaticSms'>
 export const ServiceIncludeInAutomaticSms = make<ServiceIncludeInAutomaticSms>()
@@ -424,6 +429,19 @@ export const DriverCarChassiNumber = make<DriverCarChassiNumber>()
 export type DriverCarNotes = Brand<string, 'driverCarNotes'>
 export const DriverCarNotes = make<DriverCarNotes>()
 
+export type OrderID = Brand<number, 'orderID'>
+export const OrderID = make<OrderID>()
+export type OrderNotes = Brand<string, 'orderNotes'>
+export const OrderNotes = make<OrderNotes>()
+export type SubmissionTime = Brand<Date, 'submissionTime'>
+export const SubmissionTime = make<SubmissionTime>()
+export type PickupTime = Brand<Date, 'pickupTime'>
+export const PickupTime = make<PickupTime>()
+export type VatFree = Brand<boolean, 'vatFree'>
+export const VatFree = make<VatFree>()
+export type Discount = Brand<number, 'discount'>
+export const Discount = make<Discount>()
+
 export type CheckedInStatus = 'CheckedIn' | 'CheckedOut'
 
 export const colorForService = [
@@ -451,6 +469,18 @@ export const colorForService = [
 ] as const
 
 export type ColorForService = (typeof colorForService)[number]
+
+export const orderStatus = [
+  'preliminär',
+  'skapad',
+  'påbörjad',
+  'färdig för upphämtning',
+  'avslutad',
+] as const
+
+export const bookingStatus = ['preliminär', 'skapad', 'upphämtad', 'återlämnad'] as const
+
+export type OrderStatus = (typeof orderStatus)[number]
 
 export type DbDateType = {
   createdAt: Date
@@ -1012,25 +1042,33 @@ export const storesRelations = relations(stores, ({ many }) => ({
   storeweeklynotes: many(storeweeklynotes),
 }))
 
-export const driverCars = pgTable('driverCars', {
-  driverCarID: serial('driverCarID').$type<DriverCarID>().primaryKey(),
-  driverID: integer('driverID')
-    .$type<DriverID>()
-    .references(() => drivers.driverID, { onDelete: 'cascade' }),
-  driverCarRegistrationNumber: varchar('driverCarRegistrationNumber', { length: 11 })
-    .$type<DriverCarRegistrationNumber>()
-    .unique()
-    .notNull(),
-  driverCarBrand: varchar('driverCarBrand', { length: 128 }).$type<DriverCarBrand>(),
-  driverCarModel: varchar('driverCarModel', { length: 128 }).$type<DriverCarModel>(),
-  driverCarColor: varchar('driverCarColor', { length: 64 }).$type<DriverCarColor>(),
-  driverCarYear: integer('driverCarYear').$type<DriverCarYear>(),
-  driverCarChassiNumber: varchar('driverCarChassiNumber', { length: 24 })
-    .$type<DriverCarChassiNumber>()
-    .unique(),
-  driverCarNotes: varchar('driverCarNotes').$type<DriverCarNotes>(),
-  ...dbDates,
-})
+export const driverCars = pgTable(
+  'driverCars',
+  {
+    driverCarID: serial('driverCarID').$type<DriverCarID>().primaryKey(),
+    driverID: integer('driverID')
+      .$type<DriverID>()
+      .references(() => drivers.driverID, { onDelete: 'cascade' }),
+    driverCarRegistrationNumber: varchar('driverCarRegistrationNumber', { length: 11 })
+      .$type<DriverCarRegistrationNumber>()
+      .unique()
+      .notNull(),
+    driverCarBrand: varchar('driverCarBrand', { length: 128 }).$type<DriverCarBrand>(),
+    driverCarModel: varchar('driverCarModel', { length: 128 }).$type<DriverCarModel>(),
+    driverCarColor: varchar('driverCarColor', { length: 64 }).$type<DriverCarColor>(),
+    driverCarYear: integer('driverCarYear').$type<DriverCarYear>(),
+    driverCarChassiNumber: varchar('driverCarChassiNumber', { length: 24 })
+      .$type<DriverCarChassiNumber>()
+      .unique(),
+    driverCarNotes: varchar('driverCarNotes').$type<DriverCarNotes>(),
+    ...dbDates,
+  },
+  (driverCars) => {
+    return {
+      unq: unique().on(driverCars.driverCarID, driverCars.driverID),
+    }
+  },
+)
 
 export const rentcars = pgTable('rentCars', {
   storeID: integer('storeID')
@@ -1039,8 +1077,7 @@ export const rentcars = pgTable('rentCars', {
     .notNull(),
   rentCarRegistrationNumber: varchar('rentCarRegistrationNumber')
     .$type<RentCarRegistrationNumber>()
-    .primaryKey()
-    .unique(),
+    .primaryKey(),
   rentCarModel: varchar('rentCarModel').$type<RentCarModel>().notNull(),
   rentCarColor: varchar('rentCarColor').$type<RentCarColor>().notNull(),
   rentCarYear: integer('rentCarYear').$type<RentCarYear>().notNull(),
@@ -1359,3 +1396,175 @@ export const userBelongsToStore = pgTable(
     }
   },
 )
+
+export const orderStatuspgEnum = pgEnum('orderStatus', orderStatus)
+
+export const orders = pgTable(
+  'orders',
+  {
+    orderID: serial('orderID').$type<OrderID>().primaryKey(),
+    driverCarID: integer('driverCarID')
+      .$type<DriverCarID>()
+      .references(() => driverCars.driverCarID, { onDelete: 'cascade' })
+      .notNull(),
+    driverID: integer('driverID')
+      .$type<DriverID>()
+      .references(() => drivers.driverID, { onDelete: 'cascade' })
+      .notNull(),
+    storeID: integer('storeID')
+      .$type<StoreID>()
+      .references(() => stores.storeID, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
+    orderNotes: varchar('orderNotes').$type<OrderNotes>(),
+    bookedBy: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    submissionTime: timestamp('submissionTime').$type<SubmissionTime>().notNull(),
+    pickupTime: timestamp('submissionTime').$type<PickupTime>().notNull(),
+    vatFree: boolean('vatFree').$type<VatFree>().notNull(),
+    orderStatus: orderStatuspgEnum('orderStatus').notNull(),
+    currency: varchar('currency', { length: 5 }).notNull(),
+    discount: real('discount').$type<Discount>().notNull(),
+    ...dbDates,
+  },
+  (orders) => {
+    return {
+      userReference: foreignKey({
+        columns: [orders.driverID, orders.driverCarID],
+        foreignColumns: [driverCars.driverID, driverCars.driverCarID],
+        name: 'driver_must_have_car',
+      }),
+    }
+  },
+)
+
+export const orderServices = pgTable(
+  'orderServices',
+  {
+    orderID: integer('orderID')
+      .$type<OrderID>()
+      .references(() => orders.orderID, { onDelete: 'cascade' })
+      .notNull(),
+    serviceID: integer('serviceID')
+      .$type<ServiceID>()
+      .references(() => services.serviceID, { onDelete: 'cascade' })
+      .notNull(),
+    serviceVariantID: integer('serviceVariantID')
+      .$type<ServiceID>()
+      .references(() => serviceVariants.serviceVariantID, { onDelete: 'cascade' }),
+    day1: timestamp('day1').$type<ServiceDay1>(),
+    day1Work: interval('day1Work'),
+    day1Employee: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    day2: timestamp('day2').$type<ServiceDay2>(),
+    day2Work: interval('day1Work'),
+    day2Employee: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    day3: timestamp('day3').$type<ServiceDay3>(),
+    day3Work: interval('day1Work'),
+    day3Employee: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    day4: timestamp('day4').$type<ServiceDay4>(),
+    day4Work: interval('day1Work'),
+    day4Employee: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    day5: timestamp('day5').$type<ServiceDay5>(),
+    day5Work: interval('day1Work'),
+    day5Employee: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    cost: real('cost').$type<ServiceCostNumber>().notNull(),
+    discount: real('discount').$type<ServiceCostNumber>().notNull(),
+    vatFree: boolean('vatFree').$type<VatFree>().notNull(),
+    orderNotes: varchar('orderNotes').$type<OrderNotes>(),
+  },
+  (orderServices) => {
+    return {
+      pk: primaryKey({
+        columns: [orderServices.orderID, orderServices.serviceID],
+      }),
+    }
+  },
+)
+
+export const orderLocalServices = pgTable(
+  'orderLocalServices',
+  {
+    orderID: integer('orderID')
+      .$type<OrderID>()
+      .references(() => orders.orderID, { onDelete: 'cascade' })
+      .notNull(),
+    localServiceID: integer('localServiceID')
+      .$type<LocalServiceID>()
+      .references(() => localServices.localServiceID, { onDelete: 'cascade' })
+      .notNull(),
+    serviceVariantID: integer('serviceVariantID')
+      .$type<LocalServiceID>()
+      .references(() => localServiceVariants.serviceVariantID, { onDelete: 'cascade' }),
+    day1: timestamp('day1').$type<ServiceDay1>(),
+    day1Work: interval('day1Work'),
+    day1Employee: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    day2: timestamp('day2').$type<ServiceDay2>(),
+    day2Work: interval('day1Work'),
+    day2Employee: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    day3: timestamp('day3').$type<ServiceDay3>(),
+    day3Work: interval('day1Work'),
+    day3Employee: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    day4: timestamp('day4').$type<ServiceDay4>(),
+    day4Work: interval('day1Work'),
+    day4Employee: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    day5: timestamp('day5').$type<ServiceDay5>(),
+    day5Work: interval('day1Work'),
+    day5Employee: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    cost: real('cost').$type<ServiceCostNumber>().notNull(),
+    discount: real('discount').$type<ServiceCostNumber>().notNull(),
+    vatFree: boolean('vatFree').$type<VatFree>().notNull(),
+    orderNotes: varchar('orderNotes').$type<OrderNotes>(),
+  },
+  (orderLocalServices) => {
+    return {
+      pk: primaryKey({
+        columns: [orderLocalServices.orderID, orderLocalServices.localServiceID],
+      }),
+    }
+  },
+)
+
+export const bookingStatuspgEnum = pgEnum('orderStatus', bookingStatus)
+
+export const rentCarBookings = pgTable('rentCarBookings', {
+  orderID: integer('orderID')
+    .$type<OrderID>()
+    .references(() => orders.orderID, { onDelete: 'cascade' })
+    .notNull(),
+  rentCarRegistrationNumber: integer('rentCarRegistrationNumber')
+    .$type<OrderID>()
+    .references(() => rentcars.rentCarRegistrationNumber, { onDelete: 'cascade' })
+    .notNull(),
+  rentCarBookingID: serial('rentCarBookingID').$type<OrderID>().primaryKey(),
+  bookingStart: date('bookingStart').$type<BookingStart>().notNull(),
+  bookingEnd: date('bookingEnd').$type<BookingEnd>().notNull(),
+  rentCarBookingStatus: orderStatuspgEnum('bookingStatus').notNull(),
+  bookedBy: integer('employeeID')
+    .$type<EmployeeID>()
+    .references(() => employees.employeeID, { onDelete: 'set null' }),
+  bookingStatus: orderStatuspgEnum('bookingStatus').notNull(),
+  submissionTime: timestamp('submissionTime').$type<SubmissionTime>().notNull(),
+  ...dbDates,
+})
