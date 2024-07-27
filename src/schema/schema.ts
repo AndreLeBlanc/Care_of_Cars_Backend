@@ -265,6 +265,8 @@ export const GlobalQualName = make<GlobalQualName>()
 
 export type RentCarRegistrationNumber = Brand<string, 'rentCarRegistrationNumber'>
 export const RentCarRegistrationNumber = make<RentCarRegistrationNumber>()
+export type RentCarBookingID = Brand<number, 'rentCarBookingID'>
+export const RentCarBookingID = make<RentCarBookingID>()
 export type RentCarModel = Brand<string, 'rentCarModel'>
 export const RentCarModel = make<RentCarModel>()
 export type RentCarColor = Brand<string, 'rentCarColor'>
@@ -521,8 +523,7 @@ export const employees = pgTable('employees', {
   employeeComment: varchar('employeeComment').$type<EmployeeComment>(),
   employeeCheckedIn: timestamp('checkedIn'),
   employeeCheckedOut: timestamp('checkedOut'),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const employeesRelations = relations(employees, ({ many }) => ({
@@ -566,8 +567,7 @@ export const employeeWorkingHours = pgTable(
     sundayStart: time('sundayStart').$type<SundayStart>(),
     sundayStop: time('sundayStop').$type<SundayStop>(),
     sundayBreak: interval('sundayBreak').$type<SundayBreak>(),
-    createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-    updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+    ...dbDates,
   },
   (employeeWorkingHours) => {
     return {
@@ -662,16 +662,14 @@ export const users = pgTable('users', {
     .$type<RoleID>()
     .references(() => roles.roleID)
     .notNull(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const roles = pgTable('roles', {
   roleID: serial('roleID').$type<RoleID>().primaryKey(),
   roleName: varchar('roleName', { length: 256 }).unique().notNull().$type<RoleName>(),
   description: text('description').$type<RoleDescription>(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const permissions = pgTable('permissions', {
@@ -681,8 +679,7 @@ export const permissions = pgTable('permissions', {
     .unique()
     .notNull(),
   description: text('description').$type<PermissionDescription>(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const roleToPermissions = pgTable(
@@ -713,8 +710,7 @@ export const serviceCategories = pgTable('serviceCategories', {
     .unique()
     .notNull(),
   description: text('description').$type<ServiceCategoryDescription>(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const serviceCategoriesRelations = relations(serviceCategories, ({ many }) => ({
@@ -753,8 +749,7 @@ export const services = pgTable('services', {
   day3: time('day3').$type<ServiceDay3>(),
   day4: time('day4').$type<ServiceDay4>(),
   day5: time('day5').$type<ServiceDay5>(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const serviceToServiceCategoryRelations = relations(services, ({ one }) => ({
@@ -829,8 +824,7 @@ export const localServices = pgTable('localServices', {
   day3: time('day3').$type<ServiceDay3>(),
   day4: time('day4').$type<ServiceDay4>(),
   day5: time('day5').$type<ServiceDay5>(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const localServicesCategoryToServiceRelations = relations(serviceCategories, ({ many }) => ({
@@ -902,8 +896,7 @@ export const serviceVariants = pgTable('serviceVariants', {
     .$type<ServiceID>()
     .references(() => services.serviceID)
     .notNull(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const localServiceVariants = pgTable('localServiceVariants', {
@@ -921,8 +914,7 @@ export const localServiceVariants = pgTable('localServiceVariants', {
     .$type<LocalServiceID>()
     .references(() => localServices.localServiceID, { onDelete: 'cascade' })
     .notNull(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const servicesRelations = relations(services, ({ many }) => ({
@@ -944,8 +936,7 @@ export const companycustomers = pgTable('companycustomers', {
   companyZipCode: varchar('companyZipCode', { length: 16 }).$type<CompanyZipCode>(),
   companyAddressCity: varchar('companyAddressCity', { length: 256 }).$type<CompanyAddressCity>(),
   companyCountry: varchar('companyCountry', { length: 256 }).$type<CompanyCountry>(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const drivers = pgTable('drivers', {
@@ -988,8 +979,7 @@ export const drivers = pgTable('drivers', {
   driverKeyNumber: varchar('driverKeyNumber', { length: 256 }).$type<DriverKeyNumber>(),
   driverNotesShared: varchar('driverNotesShared').$type<DriverNotesShared>(),
   driverNotes: varchar('driverNotes').$type<DriverNotes>(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const driverRelations = relations(drivers, ({ one }) => ({
@@ -1034,8 +1024,7 @@ export const stores = pgTable('stores', {
     .$type<StoreUsesCheckin>()
     .default(StoreUsesCheckin(true)),
   storeUsesPIN: boolean('storeUsesPIN').$type<StoreUsesPIN>().default(StoreUsesPIN(true)),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const storesRelations = relations(stores, ({ many }) => ({
@@ -1106,8 +1095,7 @@ export const storepaymentinfo = pgTable('storepaymentinfo', {
     .$type<StorePaymentdays>()
     .default(StorePaymentdays(30))
     .notNull(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const storepaymentinfoRelations = relations(storepaymentinfo, ({ one }) => ({
@@ -1136,8 +1124,7 @@ export const storeopeninghours = pgTable('storeopeninghours', {
   saturdayClose: time('saturdayClose').$type<SaturdayClose>(),
   sundayOpen: time('sundayOpen').$type<SundayOpen>(),
   sundayClose: time('sundayClose').$type<SundayClose>(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const storeopeninghoursRelations = relations(storeopeninghours, ({ one }) => ({
@@ -1181,8 +1168,7 @@ export const productCategories = pgTable('productCategories', {
     .unique()
     .notNull(),
   description: text('description').$type<ProductCategoryDescription>(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const products = pgTable('products', {
@@ -1323,8 +1309,7 @@ export const qualificationsGlobal = pgTable('qualificationsGlobal', {
     .unique()
     .$type<GlobalQualName>()
     .notNull(),
-  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  ...dbDates,
 })
 
 export const employeeLocalQualifications = pgTable(
@@ -1551,17 +1536,16 @@ export const orderLocalServices = pgTable(
 export const bookingStatuspgEnum = pgEnum('orderStatus', bookingStatus)
 
 export const rentCarBookings = pgTable('rentCarBookings', {
+  rentCarBookingID: serial('rentCarBookingID').$type<RentCarBookingID>().primaryKey(),
   orderID: integer('orderID')
     .$type<OrderID>()
-    .references(() => orders.orderID, { onDelete: 'cascade' })
-    .primaryKey(),
+    .references(() => orders.orderID, { onDelete: 'cascade' }),
   rentCarRegistrationNumber: varchar('rentCarRegistrationNumber')
-    .$type<OrderID>()
+    .$type<RentCarRegistrationNumber>()
     .references(() => rentcars.rentCarRegistrationNumber, { onDelete: 'cascade' })
     .notNull(),
   bookingStart: date('bookingStart').$type<BookingStart>().notNull(),
   bookingEnd: date('bookingEnd').$type<BookingEnd>().notNull(),
-  rentCarBookingStatus: orderStatuspgEnum('bookingStatus').notNull(),
   bookedBy: integer('employeeID')
     .$type<EmployeeID>()
     .references(() => employees.employeeID, { onDelete: 'set null' }),

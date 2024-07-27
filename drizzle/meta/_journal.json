@@ -8,6 +8,13 @@
       "when": 1721937960161,
       "tag": "0000_sturdy_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1722114553666,
+      "tag": "0001_exotic_sentinels",
+      "breakpoints": true
     }
   ]
 }

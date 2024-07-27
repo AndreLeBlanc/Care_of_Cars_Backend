@@ -426,3 +426,5 @@ export async function getOrder(order: OrderID): Promise<Either<string, OrderWith
     return left(errorHandling(e))
   }
 }
+
+//export async function listOrders(): Promise<Either<string, Order[]>> {}
