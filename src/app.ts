@@ -10,6 +10,7 @@ import fastifySwaggerUI from '@fastify/swagger-ui'
 import pagination from './plugins/pagination.js'
 
 import jwt from './plugins/jwt.js'
+import { orders } from './routes/orders/orders.js'
 import { permissions } from './routes/permissions/permissions.js'
 import { roleToPermissions } from './routes/role-to-permission/roleToPermissons.js'
 import { roles } from './routes/roles/roles.js'
@@ -104,6 +105,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
   app.register(seedSuperAdmin)
   app.register(fastifySwaggerUI, { prefix: '/docs' })
 
+  app.register(orders, { prefix: '/orders' })
   app.register(permissions, { prefix: '/permissions' })
   app.register(roleToPermissions, { prefix: '/roleToPermissions' })
   app.register(roles, { prefix: '/roles' })

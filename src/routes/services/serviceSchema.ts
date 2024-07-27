@@ -6,10 +6,10 @@ import { LocalQualIDSchema } from '../qulifications/qualificationsSchema.js'
 
 import { globalQualID, localQualID } from '../../utils/helper.js'
 
-const LocalServiceIDSchema = Type.Number({ minimum: 0 })
-const ServiceVariantIDSchema = Type.Number({ minimum: 0 })
-const ServiceIDSchema = Type.Number({ minimum: 0 })
-const localServicevariantIDSchema = Type.Number({ minimum: 0 })
+export const LocalServiceIDSchema = Type.Number({ minimum: 0 })
+export const ServiceVariantIDSchema = Type.Number({ minimum: 0 })
+export const ServiceIDSchema = Type.Number({ minimum: 0 })
+export const LocalServicevariantIDSchema = Type.Number({ minimum: 0 })
 const NameSchema = Type.String()
 const CostSchema = Type.Number()
 const CurrencySchema = Type.String()
@@ -49,7 +49,7 @@ export const ServiceVariantsSchema = Type.Object({
 export type ServiceVariantsSchemaType = Static<typeof ServiceVariantsSchema>
 
 export const LocalServiceVariantsSchema = Type.Object({
-  localServicevariantID: Type.Optional(localServicevariantIDSchema),
+  localServicevariantID: Type.Optional(LocalServicevariantIDSchema),
   localServiceID: LocalServiceIDSchema,
   name: NameSchema,
   award: AwardSchema,

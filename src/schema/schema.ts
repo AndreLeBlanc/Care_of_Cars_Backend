@@ -431,6 +431,8 @@ export const DriverCarNotes = make<DriverCarNotes>()
 
 export type OrderID = Brand<number, 'orderID'>
 export const OrderID = make<OrderID>()
+export type Cost = Brand<number, 'cost'>
+export const Cost = make<Cost>()
 export type OrderNotes = Brand<string, 'orderNotes'>
 export const OrderNotes = make<OrderNotes>()
 export type SubmissionTime = Brand<Date, 'submissionTime'>
@@ -1552,12 +1554,11 @@ export const rentCarBookings = pgTable('rentCarBookings', {
   orderID: integer('orderID')
     .$type<OrderID>()
     .references(() => orders.orderID, { onDelete: 'cascade' })
-    .notNull(),
-  rentCarRegistrationNumber: integer('rentCarRegistrationNumber')
+    .primaryKey(),
+  rentCarRegistrationNumber: varchar('rentCarRegistrationNumber')
     .$type<OrderID>()
     .references(() => rentcars.rentCarRegistrationNumber, { onDelete: 'cascade' })
     .notNull(),
-  rentCarBookingID: serial('rentCarBookingID').$type<OrderID>().primaryKey(),
   bookingStart: date('bookingStart').$type<BookingStart>().notNull(),
   bookingEnd: date('bookingEnd').$type<BookingEnd>().notNull(),
   rentCarBookingStatus: orderStatuspgEnum('bookingStatus').notNull(),
