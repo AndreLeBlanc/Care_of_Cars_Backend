@@ -15,7 +15,7 @@ import { driverID } from '../customers/customerSchema.js'
 
 import { CreatedAndUpdatedAT, employeeID } from '../../utils/helper.js'
 
-const OrderID = Type.Integer({ minimum: 0 })
+export const OrderID = Type.Integer({ minimum: 0 })
 const OrderNotesSchema = Type.String()
 const OrderStatusSchema = Type.String()
 const PickupTimeSchema = Type.String({ format: 'date' })

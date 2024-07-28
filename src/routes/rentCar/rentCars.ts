@@ -23,15 +23,15 @@ import {
 
 import {
   AddCustomerType,
+  AddRentBodySchema,
+  DeleteRentCarSchema,
+  DeleteRentCarSchemaType,
+  GetRentCarQueryParamsSchema,
+  GetRentCarQueryParamsSchemaType,
   ListRentCarQueryParamSchema,
   ListRentCarQueryParamSchemaType,
-  PatchRentCarType,
-  addRentBody,
-  deleteRentCar,
-  deleteRentCarType,
-  getRentCarQueryParams,
-  getRentCarQueryParamsType,
-  patchRentCarBody,
+  PatchRentCarBodySchema,
+  PatchRentCarBodySchemaType,
 } from './rentCarSchema.js'
 import {
   Limit,
@@ -60,7 +60,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        body: addRentBody,
+        body: AddRentBodySchema,
       },
     },
     async (req, rep) => {
@@ -179,7 +179,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
   )
 
   //Edit rent car
-  fastify.patch<{ Body: PatchRentCarType; Reply: object }>(
+  fastify.patch<{ Body: PatchRentCarBodySchemaType; Reply: object }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
@@ -189,7 +189,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        body: patchRentCarBody,
+        body: PatchRentCarBodySchema,
       },
     },
     async (request, reply) => {
@@ -231,7 +231,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
   )
 
   //Delete rent a car
-  fastify.delete<{ Params: deleteRentCarType }>(
+  fastify.delete<{ Params: DeleteRentCarSchemaType }>(
     '/:regNumber',
     {
       preHandler: async (request, reply, done) => {
@@ -241,7 +241,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        params: deleteRentCar,
+        params: DeleteRentCarSchema,
       },
     },
     async (request, reply) => {
@@ -261,7 +261,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
   )
 
   //Get Rent Car by Id
-  fastify.get<{ Params: getRentCarQueryParamsType }>(
+  fastify.get<{ Params: GetRentCarQueryParamsSchemaType }>(
     '/:regNumber',
     {
       preHandler: async (request, reply, done) => {
@@ -271,7 +271,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        params: getRentCarQueryParams,
+        params: GetRentCarQueryParamsSchema,
       },
     },
     async (request, reply) => {
