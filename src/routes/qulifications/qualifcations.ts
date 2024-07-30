@@ -184,7 +184,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const { localQualID } = request.params
+      const localQualID = request.params.localQualID
       const deletedLocalQualification: Either<string, QualificationsLocal> = await deleteLocalQuals(
         LocalQualID(localQualID),
       )
@@ -220,7 +220,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const { globalQualID } = request.params
+      const globalQualID = request.params.globalQualID
       const deletedGlobalQualification: Either<string, QualificationsGlobal> =
         await deleteGlobalQuals(GlobalQualID(globalQualID))
       match(
@@ -250,7 +250,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const { localQualID } = request.params
+      const localQualID = request.params.localQualID
       const localQual: Either<string, QualificationsLocal> = await getLocalQual(
         LocalQualID(localQualID),
       )
@@ -286,7 +286,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const { globalQualID } = request.params
+      const globalQualID = request.params.globalQualID
       const globalQual: Either<string, QualificationsGlobal> = await getGlobalQual(
         GlobalQualID(globalQualID),
       )

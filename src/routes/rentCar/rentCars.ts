@@ -1,7 +1,13 @@
 import { FastifyInstance } from 'fastify'
 
 import {
+  BookingEnd,
+  BookingStart,
+  EmployeeID,
+  OrderID,
+  OrderStatus,
   PermissionTitle,
+  RentCarBookingID,
   RentCarColor,
   RentCarModel,
   RentCarNotes,
@@ -9,14 +15,22 @@ import {
   RentCarRegistrationNumber,
   RentCarYear,
   StoreID,
+  SubmissionTime,
 } from '../../schema/schema.js'
 
 import {
   RentCar,
+  RentCarAvailablity,
+  RentCarBooking,
+  RentCarBookingReply,
   RentCarsPaginate,
+  availableRentCars,
   createRentCar,
+  createRentCarBooking,
+  deleteRentCarBooking,
   deleteRentCarByRegNumber,
   editRentCar,
+  getRentCarBooking,
   getRentCarByID,
   getRentCarPaginate,
 } from '../../services/rentCarService.js'
@@ -24,15 +38,26 @@ import {
 import {
   AddCustomerType,
   AddRentBodySchema,
+  AvailableRentCarSchema,
+  AvailableRentCarSchemaType,
+  AvailableRentCarsQuerySchemaType,
+  CreateRentCarBookingReplySchema,
+  CreateRentCarBookingReplySchemaType,
+  CreateRentCarBookingSchema,
+  CreateRentCarBookingSchemaType,
   DeleteRentCarSchema,
   DeleteRentCarSchemaType,
   GetRentCarQueryParamsSchema,
   GetRentCarQueryParamsSchemaType,
   ListRentCarQueryParamSchema,
   ListRentCarQueryParamSchemaType,
+  MessageSchema,
+  MessageSchemaType,
   PatchRentCarBodySchema,
   PatchRentCarBodySchemaType,
+  RentCarBookingIDSchemaType,
 } from './rentCarSchema.js'
+
 import {
   Limit,
   ModelName,
@@ -286,6 +311,160 @@ export const rentCar = async (fastify: FastifyInstance) => {
         },
         (err) => {
           return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.post<{
+    Body: CreateRentCarBookingSchemaType
+    Reply: CreateRentCarBookingReplySchemaType | MessageSchemaType
+  }>(
+    '/booking/',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('create_rent_car_booking')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: CreateRentCarBookingSchema,
+        response: { 201: CreateRentCarBookingReplySchema, 504: MessageSchema },
+      },
+    },
+    async (request, reply) => {
+      const newRentCarBooking: RentCarBooking = {
+        rentCarBookingID: request.body.rentCarBookingID
+          ? RentCarBookingID(request.body.rentCarBookingID)
+          : undefined,
+        orderID: request.body.orderID ? OrderID(request.body.orderID) : undefined,
+        rentCarRegistrationNumber: RentCarRegistrationNumber(
+          request.body.rentCarRegistrationNumber,
+        ),
+        bookingStart: BookingStart(new Date(request.body.bookingStart)),
+        bookingEnd: BookingEnd(new Date(request.body.bookingEnd)),
+        bookedBy: request.body.bookedBy ? EmployeeID(request.body.bookedBy) : undefined,
+        bookingStatus: request.body.bookingStatus as OrderStatus,
+        submissionTime: SubmissionTime(new Date(request.body.submissionTime)),
+      }
+
+      const bookingDetails: Either<string, RentCarBookingReply> = await createRentCarBooking(
+        newRentCarBooking,
+      )
+      match(
+        bookingDetails,
+        (booking: RentCarBookingReply) => {
+          return reply.status(201).send({ message: 'Rent Car booking created', ...booking })
+        },
+        (err) => {
+          return reply.status(504).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Params: RentCarBookingIDSchemaType
+    Reply: CreateRentCarBookingReplySchemaType | MessageSchemaType
+  }>(
+    '/booking/:bookingID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_rent_car_booking')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: GetRentCarQueryParamsSchema,
+        response: { 200: CreateRentCarBookingReplySchema, 404: MessageSchema },
+      },
+    },
+    async (request, reply) => {
+      const { bookingID } = request.params
+      const bookingDetails: Either<string, RentCarBookingReply> = await getRentCarBooking(
+        RentCarBookingID(bookingID),
+      )
+      match(
+        bookingDetails,
+        (booking: RentCarBookingReply) => {
+          return reply.status(200).send({ message: 'Rent Car booking found', ...booking })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.delete<{
+    Params: RentCarBookingIDSchemaType
+    Reply: CreateRentCarBookingReplySchemaType | MessageSchemaType
+  }>(
+    '/booking/:bookingID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('delete_rent_car_booking')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: GetRentCarQueryParamsSchema,
+        response: { 200: CreateRentCarBookingReplySchema, 404: MessageSchema },
+      },
+    },
+    async (request, reply) => {
+      const { bookingID } = request.params
+      const bookingDetails: Either<string, RentCarBookingReply> = await deleteRentCarBooking(
+        RentCarBookingID(bookingID),
+      )
+      match(
+        bookingDetails,
+        (booking: RentCarBookingReply) => {
+          return reply.status(200).send({ message: 'Rent Car booking deleted', ...booking })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Params: AvailableRentCarsQuerySchemaType
+    Reply: AvailableRentCarSchemaType | MessageSchemaType
+  }>(
+    '/available-rentCars/:storeID/:start/:end',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_available_rent_cars')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: GetRentCarQueryParamsSchema,
+        response: { 200: AvailableRentCarSchema, 504: MessageSchema },
+      },
+    },
+    async (request, reply) => {
+      const storeID = StoreID(request.params.storeID)
+      const start = BookingStart(new Date(request.params.start))
+      const end = BookingEnd(new Date(request.params.end))
+      const availbeCars: Either<string, RentCarAvailablity> = await availableRentCars(
+        storeID,
+        start,
+        end,
+      )
+      match(
+        availbeCars,
+        (booking: RentCarAvailablity) => {
+          return reply.status(200).send({ message: 'Rent Car booking found', ...booking })
+        },
+        (err) => {
+          return reply.status(504).send({ message: err })
         },
       )
     },

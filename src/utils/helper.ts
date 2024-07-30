@@ -7,9 +7,9 @@ export function isEmail(emailAddress: string) {
   return emailAddress?.match(regex)
 }
 
-export const employeeID = Type.Integer()
-export const localQualID = Type.Integer()
-export const globalQualID = Type.Integer()
+export const EmployeeID = Type.Integer()
+export const LocalQualID = Type.Integer()
+export const GlobalQualID = Type.Integer()
 
 export function timeStringToMS(time: string | undefined): number | undefined {
   if (time == undefined) {
