@@ -110,7 +110,7 @@ export const PatchDriverBodySchema = Type.Composite([
 
 export const CreateDriverBodySchema = Type.Composite([
   DriverBodySchema,
-  Type.Object({ companyOrgNumber: companyOrgNumber }),
+  Type.Object({ companyOrgNumber: Type.Optional(companyOrgNumber) }),
 ])
 
 export const ListCustomersQueryParamSchema = Type.Object({

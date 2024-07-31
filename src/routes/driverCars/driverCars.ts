@@ -7,6 +7,8 @@ import {
   DriverCarIDSchemaType,
   DriverCarMessageSchema,
   DriverCarMessageSchemaType,
+  DriverCarRegSchema,
+  DriverCarRegSchemaType,
   DriverCarSchema,
   DriverCarSchemaType,
   ListDriverCarReplySchema,
@@ -34,6 +36,7 @@ import {
   CreateCar,
   deleteCar,
   getCar,
+  getCarByReg,
   getCarsPaginated,
   putCar,
 } from '../../services/driverCarService.js'
@@ -111,6 +114,42 @@ export const driverCars = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const fetchedCar: Car | undefined = await getCar(DriverCarID(request.params.driverCarID))
+      if (fetchedCar == null) {
+        return reply.status(404).send({ message: "driver car doesn't exist!" })
+      }
+      return reply.status(200).send({
+        message: 'car fetched',
+        ...fetchedCar.carInfo,
+        createdAt: fetchedCar.dates.createdAt.toISOString(),
+        updatedAt: fetchedCar.dates.updatedAt.toISOString(),
+      })
+    },
+  )
+
+  fastify.get<{
+    Params: DriverCarRegSchemaType
+    Reply: (DriverCarMessageSchemaType & DriverCarDateSchemaType) | DriverCarMessageSchemaType
+  }>(
+    '/regNumber/:driverCarReg',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_driver_car')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: DriverCarRegSchema,
+        response: {
+          201: { DriverCarMessageSchema, ...DriverCarDateSchema },
+          404: DriverCarMessageSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const fetchedCar: Car | undefined = await getCarByReg(
+        DriverCarRegistrationNumber(request.params.driverCarReg),
+      )
       if (fetchedCar == null) {
         return reply.status(404).send({ message: "driver car doesn't exist!" })
       }

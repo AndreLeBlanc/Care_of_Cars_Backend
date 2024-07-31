@@ -33,6 +33,12 @@ export const DriverCarIDSchema = Type.Object({
 
 export type DriverCarIDSchemaType = Static<typeof DriverCarIDSchema>
 
+export const DriverCarRegSchema = Type.Object({
+  driverCarReg: driverCarRegistrationNumber,
+})
+
+export type DriverCarRegSchemaType = Static<typeof DriverCarRegSchema>
+
 export const DriverCarDateSchema = Type.Composite([DriverCarSchema, CreatedAndUpdatedAT])
 
 export type DriverCarDateSchemaType = Static<typeof DriverCarDateSchema>
