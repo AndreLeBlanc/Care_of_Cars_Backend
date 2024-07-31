@@ -35,6 +35,7 @@ import {
   ResultCount,
   Search,
 } from '../../plugins/pagination.js'
+
 export async function permissions(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListPermissionQueryParamSchemaType }>(
     '/',
