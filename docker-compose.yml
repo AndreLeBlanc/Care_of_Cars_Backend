@@ -26,6 +26,8 @@ services:
       - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD}
     depends_on:
       - postgres
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
 
   devapp:
     build:
@@ -46,6 +48,7 @@ services:
       - postgres
     volumes:
       - ./dist:/usr/app/dist
+      - ./certs:/etc/letsencrypt/live/xn--rdamlen-hxa3m.se
 
   test:
     build:
