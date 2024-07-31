@@ -550,42 +550,7 @@ type Res = {
   absence: Absence
 }
 
-function intervalToMilliseconds(interval: string): number {
-  // Define the conversion factors
-  const MS_PER_SECOND = 1000
-  const MS_PER_MINUTE = 60 * MS_PER_SECOND
-  const MS_PER_HOUR = 60 * MS_PER_MINUTE
-  const MS_PER_DAY = 24 * MS_PER_HOUR
-  const MS_PER_MONTH = 30 * MS_PER_DAY // Approximate, adjust as necessary
-  const MS_PER_YEAR = 365 * MS_PER_DAY // Approximate, adjust as necessary
-
-  // Regex to parse the interval string
-  const regex =
-    /(\d+)\s*years?|(\d+)\s*months?|(\d+)\s*days?|(\d+)\s*hours?|(\d+)\s*minutes?|(\d+)\s*seconds?/g
-  let match
-  let totalMilliseconds = 0
-
-  // Iterate over all matches and convert each to milliseconds
-  while ((match = regex.exec(interval)) !== null) {
-    if (match[1]) {
-      totalMilliseconds += parseInt(match[1]) * MS_PER_YEAR
-    } else if (match[2]) {
-      totalMilliseconds += parseInt(match[2]) * MS_PER_MONTH
-    } else if (match[3]) {
-      totalMilliseconds += parseInt(match[3]) * MS_PER_DAY
-    } else if (match[4]) {
-      totalMilliseconds += parseInt(match[4]) * MS_PER_HOUR
-    } else if (match[5]) {
-      totalMilliseconds += parseInt(match[5]) * MS_PER_MINUTE
-    } else if (match[6]) {
-      totalMilliseconds += parseInt(match[6]) * MS_PER_SECOND
-    }
-  }
-
-  return totalMilliseconds
-}
-
-function firstDayOfWeek(t: WorkTime, startDay: WorkTime): WorkDuration {
+export function firstDayOfWeek(t: WorkTime, startDay: WorkTime): WorkDuration {
   const dayOfWeek = startDay.getDay(),
     diff = dayOfWeek >= 1 ? dayOfWeek - 1 : 6 - dayOfWeek
 
@@ -791,29 +756,23 @@ function calcTime(
         worktimes.totalTimes.monday - undefinedIsZero(timeStringToMS(emp.mondayBreak)),
       )),
         (worktimes.totalTimes.tuesday = WorkDuration(
-          worktimes.totalTimes.tuesday +
-            (emp.tuesdayBreak ? intervalToMilliseconds(emp.tuesdayBreak) : 0),
+          worktimes.totalTimes.tuesday + undefinedIsZero(timeStringToMS(emp.tuesdayBreak)),
         ))
-      worktimes.totalTimes.wednesday = WorkDuration(
-        worktimes.totalTimes.wednesday +
-          (emp.wednesdayBreak ? intervalToMilliseconds(emp.wednesdayBreak) : 0),
-      )
-      worktimes.totalTimes.thursday = WorkDuration(
-        worktimes.totalTimes.thursday +
-          (emp.thursdayBreak ? intervalToMilliseconds(emp.thursdayBreak) : 0),
-      )
-      worktimes.totalTimes.friday = WorkDuration(
-        worktimes.totalTimes.friday +
-          (emp.fridayBreak ? intervalToMilliseconds(emp.fridayBreak) : 0),
-      )
-      worktimes.totalTimes.saturday = WorkDuration(
-        worktimes.totalTimes.saturday +
-          (emp.saturdayBreak ? intervalToMilliseconds(emp.saturdayBreak) : 0),
-      )
-      worktimes.totalTimes.sunday = WorkDuration(
-        worktimes.totalTimes.sunday +
-          (emp.sundayBreak ? intervalToMilliseconds(emp.sundayBreak) : 0),
-      )
+      ;(worktimes.totalTimes.wednesday = WorkDuration(
+        worktimes.totalTimes.wednesday + undefinedIsZero(timeStringToMS(emp.wednesdayBreak)),
+      )),
+        (worktimes.totalTimes.thursday = WorkDuration(
+          worktimes.totalTimes.thursday + undefinedIsZero(timeStringToMS(emp.thursdayBreak)),
+        )),
+        (worktimes.totalTimes.friday = WorkDuration(
+          worktimes.totalTimes.friday + undefinedIsZero(timeStringToMS(emp.fridayBreak)),
+        )),
+        (worktimes.totalTimes.saturday = WorkDuration(
+          undefinedIsZero(timeStringToMS(emp.saturdayBreak)),
+        )),
+        (worktimes.totalTimes.sunday = WorkDuration(
+          undefinedIsZero(timeStringToMS(emp.sundayBreak)),
+        ))
     })
     return right(worktimes)
   }

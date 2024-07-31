@@ -117,6 +117,7 @@ import {
   StoreOpeningHoursCreateType,
   StoreOpeningHoursType,
   StoreOpeningHoursWithSpecial,
+  StoreOpeningHoursWithSpecialType,
   StorePaginateReply,
   StorePaginateReplyType,
   StoreReplyMessage,
@@ -477,18 +478,22 @@ export async function stores(fastify: FastifyInstance) {
         storeAllowCarAPI: request.body.storeAllowCarAPI
           ? StoreAllowCarAPI(request.body.storeAllowCarAPI)
           : undefined,
-        storeAllowSendSMS: request.body.storeAllowSendSMS
-          ? StoreAllowSendSMS(request.body.storeAllowSendSMS)
-          : undefined,
-        storeSendSMS: request.body.storeSendSMS
-          ? StoreSendSMS(request.body.storeSendSMS)
-          : undefined,
-        storeUsesCheckin: request.body.storeUsesCheckin
-          ? StoreUsesCheckin(request.body.storeUsesCheckin)
-          : undefined,
-        storeUsesPIN: request.body.storeUsesPIN
-          ? StoreUsesPIN(request.body.storeUsesPIN)
-          : undefined,
+        storeAllowSendSMS:
+          request.body.storeAllowSendSMS != undefined
+            ? StoreAllowSendSMS(request.body.storeAllowSendSMS)
+            : undefined,
+        storeSendSMS:
+          request.body.storeSendSMS != undefined
+            ? StoreSendSMS(request.body.storeSendSMS)
+            : undefined,
+        storeUsesCheckin:
+          request.body.storeUsesCheckin != undefined
+            ? StoreUsesCheckin(request.body.storeUsesCheckin)
+            : undefined,
+        storeUsesPIN:
+          request.body.storeUsesPIN != undefined
+            ? StoreUsesPIN(request.body.storeUsesPIN)
+            : undefined,
       }
       const paymentPatch: StoreMaybePaymentOptions = request.body.storePaymentOptions
         ? {
@@ -811,22 +816,30 @@ export async function stores(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const storeSpecialHours: StoreSpecialHoursCreate = {
-        storeID: StoreID(request.body.storeID),
-        day: Day(new Date(request.body.day)),
-        dayOpen: DayOpen(request.body.dayOpen),
-        dayClose: DayClose(request.body.dayClose),
-      }
+      const storeSpecialHours: StoreSpecialHoursCreate[] = request.body.specialHours.map(
+        (hours) => ({
+          storeID: StoreID(hours.storeID),
+          day: Day(new Date(hours.day)),
+          dayOpen: DayOpen(hours.dayOpen),
+          dayClose: DayClose(hours.dayClose),
+        }),
+      )
 
-      const updatedHours: Either<string, StoreSpecialHours> = await createSpecialOpeningHours(
+      const updatedHours: Either<string, StoreSpecialHours[]> = await createSpecialOpeningHours(
         storeSpecialHours,
       )
       match(
         updatedHours,
-        (newOpeningHours: StoreSpecialHours) => {
-          return reply
-            .status(201)
-            .send({ message: 'store opening hours created', ...newOpeningHours })
+        (newOpeningHours: StoreSpecialHours[]) => {
+          return reply.status(201).send({
+            message: 'store opening hours created',
+            specialHours: newOpeningHours.map((hours) => ({
+              storeID: hours.storeID,
+              day: hours.day.toDateString(),
+              dayOpen: hours.dayOpen,
+              dayClose: hours.dayClose,
+            })),
+          })
         },
 
         (err) => {
@@ -862,20 +875,28 @@ export async function stores(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const storeSpecialHours: StoreSpecialHours = {
-        storeID: StoreID(request.body.storeID),
-        day: Day(new Date(request.body.day)),
-        dayOpen: DayOpen(request.body.dayOpen),
-        dayClose: DayClose(request.body.dayClose),
-      }
+      const storeSpecialHours: StoreSpecialHours[] = request.body.specialHours.map((hours) => ({
+        storeID: StoreID(hours.storeID),
+        day: Day(new Date(hours.day)),
+        dayOpen: DayOpen(hours.dayOpen),
+        dayClose: DayClose(hours.dayClose),
+      }))
 
-      const updatedHours: Either<string, StoreSpecialHours> = await updateSpecialOpeningHours(
+      const updatedHours: Either<string, StoreSpecialHours[]> = await updateSpecialOpeningHours(
         storeSpecialHours,
       )
       match(
         updatedHours,
-        (updatedHours) => {
-          return reply.status(201).send({ message: 'store opening hours updated', ...updatedHours })
+        (updatedHours: StoreSpecialHours[]) => {
+          return reply.status(201).send({
+            message: 'store opening hours updated',
+            specialHours: updatedHours.map((hours) => ({
+              storeID: hours.storeID,
+              day: hours.day.toDateString(),
+              dayOpen: hours.dayOpen,
+              dayClose: hours.dayClose,
+            })),
+          })
         },
         (err) => {
           return reply.status(417).send({ message: err })
@@ -930,7 +951,7 @@ export async function stores(fastify: FastifyInstance) {
 
   fastify.get<{
     Querystring: GetOpeningHoursType
-    Reply: StoreSpecialHoursSchemaType | StoreReplyMessageType
+    Reply: StoreOpeningHoursWithSpecialType | StoreReplyMessageType
   }>(
     '/store-opening-hours',
     {
@@ -959,9 +980,9 @@ export async function stores(fastify: FastifyInstance) {
       const to: Day = Day(new Date(request.query.to))
 
       const openingHours: Either<string, OpeningHours> = await getOpeningHours(storeID, from, to)
+
       match(
         openingHours,
-
         (openingHours: OpeningHours) => {
           return reply
             .status(200)
@@ -969,7 +990,7 @@ export async function stores(fastify: FastifyInstance) {
         },
 
         (err) => {
-          return reply.status(417).send({ message: err })
+          return reply.status(404).send({ message: err })
         },
       )
     },

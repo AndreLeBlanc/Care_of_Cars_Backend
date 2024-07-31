@@ -113,7 +113,7 @@ export type WeekOpeningHours = WeekOpeningHoursCreate & {
 
 export type OpeningHours = {
   weekyOpeningHours?: WeekOpeningHoursCreate
-  specialOpeningHours: StoreSpecialHours[]
+  specialHours: StoreSpecialHours[]
 }
 
 export type StoreCreate = {
@@ -348,56 +348,72 @@ export async function updateWeeklyOpeningHours(
 }
 
 export async function createSpecialOpeningHours(
-  openingHours: StoreSpecialHoursCreate,
-): Promise<Either<string, StoreSpecialHours>> {
+  openingHours: StoreSpecialHoursCreate[],
+): Promise<Either<string, StoreSpecialHours[]>> {
   try {
-    const [storeHours] = await db.insert(storespecialhours).values(openingHours).returning({
+    const storeHours = await db.insert(storespecialhours).values(openingHours).returning({
       storeID: storespecialhours.storeID,
       day: storespecialhours.day,
       dayOpen: storespecialhours.dayOpen,
       dayClose: storespecialhours.dayClose,
     })
 
-    return storeHours
-      ? right({
-          storeID: StoreID(storeHours.storeID),
-          day: Day(storeHours.day),
-          dayOpen: DayOpen(storeHours.dayOpen),
-          dayClose: DayClose(storeHours.dayClose),
-        })
-      : left('Store not found')
+    const typesStoreHours = storeHours.map((hours) => ({
+      storeID: StoreID(hours.storeID),
+      day: Day(hours.day),
+      dayOpen: DayOpen(hours.dayOpen),
+      dayClose: DayClose(hours.dayClose),
+    }))
+    return typesStoreHours ? right(typesStoreHours) : left('Store not found')
   } catch (e) {
     return left(errorHandling(e))
   }
 }
 
 export async function updateSpecialOpeningHours(
-  openingHours: StoreSpecialHours,
-): Promise<Either<string, StoreSpecialHours>> {
+  openingHours: StoreSpecialHours[],
+): Promise<Either<string, StoreSpecialHours[]>> {
   try {
-    const [storeHours] = await db
-      .update(storespecialhours)
-      .set(openingHours)
-      .where(
-        and(
-          eq(storespecialhours.storeID, openingHours.storeID),
-          eq(storespecialhours.day, openingHours.day),
-        ),
-      )
-      .returning({
-        storeID: storespecialhours.storeID,
-        day: storespecialhours.day,
-        dayOpen: storespecialhours.dayOpen,
-        dayClose: storespecialhours.dayClose,
-      })
+    // You have to be sure that inputs array is not empty
+    if (openingHours.length === 0) {
+      return left('No opening hours to update')
+    }
 
-    return storeHours
-      ? right({
-          storeID: StoreID(storeHours.storeID),
-          day: Day(storeHours.day),
-          dayOpen: DayOpen(storeHours.dayOpen),
-          dayClose: DayClose(storeHours.dayClose),
-        })
+    const allUpdates = await db.transaction(async (tx) => {
+      return await Promise.all(
+        openingHours.map(async (update) => {
+          const result = await tx
+            .update(storespecialhours)
+            .set(update)
+            .where(
+              and(
+                eq(storespecialhours.storeID, update.storeID),
+                eq(storespecialhours.day, update.day),
+              ),
+            )
+            .returning()
+          return result.at(0)
+        }),
+      )
+    })
+
+    const definedUpdates = allUpdates.reduce(
+      (acc: StoreSpecialHours[], el: StoreSpecialHours | undefined) => {
+        if (el) {
+          acc.push({
+            storeID: StoreID(el.storeID),
+            day: Day(el.day),
+            dayOpen: DayOpen(el.dayOpen),
+            dayClose: DayClose(el.dayClose),
+          })
+        }
+        return acc
+      },
+      [],
+    )
+
+    return definedUpdates.length > 0
+      ? right(definedUpdates)
       : left('Opening hours or store not found')
   } catch (e) {
     return left(errorHandling(e))
@@ -561,7 +577,7 @@ export async function getOpeningHours(
 
     return right({
       weekyOpeningHours: brandedWeeklyOpeningHours,
-      specialOpeningHours: specialOpeningHours,
+      specialHours: specialOpeningHours,
     })
   } catch (e) {
     return left(errorHandling(e))
@@ -769,12 +785,13 @@ export async function updateStoreByStoreID(
   storePatch?: StoreUpdateCreate,
   storePaymentPatch?: StoreMaybePaymentOptions,
 ): Promise<Either<string, StoreWithSeparateDates>> {
-  const updatedAt: Date = new Date()
   try {
     const { updatedStore, updatedPaymentInfo } = await db.transaction(async (tx) => {
+      const updatedAt: Date = new Date()
       let updatedStore = undefined
       if (storePatch !== null) {
         const storeWithUpdatedAt = { ...storePatch, updatedAt: updatedAt }
+        console.log(storeWithUpdatedAt)
         ;[updatedStore] = await tx
           .update(stores)
           .set(storeWithUpdatedAt)
