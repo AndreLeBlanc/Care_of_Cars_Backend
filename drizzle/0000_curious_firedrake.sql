@@ -133,12 +133,13 @@ CREATE TABLE IF NOT EXISTS "employees" (
 	"employmentNumber" varchar(128) NOT NULL,
 	"employeePersonalNumber" varchar(16) NOT NULL,
 	"signature" varchar(4) NOT NULL,
-	"employeeHourlyRate" numeric,
+	"employeeHourlyRate" real,
 	"employeeHourlyRateCurrency" varchar,
 	"employeePin" varchar(4),
 	"employeeComment" varchar,
 	"checkedIn" timestamp,
 	"checkedOut" timestamp,
+	"employeeActive" boolean NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "employees_userID_unique" UNIQUE("userID"),
@@ -320,15 +321,17 @@ CREATE TABLE IF NOT EXISTS "qualificationsLocal" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "rentCarBookings" (
-	"orderID" integer PRIMARY KEY NOT NULL,
+	"rentCarBookingID" serial PRIMARY KEY NOT NULL,
+	"orderID" integer,
 	"rentCarRegistrationNumber" varchar NOT NULL,
 	"bookingStart" date NOT NULL,
 	"bookingEnd" date NOT NULL,
-	"bookingStatus" "orderStatus" NOT NULL,
 	"employeeID" integer,
+	"bookingStatus" "orderStatus" NOT NULL,
 	"submissionTime" timestamp NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "rentCarBookings_orderID_unique" UNIQUE("orderID")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "rentCars" (

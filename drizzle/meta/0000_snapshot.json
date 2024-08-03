@@ -1,5 +1,5 @@
 {
-  "id": "66bc461f-eb3f-4f19-85fd-3a6067ecf503",
+  "id": "09c6deac-2fce-474f-b6f6-67921bafca6a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -877,7 +877,7 @@
         },
         "employeeHourlyRate": {
           "name": "employeeHourlyRate",
-          "type": "numeric",
+          "type": "real",
           "primaryKey": false,
           "notNull": false
         },
@@ -910,6 +910,12 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
+        },
+        "employeeActive": {
+          "name": "employeeActive",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
         },
         "createdAt": {
           "name": "createdAt",
@@ -2266,11 +2272,17 @@
       "name": "rentCarBookings",
       "schema": "",
       "columns": {
+        "rentCarBookingID": {
+          "name": "rentCarBookingID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "orderID": {
           "name": "orderID",
           "type": "integer",
-          "primaryKey": true,
-          "notNull": true
+          "primaryKey": false,
+          "notNull": false
         },
         "rentCarRegistrationNumber": {
           "name": "rentCarRegistrationNumber",
@@ -2290,18 +2302,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "employeeID": {
+          "name": "employeeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "bookingStatus": {
           "name": "bookingStatus",
           "type": "orderStatus",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
-        },
-        "employeeID": {
-          "name": "employeeID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         },
         "submissionTime": {
           "name": "submissionTime",
@@ -2367,7 +2379,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "rentCarBookings_orderID_unique": {
+          "name": "rentCarBookings_orderID_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "orderID"
+          ]
+        }
+      }
     },
     "public.rentCars": {
       "name": "rentCars",

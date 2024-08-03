@@ -78,6 +78,14 @@ export type EmployeeGlobalQualifications = {
   globalQualID: LocalQualID
 }
 
+export type QualsByEmployeeStatus = {
+  employeeID: EmployeeID
+  employeesGlobalQuals: EmployeeQualificationsGlobal[]
+  NotEmployeesGlobalQuals: EmployeeQualificationsGlobal[]
+  employeesLocalQuals: EmployeeQualificationsLocal[]
+  NotEmployeesLocalQuals: EmployeeQualificationsLocal[]
+}
+
 export async function updateLocalQuals(
   localQual: CreateQualificationsLocal,
   localQualID?: LocalQualID,
@@ -445,6 +453,96 @@ export async function getEmployeeQualifications(
     return right({
       localQuals: quals.localQualsList,
       globalQuals: quals.globalQualsList,
+    })
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function getQualificationsStatusByEmployee(
+  employeeID: EmployeeID,
+): Promise<Either<string, QualsByEmployeeStatus>> {
+  try {
+    const quals = await db.transaction(async (tx) => {
+      const localQualsList = await tx
+        .select({
+          storeID: qualificationsLocal.storeID,
+          localQualID: qualificationsLocal.localQualID,
+          localQualName: qualificationsLocal.localQualName,
+          employeeID: employeeLocalQualifications.employeeID,
+        })
+        .from(employeeLocalQualifications)
+        .rightJoin(
+          qualificationsLocal,
+          eq(employeeLocalQualifications.localQualID, qualificationsLocal.localQualID),
+        )
+        .where(eq(employeeLocalQualifications.employeeID, employeeID))
+
+      const globalQualsList = await tx
+        .select({
+          globalQualID: qualificationsGlobal.globalQualID,
+          globalQualName: qualificationsGlobal.globalQualName,
+          employeeID: employeeGlobalQualifications.employeeID,
+        })
+        .from(employeeGlobalQualifications)
+        .rightJoin(
+          qualificationsGlobal,
+          eq(employeeGlobalQualifications.globalQualID, qualificationsLocal.localQualID),
+        )
+        .where(eq(employeeGlobalQualifications.employeeID, employeeID))
+      return { localQualsList, globalQualsList }
+    })
+
+    interface QualsByStatus<T> {
+      has: T[]
+      doesntHave: T[]
+    }
+
+    const localQualsByStatus: {
+      has: EmployeeQualificationsLocal[]
+      doesntHave: EmployeeQualificationsLocal[]
+    } = quals.localQualsList.reduce<QualsByStatus<EmployeeQualificationsLocal>>(
+      (acc, qual) => {
+        const empQual: EmployeeQualificationsLocal = {
+          storeID: qual.storeID,
+          localQualID: qual.localQualID,
+          localQualName: qual.localQualName,
+        }
+        if (qual.employeeID != null) {
+          acc.has.push(empQual)
+        } else {
+          acc.doesntHave.push(empQual)
+        }
+        return acc
+      },
+      { has: [], doesntHave: [] },
+    )
+
+    const globalQualsByStatus: {
+      has: EmployeeQualificationsGlobal[]
+      doesntHave: EmployeeQualificationsGlobal[]
+    } = quals.globalQualsList.reduce<QualsByStatus<EmployeeQualificationsGlobal>>(
+      (acc, qual) => {
+        const empQual: EmployeeQualificationsGlobal = {
+          globalQualID: qual.globalQualID,
+          globalQualName: qual.globalQualName,
+        }
+        if (qual.employeeID != null) {
+          acc.has.push(empQual)
+        } else {
+          acc.doesntHave.push(empQual)
+        }
+        return acc
+      },
+      { has: [], doesntHave: [] },
+    )
+
+    return right({
+      employeeID: employeeID,
+      employeesGlobalQuals: globalQualsByStatus.has,
+      NotEmployeesGlobalQuals: globalQualsByStatus.doesntHave,
+      employeesLocalQuals: localQualsByStatus.has,
+      NotEmployeesLocalQuals: localQualsByStatus.doesntHave,
     })
   } catch (e) {
     return left(errorHandling(e))

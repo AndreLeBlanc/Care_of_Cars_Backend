@@ -5,6 +5,9 @@ import {
   CreateQualificationsGlobalSchemaType,
   CreateQualificationsLocalSchema,
   CreateQualificationsLocalSchemaType,
+  EmployeesQualsSchema,
+  EmployeesQualsSchemaType,
+  EmployeesQualsStatusSchemaType,
   GlobalQualIDSchema,
   GlobalQualIDSchemaType,
   ListQualsReplySchema,
@@ -29,16 +32,21 @@ import {
   CreateQualificationsLocal,
   EmployeeGlobalQualifications,
   EmployeeLocalQualifications,
+  EmployeeQualificationsGlobal,
+  EmployeeQualificationsLocal,
   QualificationsGlobal,
   QualificationsListed,
   QualificationsLocal,
+  QualsByEmployeeStatus,
   deleteEmployeeGlobalQualification,
   deleteEmployeeLocalQualification,
   deleteGlobalQuals,
   deleteLocalQuals,
+  getEmployeeQualifications,
   getGlobalQual,
   getLocalQual,
   getQualifcations,
+  getQualificationsStatusByEmployee,
   setEmployeeGlobalQualification,
   setEmployeeLocalQualification,
   updateGlobalQuals,
@@ -58,6 +66,7 @@ import {
 import { Search } from '../../plugins/pagination.js'
 
 import { Either, match } from '../../utils/helper.js'
+import { EmployeeIDSchemaType } from '../employees/employeesSchema.js'
 
 export const qualificationsRoute = async (fastify: FastifyInstance) => {
   fastify.put<{
@@ -295,6 +304,86 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
 
         (qual) => {
           return reply.status(200).send({ message: 'Qualification fetched', qualification: qual })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Params: EmployeeIDSchemaType
+    Reply: EmployeesQualsSchemaType | { message: QualificationMessageType }
+  }>(
+    '/employee:employeeID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_employees_qualification')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: GlobalQualIDSchema,
+        response: {
+          200: EmployeesQualsSchema,
+          404: { message: QualificationMessage },
+        },
+      },
+    },
+    async (request, reply) => {
+      const employeeID = request.params.employeeID
+      const employeesQuals: Either<
+        string,
+        { localQuals: EmployeeQualificationsLocal[]; globalQuals: EmployeeQualificationsGlobal[] }
+      > = await getEmployeeQualifications(EmployeeID(employeeID))
+      match(
+        employeesQuals,
+
+        (quals) => {
+          return reply.status(200).send({ message: 'employees qualification fetched', ...quals })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Params: EmployeeIDSchemaType
+    Reply: EmployeesQualsStatusSchemaType | { message: QualificationMessageType }
+  }>(
+    '/employeeStatus:employeeID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle(
+          'get_employees_qualification_status',
+        )
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: GlobalQualIDSchema,
+        response: {
+          200: EmployeesQualsSchema,
+          404: { message: QualificationMessage },
+        },
+      },
+    },
+    async (request, reply) => {
+      const employeeID = request.params.employeeID
+      const employeesQuals: Either<string, QualsByEmployeeStatus> =
+        await getQualificationsStatusByEmployee(EmployeeID(employeeID))
+      match(
+        employeesQuals,
+
+        (quals) => {
+          return reply
+            .status(200)
+            .send({ message: 'employees qualification statuses fetched', ...quals })
         },
         (err) => {
           return reply.status(404).send({ message: err })

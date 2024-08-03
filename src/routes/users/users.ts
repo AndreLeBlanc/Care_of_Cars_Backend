@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs'
 
 import {
   CreateUser,
+  CreateUserEmpReplySchema,
+  CreateUserEmpReplySchemaType,
+  CreateUserEmployeeSchemaType,
   CreateUserReply,
   CreateUserType,
   GetUserByIDSchema,
@@ -26,7 +29,9 @@ import {
 import { Either, match } from '../../utils/helper.js'
 
 import {
+  CreateUserEmployee,
   CreatedUser,
+  CreatedUserEmployee,
   DeleteUser,
   UserInfo,
   UserStore,
@@ -35,6 +40,7 @@ import {
   VerifyUser,
   assignToStore,
   createUser,
+  createUserEmployee,
   deleteStoreUser,
   generatePasswordHash,
   getUserByID,
@@ -48,8 +54,18 @@ import {
 } from '../../services/userService.js'
 
 import {
+  EmployeeActive,
+  EmployeeComment,
+  EmployeeHourlyRate,
+  EmployeeHourlyRateCurrency,
+  EmployeePersonalNumber,
+  EmployeePin,
+  EmploymentNumber,
+  IsSuperAdmin,
   PermissionTitle,
   RoleID,
+  ShortUserName,
+  Signature,
   StoreID,
   UserEmail,
   UserFirstName,
@@ -73,6 +89,7 @@ import {
   Search,
 } from '../../plugins/pagination.js'
 import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema.js'
+import { Currency } from 'dinero.js'
 
 export async function users(fastify: FastifyInstance) {
   fastify.get<{ Querystring: ListUserQueryParamType }>(
@@ -191,6 +208,79 @@ export async function users(fastify: FastifyInstance) {
         },
         (error) => {
           return reply.status(500).send({ error: 'Promise rejected with error: ' + error })
+        },
+      )
+    },
+  )
+
+  fastify.post<{
+    Body: CreateUserEmployeeSchemaType
+    Reply: CreateUserEmpReplySchemaType | StoreUserResponseSchemaType
+  }>(
+    '/employee',
+    {
+      preHandler: async (request, reply, done) => {
+        fastify.authorize(request, reply, PermissionTitle('create_user'))
+        fastify.authorize(request, reply, PermissionTitle('put_employee'))
+        done()
+        return reply
+      },
+
+      schema: {
+        body: CreateUser,
+        response: {
+          201: { CreateUserEmpReplySchema },
+          504: { StoreUserResponseSchema },
+        },
+      },
+    },
+    async (request, reply) => {
+      const password = request.body.user.password
+      const isStrongPass: boolean = await isStrongPassword(UserPassword(password))
+      if (!isStrongPass) {
+        return reply.status(422).send({ message: 'Provide a strong password' })
+      }
+      const passwordHash: string = await generatePasswordHash(UserPassword(password))
+
+      const stores = request.body.employee.storeID.map((store) => StoreID(store))
+      const userEmp: CreateUserEmployee = {
+        firstName: UserFirstName(request.body.user.firstName),
+        isSuperAdmin: IsSuperAdmin(false),
+        lastName: UserLastName(request.body.user.lastName),
+        email: UserEmail(request.body.user.email),
+        passwordHash: UserPassword(passwordHash),
+        roleID: RoleID(request.body.user.roleID),
+        shortUserName: ShortUserName(request.body.employee.shortUserName),
+        employmentNumber: EmploymentNumber(request.body.employee.employmentNumber),
+        employeePersonalNumber: EmployeePersonalNumber(
+          request.body.employee.employeePersonalNumber,
+        ),
+        signature: Signature(request.body.employee.signature),
+        employeePin: EmployeePin(request.body.employee.employeePin),
+        employeeActive: EmployeeActive(request.body.employee.employeeActive),
+        employeeComment: EmployeeComment(request.body.employee.employeeComment),
+        employeeHourlyRateCurrency: request.body.employee.employeeHourlyRateCurrency
+          ? EmployeeHourlyRateCurrency(request.body.employee.employeeHourlyRateCurrency as Currency)
+          : undefined,
+        employeeHourlyRate: request.body.employee.employeeHourlyRate
+          ? EmployeeHourlyRate(request.body.employee.employeeHourlyRate)
+          : undefined,
+      }
+      const createdUser: Either<string, CreatedUserEmployee> = await createUserEmployee(
+        userEmp,
+        stores,
+      )
+
+      match(
+        createdUser,
+        (userEmployee: CreatedUserEmployee) => {
+          return reply.status(201).send({
+            message: 'User and employee created',
+            ...userEmployee,
+          })
+        },
+        (error) => {
+          return reply.status(504).send({ message: 'Promise rejected with error: ' + error })
         },
       )
     },

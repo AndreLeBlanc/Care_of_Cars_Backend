@@ -68,6 +68,12 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
         brandedPage,
         offset,
       )
+      console.log('rolesPaginated')
+      console.log('rolesPaginated')
+      console.log(rolePaginated)
+      console.log('rolesPaginated')
+      console.log('rolesPaginated')
+      console.log('rolesPaginated')
       match(
         rolePaginated,
         (roles: RolesPaginated) => {
@@ -89,7 +95,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
             Page(page),
           )
 
-          return {
+          return reply.status(200).send({
             message: message,
             totalItems: roles.totalItems,
             nextUrl: nextUrl,
@@ -98,7 +104,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
             page: page,
             limit: limit,
             data: roles.data,
-          }
+          })
         },
         (err) => {
           reply.status(504).send({ message: err })
@@ -202,14 +208,15 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
+      console.log('body: ', request.body)
       if (Object.keys(request.body).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
       const role: Either<string, Role> = await updateRoleByID({
         roleID: RoleID(request.params.roleID),
-        roleDescription: request.body.description
+        description: request.body.description
           ? RoleDescription(request.body.description)
-          : null,
+          : undefined,
         roleName: RoleName(request.body.roleName),
       })
 
