@@ -8,8 +8,6 @@ import {
   RoleDescription,
   RoleID,
   RoleName,
-  permissions,
-  roleToPermissions,
   roles,
 } from '../schema/schema.js'
 
@@ -17,7 +15,7 @@ import { ilike } from 'drizzle-orm'
 
 import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
-import { Either, errorHandling, left, match, right } from '../utils/helper.js'
+import { Either, errorHandling, left, right } from '../utils/helper.js'
 
 type RoleDate = {
   createdAt: Date
@@ -183,140 +181,6 @@ export async function deleteRole(id: RoleID): Promise<Either<string, Role>> {
           updatedAt: deletedRole.updatedAt,
         })
       : left("couldn't find role")
-  } catch (e) {
-    return left(errorHandling(e))
-  }
-}
-
-export async function getRoleWithPermissions(
-  roleID: RoleID,
-): Promise<Either<string, { role: Role; roleHasPermission: RoleHasPermission[] }>> {
-  try {
-    const rolePerms = await db.transaction(async (tx) => {
-      const roleWithPermissions = await tx
-        .select({
-          permissionID: permissions.permissionID,
-          permissionName: permissions.permissionTitle,
-          createdAt: permissions.createdAt,
-          updatedAt: permissions.updatedAt,
-        })
-        .from(roleToPermissions)
-        .leftJoin(roles, eq(roleToPermissions.roleID, roles.roleID))
-        .leftJoin(permissions, eq(roleToPermissions.permissionID, permissions.permissionID))
-        .where(eq(roles.roleID, roleID))
-
-      const [role] = await tx.select().from(roles).where(eq(roles.roleID, roleID)).limit(1)
-
-      const roleBranded: Role = {
-        roleID: role.roleID,
-        roleName: role.roleName,
-        description: role.description ?? undefined,
-        createdAt: role.createdAt,
-        updatedAt: role.updatedAt,
-      }
-
-      return { role: roleBranded, roleWithPermissions: roleWithPermissions }
-    })
-    const brandedRoleWithPermissions: RoleHasPermission[] = rolePerms.roleWithPermissions.reduce(
-      (acc, roleWPerm) => {
-        if (
-          roleWPerm.permissionID != null &&
-          roleWPerm.permissionName != null &&
-          roleWPerm.createdAt != null &&
-          roleWPerm.updatedAt != null
-        ) {
-          acc.push({
-            permissionID: PermissionID(roleWPerm.permissionID),
-            permissionName: PermissionTitle(roleWPerm.permissionName),
-            createdAt: roleWPerm.createdAt,
-            updatedAt: roleWPerm.updatedAt,
-          })
-        }
-        return acc
-      },
-      new Array<RoleHasPermission>(),
-    )
-    return brandedRoleWithPermissions
-      ? right({ role: rolePerms.role, roleHasPermission: brandedRoleWithPermissions })
-      : left("couldn't find role with permissions")
-  } catch (e) {
-    return left(errorHandling(e))
-  }
-}
-
-export async function getAllPermissionStatus(
-  roleID: RoleID,
-): Promise<Either<string, { role: Role; allPermissionsWithStatus: PermissionStatus[] }>> {
-  try {
-    const rolePerms = await db.transaction(async (tx) => {
-      const allPermissions = await db
-        .select({
-          permissions: {
-            id: permissions.permissionID,
-            permissionName: permissions.permissionTitle,
-          },
-          roleToPermissions: { permissionID: roleToPermissions.permissionID },
-        })
-        .from(permissions)
-        .leftJoin(roleToPermissions, eq(roleToPermissions.roleID, roleID))
-
-      const [role] = await tx.select().from(roles).where(eq(roles.roleID, roleID)).limit(1)
-
-      const roleBranded: Role = {
-        roleID: role.roleID,
-        roleName: role.roleName,
-        description: role.description ?? undefined,
-        createdAt: role.createdAt,
-        updatedAt: role.updatedAt,
-      }
-      return { role: roleBranded, allPermissions: allPermissions }
-    })
-
-    const allPermissionsWithStatus: Array<{
-      permissionID: PermissionID
-      permissionName: PermissionTitle
-      hasPermission: boolean
-    }> = []
-    for (const el of rolePerms.allPermissions) {
-      allPermissionsWithStatus.push({
-        permissionID: PermissionID(el.permissions.id),
-        permissionName: PermissionTitle(el.permissions.permissionName),
-        hasPermission: el.roleToPermissions ? true : false,
-      })
-    }
-    return allPermissionsWithStatus
-      ? right({
-          role: rolePerms.role,
-          allPermissionsWithStatus: allPermissionsWithStatus,
-        })
-      : left("Couldn't find any permissions")
-  } catch (e) {
-    return left(errorHandling(e))
-  }
-}
-
-export async function roleHasPermission(
-  roleID: RoleID,
-  permissionName: PermissionTitle,
-): Promise<Either<string, boolean>> {
-  try {
-    const roleToPermissions: Either<
-      string,
-      { role: Role; roleHasPermission: RoleHasPermission[] }
-    > = await getRoleWithPermissions(roleID)
-
-    return match(
-      roleToPermissions,
-      (rolesToPerms) => {
-        return right(
-          rolesToPerms.roleHasPermission.filter((e) => e.permissionName === permissionName).length >
-            0,
-        )
-      },
-      (err) => {
-        return left(err)
-      },
-    )
   } catch (e) {
     return left(errorHandling(e))
   }

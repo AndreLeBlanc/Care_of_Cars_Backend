@@ -676,9 +676,13 @@ export const roles = pgTable('roles', {
   ...dbDates,
 })
 
+export const rolessRelations = relations(roles, ({ many }) => ({
+  roleToPermissions: many(roleToPermissions),
+}))
+
 export const permissions = pgTable('permissions', {
   permissionID: serial('permissionID').$type<PermissionID>().primaryKey(),
-  permissionTitle: varchar('permissionName', { length: 256 })
+  permissionTitle: varchar('permissionTitle', { length: 256 })
     .$type<PermissionTitle>()
     .unique()
     .notNull(),
@@ -686,10 +690,17 @@ export const permissions = pgTable('permissions', {
   ...dbDates,
 })
 
+export const permissionsRelations = relations(permissions, ({ many }) => ({
+  roleToPermissions: many(roleToPermissions),
+}))
+
 export const roleToPermissions = pgTable(
   'roleToPermissions',
   {
-    roleID: integer('roleID').$type<RoleID>().notNull(),
+    roleID: integer('roleID')
+      .$type<RoleID>()
+      .references(() => roles.roleID)
+      .notNull(),
     permissionID: integer('permissionID')
       .$type<PermissionID>()
       .references(() => permissions.permissionID)
@@ -706,6 +717,17 @@ export const roleToPermissions = pgTable(
     }
   },
 )
+
+export const roleToPermissionsRelations = relations(roleToPermissions, ({ one }) => ({
+  roles: one(roles, {
+    fields: [roleToPermissions.roleID],
+    references: [roles.roleID],
+  }),
+  permissions: one(permissions, {
+    fields: [roleToPermissions.permissionID],
+    references: [permissions.permissionID],
+  }),
+}))
 
 export const serviceCategories = pgTable('serviceCategories', {
   serviceCategoryID: serial('serviceCategoryID').$type<ServiceCategoryID>().primaryKey(),

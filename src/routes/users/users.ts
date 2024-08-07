@@ -74,7 +74,7 @@ import {
   UserPassword,
 } from '../../schema/schema.js'
 
-import { getAllPermissionStatus, getRoleWithPermissions } from '../../services/roleService.js'
+import { getRoleWithPermissions } from '../../services/roleToPermissionService.js'
 
 import {
   Limit,
@@ -304,7 +304,7 @@ export async function users(fastify: FastifyInstance) {
           if (match) {
             const token = fastify.jwt.sign({ user })
             const rolePermissions = await getRoleWithPermissions(RoleID(user.role.roleID))
-            const roleFullPermissions = await getAllPermissionStatus(RoleID(user.role.roleID))
+            //            const roleFullPermissions = await getAllPermissionStatus(RoleID(user.role.roleID))
 
             return reply.status(200).send({
               message: 'Login success',
@@ -320,7 +320,6 @@ export async function users(fastify: FastifyInstance) {
                   id: user.role.roleID,
                   roleName: user.role.roleName,
                   rolePermissions: rolePermissions,
-                  roleFullPermissions: roleFullPermissions,
                 },
               },
             })

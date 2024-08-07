@@ -18,7 +18,7 @@ import { Either, errorHandling, left, right } from '../utils/helper.js'
 export type PermissionIDDescName = {
   permissionID: PermissionID
   permissionTitle: PermissionTitle
-  permissionDescription: PermissionDescription | null
+  permissionDescription?: PermissionDescription
 }
 
 type PermissionCreatedAndUpdated = {
@@ -55,13 +55,7 @@ export async function getPermissionsPaginate(
       .where(condition)
 
     const permissionsList = await db
-      .select({
-        permissionID: permissions.permissionID,
-        permissionTitle: permissions.permissionTitle,
-        permissionDescription: permissions.description,
-        createdAt: permissions.createdAt,
-        updatedAt: permissions.updatedAt,
-      })
+      .select()
       .from(permissions)
       .where(condition)
       .orderBy(desc(permissions.permissionID))
@@ -74,7 +68,13 @@ export async function getPermissionsPaginate(
       totalItems: totalItems.count,
       totalPage,
       perPage: page,
-      data: permissionsList,
+      data: permissionsList.map((perm) => ({
+        permissionID: perm.permissionID,
+        permissionTitle: perm.permissionTitle,
+        permissionDescription: perm.description ?? undefined,
+        createdAt: perm.createdAt,
+        updatedAt: perm.updatedAt,
+      })),
     })
   } catch (e) {
     return left(errorHandling(e))
@@ -97,7 +97,13 @@ export async function createPermission(
         permissionTitle: permissions.permissionTitle,
         permissionDescription: permissions.description,
       })
-    return createdPermission ? right(createdPermission) : left("couldn't create permission")
+
+    const brandedPerm = {
+      permissionID: createdPermission.permissionID,
+      permissionTitle: createdPermission.permissionTitle,
+      permissionDescription: createdPermission.permissionDescription ?? undefined,
+    }
+    return createdPermission ? right(brandedPerm) : left("couldn't create permission")
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -115,7 +121,14 @@ export async function getPermissionByID(id: PermissionID): Promise<Either<string
       })
       .from(permissions)
       .where(eq(permissions.permissionID, id))
-    return permission ? right(permission) : left("couldn't find permission")
+    const brandedPerm = {
+      permissionID: permission.permissionID,
+      permissionTitle: permission.permissionTitle,
+      permissionDescription: permission.permissionDescription ?? undefined,
+      createdAt: permission.createdAt,
+      updatedAt: permission.updatedAt,
+    }
+    return permission ? right(brandedPerm) : left("couldn't find permission")
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -141,7 +154,14 @@ export async function updatePermissionByID(
         createdAt: permissions.createdAt,
         updatedAt: permissions.updatedAt,
       })
-    return updatedPermission ? right(updatedPermission) : left("couldn't find permission")
+    const brandedPerm = {
+      permissionID: updatedPermission.permissionID,
+      permissionTitle: updatedPermission.permissionTitle,
+      permissionDescription: updatedPermission.permissionDescription ?? undefined,
+      createdAt: updatedPermission.createdAt,
+      updatedAt: updatedPermission.updatedAt,
+    }
+    return updatedPermission ? right(brandedPerm) : left("couldn't find permission")
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -159,7 +179,14 @@ export async function deletePermission(id: PermissionID): Promise<Either<string,
         createdAt: permissions.createdAt,
         updatedAt: permissions.updatedAt,
       })
-    return deletedPermission ? right(deletedPermission) : left("couldn't find permission")
+    const brandedPerm = {
+      permissionID: deletedPermission.permissionID,
+      permissionTitle: deletedPermission.permissionTitle,
+      permissionDescription: deletedPermission.permissionDescription ?? undefined,
+      createdAt: deletedPermission.createdAt,
+      updatedAt: deletedPermission.updatedAt,
+    }
+    return deletedPermission ? right(brandedPerm) : left("couldn't find permission")
   } catch (e) {
     return left(errorHandling(e))
   }

@@ -8,6 +8,20 @@
       "when": 1722695261907,
       "tag": "0000_curious_firedrake",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1722766822735,
+      "tag": "0001_massive_lady_deathstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1722980593642,
+      "tag": "0002_motionless_dakota_north",
+      "breakpoints": true
     }
   ]
 }

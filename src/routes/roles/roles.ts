@@ -2,11 +2,9 @@ import { FastifyInstance } from 'fastify'
 
 import {
   CreatedRole,
-  PermissionStatus,
   Role,
   createRole,
   deleteRole,
-  getAllPermissionStatus,
   getRoleByID,
   getRolesPaginate,
   updateRoleByID,
@@ -68,12 +66,6 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
         brandedPage,
         offset,
       )
-      console.log('rolesPaginated')
-      console.log('rolesPaginated')
-      console.log(rolePaginated)
-      console.log('rolesPaginated')
-      console.log('rolesPaginated')
-      console.log('rolesPaginated')
       match(
         rolePaginated,
         (roles: RolesPaginated) => {
@@ -208,7 +200,6 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      console.log('body: ', request.body)
       if (Object.keys(request.body).length == 0) {
         return reply.status(422).send({ message: 'Provide at least one column to update.' })
       }
@@ -261,45 +252,6 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
         },
         (err) => {
           return reply.status(404).send({ message: err })
-        },
-      )
-    },
-  )
-
-  fastify.get<{ Params: getRoleByIDType }>(
-    '/roleWithPermissions/:roleID',
-    {
-      preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = PermissionTitle('get_role_with_permissions')
-        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
-        if (!authorizeStatus) {
-          return reply
-            .status(403)
-            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
-        }
-        done()
-        return reply
-      },
-      schema: {
-        params: getRoleByIDSchema,
-      },
-    },
-    async (request, reply) => {
-      const roleID: RoleID = RoleID(request.params.roleID)
-      const role: Either<
-        string,
-        {
-          role: Role
-          allPermissionsWithStatus: PermissionStatus[]
-        }
-      > = await getAllPermissionStatus(roleID)
-      match(
-        role,
-        (roleToPerm) => {
-          reply.status(200).send({ message: 'Role with permissions', ...roleToPerm })
-        },
-        (err) => {
-          reply.status(404).send({ message: err })
         },
       )
     },
