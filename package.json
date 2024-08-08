@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node --loader ts-node/esm  test/**/roles.test.ts",
+    "test": "node --loader ts-node/esm  test/**/category.test.ts",
     "start": "npm run build:ts && node dist/index.js",
     "build:ts": "tsc",
     "dockerDev": "nodemon dist/index.js",

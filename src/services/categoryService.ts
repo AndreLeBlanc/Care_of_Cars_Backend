@@ -19,8 +19,8 @@ import { Either, errorHandling, left, right } from '../utils/helper.js'
 
 export type CreateServiceCategory = {
   serviceCategoryID: ServiceCategoryID
-  serviceCategoryName?: ServiceCategoryName
-  ServiceCategoryDescription?: ServiceCategoryDescription
+  serviceCategoryName: ServiceCategoryName
+  serviceCategoryDescription?: ServiceCategoryDescription
 }
 
 export type ServiceCategory = CreateServiceCategory & {
@@ -43,13 +43,6 @@ export type UpdatedServiceCategoryByID = {
   description?: ServiceCategoryID
   name?: ServiceCategoryName
 }
-export type UpdatedServiceCategory = {
-  serviceCategoryID: ServiceCategoryID
-  ServiceCategoryDescription?: ServiceCategoryDescription
-  serviceCategoryName: ServiceCategoryName
-  createdAt: Date
-  updatedAt: Date
-}
 
 export type UpdatedProductCategory = {
   productCategoryID: ProductCategoryID
@@ -63,14 +56,14 @@ export type ServicesPaginated = {
   totalItems: number
   totalPage: number
   perPage: number
-  data: ServiceCategory[]
+  data: CreateServiceCategory[]
 }
 
 export type ProductsCategoryPaginated = {
   totalItems: number
   totalPage: number
   perPage: number
-  data: ProductCategory[]
+  data: CreateProductCategory[]
 }
 
 //Get Product Category List
@@ -98,8 +91,6 @@ export async function getProductCategoriesPaginate(
         id: productCategories.productCategoryID,
         name: productCategories.productCategoryName,
         description: productCategories.description,
-        createdAt: productCategories.createdAt,
-        updatedAt: productCategories.updatedAt,
       })
       .from(productCategories)
       .where(condition)
@@ -107,14 +98,12 @@ export async function getProductCategoriesPaginate(
       .limit(limit || 10)
       .offset(offset || 0)
 
-    const productCategoryListBranded: ProductCategory[] = productCategorysList.map(
+    const productCategoryListBranded: CreateProductCategory[] = productCategorysList.map(
       (productCategory) => {
         return {
           productCategoryID: productCategory.id,
           productCategoryName: productCategory.name,
           productCategoryDescription: productCategory.description ?? undefined,
-          createdAt: productCategory.createdAt,
-          updatedAt: productCategory.updatedAt,
         }
       },
     )
@@ -141,7 +130,7 @@ export async function getServiceCategoriesPaginate(
 ): Promise<Either<string, ServicesPaginated>> {
   const condition = or(
     ilike(serviceCategories.serviceCategoryName, '%' + search + '%'),
-    ilike(serviceCategories.description, '%' + search + '%'),
+    ilike(serviceCategories.serviceCategoryDescription, '%' + search + '%'),
   )
 
   try {
@@ -156,9 +145,7 @@ export async function getServiceCategoriesPaginate(
       .select({
         id: serviceCategories.serviceCategoryID,
         name: serviceCategories.serviceCategoryName,
-        description: serviceCategories.description,
-        createdAt: serviceCategories.createdAt,
-        updatedAt: serviceCategories.updatedAt,
+        description: serviceCategories.serviceCategoryDescription,
       })
       .from(serviceCategories)
       .where(condition)
@@ -166,14 +153,12 @@ export async function getServiceCategoriesPaginate(
       .limit(limit || 10)
       .offset(offset || 0)
 
-    const serviceCategorysListBranded: ServiceCategory[] = serviceCategorysList.map(
+    const serviceCategorysListBranded: CreateServiceCategory[] = serviceCategorysList.map(
       (serviceCategory) => {
         return {
           serviceCategoryID: serviceCategory.id,
           serviceCategoryName: serviceCategory.name,
-          ServiceCategoryDescription: serviceCategory.description ?? undefined,
-          createdAt: serviceCategory.createdAt,
-          updatedAt: serviceCategory.updatedAt,
+          serviceCategoryDescription: serviceCategory.description ?? undefined,
         }
       },
     )
@@ -199,16 +184,16 @@ export async function createServiceCategory(
   try {
     const [createdServiceCategory] = await db
       .insert(serviceCategories)
-      .values({ serviceCategoryName: name, description: description })
+      .values({ serviceCategoryName: name, serviceCategoryDescription: description })
       .returning({
         id: serviceCategories.serviceCategoryID,
         serviceCategoryName: serviceCategories.serviceCategoryName,
-        description: serviceCategories.description,
+        serviceCategoryDescription: serviceCategories.serviceCategoryDescription,
       })
     return right({
       serviceCategoryID: createdServiceCategory.id,
       serviceCategoryName: createdServiceCategory.serviceCategoryName,
-      ServiceCategoryDescription: createdServiceCategory.description ?? undefined,
+      serviceCategoryDescription: createdServiceCategory.serviceCategoryDescription ?? undefined,
     })
   } catch (e) {
     return left(errorHandling(e))
@@ -247,7 +232,7 @@ export async function getServiceCategoryByID(
       .select({
         serviceCategoryID: serviceCategories.serviceCategoryID,
         serviceCategoryName: serviceCategories.serviceCategoryName,
-        ServiceCategoryDescription: serviceCategories.description,
+        serviceCategoryDescription: serviceCategories.serviceCategoryDescription,
         createdAt: serviceCategories.createdAt,
         updatedAt: serviceCategories.updatedAt,
       })
@@ -258,7 +243,7 @@ export async function getServiceCategoryByID(
       ? right({
           serviceCategoryID: results.serviceCategoryID,
           serviceCategoryName: results.serviceCategoryName,
-          ServiceCategoryDescription: results.ServiceCategoryDescription ?? undefined,
+          serviceCategoryDescription: results.serviceCategoryDescription ?? undefined,
           createdAt: results.createdAt,
           updatedAt: results.updatedAt,
         })
@@ -299,7 +284,7 @@ export async function getProductCategoryByID(
 
 export async function updateServiceCategoryByID(
   serviceCategory: CreateServiceCategory,
-): Promise<Either<string, UpdatedServiceCategory>> {
+): Promise<Either<string, ServiceCategory>> {
   const serviceCategoryWithUpdatedAt = { ...serviceCategory, updatedAt: new Date() }
   try {
     const [updatedServiceCategory] = await db
@@ -309,13 +294,13 @@ export async function updateServiceCategoryByID(
       .returning({
         serviceCategoryID: serviceCategories.serviceCategoryID,
         serviceCategoryName: serviceCategories.serviceCategoryName,
-        ServiceCategoryDescription: serviceCategories.description,
+        serviceCategoryDescription: serviceCategories.serviceCategoryDescription,
         createdAt: serviceCategories.createdAt,
         updatedAt: serviceCategories.updatedAt,
       })
     return right({
       serviceCategoryID: updatedServiceCategory.serviceCategoryID,
-      ServiceCategoryDescription: updatedServiceCategory.ServiceCategoryDescription ?? undefined,
+      serviceCategoryDescription: updatedServiceCategory.serviceCategoryDescription ?? undefined,
       serviceCategoryName: updatedServiceCategory.serviceCategoryName,
       createdAt: updatedServiceCategory.createdAt,
       updatedAt: updatedServiceCategory.updatedAt,
@@ -350,15 +335,16 @@ export async function deleteServiceCategory(
     const [deletedServiceCategory] = await db
       .delete(serviceCategories)
       .where(eq(serviceCategories.serviceCategoryID, id))
-      .returning({
-        serviceCategoryID: serviceCategories.serviceCategoryID,
-        serviceCategoryName: serviceCategories.serviceCategoryName,
-        serviceCategoryDescription: serviceCategories.description,
-        createdAt: serviceCategories.createdAt,
-        updatedAt: serviceCategories.updatedAt,
-      })
+      .returning()
     return deletedServiceCategory
-      ? right(deletedServiceCategory)
+      ? right({
+          serviceCategoryID: deletedServiceCategory.serviceCategoryID,
+          serviceCategoryName: deletedServiceCategory.serviceCategoryName,
+          serviceCategoryDescription:
+            deletedServiceCategory.serviceCategoryDescription ?? undefined,
+          createdAt: deletedServiceCategory.createdAt,
+          updatedAt: deletedServiceCategory.updatedAt,
+        })
       : left('no service category found')
   } catch (e) {
     return left(errorHandling(e))

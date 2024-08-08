@@ -735,7 +735,9 @@ export const serviceCategories = pgTable('serviceCategories', {
     .$type<ServiceCategoryName>()
     .unique()
     .notNull(),
-  description: text('description').$type<ServiceCategoryDescription>(),
+  serviceCategoryDescription: varchar(
+    'serviceCategoryDescription',
+  ).$type<ServiceCategoryDescription>(),
   ...dbDates,
 })
 
