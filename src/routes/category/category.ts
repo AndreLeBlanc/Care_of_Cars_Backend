@@ -39,7 +39,7 @@ import {
   PatchServiceCategorySchema,
   PatchServiceCategorySchemaType,
   getServiceCategoryByIDSchema,
-  getServiceCategoryByIDType,
+  getServiceCategoryByIDSchemaType,
 } from './categorySchema.js'
 
 import {
@@ -270,8 +270,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
   )
 
   // Get Product category
-  fastify.get<{ Params: getServiceCategoryByIDType }>(
-    '/product/:producgCategoryID',
+  fastify.get<{ Params: getServiceCategoryByIDSchemaType }>(
+    '/product/:id',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('view_product_category')
@@ -302,8 +302,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
   )
 
   //Get service category by id
-  fastify.get<{ Params: getServiceCategoryByIDType }>(
-    '/service/:serviceCategoryID',
+  fastify.get<{ Params: getServiceCategoryByIDSchemaType }>(
+    '/service/:id',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('view_service_category')
@@ -336,9 +336,9 @@ export async function serviceCategory(fastify: FastifyInstance) {
   fastify.patch<{
     Body: PatchServiceCategorySchemaType
     Reply: object
-    Params: getServiceCategoryByIDType
+    Params: getServiceCategoryByIDSchemaType
   }>(
-    '/service/:serviceCategoryID',
+    '/service/:id',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('update_service_category')
@@ -389,9 +389,9 @@ export async function serviceCategory(fastify: FastifyInstance) {
   fastify.patch<{
     Body: PatchServiceCategorySchemaType
     Reply: object
-    Params: getServiceCategoryByIDType
+    Params: getServiceCategoryByIDSchemaType
   }>(
-    '/product/:producgCategoryID',
+    '/product/:id',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('update_product_category')
@@ -440,7 +440,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
   )
 
   //Delete service category
-  fastify.delete<{ Params: getServiceCategoryByIDType }>(
+  fastify.delete<{ Params: getServiceCategoryByIDSchemaType }>(
     '/service/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -476,7 +476,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
   )
 
   //Delete product category
-  fastify.delete<{ Params: getServiceCategoryByIDType }>(
+  fastify.delete<{ Params: getServiceCategoryByIDSchemaType }>(
     '/product/:id',
     {
       preHandler: async (request, reply, done) => {

@@ -20,7 +20,7 @@ export type CreateServiceCategorySchemaType = Static<typeof CreateServiceCategor
 export const getServiceCategoryByIDSchema = Type.Object({
   id: CategoryIDSchema,
 })
-export type getServiceCategoryByIDType = Static<typeof getServiceCategoryByIDSchema>
+export type getServiceCategoryByIDSchemaType = Static<typeof getServiceCategoryByIDSchema>
 
 export const PatchServiceCategorySchema = Type.Object({
   name: Type.String(),
