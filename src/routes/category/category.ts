@@ -18,7 +18,6 @@ import {
   ServiceCategory,
   ServicesPaginated,
   UpdatedProductCategory,
-  UpdatedServiceCategory,
   createProductCategory,
   createServiceCategory,
   deleteProductCategory,
@@ -36,8 +35,22 @@ import {
   CreateServiceCategorySchemaType,
   ListServiceCategoryQueryParamSchema,
   ListServiceCategoryQueryParamSchemaType,
+  MessageReplySchema,
+  MessageReplySchemaType,
   PatchServiceCategorySchema,
   PatchServiceCategorySchemaType,
+  ProductCategoryReplySchema,
+  ProductCategoryReplySchemaType,
+  ProductCategorySchema,
+  ProductCategorySchemaType,
+  ProductsPaginatedSchema,
+  ProductsPaginatedSchemaType,
+  ServiceCategoryReplySchema,
+  ServiceCategoryReplySchemaType,
+  ServiceCategorySchema,
+  ServiceCategorySchemaType,
+  ServicesPaginatedSchema,
+  ServicesPaginatedSchemaType,
   getServiceCategoryByIDSchema,
   getServiceCategoryByIDSchemaType,
 } from './categorySchema.js'
@@ -59,7 +72,10 @@ import { Either, match } from '../../utils/helper.js'
 
 export async function serviceCategory(fastify: FastifyInstance) {
   //Get service categories
-  fastify.get<{ Querystring: ListServiceCategoryQueryParamSchemaType }>(
+  fastify.get<{
+    Querystring: ListServiceCategoryQueryParamSchemaType
+    Reply: ServicesPaginatedSchemaType | MessageReplySchemaType
+  }>(
     '/service-category-list',
     {
       preHandler: async (request, reply, done) => {
@@ -75,6 +91,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
       schema: {
         querystring: ListServiceCategoryQueryParamSchema,
+        response: { 200: ServicesPaginatedSchema, 403: MessageReplySchema },
       },
     },
     async function (request, reply) {
@@ -127,7 +144,10 @@ export async function serviceCategory(fastify: FastifyInstance) {
   )
 
   //Get Product categories
-  fastify.get<{ Querystring: ListServiceCategoryQueryParamSchemaType }>(
+  fastify.get<{
+    Querystring: ListServiceCategoryQueryParamSchemaType
+    Reply: ProductsPaginatedSchemaType | MessageReplySchemaType
+  }>(
     '/products-category-list',
     {
       preHandler: async (request, reply, done) => {
@@ -143,6 +163,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
       schema: {
         querystring: ListServiceCategoryQueryParamSchema,
+        response: { 200: ProductsPaginatedSchema, 403: MessageReplySchema },
       },
     },
     async function (request, reply) {
@@ -195,7 +216,10 @@ export async function serviceCategory(fastify: FastifyInstance) {
   )
 
   //create service category
-  fastify.post<{ Body: CreateServiceCategorySchemaType; Reply: object }>(
+  fastify.post<{
+    Body: CreateServiceCategorySchemaType
+    Reply: (MessageReplySchemaType & ServiceCategorySchemaType) | MessageReplySchemaType
+  }>(
     '/service',
     {
       preHandler: async (request, reply, done) => {
@@ -211,7 +235,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
       schema: {
         body: CreateServiceCategorySchema,
-        response: {},
+        response: {
+          201: { ...MessageReplySchema, ...ServiceCategorySchema },
+          404: MessageReplySchema,
+          403: MessageReplySchema,
+        },
       },
     },
     async (request, reply) => {
@@ -224,7 +252,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       match(
         serviceCategory,
         (serviceCategory: CreateServiceCategory) => {
-          return reply.status(201).send({ message: 'Service Category created', serviceCategory })
+          return reply.status(201).send({ message: 'Service Category created', ...serviceCategory })
         },
         (err) => {
           return reply.status(404).send({ message: err })
@@ -232,8 +260,12 @@ export async function serviceCategory(fastify: FastifyInstance) {
       )
     },
   )
+
   //Create Product category
-  fastify.post<{ Body: CreateServiceCategorySchemaType; Reply: object }>(
+  fastify.post<{
+    Body: CreateServiceCategorySchemaType
+    Reply: (MessageReplySchemaType & ProductCategorySchemaType) | MessageReplySchemaType
+  }>(
     '/product',
     {
       preHandler: async (request, reply, done) => {
@@ -249,7 +281,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
       schema: {
         body: CreateServiceCategorySchema,
-        response: {},
+        response: {
+          201: { ...MessageReplySchema, ...ProductCategorySchema },
+          404: MessageReplySchema,
+          403: MessageReplySchema,
+        },
       },
     },
     async (request, reply) => {
@@ -261,7 +297,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       )
       match(
         productCategory,
-        (prodCat) => reply.status(201).send({ message: 'Product Category created', prodCat }),
+        (prodCat) => reply.status(201).send({ message: 'Product Category created', ...prodCat }),
         (err) => {
           reply.status(404).send({ message: err })
         },
@@ -270,7 +306,10 @@ export async function serviceCategory(fastify: FastifyInstance) {
   )
 
   // Get Product category
-  fastify.get<{ Params: getServiceCategoryByIDSchemaType }>(
+  fastify.get<{
+    Params: getServiceCategoryByIDSchemaType
+    Reply: (MessageReplySchemaType & ProductCategoryReplySchemaType) | MessageReplySchemaType
+  }>(
     '/product/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -286,6 +325,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
       schema: {
         params: getServiceCategoryByIDSchema,
+        response: {
+          200: { ...MessageReplySchema, ...ProductCategoryReplySchema },
+          404: MessageReplySchema,
+          403: MessageReplySchema,
+        },
       },
     },
     async (request, reply) => {
@@ -293,7 +337,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
       const productCategory: Either<string, ProductCategory> = await getProductCategoryByID(id)
       match(
         productCategory,
-        (prodCat: ProductCategory) => reply.status(200).send({ prodCat }),
+        (prodCat: ProductCategory) =>
+          reply.status(200).send({ message: 'product category', ...prodCat }),
         (err) => {
           reply.status(404).send({ message: err })
         },
@@ -302,7 +347,10 @@ export async function serviceCategory(fastify: FastifyInstance) {
   )
 
   //Get service category by id
-  fastify.get<{ Params: getServiceCategoryByIDSchemaType }>(
+  fastify.get<{
+    Params: getServiceCategoryByIDSchemaType
+    Reply: (MessageReplySchemaType & ServiceCategoryReplySchemaType) | MessageReplySchemaType
+  }>(
     '/service/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -318,6 +366,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
       schema: {
         params: getServiceCategoryByIDSchema,
+        response: {
+          200: { ...MessageReplySchema, ...ServiceCategoryReplySchema },
+          404: MessageReplySchema,
+          403: MessageReplySchema,
+        },
       },
     },
     async (request, reply) => {
@@ -325,7 +378,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
       const serviceCategory: Either<string, ServiceCategory> = await getServiceCategoryByID(id)
       match(
         serviceCategory,
-        (servCat: ServiceCategory) => reply.status(200).send({ serviceCategory: servCat }),
+        (servCat: ServiceCategory) =>
+          reply.status(200).send({ message: 'service category', ...servCat }),
         (err) => {
           return reply.status(404).send({ message: err })
         },
@@ -335,7 +389,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   fastify.patch<{
     Body: PatchServiceCategorySchemaType
-    Reply: object
+    Reply: (MessageReplySchemaType & ServiceCategoryReplySchemaType) | MessageReplySchemaType
     Params: getServiceCategoryByIDSchemaType
   }>(
     '/service/:id',
@@ -354,6 +408,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       schema: {
         body: PatchServiceCategorySchema,
         params: getServiceCategoryByIDSchema,
+        response: {
+          201: { ...MessageReplySchema, ...ServiceCategoryReplySchema },
+          404: MessageReplySchema,
+          403: MessageReplySchema,
+        },
       },
     },
     async (request, reply) => {
@@ -363,20 +422,18 @@ export async function serviceCategory(fastify: FastifyInstance) {
           .status(422)
           .send({ message: 'Provide at least one required property to update.' })
       } else {
-        const serviceCategory: Either<string, UpdatedServiceCategory> =
-          await updateServiceCategoryByID({
-            serviceCategoryID: ServiceCategoryID(request.params.id),
-            serviceCategoryName: request.body.name
-              ? ServiceCategoryName(request.body.name)
-              : undefined,
-            ServiceCategoryDescription: request.body.description
-              ? ServiceCategoryDescription(request.body.description)
-              : undefined,
-          })
+        const serviceCategory: Either<string, ServiceCategory> = await updateServiceCategoryByID({
+          serviceCategoryID: ServiceCategoryID(request.params.id),
+          serviceCategoryName: ServiceCategoryName(request.body.name),
+          serviceCategoryDescription: request.body.description
+            ? ServiceCategoryDescription(request.body.description)
+            : undefined,
+        })
+
         match(
           serviceCategory,
-          (servCat: UpdatedServiceCategory) =>
-            reply.status(201).send({ message: 'Service Category Updated', data: servCat }),
+          (servCat: ServiceCategory) =>
+            reply.status(201).send({ message: 'Service Category Updated', ...servCat }),
           (err) => {
             return reply.status(404).send({ message: err })
           },
@@ -388,7 +445,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
   //Delete product category
   fastify.patch<{
     Body: PatchServiceCategorySchemaType
-    Reply: object
+    Reply: (MessageReplySchemaType & ProductCategoryReplySchemaType) | MessageReplySchemaType
     Params: getServiceCategoryByIDSchemaType
   }>(
     '/product/:id',
@@ -407,6 +464,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       schema: {
         body: PatchServiceCategorySchema,
         params: getServiceCategoryByIDSchema,
+        response: {
+          200: { ...MessageReplySchema, ...ProductCategoryReplySchema },
+          404: MessageReplySchema,
+          403: MessageReplySchema,
+        },
       },
     },
     async (request, reply) => {
@@ -430,7 +492,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
         match(
           productCategory,
           (prodCat: UpdatedProductCategory) =>
-            reply.status(201).send({ message: 'product Category Updated', data: prodCat }),
+            reply.status(201).send({ message: 'product Category Updated', ...prodCat }),
           (err) => {
             return reply.status(404).send({ message: err })
           },
@@ -440,7 +502,10 @@ export async function serviceCategory(fastify: FastifyInstance) {
   )
 
   //Delete service category
-  fastify.delete<{ Params: getServiceCategoryByIDSchemaType }>(
+  fastify.delete<{
+    Params: getServiceCategoryByIDSchemaType
+    Reply: (MessageReplySchemaType & ServiceCategoryReplySchemaType) | MessageReplySchemaType
+  }>(
     '/service/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -456,6 +521,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
       schema: {
         params: getServiceCategoryByIDSchema,
+        response: {
+          200: { ...MessageReplySchema, ...ServiceCategoryReplySchema },
+          404: MessageReplySchema,
+          403: MessageReplySchema,
+        },
       },
     },
     async (request, reply) => {
@@ -466,7 +536,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       match(
         deletedServiceCategory,
         (delServCat: ServiceCategory) => {
-          return reply.status(200).send({ message: 'Service Category deleted', delServCat })
+          return reply.status(200).send({ message: 'Service Category deleted', ...delServCat })
         },
         (err) => {
           return reply.status(404).send({ message: err })
@@ -476,7 +546,10 @@ export async function serviceCategory(fastify: FastifyInstance) {
   )
 
   //Delete product category
-  fastify.delete<{ Params: getServiceCategoryByIDSchemaType }>(
+  fastify.delete<{
+    Params: getServiceCategoryByIDSchemaType
+    Reply: (MessageReplySchemaType & ProductCategoryReplySchemaType) | MessageReplySchemaType
+  }>(
     '/product/:id',
     {
       preHandler: async (request, reply, done) => {
@@ -492,6 +565,11 @@ export async function serviceCategory(fastify: FastifyInstance) {
       },
       schema: {
         params: getServiceCategoryByIDSchema,
+        response: {
+          200: { ...MessageReplySchema, ...ServiceCategoryReplySchema },
+          404: MessageReplySchema,
+          403: MessageReplySchema,
+        },
       },
     },
     async (request, reply) => {
@@ -502,7 +580,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
       match(
         deletedProductCategory,
         (delProdCat: ProductCategory) => {
-          return reply.status(200).send({ message: 'Product Category deleted', delProdCat })
+          return reply.status(200).send({ message: 'Product Category deleted', ...delProdCat })
         },
         (err) => {
           return reply.status(404).send({ message: err })
