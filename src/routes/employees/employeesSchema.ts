@@ -1,10 +1,8 @@
-import { CreatedAndUpdatedAT } from '../../utils/helper.js'
-
+import { EmployeeID, GlobalQualID, LocalQualID } from '../../utils/helper.js'
 import { Static, Type } from '@sinclair/typebox'
+import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 import { storeID } from '../stores/storesSchema.js'
 import { userID } from '../users/userSchema.js'
-
-import { employeeID, globalQualID, localQualID } from '../../utils/helper.js'
 
 const AbsenceSchema = Type.Boolean()
 const EmployeeSpceialHoursID = Type.Integer()
@@ -21,6 +19,7 @@ const employeeComment = Type.String()
 const EmployeeHourlyRateCurrency = Type.Optional(Type.String())
 const employeeCheckedIn = Type.String({ format: 'date' })
 const employeeCheckedOut = Type.String({ format: 'date' })
+
 const EmployeeSchema = Type.Object({
   userID: userID,
   shortUserName: shortUserName,
@@ -37,7 +36,7 @@ export const EmployeeSpceialHoursIDSchema = Type.Object({
 export type EmployeeSpceialHoursIDSchemaType = Static<typeof EmployeeSpceialHoursIDSchema>
 
 export const EmployeeSpceialHourByDateSchema = Type.Object({
-  employeeID: employeeID,
+  employeeID: EmployeeID,
   storeID: storeID,
   begin: Type.String({ format: 'date' }),
   end: Type.String({ format: 'date' }),
@@ -48,8 +47,8 @@ export type EmployeeSpceialHourByDateSchemaType = Static<typeof EmployeeSpceialH
 export const ListEmployeeWorkingHoursSchema = Type.Object({
   storeID: storeID,
   startDay: Type.String({ format: 'date' }),
-  quals: Type.Optional(Type.Array(localQualID)),
-  localQuals: Type.Optional(Type.Array(globalQualID)),
+  quals: Type.Optional(Type.Array(LocalQualID)),
+  localQuals: Type.Optional(Type.Array(GlobalQualID)),
 })
 
 export type ListEmployeeWorkingHoursSchemaType = Static<typeof ListEmployeeWorkingHoursSchema>
@@ -64,7 +63,7 @@ export const CreateEmployeeSchema = Type.Composite([
   EmployeeSchema,
   Type.Object({
     storeID: Type.Array(storeID, { minItems: 1 }),
-    employeeID: Type.Optional(employeeID),
+    employeeID: Type.Optional(EmployeeID),
     EmployeeHourlyRateCurrency: Type.Optional(EmployeeHourlyRateCurrency),
     employeeHourlyRate: Type.Optional(employeeHourlyRate),
   }),
@@ -77,7 +76,7 @@ export const EmployeeReplySchema = Type.Composite([
   Type.Object({
     storeID: Type.Array(storeID, { minItems: 1 }),
     employeeHourlyRateDinero: employeeHourlyRate,
-    employeeID: employeeID,
+    employeeID: EmployeeID,
     employeeCheckedIn: Type.Optional(employeeCheckedIn),
     employeeCheckedOut: Type.Optional(employeeCheckedOut),
   }),
@@ -88,7 +87,7 @@ export type EmployeeReplySchemaType = Static<typeof EmployeeReplySchema>
 export const SelectedEmployeeSchema = Type.Composite([
   EmployeeSchema,
   Type.Object({
-    employeeID: employeeID,
+    employeeID: EmployeeID,
     storeIDs: Type.Array(storeID),
     EmployeeHourlyRateCurrency: EmployeeHourlyRateCurrency,
     EmployeeHourlyRateDinero: employeeHourlyRate,
@@ -109,7 +108,7 @@ export const ListEmployeesReplySchema = Type.Composite([
     employees: Type.Array(
       Type.Object({
         shortUserName: shortUserName,
-        employeeID: employeeID,
+        employeeID: EmployeeID,
         employmentNumber: employmentNumber,
         employeePersonalNumber: employeePersonalNumber,
         signature: signature,
@@ -136,7 +135,7 @@ export const ListEmployeesSchema = Type.Object({
 export type ListEmployeesSchemaType = Static<typeof ListEmployeesSchema>
 
 export const CheckInTimesSchema = Type.Object({
-  employeeID: employeeID,
+  employeeID: EmployeeID,
   employeeCheckIn: Type.Optional(employeeCheckedIn),
   employeeCheckOut: Type.Optional(employeeCheckedOut),
 })
@@ -144,7 +143,7 @@ export const CheckInTimesSchema = Type.Object({
 export type CheckInTimesSchemaType = Static<typeof CheckInTimesSchema>
 
 export const EmployeeIDCheckinSchema = Type.Object({
-  employeeID: employeeID,
+  employeeID: EmployeeID,
   employeeCheckedOut: Type.Union([Type.Literal('CheckedIn'), Type.Literal('CheckedOut')]),
 })
 
@@ -155,7 +154,7 @@ export const ListCheckInStatusSchema = Type.Composite([
   Type.Object({
     statuses: Type.Array(
       Type.Object({
-        employeeID: employeeID,
+        employeeID: EmployeeID,
         time: Type.Optional(Type.String({ format: 'date' })),
         status: Type.Union([Type.Literal('CheckedIn'), Type.Literal('CheckedOut')]),
       }),
@@ -166,7 +165,7 @@ export const ListCheckInStatusSchema = Type.Composite([
 export type ListCheckInStatusSchemaType = Static<typeof ListCheckInStatusSchema>
 
 export const EmployeeTimeSchema = Type.Object({
-  employeeID: employeeID,
+  employeeID: EmployeeID,
   storeID: storeID,
   mondayStart: Type.Optional(workTimeSchema),
   mondayStop: Type.Optional(workTimeSchema),
@@ -195,7 +194,7 @@ export type EmployeeTimeSchemaType = Static<typeof EmployeeTimeSchema>
 
 export const SpecialHoursSchema = Type.Object({
   employeeSpecialHoursID: Type.Optional(EmployeeSpceialHoursID),
-  employeeID: employeeID,
+  employeeID: EmployeeID,
   storeID: storeID,
   start: workDateTimeSchema,
   end: workDateTimeSchema,
@@ -220,7 +219,7 @@ export const WorkingHoursIDTotalSchema = Type.Object({
 export type WorkingHoursIDTotalSchemaType = Static<typeof WorkingHoursIDTotalSchema>
 
 export const GetEmployeeWorkingHoursSchema = Type.Object({
-  employeeID: employeeID,
+  employeeID: EmployeeID,
   storeID: storeID,
 })
 

@@ -76,6 +76,11 @@ export type RentCarBookingReply = RentCarBooking & {
   updatedAt: Date
 }
 
+export type RentCarAvailablity = {
+  available: RentCar[]
+  unavailable: RentCar[]
+}
+
 export const createRentCar = async (
   carData: RentCarCreateType,
 ): Promise<Either<string, RentCar>> => {
@@ -355,7 +360,7 @@ export async function availableRentCars(
   storeID: StoreID,
   start: BookingStart,
   end: BookingEnd,
-): Promise<Either<string, RentCar[]>> {
+): Promise<Either<string, RentCarAvailablity>> {
   try {
     const fetchedBooking = await db
       .select()
@@ -368,22 +373,30 @@ export async function availableRentCars(
           eq(rentcars.storeID, storeID),
         ),
       )
-    const available: RentCar[] = fetchedBooking.reduce((acc: RentCar[], book) => {
-      if (book.rentCarBookings && book.rentCars) {
-        acc.push({
-          storeID: book.rentCars.storeID,
-          rentCarRegistrationNumber: book.rentCars.rentCarRegistrationNumber,
-          rentCarModel: book.rentCars.rentCarModel,
-          rentCarColor: book.rentCars.rentCarColor,
-          rentCarYear: book.rentCars.rentCarYear,
-          rentCarNotes: book.rentCars.rentCarNotes ?? undefined,
-          rentCarNumber: book.rentCars.rentCarNumber ?? undefined,
-          createdAt: book.rentCars.createdAt,
-          updatedAt: book.rentCars.updatedAt,
-        })
-      }
-      return acc
-    }, [])
+    const available: RentCarAvailablity = fetchedBooking.reduce(
+      (acc: RentCarAvailablity, book) => {
+        if (book.rentCarBookings) {
+          const car: RentCar = {
+            storeID: book.rentCars.storeID,
+            rentCarRegistrationNumber: book.rentCars.rentCarRegistrationNumber,
+            rentCarModel: book.rentCars.rentCarModel,
+            rentCarColor: book.rentCars.rentCarColor,
+            rentCarYear: book.rentCars.rentCarYear,
+            rentCarNotes: book.rentCars.rentCarNotes ?? undefined,
+            rentCarNumber: book.rentCars.rentCarNumber ?? undefined,
+            createdAt: book.rentCars.createdAt,
+            updatedAt: book.rentCars.updatedAt,
+          }
+          if (book.rentCars != null) {
+            acc.available.push(car)
+          } else {
+            acc.unavailable.push(car)
+          }
+        }
+        return acc
+      },
+      { available: [], unavailable: [] },
+    )
     return fetchedBooking ? right(available) : left('no booking found')
   } catch (e) {
     return left(errorHandling(e))
