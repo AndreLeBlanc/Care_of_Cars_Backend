@@ -1,7 +1,9 @@
 import { Static, Type } from '@sinclair/typebox'
 
-export const driverID = Type.Integer({ minimum: 0 })
-
+import { LocalServiceIDSchema, ServiceIDSchema } from '../services/serviceSchema.js'
+import { PickupTimeSchema, SubmissionTimeSchema } from '../orders/ordersSchema.js'
+import { CategoryIDSchema } from '../category/categorySchema.js'
+import { driverID } from '../../utils/helper.js'
 const companyOrgNumber = Type.String({ maxLength: 11 })
 const companyName = Type.String({ maxLength: 255 })
 const companyReference = Type.String({ maxLength: 255 })
@@ -119,24 +121,20 @@ export const ListCustomersQueryParamSchema = Type.Object({
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
 })
 
-export const ListDriversQueryParamSchema = Type.Object({
+export const SearchSchema = Type.Object({
   search: Type.Optional(Type.String()),
   limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+  companyOrg: Type.Optional(companyOrgNumber),
+  from: Type.Optional(SubmissionTimeSchema),
+  to: Type.Optional(PickupTimeSchema),
+  service: Type.Optional(ServiceIDSchema),
+  localService: Type.Optional(LocalServiceIDSchema),
+  serviceCategory: Type.Optional(CategoryIDSchema),
 })
-
-export const ListDriversCompanyQueryParamSchema = Type.Object({
-  search: Type.Optional(Type.String()),
-  limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
-  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
-  companyOrgNumber: Type.String(),
-})
+export type SearchSchemaType = Static<typeof SearchSchema>
 
 export type ListCustomersQueryParamSchemaType = Static<typeof ListCustomersQueryParamSchema>
-export type ListDriversQueryParamSchemaType = Static<typeof ListDriversQueryParamSchema>
-export type ListDriversCompanyQueryParamSchemaType = Static<
-  typeof ListDriversCompanyQueryParamSchema
->
 export type GetDriverByIDSchemaType = Static<typeof GetDriverByIDSchema>
 export type GetCompanyByOrgNumberSchemaType = Static<typeof GetCompanyByOrgNumberSchema>
 export type CreateCustomerType = Static<typeof AddCustomerBodySchema>

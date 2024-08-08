@@ -25,12 +25,23 @@ import {
   DriverNotesShared,
   DriverPhoneNumber,
   DriverZipCode,
+  LocalServiceID,
+  PickupTime,
+  ServiceCategoryID,
+  ServiceID,
+  SubmissionTime,
   companycustomers,
   drivers,
+  localServices,
+  orderLocalServices,
+  orderServices,
+  orders,
+  serviceCategories,
+  services,
 } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
 
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm'
 
 import { Offset, Search } from '../plugins/pagination.js'
 
@@ -425,21 +436,30 @@ export async function getCustomersPaginate(
   }
 }
 
+export type AdvancedSearch = {
+  companyOrg?: CustomerOrgNumber
+  from?: SubmissionTime
+  to?: PickupTime
+  service?: ServiceID
+  localService?: LocalServiceID
+  serviceCategory?: ServiceCategoryID
+}
+
 //Drivers Paginate
 export async function getDriversPaginate(
   search: Search,
   limit = 10,
   page = 1,
   offset = Offset(0),
-  isCompany?: CustomerOrgNumber,
+  advanced?: AdvancedSearch,
 ): Promise<Either<string, DriversPaginate>> {
   try {
     const returnData = await db.transaction(async (tx) => {
       let condition
 
-      if (isCompany) {
+      if (advanced?.companyOrg) {
         condition = and(
-          isCompany ? eq(drivers.customerOrgNumber, isCompany) : undefined,
+          advanced.companyOrg ? eq(drivers.customerOrgNumber, advanced.companyOrg) : undefined,
           or(
             isEmail(search)
               ? ilike(drivers.driverEmail, '%' + search + '%')
@@ -454,19 +474,41 @@ export async function getDriversPaginate(
             ? ilike(drivers.driverEmail, '%' + search + '%')
             : (ilike(drivers.driverPhoneNumber, '%' + search + '%'),
               ilike(drivers.driverFirstName, '%' + search + '%'),
-              ilike(drivers.driverLastName, '%' + search + '%'),
-              ilike(drivers.customerOrgNumber, '%' + search + '%')),
+              ilike(drivers.driverLastName, '%' + search + '%')),
         )
       }
 
-      const [totalItems] = await tx
-        .select({
-          count: sql`count(*)`.mapWith(Number).as('count'),
-        })
-        .from(drivers)
-        .where(condition)
+      if (
+        advanced?.from ||
+        advanced?.to ||
+        advanced?.service ||
+        advanced?.localService ||
+        advanced?.serviceCategory
+      ) {
+        if (advanced.from) {
+          condition = and(condition, lte(orders.submissionTime, advanced.from))
+        }
+        if (advanced.to) {
+          condition = and(condition, gte(orders.pickupTime, advanced.to))
+        }
+        if (advanced.service) {
+          condition = and(condition, eq(orderServices.serviceID, advanced.service))
+          if (advanced.serviceCategory) {
+            condition = and(
+              condition,
+              eq(localServices.serviceCategoryID, advanced.serviceCategory),
+            )
+          }
+        }
+        if (advanced.localService) {
+          condition = and(condition, eq(orderLocalServices.localServiceID, advanced.localService))
+          if (advanced.serviceCategory) {
+            condition = and(condition, eq(services.serviceCategoryID, advanced.serviceCategory))
+          }
+        }
+      }
 
-      const driverList = await tx
+      let driverQuery = tx
         .select({
           driverID: drivers.driverID,
           driverFirstName: drivers.driverFirstName,
@@ -479,15 +521,61 @@ export async function getDriversPaginate(
         })
         .from(drivers)
         .where(condition)
+
+      let driverCountQuery = tx
+        .select({
+          count: sql`count(*)`.mapWith(Number).as('count'),
+        })
+        .from(drivers)
+        .where(condition)
+
+      let driverList = []
+      if (
+        advanced?.from ||
+        advanced?.to ||
+        advanced?.service ||
+        advanced?.localService ||
+        advanced?.serviceCategory
+      ) {
+        driverQuery = driverQuery.innerJoin(orders, eq(orders.driverID, drivers.driverID))
+        driverCountQuery = driverCountQuery.innerJoin(orders, eq(orders.driverID, drivers.driverID))
+
+        if (advanced.service || advanced.serviceCategory) {
+          driverQuery = driverQuery.innerJoin(
+            orderServices,
+            eq(orderServices.orderID, orders.orderID),
+          )
+        }
+        if (advanced.localService || advanced.serviceCategory) {
+          driverQuery = driverQuery
+            .innerJoin(orderLocalServices, eq(orderLocalServices.orderID, orders.orderID))
+            .innerJoin(
+              localServices,
+              eq(localServices.localServiceID, orderLocalServices.localServiceID),
+            )
+        }
+        if (advanced.serviceCategory) {
+          driverList = await driverQuery
+            .innerJoin(
+              serviceCategories,
+              eq(serviceCategories.serviceCategoryID, localServices.serviceCategoryID),
+            )
+            .innerJoin(services, eq(services.serviceID, orderServices.serviceID))
+        }
+      }
+
+      driverList = await driverQuery
         .orderBy(desc(drivers.createdAt))
         .limit(limit || 10)
         .offset(offset || 0)
 
+      console.log('liiiist: ', driverList)
+
+      const [totalItems] = await driverCountQuery
       return { driverList, totalItems }
     })
 
     const totalPage = Math.ceil(returnData.totalItems.count / limit)
-
     return right({
       totalItems: returnData.totalItems.count,
       totalPage,
