@@ -4,12 +4,12 @@ import { storeID } from '../stores/storesSchema.js'
 
 import { LocalQualIDSchema } from '../qulifications/qualificationsSchema.js'
 
-import { globalQualID, localQualID } from '../../utils/helper.js'
+import { GlobalQualID, LocalQualID } from '../../utils/helper.js'
 
-const LocalServiceIDSchema = Type.Number({ minimum: 0 })
-const ServiceVariantIDSchema = Type.Number({ minimum: 0 })
-const ServiceIDSchema = Type.Number({ minimum: 0 })
-const localServicevariantIDSchema = Type.Number({ minimum: 0 })
+export const LocalServiceIDSchema = Type.Number({ minimum: 0 })
+export const ServiceVariantIDSchema = Type.Number({ minimum: 0 })
+export const ServiceIDSchema = Type.Number({ minimum: 0 })
+export const LocalServicevariantIDSchema = Type.Number({ minimum: 0 })
 const NameSchema = Type.String()
 const CostSchema = Type.Number()
 const CurrencySchema = Type.String()
@@ -49,7 +49,7 @@ export const ServiceVariantsSchema = Type.Object({
 export type ServiceVariantsSchemaType = Static<typeof ServiceVariantsSchema>
 
 export const LocalServiceVariantsSchema = Type.Object({
-  localServicevariantID: Type.Optional(localServicevariantIDSchema),
+  localServicevariantID: Type.Optional(LocalServicevariantIDSchema),
   localServiceID: LocalServiceIDSchema,
   name: NameSchema,
   award: AwardSchema,
@@ -153,58 +153,58 @@ export type ServicesPaginatedSchemaType = Static<typeof ServicesPaginatedSchema>
 
 export const LocalServiceLocalQualSchema = Type.Object({
   localServiceID: LocalServiceIDSchema,
-  localQualID: localQualID,
+  localQualID: LocalQualID,
 })
 
 export type LocalServiceLocalQualSchemaType = Static<typeof LocalServiceLocalQualSchema>
 
 export const LocalServiceGlobalQualSchema = Type.Object({
   localServiceID: LocalServiceIDSchema,
-  globalQualID: globalQualID,
+  globalQualID: GlobalQualID,
 })
 
 export type LocalServiceGlobalQualSchemaType = Static<typeof LocalServiceGlobalQualSchema>
 
 export const ServiceLocalQualSchema = Type.Object({
   serviceID: ServiceIDSchema,
-  localQualID: localQualID,
+  localQualID: LocalQualID,
 })
 
 export type ServiceLocalQualSchemaType = Static<typeof ServiceLocalQualSchema>
 
 export const ServiceGlobalQual = Type.Object({
   serviceID: ServiceIDSchema,
-  globalQualID: globalQualID,
+  globalQualID: GlobalQualID,
 })
 
 export type ServiceGlobalQualType = Static<typeof ServiceGlobalQual>
 
 export const ServiceDeleteQual = Type.Object({
   serviceID: ServiceIDSchema,
-  globalQualID: Type.Optional(globalQualID),
-  localQualID: Type.Optional(localQualID),
+  globalQualID: Type.Optional(GlobalQualID),
+  localQualID: Type.Optional(LocalQualID),
 })
 
 export type ServiceDeleteQualType = Static<typeof ServiceDeleteQual>
 
 export const LocalServiceDeleteQual = Type.Object({
   localServiceID: LocalServiceIDSchema,
-  globalQualID: Type.Optional(globalQualID),
-  localQualID: Type.Optional(localQualID),
+  globalQualID: Type.Optional(GlobalQualID),
+  localQualID: Type.Optional(LocalQualID),
 })
 
 export type LocalServiceDeleteQualType = Static<typeof LocalServiceDeleteQual>
 
 export const LocalServiceQualsSchema = Type.Object({
   localQuals: Type.Array(LocalQualIDSchema),
-  globalQuals: Type.Array(globalQualID),
+  globalQuals: Type.Array(GlobalQualID),
 })
 
 export type LocalServiceQualsSchemaType = Static<typeof LocalServiceQualsSchema>
 
 export const GlobalServiceQualsSchema = Type.Object({
   localQuals: Type.Array(LocalQualIDSchema),
-  globalQuals: Type.Array(globalQualID),
+  globalQuals: Type.Array(GlobalQualID),
 })
 
 export type GlobalServiceQualsSchemType = Static<typeof GlobalServiceQualsSchema>

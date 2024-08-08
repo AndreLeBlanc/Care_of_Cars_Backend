@@ -1,6 +1,6 @@
 {
-  "id": "09c6deac-2fce-474f-b6f6-67921bafca6a",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "7ceea683-2d89-4cc1-ae34-46f7abf0499b",
+  "prevId": "0c89a5a8-f76a-44c0-8b6a-6c03e07de9cc",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
@@ -1964,8 +1964,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "permissionName": {
-          "name": "permissionName",
+        "permissionTitle": {
+          "name": "permissionTitle",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true
@@ -1995,11 +1995,11 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "permissions_permissionName_unique": {
-          "name": "permissions_permissionName_unique",
+        "permissions_permissionTitle_unique": {
+          "name": "permissions_permissionTitle_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "permissionName"
+            "permissionTitle"
           ]
         }
       }
@@ -2502,6 +2502,19 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "roleToPermissions_roleID_roles_roleID_fk": {
+          "name": "roleToPermissions_roleID_roles_roleID_fk",
+          "tableFrom": "roleToPermissions",
+          "tableTo": "roles",
+          "columnsFrom": [
+            "roleID"
+          ],
+          "columnsTo": [
+            "roleID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "roleToPermissions_permissionID_permissions_permissionID_fk": {
           "name": "roleToPermissions_permissionID_permissions_permissionID_fk",
           "tableFrom": "roleToPermissions",

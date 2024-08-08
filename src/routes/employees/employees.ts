@@ -44,6 +44,7 @@ import { Currency } from 'dinero.js'
 import {
   Absence,
   CheckedInStatus,
+  EmployeeActive,
   EmployeeComment,
   EmployeeHourlyRate,
   EmployeeHourlyRateCurrency,
@@ -232,10 +233,11 @@ export const employees = async (fastify: FastifyInstance) => {
         employeeHourlyRate: req.body.employeeHourlyRate
           ? EmployeeHourlyRate(req.body.employeeHourlyRate)
           : undefined,
-        employeeHourlyRateCurrency: req.body.EmployeeHourlyRateCurrency
-          ? EmployeeHourlyRateCurrency(req.body.EmployeeHourlyRateCurrency as Currency)
+        employeeHourlyRateCurrency: req.body.employeeHourlyRateCurrency
+          ? EmployeeHourlyRateCurrency(req.body.employeeHourlyRateCurrency as Currency)
           : undefined,
         employeePin: EmployeePin(req.body.employeePin),
+        employeeActive: EmployeeActive(req.body.employeeActive),
         employeeComment: EmployeeComment(req.body.employeeComment),
       }
 
@@ -244,12 +246,18 @@ export const employees = async (fastify: FastifyInstance) => {
         employee,
         employeeID,
       )
+
       match(
         createdEmployee,
         (employee: Employee) => {
+          const { employeeHourlyRateDinero, ...rest } = employee
           return rep.status(201).send({
             message: 'Employee Created/updated successfully',
-            ...employee,
+            ...{
+              employeeHourlyRate: employeeHourlyRateDinero?.getAmount(),
+              employeeHourlyRateCurrency: employeeHourlyRateDinero?.getCurrency(),
+              ...rest,
+            },
           })
         },
         (err) => {
@@ -290,7 +298,15 @@ export const employees = async (fastify: FastifyInstance) => {
       match(
         deletedEmployee,
         (employee: Employee) => {
-          return reply.status(200).send({ message: 'Employee deleted', ...employee })
+          const { employeeHourlyRateDinero, ...rest } = employee
+          return reply.status(200).send({
+            message: 'Employee deleted successfully',
+            ...{
+              employeeHourlyRate: employeeHourlyRateDinero?.getAmount(),
+              employeeHourlyRateCurrency: employeeHourlyRateDinero?.getCurrency(),
+              ...rest,
+            },
+          })
         },
         (err) => {
           return reply.status(404).send({ message: err })
@@ -328,7 +344,15 @@ export const employees = async (fastify: FastifyInstance) => {
       match(
         fetchedEmployee,
         (employee: Employee) => {
-          return reply.status(200).send({ message: 'Employee fetched', ...employee })
+          const { employeeHourlyRateDinero, ...rest } = employee
+          return reply.status(200).send({
+            message: 'Employee fetched',
+            ...{
+              employeeHourlyRate: employeeHourlyRateDinero?.getAmount(),
+              employeeHourlyRateCurrency: employeeHourlyRateDinero?.getCurrency(),
+              ...rest,
+            },
+          })
         },
         (err) => {
           return reply.status(404).send({ message: err })
@@ -377,7 +401,23 @@ export const employees = async (fastify: FastifyInstance) => {
       match(
         employees,
         (employeeList: EmployeePaginated) => {
-          return reply.status(200).send({ message: 'Employee fetched', ...employeeList })
+          const employeeNoDinero = employeeList.employees.map((emp) => {
+            const { employeeHourlyRateDinero, ...rest } = emp
+
+            return {
+              employeeHourlyRate: employeeHourlyRateDinero?.getAmount(),
+              employeeHourlyRateCurrency: employeeHourlyRateDinero?.getCurrency(),
+              ...rest,
+            }
+          })
+
+          return reply.status(200).send({
+            message: 'Employees fetched',
+            totalEmployees: employeeList.totalEmployees,
+            totalPage: employeeList.totalPage,
+            perPage: employeeList.perPage,
+            employees: employeeNoDinero,
+          })
         },
         (err) => {
           return reply.status(404).send({ message: err })

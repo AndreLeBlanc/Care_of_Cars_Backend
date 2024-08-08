@@ -441,7 +441,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   //Delete service category
   fastify.delete<{ Params: getServiceCategoryByIDType }>(
-    '/service/:serviceCategoryID',
+    '/service/:id',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('delete_service_category')
@@ -477,7 +477,7 @@ export async function serviceCategory(fastify: FastifyInstance) {
 
   //Delete product category
   fastify.delete<{ Params: getServiceCategoryByIDType }>(
-    '/product/:producgCategoryID',
+    '/product/:id',
     {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('delete_product_category')

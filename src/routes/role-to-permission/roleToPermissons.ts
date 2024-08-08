@@ -5,12 +5,21 @@ import {
   CreateRoleToPermissionSchemaType,
   DeleteRoleToPermissionSchema,
   DeleteRoleToPermissionType,
+  ListRolesToPermissionReplySchema,
+  MessageSchema,
 } from './roleToPermissionSchema.js'
+import { getRoleByIDSchema, getRoleByIDType } from '../roles/roleSchema.js'
+
 import {
+  PermissionsByRole,
   RoleToPermissions,
   createRoleToPermissions,
   deleteRoleToPermissions,
+  getAllPermissionStatus,
+  listRolesToPermissions,
 } from '../../services/roleToPermissionService.js'
+
+import { PermissionIDDescName } from '../../services/permissionService.js'
 
 import { PermissionID, PermissionTitle, RoleID } from '../../schema/schema.js'
 
@@ -83,6 +92,78 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
         },
         (err) => {
           return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{ Params: getRoleByIDType }>(
+    '/roleWithPermissions/:roleID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_role_with_permissions')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        params: getRoleByIDSchema,
+      },
+    },
+    async (request, reply) => {
+      const roleID: RoleID = RoleID(request.params.roleID)
+      const role: Either<
+        string,
+        { roleID: RoleID; allPermissionsWithStatus: PermissionIDDescName[] }
+      > = await getAllPermissionStatus(roleID)
+      match(
+        role,
+        (roleToPerm) => {
+          reply.status(200).send({ message: 'Role with permissions', ...roleToPerm })
+        },
+        (err) => {
+          reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get(
+    '/listRolesToPermission',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('list_role_with_permissions')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        response: {
+          200: ListRolesToPermissionReplySchema,
+          404: MessageSchema,
+        },
+      },
+    },
+    async (_, reply) => {
+      const role: Either<string, PermissionsByRole[]> = await listRolesToPermissions()
+
+      match(
+        role,
+        (roleToPerm) => {
+          reply.status(200).send({ message: 'Roles with permissions', rolesWithPerms: roleToPerm })
+        },
+        (err) => {
+          reply.status(404).send({ message: err })
         },
       )
     },

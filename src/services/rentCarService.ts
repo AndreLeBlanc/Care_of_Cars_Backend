@@ -1,6 +1,12 @@
 import { db } from '../config/db-connect.js'
 
 import {
+  BookingEnd,
+  BookingStart,
+  EmployeeID,
+  OrderID,
+  OrderStatus,
+  RentCarBookingID,
   RentCarColor,
   RentCarModel,
   RentCarNotes,
@@ -8,10 +14,12 @@ import {
   RentCarRegistrationNumber,
   RentCarYear,
   StoreID,
+  SubmissionTime,
+  rentCarBookings,
   rentcars,
 } from '../schema/schema.js'
 
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm'
 import { Offset } from '../plugins/pagination.js'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
@@ -50,6 +58,27 @@ export type RentCarsPaginate = {
   totalPage: number
   perPage: number
   data: RentCar[]
+}
+
+export type RentCarBooking = {
+  rentCarBookingID?: RentCarBookingID
+  orderID?: OrderID
+  rentCarRegistrationNumber: RentCarRegistrationNumber
+  bookingStart: BookingStart
+  bookingEnd: BookingEnd
+  bookedBy?: EmployeeID
+  bookingStatus: OrderStatus
+  submissionTime: SubmissionTime
+}
+
+export type RentCarBookingReply = RentCarBooking & {
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type RentCarAvailablity = {
+  available: RentCar[]
+  unavailable: RentCar[]
 }
 
 export const createRentCar = async (
@@ -262,6 +291,141 @@ export async function getRentCarByID(
           updatedAt: rentCarDetails.updatedAt,
         })
       : left("Couldn't find car")
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function createRentCarBooking(
+  booking: RentCarBooking,
+): Promise<Either<string, RentCarBookingReply>> {
+  try {
+    const [newBooking] = await db
+      .insert(rentCarBookings)
+      .values(booking)
+      .onConflictDoUpdate({
+        target: [rentCarBookings.rentCarBookingID, rentCarBookings.orderID],
+        set: booking,
+      })
+      .returning()
+
+    return newBooking
+      ? right({
+          rentCarBookingID: newBooking.rentCarBookingID,
+          orderID: newBooking.orderID ?? undefined,
+          rentCarRegistrationNumber: newBooking.rentCarRegistrationNumber,
+          bookingStart: newBooking.bookingStart,
+          bookingEnd: newBooking.bookingEnd,
+          bookedBy: newBooking.bookedBy ?? undefined,
+          bookingStatus: newBooking.bookingStatus,
+          submissionTime: newBooking.submissionTime,
+          createdAt: newBooking.createdAt,
+          updatedAt: newBooking.updatedAt,
+        })
+      : left('no booking made')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function getRentCarBooking(
+  bookingID: RentCarBookingID,
+): Promise<Either<string, RentCarBookingReply>> {
+  try {
+    const [fetchedBooking] = await db
+      .select()
+      .from(rentCarBookings)
+      .where(eq(rentCarBookings.rentCarBookingID, bookingID))
+
+    return fetchedBooking
+      ? right({
+          rentCarBookingID: fetchedBooking.rentCarBookingID,
+          orderID: fetchedBooking.orderID ?? undefined,
+          rentCarRegistrationNumber: fetchedBooking.rentCarRegistrationNumber,
+          bookingStart: fetchedBooking.bookingStart,
+          bookingEnd: fetchedBooking.bookingEnd,
+          bookedBy: fetchedBooking.bookedBy ?? undefined,
+          bookingStatus: fetchedBooking.bookingStatus,
+          submissionTime: fetchedBooking.submissionTime,
+          createdAt: fetchedBooking.createdAt,
+          updatedAt: fetchedBooking.updatedAt,
+        })
+      : left('no booking found')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function availableRentCars(
+  storeID: StoreID,
+  start: BookingStart,
+  end: BookingEnd,
+): Promise<Either<string, RentCarAvailablity>> {
+  try {
+    const fetchedBooking = await db
+      .select()
+      .from(rentCarBookings)
+      .rightJoin(
+        rentcars,
+        and(
+          lte(rentCarBookings.bookingEnd, BookingEnd(start)),
+          gte(rentCarBookings.bookingStart, BookingStart(end)),
+          eq(rentcars.storeID, storeID),
+        ),
+      )
+    const available: RentCarAvailablity = fetchedBooking.reduce(
+      (acc: RentCarAvailablity, book) => {
+        if (book.rentCarBookings) {
+          const car: RentCar = {
+            storeID: book.rentCars.storeID,
+            rentCarRegistrationNumber: book.rentCars.rentCarRegistrationNumber,
+            rentCarModel: book.rentCars.rentCarModel,
+            rentCarColor: book.rentCars.rentCarColor,
+            rentCarYear: book.rentCars.rentCarYear,
+            rentCarNotes: book.rentCars.rentCarNotes ?? undefined,
+            rentCarNumber: book.rentCars.rentCarNumber ?? undefined,
+            createdAt: book.rentCars.createdAt,
+            updatedAt: book.rentCars.updatedAt,
+          }
+          if (book.rentCars != null) {
+            acc.available.push(car)
+          } else {
+            acc.unavailable.push(car)
+          }
+        }
+        return acc
+      },
+      { available: [], unavailable: [] },
+    )
+    return fetchedBooking ? right(available) : left('no booking found')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function deleteRentCarBooking(
+  bookingID: RentCarBookingID,
+): Promise<Either<string, RentCarBookingReply>> {
+  try {
+    const [deletedBooking] = await db
+      .delete(rentCarBookings)
+      .where(eq(rentCarBookings.rentCarBookingID, bookingID))
+      .returning()
+
+    return deletedBooking
+      ? right({
+          rentCarBookingID: deletedBooking.rentCarBookingID,
+          orderID: deletedBooking.orderID ?? undefined,
+          rentCarRegistrationNumber: deletedBooking.rentCarRegistrationNumber,
+          bookingStart: deletedBooking.bookingStart,
+          bookingEnd: deletedBooking.bookingEnd,
+          bookedBy: deletedBooking.bookedBy ?? undefined,
+          bookingStatus: deletedBooking.bookingStatus,
+          submissionTime: deletedBooking.submissionTime,
+          createdAt: deletedBooking.createdAt,
+          updatedAt: deletedBooking.updatedAt,
+        })
+      : left('no booking found')
   } catch (e) {
     return left(errorHandling(e))
   }

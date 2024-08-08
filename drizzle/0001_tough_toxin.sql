@@ -1,2 +1,0 @@
-ALTER TABLE "employeeSpecialHours" ADD CONSTRAINT "employeeSpecialHours_start_employeeID_unique" UNIQUE("start","employeeID");--> statement-breakpoint
-ALTER TABLE "employeeSpecialHours" ADD CONSTRAINT "employeeSpecialHours_end_employeeID_unique" UNIQUE("end","employeeID");

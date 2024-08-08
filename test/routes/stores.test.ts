@@ -6,6 +6,10 @@ import assert from 'assert'
 import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
+//function onlyUnique(value, index, array) {
+//  return array.indexOf(value) === index
+//}
+
 let jwt = ''
 describe('stores test', async () => {
   let app: FastifyInstance
@@ -92,7 +96,45 @@ describe('stores test', async () => {
           storeUsesCheckin,
           storeUsesPIN,
         ) => {
-          for (let i = 0; i < storeName.length; i++) {
+          // storeName = storeName.filter(onlyUnique)
+          // storeOrgNumber = storeOrgNumber.filter(onlyUnique)
+          // storeFSkatt = storeFSkatt.filter(onlyUnique)
+          // storeStatus = storeStatus.filter(onlyUnique)
+          // storeEmail = storeEmail.filter(onlyUnique)
+          // storeAddress = storeAddress.filter(onlyUnique)
+          // storeZipCode = storeZipCode.filter(onlyUnique)
+          // storeCity = storeCity.filter(onlyUnique)
+          // storeCountry = storeCountry.filter(onlyUnique)
+          // storeDescription = storeDescription.filter(onlyUnique)
+          // storeContactPerson = storeContactPerson.filter(onlyUnique)
+          // storeMaxUsers = storeMaxUsers.filter(onlyUnique)
+          // storeAllowCarAPI = storeAllowCarAPI.filter(onlyUnique)
+          // storeAllowSendSMS = storeAllowSendSMS.filter(onlyUnique)
+          // storeSendSMS = storeSendSMS.filter(onlyUnique)
+          // storeUsesCheckin = storeUsesCheckin.filter(onlyUnique)
+          // storeUsesPIN = storeUsesPIN.filter(onlyUnique)
+
+          //const len = [
+          //  storeName,
+          //  storeOrgNumber,
+          //  storeFSkatt,
+          //  storeStatus,
+          //  storeEmail,
+          //  storeAddress,
+          //  storeZipCode,
+          //  storeCity,
+          //  storeCountry,
+          //  storeDescription,
+          //  storeContactPerson,
+          //  storeMaxUsers,
+          //  storeAllowCarAPI,
+          //  storeAllowSendSMS,
+          //  storeSendSMS,
+          //  storeUsesCheckin,
+          //  storeUsesPIN,
+          //].reduce((acc, el) => (acc > el.length ? el.length : acc), storeName.length)
+          //console.log(len)
+          for (let i = 0; i < 1; i++) {
             const response = await app.inject({
               method: 'POST',
               url: '/stores',

@@ -1,7 +1,8 @@
 import { Static, Type } from '@sinclair/typebox'
 
-import { PermissionID } from '../permissions/permissionSchema.js'
-import { RoleID } from '../roles/roleSchema.js'
+import { PermissionID, PermissionIDDescNameSchema } from '../permissions/permissionSchema.js'
+import { RoleDescription, RoleID, RoleName } from '../roles/roleSchema.js'
+const Message = Type.String()
 
 export const CreateRoleToPermissionSchema = Type.Object({
   roleID: RoleID,
@@ -13,4 +14,21 @@ export const DeleteRoleToPermissionSchema = Type.Object({
   roleID: RoleID,
   permissionID: PermissionID,
 })
+
 export type DeleteRoleToPermissionType = Static<typeof DeleteRoleToPermissionSchema>
+
+export const ListRolesToPermissionReplySchema = Type.Object({
+  message: Message,
+  rolesWithPerms: Type.Array(
+    Type.Object({
+      permissions: Type.Array(PermissionIDDescNameSchema),
+      roleID: RoleID,
+      roleName: RoleName,
+      description: RoleDescription,
+    }),
+  ),
+})
+
+export const MessageSchema = Type.Object({
+  message: Message,
+})

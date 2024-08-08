@@ -2,11 +2,9 @@ import { FastifyInstance } from 'fastify'
 
 import {
   CreatedRole,
-  PermissionStatus,
   Role,
   createRole,
   deleteRole,
-  getAllPermissionStatus,
   getRoleByID,
   getRolesPaginate,
   updateRoleByID,
@@ -89,7 +87,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
             Page(page),
           )
 
-          return {
+          return reply.status(200).send({
             message: message,
             totalItems: roles.totalItems,
             nextUrl: nextUrl,
@@ -98,7 +96,7 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
             page: page,
             limit: limit,
             data: roles.data,
-          }
+          })
         },
         (err) => {
           reply.status(504).send({ message: err })
@@ -207,9 +205,9 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
       }
       const role: Either<string, Role> = await updateRoleByID({
         roleID: RoleID(request.params.roleID),
-        roleDescription: request.body.description
+        description: request.body.description
           ? RoleDescription(request.body.description)
-          : null,
+          : undefined,
         roleName: RoleName(request.body.roleName),
       })
 
@@ -254,45 +252,6 @@ export async function roles(fastify: FastifyInstance): Promise<void> {
         },
         (err) => {
           return reply.status(404).send({ message: err })
-        },
-      )
-    },
-  )
-
-  fastify.get<{ Params: getRoleByIDType }>(
-    '/roleWithPermissions/:roleID',
-    {
-      preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = PermissionTitle('get_role_with_permissions')
-        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
-        if (!authorizeStatus) {
-          return reply
-            .status(403)
-            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
-        }
-        done()
-        return reply
-      },
-      schema: {
-        params: getRoleByIDSchema,
-      },
-    },
-    async (request, reply) => {
-      const roleID: RoleID = RoleID(request.params.roleID)
-      const role: Either<
-        string,
-        {
-          role: Role
-          allPermissionsWithStatus: PermissionStatus[]
-        }
-      > = await getAllPermissionStatus(roleID)
-      match(
-        role,
-        (roleToPerm) => {
-          reply.status(200).send({ message: 'Role with permissions', ...roleToPerm })
-        },
-        (err) => {
-          reply.status(404).send({ message: err })
         },
       )
     },
