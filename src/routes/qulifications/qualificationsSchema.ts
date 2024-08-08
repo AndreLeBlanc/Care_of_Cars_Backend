@@ -73,3 +73,22 @@ export const PutEmployeeGlobalQualSchema = Type.Composite([
 ])
 
 export type PutEmployeeGlobalQualSchemaType = Static<typeof PutEmployeeGlobalQualSchema>
+
+export const EmployeesQualsSchema = Type.Object({
+  message: QualificationMessage,
+  localQuals: Type.Array(CreateQualificationsLocalSchema),
+  globalQuals: Type.Array(CreateQualificationsGlobalSchema),
+})
+
+export type EmployeesQualsSchemaType = Static<typeof EmployeesQualsSchema>
+
+export const EmployeesQualsStatusSchema = Type.Object({
+  message: QualificationMessage,
+  employeeID: EmployeeID,
+  employeesGlobalQuals: Type.Array(CreateQualificationsGlobalSchema),
+  NotEmployeesGlobalQuals: Type.Array(CreateQualificationsGlobalSchema),
+  employeesLocalQuals: Type.Array(CreateQualificationsLocalSchema),
+  NotEmployeesLocalQuals: Type.Array(CreateQualificationsLocalSchema),
+})
+
+export type EmployeesQualsStatusSchemaType = Static<typeof EmployeesQualsStatusSchema>

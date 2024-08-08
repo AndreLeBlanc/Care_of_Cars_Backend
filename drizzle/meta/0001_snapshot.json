@@ -1,6 +1,6 @@
 {
-  "id": "7fada74e-88d1-48c3-ae8d-f3cc9e9b0ead",
-  "prevId": "66bc461f-eb3f-4f19-85fd-3a6067ecf503",
+  "id": "0c89a5a8-f76a-44c0-8b6a-6c03e07de9cc",
+  "prevId": "09c6deac-2fce-474f-b6f6-67921bafca6a",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
@@ -877,7 +877,7 @@
         },
         "employeeHourlyRate": {
           "name": "employeeHourlyRate",
-          "type": "numeric",
+          "type": "real",
           "primaryKey": false,
           "notNull": false
         },
@@ -910,6 +910,12 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
+        },
+        "employeeActive": {
+          "name": "employeeActive",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
         },
         "createdAt": {
           "name": "createdAt",
@@ -2373,7 +2379,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "rentCarBookings_orderID_unique": {
+          "name": "rentCarBookings_orderID_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "orderID"
+          ]
+        }
+      }
     },
     "public.rentCars": {
       "name": "rentCars",
@@ -2488,6 +2502,19 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "roleToPermissions_roleID_roles_roleID_fk": {
+          "name": "roleToPermissions_roleID_roles_roleID_fk",
+          "tableFrom": "roleToPermissions",
+          "tableTo": "roles",
+          "columnsFrom": [
+            "roleID"
+          ],
+          "columnsTo": [
+            "roleID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "roleToPermissions_permissionID_permissions_permissionID_fk": {
           "name": "roleToPermissions_permissionID_permissions_permissionID_fk",
           "tableFrom": "roleToPermissions",

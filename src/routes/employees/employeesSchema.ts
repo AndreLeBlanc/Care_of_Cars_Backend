@@ -1,8 +1,14 @@
-import { EmployeeID, GlobalQualID, LocalQualID } from '../../utils/helper.js'
+import {
+  EmployeeID,
+  FirstName,
+  GlobalQualID,
+  LastName,
+  LocalQualID,
+  UserID,
+} from '../../utils/helper.js'
 import { Static, Type } from '@sinclair/typebox'
 import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 import { storeID } from '../stores/storesSchema.js'
-import { userID } from '../users/userSchema.js'
 
 const AbsenceSchema = Type.Boolean()
 const EmployeeSpceialHoursID = Type.Integer()
@@ -13,22 +19,29 @@ const shortUserName = Type.String({ maxLength: 4 })
 const employmentNumber = Type.String({ maxLength: 128 })
 const employeePersonalNumber = Type.String({ maxLength: 16 })
 const signature = Type.String({ maxLength: 4 })
-const employeeHourlyRate = Type.Optional(Type.Number({ minimum: 0 }))
+export const EmployeeHourlyRateSchema = Type.Optional(Type.Number({ minimum: 0 }))
 const employeePin = Type.String()
+const employeeActive = Type.Boolean()
 const employeeComment = Type.String()
-const EmployeeHourlyRateCurrency = Type.Optional(Type.String())
+export const EmployeeHourlyRateCurrencySchema = Type.Optional(Type.String())
 const employeeCheckedIn = Type.String({ format: 'date' })
 const employeeCheckedOut = Type.String({ format: 'date' })
+const employeeCheckinStatus = Type.Boolean()
 
-const EmployeeSchema = Type.Object({
-  userID: userID,
+export const EmployeeNoUserSchema = Type.Object({
   shortUserName: shortUserName,
   employmentNumber: employmentNumber,
   employeePersonalNumber: employeePersonalNumber,
   signature: signature,
   employeePin: employeePin,
+  employeeActive: employeeActive,
   employeeComment: employeeComment,
 })
+
+export const EmployeeSchema = Type.Composite([
+  EmployeeNoUserSchema,
+  Type.Object({ userID: UserID }),
+])
 
 export const EmployeeSpceialHoursIDSchema = Type.Object({
   employeeSpceialHoursID: EmployeeSpceialHoursID,
@@ -64,8 +77,8 @@ export const CreateEmployeeSchema = Type.Composite([
   Type.Object({
     storeID: Type.Array(storeID, { minItems: 1 }),
     employeeID: Type.Optional(EmployeeID),
-    EmployeeHourlyRateCurrency: Type.Optional(EmployeeHourlyRateCurrency),
-    employeeHourlyRate: Type.Optional(employeeHourlyRate),
+    employeeHourlyRateCurrency: Type.Optional(EmployeeHourlyRateCurrencySchema),
+    employeeHourlyRate: Type.Optional(EmployeeHourlyRateSchema),
   }),
 ])
 
@@ -75,7 +88,7 @@ export const EmployeeReplySchema = Type.Composite([
   CreateEmployeeSchema,
   Type.Object({
     storeID: Type.Array(storeID, { minItems: 1 }),
-    employeeHourlyRateDinero: employeeHourlyRate,
+    employeeHourlyRate: EmployeeHourlyRateSchema,
     employeeID: EmployeeID,
     employeeCheckedIn: Type.Optional(employeeCheckedIn),
     employeeCheckedOut: Type.Optional(employeeCheckedOut),
@@ -89,8 +102,8 @@ export const SelectedEmployeeSchema = Type.Composite([
   Type.Object({
     employeeID: EmployeeID,
     storeIDs: Type.Array(storeID),
-    EmployeeHourlyRateCurrency: EmployeeHourlyRateCurrency,
-    EmployeeHourlyRateDinero: employeeHourlyRate,
+    employeeHourlyRateCurrency: EmployeeHourlyRateCurrencySchema,
+    employeeHourlyRate: EmployeeHourlyRateSchema,
     employeeCheckedIn: Type.Optional(employeeCheckedIn),
     employeeCheckedOut: Type.Optional(employeeCheckedOut),
   }),
@@ -107,16 +120,21 @@ export const ListEmployeesReplySchema = Type.Composite([
     perPage: Type.Integer(),
     employees: Type.Array(
       Type.Object({
+        firstName: FirstName,
+        lastName: LastName,
         shortUserName: shortUserName,
         employeeID: EmployeeID,
         employmentNumber: employmentNumber,
         employeePersonalNumber: employeePersonalNumber,
         signature: signature,
-        employeeHourlyRateDinero: employeeHourlyRate,
-        employeePin: employeePin,
-        employeeComment: employeeComment,
+        employeeHourlyRate: Type.Optional(EmployeeHourlyRateSchema),
+        employeeHourlyRateCurrency: Type.Optional(EmployeeHourlyRateCurrencySchema),
+        employeePin: Type.Optional(employeePin),
+        employeeActive: employeeActive,
+        employeeComment: Type.Optional(employeeComment),
         employeeCheckedIn: Type.Optional(employeeCheckedIn),
         employeeCheckedOut: Type.Optional(employeeCheckedOut),
+        employeeCheckinStatus: employeeCheckinStatus,
       }),
     ),
   }),

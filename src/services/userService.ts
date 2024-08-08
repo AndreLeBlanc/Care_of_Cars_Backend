@@ -3,19 +3,39 @@ import bcrypt from 'bcryptjs'
 
 import { db } from '../config/db-connect.js'
 
-import { RoleID, RoleName, StoreID, roles, userBelongsToStore, users } from '../schema/schema.js'
+import {
+  EmployeeActive,
+  RoleID,
+  RoleName,
+  StoreID,
+  roles,
+  userBelongsToStore,
+  users,
+} from '../schema/schema.js'
 
 import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
 
+import { Employee, dineroDBReturn } from './employeeService.js'
+
 import {
+  EmployeeComment,
+  EmployeeHourlyRate,
+  EmployeeHourlyRateCurrency,
+  EmployeePersonalNumber,
+  EmployeePin,
+  EmploymentNumber,
   IsSuperAdmin,
+  ShortUserName,
+  Signature,
   UserEmail,
   UserFirstName,
   UserID,
   UserLastName,
   UserPassword,
+  employeeStore,
+  employees,
 } from '../schema/schema.js'
 
 export type UserStore = {
@@ -29,6 +49,7 @@ export type UserInfo = {
   roleID: RoleID
   lastName: UserLastName
   email: UserEmail
+  isSuperAdmin: IsSuperAdmin
   createdAt: Date
   updatedAt: Date
 }
@@ -66,6 +87,29 @@ export type UsersPaginated = {
   data: UserInfo[]
 }
 
+export type CreateUserEmployee = {
+  firstName: UserFirstName
+  lastName: UserLastName
+  email: UserEmail
+  passwordHash: UserPassword
+  roleID: RoleID
+  isSuperAdmin: IsSuperAdmin
+  shortUserName: ShortUserName
+  employmentNumber: EmploymentNumber
+  employeePersonalNumber: EmployeePersonalNumber
+  signature: Signature
+  employeePin?: EmployeePin
+  employeeActive: EmployeeActive
+  employeeComment?: EmployeeComment
+  employeeHourlyRateCurrency?: EmployeeHourlyRateCurrency
+  employeeHourlyRate?: EmployeeHourlyRate
+}
+
+export type CreatedUserEmployee = {
+  user: CreatedUser
+  employee: Employee
+}
+
 export async function createUser(
   firstName: UserFirstName,
   lastName: UserLastName,
@@ -87,6 +131,84 @@ export async function createUser(
       })
       .returning()
     return user ? right(user) : left('no user created')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function createUserEmployee(
+  userEmp: CreateUserEmployee,
+  stores: StoreID[],
+): Promise<Either<string, CreatedUserEmployee>> {
+  if (stores.length < 1) {
+    return left('no store given')
+  }
+  try {
+    const userEmployee = await db.transaction(async (tx) => {
+      const [user] = await tx
+        .insert(users)
+        .values({
+          firstName: userEmp.firstName,
+          lastName: userEmp.lastName,
+          email: userEmp.email,
+          password: userEmp.passwordHash,
+          roleID: userEmp.roleID,
+          isSuperAdmin: userEmp.isSuperAdmin,
+        })
+        .returning()
+
+      const [createdEmployee] = await tx
+        .insert(employees)
+        .values({
+          userID: user.userID,
+          shortUserName: userEmp.shortUserName,
+          employmentNumber: userEmp.employmentNumber,
+          employeePersonalNumber: userEmp.employeePersonalNumber,
+          signature: userEmp.signature,
+          employeePin: userEmp.employeePin,
+          employeeActive: userEmp.employeeActive,
+          employeeComment: userEmp.employeeComment,
+          employeeHourlyRateCurrency: userEmp.employeeHourlyRateCurrency,
+          employeeHourlyRate: userEmp.employeeHourlyRate,
+        })
+        .returning()
+
+      const employeeIDStoreID = stores.map((store) => {
+        return { storeID: store, employeeID: createdEmployee.employeeID }
+      })
+
+      const employeeStores = await tx
+        .insert(employeeStore)
+        .values(employeeIDStoreID)
+        .onConflictDoNothing()
+        .returning({ storeID: employeeStore.storeID })
+
+      const createdEmployeeWithUndefined = {
+        userID: createdEmployee.userID,
+        employeeID: createdEmployee.employeeID,
+        shortUserName: createdEmployee.shortUserName,
+        employmentNumber: createdEmployee.employmentNumber,
+        employeePersonalNumber: createdEmployee.employeePersonalNumber,
+        signature: createdEmployee.signature,
+        employeeHourlyRateDinero: dineroDBReturn(
+          createdEmployee.employeeHourlyRate,
+          createdEmployee.employeeHourlyRateCurrency,
+        ),
+        employeePin: createdEmployee.employeePin ?? undefined,
+        employeeActive: createdEmployee.employeeActive,
+        employeeComment: createdEmployee.employeeComment ?? undefined,
+        createdAt: createdEmployee.createdAt,
+        updatedAt: createdEmployee.updatedAt,
+      }
+      return {
+        user: user,
+        employee: {
+          ...createdEmployeeWithUndefined,
+          storeIDs: employeeStores.map((row) => row.storeID),
+        },
+      }
+    })
+    return userEmployee ? right(userEmployee) : left('no user created')
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -119,6 +241,7 @@ export async function getUsersPaginate(
           lastName: users.lastName,
           email: users.email,
           roleID: users.roleID,
+          isSuperAdmin: users.isSuperAdmin,
           createdAt: users.createdAt,
           updatedAt: users.updatedAt,
         })
@@ -178,6 +301,7 @@ export async function getUserByID(
         lastName: users.lastName,
         email: users.email,
         roleID: users.roleID,
+        isSuperAdmin: users.isSuperAdmin,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
         ...(checkPassword ? { password: users.password } : {}),
@@ -202,6 +326,7 @@ export async function updateUserByID(user: PatchUserInfo): Promise<Either<string
         firstName: users.firstName,
         lastName: users.lastName,
         email: users.email,
+        isSuperAdmin: users.isSuperAdmin,
         roleID: users.roleID,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
@@ -227,6 +352,7 @@ export async function updateUserPasswordByID(
         firstName: users.firstName,
         lastName: users.lastName,
         email: users.email,
+        isSuperAdmin: users.isSuperAdmin,
         roleID: users.roleID,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,

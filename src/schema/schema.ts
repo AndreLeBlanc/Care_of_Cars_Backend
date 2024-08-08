@@ -11,7 +11,6 @@ import {
   index,
   integer,
   interval,
-  numeric,
   pgEnum,
   pgTable,
   primaryKey,
@@ -354,6 +353,10 @@ export type EmployeeCheckIn = Brand<string, 'EmployeeCheckIn'>
 export const EmployeeCheckIn = make<EmployeeCheckIn>()
 export type EmployeeCheckOut = Brand<string, 'employeeCheckOut'>
 export const EmployeeCheckOut = make<EmployeeCheckOut>()
+export type EmployeeCheckinStatus = Brand<boolean, 'employeeCheckinStatus'>
+export const EmployeeCheckinStatus = make<EmployeeCheckinStatus>()
+export type EmployeeActive = Brand<boolean, 'employeeActive'>
+export const EmployeeActive = make<EmployeeActive>()
 
 export type MondayStart = Brand<string, 'mondayStart'>
 export const MondayStart = make<MondayStart>()
@@ -515,7 +518,7 @@ export const employees = pgTable('employees', {
     .notNull()
     .unique(),
   signature: varchar('signature', { length: 4 }).$type<Signature>().notNull().unique(),
-  employeeHourlyRate: numeric('employeeHourlyRate').$type<EmployeeHourlyRate>(),
+  employeeHourlyRate: real('employeeHourlyRate').$type<number>(),
   employeeHourlyRateCurrency: varchar(
     'employeeHourlyRateCurrency',
   ).$type<EmployeeHourlyRateCurrency>(),
@@ -523,6 +526,7 @@ export const employees = pgTable('employees', {
   employeeComment: varchar('employeeComment').$type<EmployeeComment>(),
   employeeCheckedIn: timestamp('checkedIn'),
   employeeCheckedOut: timestamp('checkedOut'),
+  employeeActive: boolean('employeeActive').$type<EmployeeActive>().notNull(),
   ...dbDates,
 })
 
@@ -672,9 +676,13 @@ export const roles = pgTable('roles', {
   ...dbDates,
 })
 
+export const rolessRelations = relations(roles, ({ many }) => ({
+  roleToPermissions: many(roleToPermissions),
+}))
+
 export const permissions = pgTable('permissions', {
   permissionID: serial('permissionID').$type<PermissionID>().primaryKey(),
-  permissionTitle: varchar('permissionName', { length: 256 })
+  permissionTitle: varchar('permissionTitle', { length: 256 })
     .$type<PermissionTitle>()
     .unique()
     .notNull(),
@@ -682,10 +690,17 @@ export const permissions = pgTable('permissions', {
   ...dbDates,
 })
 
+export const permissionsRelations = relations(permissions, ({ many }) => ({
+  roleToPermissions: many(roleToPermissions),
+}))
+
 export const roleToPermissions = pgTable(
   'roleToPermissions',
   {
-    roleID: integer('roleID').$type<RoleID>().notNull(),
+    roleID: integer('roleID')
+      .$type<RoleID>()
+      .references(() => roles.roleID)
+      .notNull(),
     permissionID: integer('permissionID')
       .$type<PermissionID>()
       .references(() => permissions.permissionID)
@@ -702,6 +717,17 @@ export const roleToPermissions = pgTable(
     }
   },
 )
+
+export const roleToPermissionsRelations = relations(roleToPermissions, ({ one }) => ({
+  roles: one(roles, {
+    fields: [roleToPermissions.roleID],
+    references: [roles.roleID],
+  }),
+  permissions: one(permissions, {
+    fields: [roleToPermissions.permissionID],
+    references: [permissions.permissionID],
+  }),
+}))
 
 export const serviceCategories = pgTable('serviceCategories', {
   serviceCategoryID: serial('serviceCategoryID').$type<ServiceCategoryID>().primaryKey(),
@@ -1539,7 +1565,8 @@ export const rentCarBookings = pgTable('rentCarBookings', {
   rentCarBookingID: serial('rentCarBookingID').$type<RentCarBookingID>().primaryKey(),
   orderID: integer('orderID')
     .$type<OrderID>()
-    .references(() => orders.orderID, { onDelete: 'cascade' }),
+    .references(() => orders.orderID, { onDelete: 'cascade' })
+    .unique(),
   rentCarRegistrationNumber: varchar('rentCarRegistrationNumber')
     .$type<RentCarRegistrationNumber>()
     .references(() => rentcars.rentCarRegistrationNumber, { onDelete: 'cascade' })
