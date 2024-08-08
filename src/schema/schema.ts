@@ -1008,12 +1008,14 @@ export const drivers = pgTable('drivers', {
   ...dbDates,
 })
 
-export const driverRelations = relations(drivers, ({ one }) => ({
+export const driverRelations = relations(drivers, ({ one, many }) => ({
   companycustomers: one(companycustomers, {
     fields: [drivers.customerOrgNumber],
     references: [companycustomers.customerOrgNumber],
   }),
+  orders: many(orders),
 }))
+
 export const companycustomersRelations = relations(companycustomers, ({ many }) => ({
   drivers: many(drivers),
 }))
@@ -1453,6 +1455,15 @@ export const orders = pgTable(
   },
 )
 
+export const ordersRelations = relations(orders, ({ one, many }) => ({
+  drivers: one(drivers, {
+    fields: [orders.driverID],
+    references: [drivers.driverID],
+  }),
+  orderServices: many(orderServices),
+  orderLocalServices: many(orderLocalServices),
+}))
+
 export const orderServices = pgTable(
   'orderServices',
   {
@@ -1506,6 +1517,17 @@ export const orderServices = pgTable(
   },
 )
 
+export const orderServicesRelations = relations(orderServices, ({ one }) => ({
+  orders: one(orders, {
+    fields: [orderServices.orderID],
+    references: [orders.orderID],
+  }),
+  services: one(services, {
+    fields: [orderServices.serviceID],
+    references: [services.serviceID],
+  }),
+}))
+
 export const orderLocalServices = pgTable(
   'orderLocalServices',
   {
@@ -1558,6 +1580,17 @@ export const orderLocalServices = pgTable(
     }
   },
 )
+
+export const orderLocalServicesRelations = relations(orderLocalServices, ({ one }) => ({
+  orders: one(orders, {
+    fields: [orderLocalServices.orderID],
+    references: [orders.orderID],
+  }),
+  localServices: one(localServices, {
+    fields: [orderLocalServices.localServiceID],
+    references: [localServices.localServiceID],
+  }),
+}))
 
 export const bookingStatuspgEnum = pgEnum('orderStatus', bookingStatus)
 
