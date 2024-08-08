@@ -16,9 +16,6 @@ COPY tsconfig.json .
 COPY drizzle/ ./drizzle
 COPY test/ ./test
 
-# Build TypeScript code
-RUN npm run build:ts
-
 # Expose port 3000
 EXPOSE 3000
 

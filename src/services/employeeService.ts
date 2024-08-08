@@ -979,50 +979,55 @@ export async function listCheckedinStatus(
 export async function checkInCheckOut(
   employeeID: EmployeeID,
   checkIn: CheckedInStatus,
-): Promise<CheckInTimes | undefined> {
+): Promise<Either<string, CheckInTimes>> {
   const timestamp: Date = new Date()
-  if (timestamp != null) {
-    switch (checkIn) {
-      case 'CheckedIn':
-        const [setCheckinTime] = await db
-          .update(employees)
-          .set({ employeeCheckedIn: timestamp })
-          .where(eq(employees.employeeID, employeeID))
-          .returning({
-            employeeID: employees.employeeID,
-            employeeCheckedIn: employees.employeeCheckedIn ?? undefined,
-            employeeCheckedOut: employees.employeeCheckedOut ?? undefined,
-          })
+  try {
+    if (timestamp != null) {
+      switch (checkIn) {
+        case 'CheckedIn':
+          const [setCheckinTime] = await db
+            .update(employees)
+            .set({ employeeCheckedIn: timestamp })
+            .where(eq(employees.employeeID, employeeID))
+            .returning({
+              employeeID: employees.employeeID,
+              employeeCheckedIn: employees.employeeCheckedIn ?? undefined,
+              employeeCheckedOut: employees.employeeCheckedOut ?? undefined,
+            })
 
-        return {
-          employeeID: setCheckinTime.employeeID,
-          employeeCheckIn: setCheckinTime.employeeCheckedIn
-            ? EmployeeCheckIn(setCheckinTime.employeeCheckedIn.toISOString())
-            : undefined,
-          employeeCheckOut: setCheckinTime.employeeCheckedOut
-            ? EmployeeCheckOut(setCheckinTime.employeeCheckedOut.toISOString())
-            : undefined,
-        }
-      case 'CheckedOut':
-        const [setCheckOutTime] = await db
-          .update(employees)
-          .set({ employeeCheckedOut: timestamp })
-          .where(eq(employees.employeeID, employeeID))
-          .returning({
-            employeeID: employees.employeeID,
-            employeeCheckedIn: employees.employeeCheckedIn,
-            employeeCheckedOut: employees.employeeCheckedOut,
+          return right({
+            employeeID: setCheckinTime.employeeID,
+            employeeCheckIn: setCheckinTime.employeeCheckedIn
+              ? EmployeeCheckIn(setCheckinTime.employeeCheckedIn.toISOString())
+              : undefined,
+            employeeCheckOut: setCheckinTime.employeeCheckedOut
+              ? EmployeeCheckOut(setCheckinTime.employeeCheckedOut.toISOString())
+              : undefined,
           })
-        return {
-          employeeID: setCheckOutTime.employeeID,
-          employeeCheckIn: setCheckOutTime.employeeCheckedIn
-            ? EmployeeCheckIn(setCheckOutTime.employeeCheckedIn.toISOString())
-            : undefined,
-          employeeCheckOut: setCheckOutTime.employeeCheckedOut
-            ? EmployeeCheckOut(setCheckOutTime.employeeCheckedOut.toISOString())
-            : undefined,
-        }
+        case 'CheckedOut':
+          const [setCheckOutTime] = await db
+            .update(employees)
+            .set({ employeeCheckedOut: timestamp })
+            .where(eq(employees.employeeID, employeeID))
+            .returning({
+              employeeID: employees.employeeID,
+              employeeCheckedIn: employees.employeeCheckedIn,
+              employeeCheckedOut: employees.employeeCheckedOut,
+            })
+          return right({
+            employeeID: setCheckOutTime.employeeID,
+            employeeCheckIn: setCheckOutTime.employeeCheckedIn
+              ? EmployeeCheckIn(setCheckOutTime.employeeCheckedIn.toISOString())
+              : undefined,
+            employeeCheckOut: setCheckOutTime.employeeCheckedOut
+              ? EmployeeCheckOut(setCheckOutTime.employeeCheckedOut.toISOString())
+              : undefined,
+          })
+      }
     }
+    return left("couldn't checkin/out")
+  } catch (e) {
+    return left(errorHandling(e))
   }
 }
 

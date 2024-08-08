@@ -7,6 +7,7 @@ import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
 let jwt = ''
+const newRole = 1
 describe('POST /users/login HTTP', async () => {
   let app: FastifyInstance
 
@@ -24,6 +25,20 @@ describe('POST /users/login HTTP', async () => {
     const parsedResponse = JSON.parse(response.body)
     console.log(parsedResponse)
     jwt = 'Bearer ' + parsedResponse.token
+
+    //const roleResp = await app.inject({
+    //  method: 'POST',
+    //  url: '/roles',
+    //  headers: {
+    //    Authorization: jwt,
+    //  },
+    //  payload: {
+    //    roleName: 'Next role',
+    //    description: 'My role desc',
+    //  },
+    //})
+    //newRole = JSON.parse(roleResp.body).data.roleID
+    //console.log(newRole)
   })
 
   after(async () => {
@@ -187,6 +202,23 @@ describe('POST /users/login HTTP', async () => {
     )
 
     for (const userID of userIDs) {
+      const patchResponse = await app.inject({
+        method: 'PATCH',
+        url: '/users/' + userID,
+        headers: {
+          Authorization: jwt,
+        },
+        payload: {
+          firstName: 'firstName',
+          lastName: 'lastName',
+          email: 'email@' + userID + '.com',
+          roleID: newRole,
+        },
+      })
+
+      const parsedPatched = JSON.parse(patchResponse.body)
+      assert.deepStrictEqual(parsedPatched.roleID, newRole)
+
       const deletedResponse = await app.inject({
         method: 'DELETE',
         url: '/users/' + userID,

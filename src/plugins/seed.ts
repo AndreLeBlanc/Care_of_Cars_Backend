@@ -84,42 +84,47 @@ export enum seedResult {
 
 export default fp<SupportPluginOptions>(async () => {
   async function seedSuperAdmin(): Promise<seedResult> {
+    const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
+    const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
     try {
-      if (
-        typeof process.env.SUPER_ADMIN_PASSWORD === 'string' &&
-        typeof process.env.SUPER_ADMIN_EMAIL === 'string'
-      ) {
-        const role: CreatedRole = await createRole(
+      if (typeof superAdminPassword === 'string' && typeof superAdminEmail === 'string') {
+        const role: Either<string, CreatedRole> = await createRole(
           RoleName('SuperAdmin'),
           RoleDescription('Super admin user'),
         )
 
-        // Below two envs are required in plugins/env.ts so it will throw message in console if not added.
-        const passwordHash = await generatePasswordHash(
-          UserPassword(process.env.SUPER_ADMIN_PASSWORD),
+        match(
+          role,
+          async (createdRole: CreatedRole) => {
+            // Below two envs are required in plugins/env.ts so it will throw message in console if not added.
+            const passwordHash = await generatePasswordHash(UserPassword(superAdminPassword))
+            const user: Either<string, CreatedUser> = await createUser(
+              UserFirstName('SuperAdmin'),
+              UserLastName('SuperAdmin'),
+              UserEmail(superAdminEmail),
+              passwordHash,
+              RoleID(createdRole.roleID),
+              IsSuperAdmin(true),
+            )
+            console.info('Super admin created from seed!', role, user)
+            const roleSecond: Either<string, CreatedRole> = await createRole(
+              RoleName('testRole'),
+              RoleDescription('second test user'),
+            )
+            const userSecond: Either<string, CreatedUser> = await createUser(
+              UserFirstName('SuperAdmin'),
+              UserLastName('SuperAdmin'),
+              UserEmail('27CM@HOTMAIL.COM'),
+              passwordHash,
+              RoleID(createdRole.roleID),
+              IsSuperAdmin(true),
+            )
+            console.info('Second user created from seed!', roleSecond, userSecond)
+          },
+          (err) => {
+            console.log('seed error: ', err)
+          },
         )
-        const user: Either<string, CreatedUser> = await createUser(
-          UserFirstName('SuperAdmin'),
-          UserLastName('SuperAdmin'),
-          UserEmail(process.env.SUPER_ADMIN_EMAIL),
-          passwordHash,
-          RoleID(role?.roleID),
-          IsSuperAdmin(true),
-        )
-        console.info('Super admin created from seed!', role, user)
-        const roleSecond: CreatedRole = await createRole(
-          RoleName('testRole'),
-          RoleDescription('second test user'),
-        )
-        const userSecond: Either<string, CreatedUser> = await createUser(
-          UserFirstName('SuperAdmin'),
-          UserLastName('SuperAdmin'),
-          UserEmail('27CM@HOTMAIL.COM'),
-          passwordHash,
-          RoleID(role?.roleID),
-          IsSuperAdmin(true),
-        )
-        console.info('Second user created from seed!', roleSecond, userSecond)
 
         const storeInfo: StoreCreate = {
           storeName: StoreName('Vendstore'),

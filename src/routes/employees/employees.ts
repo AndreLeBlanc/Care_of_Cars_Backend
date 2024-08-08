@@ -136,15 +136,20 @@ export const employees = async (fastify: FastifyInstance) => {
       const employeeID = EmployeeID(req.body.employeeID)
       const checkedInStatus = req.body.employeeCheckedOut as CheckedInStatus
 
-      const checkinStatus: CheckInTimes | undefined = await checkInCheckOut(
+      const checkinStatus: Either<string, CheckInTimes> = await checkInCheckOut(
         employeeID,
         checkedInStatus,
       )
       console.log('checkinStatus', checkinStatus)
-      if (checkinStatus == null) {
-        return rep.status(504).send({ message: "can't set employee checkin" })
-      }
-      return rep.status(201).send({ message: 'updated employee checkin', ...checkinStatus })
+      match(
+        checkinStatus,
+        (status: CheckInTimes) => {
+          return rep.status(201).send({ message: 'updated employee checkin', ...status })
+        },
+        (err) => {
+          return rep.status(504).send({ message: err })
+        },
+      )
     },
   )
 
@@ -780,20 +785,6 @@ export const employees = async (fastify: FastifyInstance) => {
         quals,
         localQuals,
       )
-
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
-      console.log('hours')
       match(
         hours,
         (specialHours: WorkingHoursIDTotal) => {
