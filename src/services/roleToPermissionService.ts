@@ -173,7 +173,7 @@ export async function listRolesToPermissions(): Promise<Either<string, Permissio
           acc.push({
             permissionID: perm.permissions.permissionID,
             permissionTitle: perm.permissions.permissionTitle,
-            permissionDescription: perm.permissions.description ?? undefined,
+            description: perm.permissions.description ?? undefined,
           })
         }
         return acc
@@ -222,7 +222,7 @@ export async function getRoleWithPermissions(
           acc.push({
             permissionID: PermissionID(roleWPerm.permissionID),
             permissionTitle: PermissionTitle(roleWPerm.permissionTitle),
-            permissionDescription: roleWPerm.description ?? undefined,
+            description: roleWPerm.description ?? undefined,
           })
         }
         return acc

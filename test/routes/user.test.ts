@@ -7,7 +7,7 @@ import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
 let jwt = ''
-const newRole = 1
+let newRole = 1
 describe('POST /users/login HTTP', async () => {
   let app: FastifyInstance
 
@@ -26,19 +26,19 @@ describe('POST /users/login HTTP', async () => {
     console.log(parsedResponse)
     jwt = 'Bearer ' + parsedResponse.token
 
-    //const roleResp = await app.inject({
-    //  method: 'POST',
-    //  url: '/roles',
-    //  headers: {
-    //    Authorization: jwt,
-    //  },
-    //  payload: {
-    //    roleName: 'Next role',
-    //    description: 'My role desc',
-    //  },
-    //})
-    //newRole = JSON.parse(roleResp.body).data.roleID
-    //console.log(newRole)
+    const roleResp = await app.inject({
+      method: 'POST',
+      url: '/roles',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        roleName: 'Next role',
+        description: 'My role desc',
+      },
+    })
+    newRole = JSON.parse(roleResp.body).data.roleID
+    console.log('new role: '), newRole
   })
 
   after(async () => {
@@ -130,6 +130,7 @@ describe('POST /users/login HTTP', async () => {
       },
     })
     const parsedResponse = JSON.parse(response.body)
+
     assert.deepStrictEqual(parsedResponse.userID, 1)
     assert.deepStrictEqual(parsedResponse.firstName, 'SuperAdmin')
     assert.deepStrictEqual(parsedResponse.lastName, 'SuperAdmin')
@@ -155,21 +156,23 @@ describe('POST /users/login HTTP', async () => {
               firstName: firstName,
               lastName: lastName,
               email: email,
+              isSuperAdmin: 'false',
               password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
               roleID: 1,
             },
           })
 
           const parsedResponse = JSON.parse(response.body)
-          assert.deepStrictEqual(parsedResponse.body.firstName, firstName)
-          assert.deepStrictEqual(parsedResponse.body.lastName, lastName)
-          assert.deepStrictEqual(parsedResponse.body.email, email)
+
+          assert.deepStrictEqual(parsedResponse.firstName, firstName)
+          assert.deepStrictEqual(parsedResponse.lastName, lastName)
+          assert.deepStrictEqual(parsedResponse.email, email)
           assert.strictEqual(response.statusCode, 201)
-          userIDs.push(parsedResponse.body.userID)
+          userIDs.push(parsedResponse.userID)
 
           const getResponse = await app.inject({
             method: 'GET',
-            url: '/users/' + parsedResponse.body.userID,
+            url: '/users/' + parsedResponse.userID,
             headers: {
               Authorization: jwt,
             },
@@ -177,7 +180,7 @@ describe('POST /users/login HTTP', async () => {
 
           const parsedGetResponse = JSON.parse(getResponse.body)
 
-          assert.deepStrictEqual(parsedGetResponse.userID, parsedResponse.body.userID)
+          assert.deepStrictEqual(parsedGetResponse.userID, parsedResponse.userID)
           assert.deepStrictEqual(parsedGetResponse.firstName, firstName)
           assert.deepStrictEqual(parsedGetResponse.lastName, lastName)
           assert.deepStrictEqual(parsedGetResponse.email, email)
@@ -234,6 +237,47 @@ describe('POST /users/login HTTP', async () => {
       const getDeletedResponse = await app.inject({
         method: 'GET',
         url: '/users/' + userID,
+        headers: {
+          Authorization: jwt,
+        },
+      })
+
+      const parsedGetResponse = JSON.parse(getDeletedResponse.body)
+      assert.deepStrictEqual(parsedGetResponse.message, 'user not found')
+      assert.deepStrictEqual(getDeletedResponse.statusCode, 404)
+    }
+
+    // Test patching, deleting and getting users that don't exist.
+    for (let i = 1000; i < 1100; i++) {
+      const patchResponse = await app.inject({
+        method: 'PATCH',
+        url: '/users/' + i,
+        headers: {
+          Authorization: jwt,
+        },
+        payload: {
+          firstName: 'firstName',
+          lastName: 'lastName',
+          email: 'email@' + 'userID' + '.com',
+          roleID: newRole,
+        },
+      })
+
+      assert.deepStrictEqual(patchResponse.statusCode, 404)
+
+      const deletedResponse = await app.inject({
+        method: 'DELETE',
+        url: '/users/' + i,
+        headers: {
+          Authorization: jwt,
+        },
+      })
+
+      assert.deepStrictEqual(deletedResponse.statusCode, 404)
+
+      const getDeletedResponse = await app.inject({
+        method: 'GET',
+        url: '/users/' + i,
         headers: {
           Authorization: jwt,
         },

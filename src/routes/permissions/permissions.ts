@@ -165,6 +165,7 @@ export async function permissions(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
+      console.log('request: ', request)
       const id: PermissionID = PermissionID(request.params.permissionID)
       const permission: Either<string, Permission> = await getPermissionByID(id)
       match(
@@ -207,7 +208,7 @@ export async function permissions(fastify: FastifyInstance) {
       const permission: Either<string, Permission> = await updatePermissionByID({
         permissionID: PermissionID(request.params.permissionID),
         permissionTitle: PermissionTitle(request.body.permissionTitle),
-        permissionDescription: request.body.description
+        description: request.body.description
           ? PermissionDescription(request.body.description)
           : undefined,
       })

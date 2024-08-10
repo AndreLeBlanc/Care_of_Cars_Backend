@@ -174,7 +174,7 @@ export async function users(fastify: FastifyInstance) {
       schema: {
         body: CreateUser,
         response: {
-          201: { body: CreateUserReply },
+          201: CreateUserReply,
         },
       },
     },
@@ -185,6 +185,7 @@ export async function users(fastify: FastifyInstance) {
         return reply.status(422).send({ message: 'Provide a strong password' })
       }
       const passwordHash: string = await generatePasswordHash(UserPassword(password))
+
       const createdUser: Either<string, CreatedUser> = await createUser(
         UserFirstName(firstName),
         UserLastName(lastName),
@@ -198,12 +199,11 @@ export async function users(fastify: FastifyInstance) {
         (user: CreatedUser) => {
           return reply.status(201).send({
             message: 'User created',
-            body: {
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.email,
-              userID: user.userID,
-            },
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            userID: user.userID,
+            roleID: user.roleID,
           })
         },
         (error) => {
@@ -304,7 +304,6 @@ export async function users(fastify: FastifyInstance) {
           if (match) {
             const token = fastify.jwt.sign({ user })
             const rolePermissions = await getRoleWithPermissions(RoleID(user.role.roleID))
-            //            const roleFullPermissions = await getAllPermissionStatus(RoleID(user.role.roleID))
 
             return reply.status(200).send({
               message: 'Login success',

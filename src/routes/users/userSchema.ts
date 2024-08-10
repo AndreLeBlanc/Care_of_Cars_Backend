@@ -30,6 +30,7 @@ export const CreatedUser = Type.Object({
 })
 
 export const CreateUserReply = Type.Object({
+  message: Type.String(),
   firstName: FirstName,
   lastName: LastName,
   email: userEmail,

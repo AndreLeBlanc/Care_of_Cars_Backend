@@ -18,7 +18,7 @@ import { Either, errorHandling, left, right } from '../utils/helper.js'
 export type PermissionIDDescName = {
   permissionID: PermissionID
   permissionTitle: PermissionTitle
-  permissionDescription?: PermissionDescription
+  description?: PermissionDescription
 }
 
 type PermissionCreatedAndUpdated = {
@@ -71,7 +71,7 @@ export async function getPermissionsPaginate(
       data: permissionsList.map((perm) => ({
         permissionID: perm.permissionID,
         permissionTitle: perm.permissionTitle,
-        permissionDescription: perm.description ?? undefined,
+        description: perm.description ?? undefined,
         createdAt: perm.createdAt,
         updatedAt: perm.updatedAt,
       })),
@@ -95,13 +95,13 @@ export async function createPermission(
       .returning({
         permissionID: permissions.permissionID,
         permissionTitle: permissions.permissionTitle,
-        permissionDescription: permissions.description,
+        description: permissions.description,
       })
 
     const brandedPerm = {
       permissionID: createdPermission.permissionID,
       permissionTitle: createdPermission.permissionTitle,
-      permissionDescription: createdPermission.permissionDescription ?? undefined,
+      description: createdPermission.description ?? undefined,
     }
     return createdPermission ? right(brandedPerm) : left("couldn't create permission")
   } catch (e) {
@@ -115,7 +115,7 @@ export async function getPermissionByID(id: PermissionID): Promise<Either<string
       .select({
         permissionID: permissions.permissionID,
         permissionTitle: permissions.permissionTitle,
-        permissionDescription: permissions.description,
+        description: permissions.description,
         createdAt: permissions.createdAt,
         updatedAt: permissions.updatedAt,
       })
@@ -124,7 +124,7 @@ export async function getPermissionByID(id: PermissionID): Promise<Either<string
     const brandedPerm = {
       permissionID: permission.permissionID,
       permissionTitle: permission.permissionTitle,
-      permissionDescription: permission.permissionDescription ?? undefined,
+      description: permission.description ?? undefined,
       createdAt: permission.createdAt,
       updatedAt: permission.updatedAt,
     }
@@ -140,7 +140,7 @@ export async function updatePermissionByID(
   try {
     const permissionWithUpdatedAt = {
       permissionTitle: permission.permissionTitle,
-      description: permission.permissionDescription,
+      description: permission.description,
       updatedAt: new Date(),
     }
     const [updatedPermission] = await db
@@ -150,14 +150,14 @@ export async function updatePermissionByID(
       .returning({
         permissionID: permissions.permissionID,
         permissionTitle: permissions.permissionTitle,
-        permissionDescription: permissions.description,
+        description: permissions.description,
         createdAt: permissions.createdAt,
         updatedAt: permissions.updatedAt,
       })
     const brandedPerm = {
       permissionID: updatedPermission.permissionID,
       permissionTitle: updatedPermission.permissionTitle,
-      permissionDescription: updatedPermission.permissionDescription ?? undefined,
+      description: updatedPermission.description ?? undefined,
       createdAt: updatedPermission.createdAt,
       updatedAt: updatedPermission.updatedAt,
     }
@@ -175,14 +175,14 @@ export async function deletePermission(id: PermissionID): Promise<Either<string,
       .returning({
         permissionID: permissions.permissionID,
         permissionTitle: permissions.permissionTitle,
-        permissionDescription: permissions.description,
+        description: permissions.description,
         createdAt: permissions.createdAt,
         updatedAt: permissions.updatedAt,
       })
     const brandedPerm = {
       permissionID: deletedPermission.permissionID,
       permissionTitle: deletedPermission.permissionTitle,
-      permissionDescription: deletedPermission.permissionDescription ?? undefined,
+      description: deletedPermission.description ?? undefined,
       createdAt: deletedPermission.createdAt,
       updatedAt: deletedPermission.updatedAt,
     }

@@ -11,7 +11,7 @@ import { initDrizzle } from '../../src/config/db-connect.js'
 //}
 
 let jwt = ''
-describe('stores test', async () => {
+describe('POST /users/login HTTP', async () => {
   let app: FastifyInstance
 
   before(async () => {
@@ -25,11 +25,10 @@ describe('stores test', async () => {
         password: 'admin123',
       },
     })
+    console.log('parsed 123: ', response)
     const parsedResponse = JSON.parse(response.body)
-
     jwt = 'Bearer ' + parsedResponse.token
   })
-
   //  const storeIDs: number[] = []
 
   after(async () => {
@@ -40,10 +39,10 @@ describe('stores test', async () => {
     await fc.assert(
       fc.asyncProperty(
         fc
-          .uniqueArray(fc.string({ minLength: 1 }).noShrink(), { minLength: 1, maxLength: 1 })
+          .uniqueArray(fc.string({ minLength: 3 }).noShrink(), { minLength: 1, maxLength: 1 })
           .noShrink(),
         fc
-          .uniqueArray(fc.string({ minLength: 1, maxLength: 11 }).noShrink(), {
+          .uniqueArray(fc.string({ minLength: 8, maxLength: 11 }).noShrink(), {
             minLength: 1,
             maxLength: 1,
           })
@@ -55,10 +54,16 @@ describe('stores test', async () => {
           .uniqueArray(fc.string({ minLength: 1 }).noShrink(), { minLength: 1, maxLength: 1 })
           .noShrink(),
         fc
-          .uniqueArray(fc.string({ minLength: 1 }).noShrink(), { minLength: 1, maxLength: 1 })
+          .uniqueArray(fc.string({ minLength: 3, maxLength: 16 }).noShrink(), {
+            minLength: 1,
+            maxLength: 1,
+          })
           .noShrink(),
         fc
-          .uniqueArray(fc.string({ minLength: 1 }).noShrink(), { minLength: 1, maxLength: 1 })
+          .uniqueArray(fc.string({ minLength: 3, maxLength: 16 }).noShrink(), {
+            minLength: 1,
+            maxLength: 1,
+          })
           .noShrink(),
         fc
           .uniqueArray(fc.string({ minLength: 1 }).noShrink(), { minLength: 1, maxLength: 1 })
@@ -96,44 +101,6 @@ describe('stores test', async () => {
           storeUsesCheckin,
           storeUsesPIN,
         ) => {
-          // storeName = storeName.filter(onlyUnique)
-          // storeOrgNumber = storeOrgNumber.filter(onlyUnique)
-          // storeFSkatt = storeFSkatt.filter(onlyUnique)
-          // storeStatus = storeStatus.filter(onlyUnique)
-          // storeEmail = storeEmail.filter(onlyUnique)
-          // storeAddress = storeAddress.filter(onlyUnique)
-          // storeZipCode = storeZipCode.filter(onlyUnique)
-          // storeCity = storeCity.filter(onlyUnique)
-          // storeCountry = storeCountry.filter(onlyUnique)
-          // storeDescription = storeDescription.filter(onlyUnique)
-          // storeContactPerson = storeContactPerson.filter(onlyUnique)
-          // storeMaxUsers = storeMaxUsers.filter(onlyUnique)
-          // storeAllowCarAPI = storeAllowCarAPI.filter(onlyUnique)
-          // storeAllowSendSMS = storeAllowSendSMS.filter(onlyUnique)
-          // storeSendSMS = storeSendSMS.filter(onlyUnique)
-          // storeUsesCheckin = storeUsesCheckin.filter(onlyUnique)
-          // storeUsesPIN = storeUsesPIN.filter(onlyUnique)
-
-          //const len = [
-          //  storeName,
-          //  storeOrgNumber,
-          //  storeFSkatt,
-          //  storeStatus,
-          //  storeEmail,
-          //  storeAddress,
-          //  storeZipCode,
-          //  storeCity,
-          //  storeCountry,
-          //  storeDescription,
-          //  storeContactPerson,
-          //  storeMaxUsers,
-          //  storeAllowCarAPI,
-          //  storeAllowSendSMS,
-          //  storeSendSMS,
-          //  storeUsesCheckin,
-          //  storeUsesPIN,
-          //].reduce((acc, el) => (acc > el.length ? el.length : acc), storeName.length)
-          //console.log(len)
           for (let i = 0; i < 1; i++) {
             const response = await app.inject({
               method: 'POST',
@@ -164,7 +131,6 @@ describe('stores test', async () => {
             })
 
             const parsedResponse = JSON.parse(response.body)
-            console.log('parsed store', parsedResponse.store)
             //          storeIDs.push(parsedResponse.data.permissionID)
             //assert.deepStrictEqual(parsedResponse.data.permissionName, name)
             //assert.deepStrictEqual(parsedResponse.data.permissionDescription, description)
