@@ -1197,7 +1197,7 @@ export const productCategories = pgTable('productCategories', {
     .$type<ProductCategoryName>()
     .unique()
     .notNull(),
-  description: text('description').$type<ProductCategoryDescription>(),
+  productCategoryDescription: text('description').$type<ProductCategoryDescription>(),
   ...dbDates,
 })
 

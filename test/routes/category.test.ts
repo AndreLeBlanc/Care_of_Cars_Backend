@@ -91,8 +91,8 @@ describe('category tests', async () => {
           Authorization: jwt,
         },
         payload: {
-          name: name,
-          description: name,
+          serviceCategoryName: name,
+          serviceCategoryDescription: name,
         },
       })
 
@@ -117,6 +117,7 @@ describe('category tests', async () => {
           Authorization: jwt,
         },
       })
+
       const parsedGetResponse = JSON.parse(getResponse.body)
 
       assert.deepStrictEqual(parsedGetResponse.serviceCategoryName, name)
@@ -133,8 +134,8 @@ describe('category tests', async () => {
           Authorization: jwt,
         },
         payload: {
-          name: newName,
-          description: newDescription,
+          serviceCategoryName: newName,
+          serviceCategoryDescription: newDescription,
         },
       })
 
@@ -156,6 +157,86 @@ describe('category tests', async () => {
 
       assert.deepStrictEqual(deletedParsedResponse.serviceCategoryName, newName)
       assert.deepStrictEqual(deletedParsedResponse.serviceCategoryDescription, newDescription)
+      assert.deepStrictEqual(deletedResponse.statusCode, 200)
+    }
+  })
+
+  it('product Category create and get', async () => {
+    for (const [i, name] of str.entries()) {
+      console.log('name and i: ', name, ' ', i)
+      const response = await app.inject({
+        method: 'POST',
+        url: '/category/product',
+        headers: {
+          Authorization: jwt,
+        },
+        payload: {
+          productCategoryName: name,
+          productCategoryDescription: name,
+        },
+      })
+
+      const parsedResponse = JSON.parse(response.body)
+
+      console.log(
+        'parsedResponse ',
+        parsedResponse,
+        parsedResponse.productCategoryDescription,
+        '   ',
+        name,
+        name === parsedResponse.productCategoryDescription,
+      )
+
+      assert.deepStrictEqual(parsedResponse.productCategoryName, name)
+      assert.deepStrictEqual(parsedResponse.productCategoryDescription, name)
+      assert.deepStrictEqual(response.statusCode, 201)
+      const getResponse = await app.inject({
+        method: 'GET',
+        url: '/category/product/' + parsedResponse.productCategoryID,
+        headers: {
+          Authorization: jwt,
+        },
+      })
+
+      const parsedGetResponse = JSON.parse(getResponse.body)
+
+      assert.deepStrictEqual(parsedGetResponse.productCategoryName, name)
+      assert.deepStrictEqual(parsedGetResponse.productCategoryDescription, str[i])
+      assert.deepStrictEqual(getResponse.statusCode, 200)
+
+      const newName = crypto.randomBytes(i + 3).toString('hex')
+      const newDescription = crypto.randomBytes(i + 8).toString('hex')
+
+      const patchResponse = await app.inject({
+        method: 'PATCH',
+        url: '/category/product/' + parsedResponse.productCategoryID,
+        headers: {
+          Authorization: jwt,
+        },
+        payload: {
+          productCategoryName: newName,
+          productCategoryDescription: newDescription,
+        },
+      })
+
+      const parsedPatchResponse = JSON.parse(patchResponse.body)
+
+      assert.deepStrictEqual(parsedPatchResponse.productCategoryName, newName)
+      assert.deepStrictEqual(parsedPatchResponse.productCategoryDescription, newDescription)
+      assert.deepStrictEqual(patchResponse.statusCode, 201)
+
+      const deletedResponse = await app.inject({
+        method: 'DELETE',
+        url: '/category/product/' + parsedResponse.productCategoryID,
+        headers: {
+          Authorization: jwt,
+        },
+      })
+
+      const deletedParsedResponse = JSON.parse(deletedResponse.body)
+
+      assert.deepStrictEqual(deletedParsedResponse.productCategoryName, newName)
+      assert.deepStrictEqual(deletedParsedResponse.productCategoryDescription, newDescription)
       assert.deepStrictEqual(deletedResponse.statusCode, 200)
     }
   })

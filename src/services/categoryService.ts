@@ -40,7 +40,7 @@ export type CreateProductCategory = {
 }
 
 export type UpdatedServiceCategoryByID = {
-  description?: ServiceCategoryID
+  serviceCategoryID?: ServiceCategoryID
   name?: ServiceCategoryName
 }
 
@@ -76,7 +76,7 @@ export async function getProductCategoriesPaginate(
   try {
     const condition = or(
       ilike(productCategories.productCategoryName, '%' + search + '%'),
-      ilike(productCategories.description, '%' + search + '%'),
+      ilike(productCategories.productCategoryDescription, '%' + search + '%'),
     )
 
     const [totalItems] = await db
@@ -90,7 +90,7 @@ export async function getProductCategoriesPaginate(
       .select({
         id: productCategories.productCategoryID,
         name: productCategories.productCategoryName,
-        description: productCategories.description,
+        productCategoryDescription: productCategories.productCategoryDescription,
       })
       .from(productCategories)
       .where(condition)
@@ -103,7 +103,7 @@ export async function getProductCategoriesPaginate(
         return {
           productCategoryID: productCategory.id,
           productCategoryName: productCategory.name,
-          productCategoryDescription: productCategory.description ?? undefined,
+          productCategoryDescription: productCategory.productCategoryDescription ?? undefined,
         }
       },
     )
@@ -145,7 +145,7 @@ export async function getServiceCategoriesPaginate(
       .select({
         id: serviceCategories.serviceCategoryID,
         name: serviceCategories.serviceCategoryName,
-        description: serviceCategories.serviceCategoryDescription,
+        serviceCategoryDescription: serviceCategories.serviceCategoryDescription,
       })
       .from(serviceCategories)
       .where(condition)
@@ -158,7 +158,7 @@ export async function getServiceCategoriesPaginate(
         return {
           serviceCategoryID: serviceCategory.id,
           serviceCategoryName: serviceCategory.name,
-          serviceCategoryDescription: serviceCategory.description ?? undefined,
+          serviceCategoryDescription: serviceCategory.serviceCategoryDescription ?? undefined,
         }
       },
     )
@@ -179,12 +179,12 @@ export async function getServiceCategoriesPaginate(
 //Create Service Category
 export async function createServiceCategory(
   name: ServiceCategoryName,
-  description: ServiceCategoryDescription,
+  serviceCategoryDescription: ServiceCategoryDescription,
 ): Promise<Either<string, CreateServiceCategory>> {
   try {
     const [createdServiceCategory] = await db
       .insert(serviceCategories)
-      .values({ serviceCategoryName: name, serviceCategoryDescription: description })
+      .values({ serviceCategoryName: name, serviceCategoryDescription: serviceCategoryDescription })
       .returning({
         id: serviceCategories.serviceCategoryID,
         serviceCategoryName: serviceCategories.serviceCategoryName,
@@ -203,21 +203,24 @@ export async function createServiceCategory(
 //Create Product Category
 export async function createProductCategory(
   productCategoryName: ProductCategoryName,
-  description: ProductCategoryDescription,
+  productCategoryDescription: ProductCategoryDescription,
 ): Promise<Either<string, CreateProductCategory>> {
   try {
     const [createdProductCategory] = await db
       .insert(productCategories)
-      .values({ productCategoryName: productCategoryName, description: description })
+      .values({
+        productCategoryName: productCategoryName,
+        productCategoryDescription: productCategoryDescription,
+      })
       .returning({
         id: productCategories.productCategoryID,
         productCategoryName: productCategories.productCategoryName,
-        description: productCategories.description,
+        productCategoryDescription: productCategories.productCategoryDescription,
       })
     return right({
       productCategoryID: createdProductCategory.id,
       productCategoryName: createdProductCategory.productCategoryName,
-      productCategoryDescription: createdProductCategory.description ?? undefined,
+      productCategoryDescription: createdProductCategory.productCategoryDescription ?? undefined,
     })
   } catch (e) {
     return left(errorHandling(e))
@@ -261,7 +264,7 @@ export async function getProductCategoryByID(
       .select({
         productCategoryID: productCategories.productCategoryID,
         productCategoryName: productCategories.productCategoryName,
-        productCategoryDescription: productCategories.description,
+        productCategoryDescription: productCategories.productCategoryDescription,
         createdAt: productCategories.createdAt,
         updatedAt: productCategories.updatedAt,
       })
@@ -321,7 +324,14 @@ export async function updateProductCategoryByID(
       .where(eq(productCategories.productCategoryID, productCategory.productCategoryID))
       .returning()
     return updatedProductCategory
-      ? right(updatedProductCategory)
+      ? right({
+          productCategoryID: updatedProductCategory.productCategoryID,
+          productCategoryName: updatedProductCategory.productCategoryName,
+          productCategoryDescription:
+            updatedProductCategory.productCategoryDescription ?? undefined,
+          createdAt: updatedProductCategory.createdAt,
+          updatedAt: updatedProductCategory.updatedAt,
+        })
       : left('no product category found')
   } catch (e) {
     return left(errorHandling(e))
@@ -363,7 +373,8 @@ export async function deleteProductCategory(
       ? right({
           productCategoryID: deletedProductCategory.productCategoryID,
           productCategoryName: deletedProductCategory.productCategoryName,
-          productCategoryDescription: deletedProductCategory.description ?? undefined,
+          productCategoryDescription:
+            deletedProductCategory.productCategoryDescription ?? undefined,
           createdAt: deletedProductCategory.createdAt,
           updatedAt: deletedProductCategory.updatedAt,
         })

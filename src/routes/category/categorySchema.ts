@@ -20,21 +20,38 @@ export type ListServiceCategoryQueryParamSchemaType = Static<
 >
 
 export const CreateServiceCategorySchema = Type.Object({
-  name: CategoryNameSchema,
-  description: Type.Optional(CategoryDescriptionSchema),
+  serviceCategoryName: CategoryNameSchema,
+  serviceCategoryDescription: Type.Optional(CategoryDescriptionSchema),
 })
 export type CreateServiceCategorySchemaType = Static<typeof CreateServiceCategorySchema>
 
-export const getServiceCategoryByIDSchema = Type.Object({
+export const CreateProductCategorySchema = Type.Object({
+  productCategoryName: CategoryNameSchema,
+  productCategoryDescription: Type.Optional(CategoryDescriptionSchema),
+})
+export type CreateProductCategorySchemaType = Static<typeof CreateProductCategorySchema>
+
+export const GetServiceCategoryByIDSchema = Type.Object({
   id: CategoryIDSchema,
 })
-export type getServiceCategoryByIDSchemaType = Static<typeof getServiceCategoryByIDSchema>
+export type GetServiceCategoryByIDSchemaType = Static<typeof GetServiceCategoryByIDSchema>
+
+export const GetProductCategoryByIDSchema = Type.Object({
+  id: CategoryIDSchema,
+})
+export type GetProductCategoryByIDSchemaType = Static<typeof GetProductCategoryByIDSchema>
 
 export const PatchServiceCategorySchema = Type.Object({
-  name: CategoryNameSchema,
-  description: Type.Optional(CategoryDescriptionSchema),
+  serviceCategoryName: CategoryNameSchema,
+  serviceCategoryDescription: Type.Optional(CategoryDescriptionSchema),
 })
 export type PatchServiceCategorySchemaType = Static<typeof PatchServiceCategorySchema>
+
+export const PatchProductCategorySchema = Type.Object({
+  productCategoryName: CategoryNameSchema,
+  productCategoryDescription: Type.Optional(CategoryDescriptionSchema),
+})
+export type PatchProductCategorySchemaType = Static<typeof PatchProductCategorySchema>
 
 export const ServiceCategorySchema = Type.Object({
   serviceCategoryID: CategoryIDSchema,
