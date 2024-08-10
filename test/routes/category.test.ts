@@ -81,7 +81,7 @@ describe('category tests', async () => {
     await app.close()
   })
 
-  it('service Category create and get', async () => {
+  it('service Category create, delete and get', async () => {
     for (const [i, name] of str.entries()) {
       console.log('name and i: ', name, ' ', i)
       const response = await app.inject({
@@ -97,15 +97,6 @@ describe('category tests', async () => {
       })
 
       const parsedResponse = JSON.parse(response.body)
-
-      console.log(
-        'parsedResponse ',
-        parsedResponse,
-        parsedResponse.serviceCategoryDescription,
-        '   ',
-        name,
-        name === parsedResponse.serviceCategoryDescription,
-      )
 
       assert.deepStrictEqual(parsedResponse.serviceCategoryName, name)
       assert.deepStrictEqual(parsedResponse.serviceCategoryDescription, name)
@@ -161,7 +152,7 @@ describe('category tests', async () => {
     }
   })
 
-  it('product Category create and get', async () => {
+  it('product Category create, delete and get', async () => {
     for (const [i, name] of str.entries()) {
       console.log('name and i: ', name, ' ', i)
       const response = await app.inject({
@@ -177,15 +168,6 @@ describe('category tests', async () => {
       })
 
       const parsedResponse = JSON.parse(response.body)
-
-      console.log(
-        'parsedResponse ',
-        parsedResponse,
-        parsedResponse.productCategoryDescription,
-        '   ',
-        name,
-        name === parsedResponse.productCategoryDescription,
-      )
 
       assert.deepStrictEqual(parsedResponse.productCategoryName, name)
       assert.deepStrictEqual(parsedResponse.productCategoryDescription, name)
