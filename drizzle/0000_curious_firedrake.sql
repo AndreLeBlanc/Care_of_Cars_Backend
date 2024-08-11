@@ -12,7 +12,7 @@ END $$;
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "companycustomers" (
 	"customerOrgNumber" varchar(11) PRIMARY KEY NOT NULL,
-	"customerComapanyName" varchar(255) NOT NULL,
+	"customerCompanyName" varchar(255) NOT NULL,
 	"companyAddress" varchar(256),
 	"companyZipCode" varchar(16),
 	"companyAddressCity" varchar(256),
