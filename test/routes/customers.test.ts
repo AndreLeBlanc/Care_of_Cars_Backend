@@ -180,7 +180,7 @@ describe('Customer Route', () => {
         Authorization: jwt,
       },
       payload: {
-        customerOrgNumber: '5593921082/',
+        customerOrgNumber: '5593921082',
         customerCompanyName: 'Vendfox solutions ab',
         companyReference: 'André Le Blanc',
         companyEmail: 'andre@vendfox.com',
@@ -214,7 +214,7 @@ describe('Customer Route', () => {
       message: 'company / driver created',
       data: {
         company: {
-          customerOrgNumber: '5593921082/',
+          customerOrgNumber: '5593921082',
           customerCompanyName: 'Vendfox solutions ab',
           companyEmail: 'andre@vendfox.com',
           companyPhone: '0762757764',
@@ -251,7 +251,7 @@ describe('Customer Route', () => {
     }
     const parsedPostResponse = JSON.parse(postResponse.body)
 
-    assert.deepStrictEqual(parsedPostResponse.data.company.customerOrgNumber, '5593921082/')
+    assert.deepStrictEqual(parsedPostResponse.data.company.customerOrgNumber, '5593921082')
     assert.deepStrictEqual(
       parsedPostResponse.data.company.customerCompanyName,
       'Vendfox solutions ab',
@@ -324,7 +324,7 @@ describe('Customer Route', () => {
         Authorization: jwt,
       },
       payload: {
-        customerOrgNumber: '5593921082/',
+        customerOrgNumber: '5593921082',
         customerCompanyName: 'Vendfox solutions AB',
         companyEmail: 'andre.leblanc@zoho.com',
         companyPhone: '0762757764',
@@ -336,12 +336,7 @@ describe('Customer Route', () => {
     })
     const parsedPatchResponse = JSON.parse(postPatchResponse.body)
 
-    console.log('parsedPatchResponse')
-    console.log('parsedPatchResponse')
-    console.log(parsedPatchResponse)
-    console.log('parsedPatchResponse')
-    console.log('parsedPatchResponse')
-    assert.deepStrictEqual(parsedPatchResponse.comp.customerOrgNumber, '5593921082/')
+    assert.deepStrictEqual(parsedPatchResponse.comp.customerOrgNumber, '5593921082')
     assert.deepStrictEqual(parsedPatchResponse.comp.customerCompanyName, 'Vendfox solutions AB')
     assert.deepStrictEqual(parsedPatchResponse.comp.companyEmail, 'andre.leblanc@zoho.com')
     assert.deepStrictEqual(parsedPatchResponse.comp.companyPhone, '0762757764')
@@ -349,5 +344,276 @@ describe('Customer Route', () => {
     assert.deepStrictEqual(parsedPatchResponse.comp.companyZipCode, '75323')
     assert.deepStrictEqual(parsedPatchResponse.comp.companyAddressCity, 'Stockholm')
     assert.deepStrictEqual(parsedPatchResponse.comp.companyCountry, 'Sweden')
+
+    const getResponse = await app.inject({
+      method: 'GET',
+      url: '/customer/123456',
+      headers: {
+        Authorization: jwt,
+      },
+    })
+
+    const parsedgetResponse = JSON.parse(getResponse.body)
+
+    assert.deepStrictEqual(parsedgetResponse.comp.customerOrgNumber, '123456')
+    assert.deepStrictEqual(parsedgetResponse.comp.customerCompanyName, 'ABC INC')
+    assert.deepStrictEqual(parsedgetResponse.comp.companyEmail, 'admin@abcinc.com')
+    assert.deepStrictEqual(parsedgetResponse.comp.companyPhone, '018234432')
+    assert.deepStrictEqual(parsedgetResponse.comp.companyAddress, 'Some Road, Some Where')
+    assert.deepStrictEqual(parsedgetResponse.comp.companyZipCode, '74934')
+    assert.deepStrictEqual(parsedgetResponse.comp.companyAddressCity, 'LOK')
+    assert.deepStrictEqual(parsedgetResponse.comp.companyCountry, 'IN')
+
+    const getResponse2 = await app.inject({
+      method: 'GET',
+      url: '/customer/5593921082',
+      headers: {
+        Authorization: jwt,
+      },
+    })
+
+    const parsedgetResponse2 = JSON.parse(getResponse2.body)
+    assert.deepStrictEqual(parsedgetResponse2.comp.customerOrgNumber, '5593921082')
+    assert.deepStrictEqual(parsedgetResponse2.comp.customerCompanyName, 'Vendfox solutions AB')
+    assert.deepStrictEqual(parsedgetResponse2.comp.companyEmail, 'andre.leblanc@zoho.com')
+    assert.deepStrictEqual(parsedgetResponse2.comp.companyPhone, '0762757764')
+    assert.deepStrictEqual(parsedgetResponse2.comp.companyAddress, 'köpmangatan')
+    assert.deepStrictEqual(parsedgetResponse2.comp.companyZipCode, '75323')
+    assert.deepStrictEqual(parsedgetResponse2.comp.companyAddressCity, 'Stockholm')
+    assert.deepStrictEqual(parsedgetResponse2.comp.companyCountry, 'Sweden')
+
+    const additionalDriverRequest = await app.inject({
+      method: 'POST',
+      url: '/customer/driver',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        customerOrgNumber: '123456',
+        driverExternalNumber: '0943094',
+        driverGDPRAccept: true,
+        driverISWarrantyDriver: true,
+        driverAcceptsMarketing: true,
+        driverFirstName: 'Mahan',
+        driverLastName: 'Putri',
+        driverEmail: 'newGuy.putri@abcinc.com',
+        driverPhoneNumber: '1234234',
+        driverAddress: '234123',
+        driverZipCode: '32112',
+        driverAddressCity: '23',
+        driverCountry: 'UK',
+        driverHasCard: false,
+        driverCardNumber: 'XXXX-XXXX-XXXX',
+        driverCardValidTo: '2024-12-31',
+        driverKeyNumber: 'XXXX',
+        driverNotesShared: '',
+        driverNotes: '',
+      },
+    })
+    const additionalDriver = JSON.parse(additionalDriverRequest.body)
+
+    assert.deepStrictEqual(additionalDriver.data.customerOrgNumber, '123456')
+    assert.deepStrictEqual(additionalDriver.data.driverExternalNumber, '0943094')
+    assert.deepStrictEqual(additionalDriver.data.driverGDPRAccept, true)
+    assert.deepStrictEqual(additionalDriver.data.driverISWarrantyDriver, true)
+    assert.deepStrictEqual(additionalDriver.data.driverAcceptsMarketing, true)
+    assert.deepStrictEqual(additionalDriver.data.driverFirstName, 'Mahan')
+    assert.deepStrictEqual(additionalDriver.data.driverLastName, 'Putri')
+    assert.deepStrictEqual(additionalDriver.data.driverEmail, 'newGuy.putri@abcinc.com')
+    assert.deepStrictEqual(additionalDriver.data.driverPhoneNumber, '1234234')
+    assert.deepStrictEqual(additionalDriver.data.driverAddress, '234123')
+    assert.deepStrictEqual(additionalDriver.data.driverZipCode, '32112')
+    assert.deepStrictEqual(additionalDriver.data.driverAddressCity, '23')
+    assert.deepStrictEqual(additionalDriver.data.driverCountry, 'UK')
+    assert.deepStrictEqual(additionalDriver.data.driverHasCard, false)
+    assert.strictEqual(additionalDriverRequest.statusCode, 201)
+
+    const additionalDriverPatchRequest = await app.inject({
+      method: 'PATCH',
+      url: '/customer/driver',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        driverID: additionalDriver.data.driverID,
+        customerOrgNumber: '5593921082',
+        driverExternalNumber: '0943094',
+        driverGDPRAccept: true,
+        driverISWarrantyDriver: true,
+        driverAcceptsMarketing: true,
+        driverFirstName: 'Mahan',
+        driverLastName: 'Putri',
+        driverEmail: 'newGuy.putri@abcinc.com',
+        driverPhoneNumber: '1234234',
+        driverAddress: '234123',
+        driverZipCode: '32112',
+        driverAddressCity: '23',
+        driverCountry: 'UK',
+        driverHasCard: false,
+        driverCardNumber: 'XXXX-XXXX-XXXX',
+        driverCardValidTo: '2024-12-31',
+        driverKeyNumber: 'XXXX',
+        driverNotesShared: '',
+        driverNotes: '',
+      },
+    })
+    const additionalDriverVendfox = JSON.parse(additionalDriverPatchRequest.body)
+
+    assert.deepStrictEqual(additionalDriverVendfox.driver.customerOrgNumber, '5593921082')
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverExternalNumber, '0943094')
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverGDPRAccept, true)
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverISWarrantyDriver, true)
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverAcceptsMarketing, true)
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverFirstName, 'Mahan')
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverLastName, 'Putri')
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverEmail, 'newGuy.putri@abcinc.com')
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverPhoneNumber, '1234234')
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverAddress, '234123')
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverZipCode, '32112')
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverAddressCity, '23')
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverCountry, 'UK')
+    assert.deepStrictEqual(additionalDriverVendfox.driver.driverHasCard, false)
+    assert.strictEqual(additionalDriverPatchRequest.statusCode, 201)
+
+    const additionalDriverNoCompanyRequest = await app.inject({
+      method: 'PATCH',
+      url: '/customer/driver',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        driverID: additionalDriver.data.driverID,
+        driverExternalNumber: '0943094',
+        driverGDPRAccept: true,
+        driverISWarrantyDriver: true,
+        driverAcceptsMarketing: true,
+        driverFirstName: 'Mahan',
+        driverLastName: 'Putri',
+        driverEmail: 'newGuy.putri@abcinc.com',
+        driverPhoneNumber: '1234234',
+        driverAddress: '234123',
+        driverZipCode: '32112',
+        driverAddressCity: '24',
+        driverCountry: 'UK',
+        driverHasCard: false,
+        driverCardNumber: 'XXXX-XXXX-XXXX',
+        driverCardValidTo: '2024-12-31',
+        driverKeyNumber: 'XXXX',
+        driverNotesShared: '',
+        driverNotes: '',
+      },
+    })
+    const additionalDriverNoCompany = JSON.parse(additionalDriverNoCompanyRequest.body)
+
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.customerOrgNumber, undefined)
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverExternalNumber, '0943094')
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverGDPRAccept, true)
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverISWarrantyDriver, true)
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverAcceptsMarketing, true)
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverFirstName, 'Mahan')
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverLastName, 'Putri')
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverEmail, 'newGuy.putri@abcinc.com')
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverPhoneNumber, '1234234')
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverAddress, '234123')
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverZipCode, '32112')
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverAddressCity, '24')
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverCountry, 'UK')
+    assert.deepStrictEqual(additionalDriverNoCompany.driver.driverHasCard, false)
+    assert.strictEqual(additionalDriverNoCompanyRequest.statusCode, 201)
+
+    const privateDriverRequest = await app.inject({
+      method: 'POST',
+      url: '/customer/driver',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        driverGDPRAccept: false,
+        driverISWarrantyDriver: true,
+        driverAcceptsMarketing: true,
+        driverFirstName: 'sdfsdf',
+        driverLastName: 'sdf',
+        driverEmail: 'newGuy.putri@lulzec.com',
+        driverPhoneNumber: '0183212342',
+        driverAddress: '234123',
+        driverZipCode: '32112',
+        driverAddressCity: '24',
+        driverCountry: 'AF',
+        driverHasCard: false,
+        driverCardNumber: 'XXXX-XXXX-XXXX',
+        driverCardValidTo: '2025-01-01',
+        driverKeyNumber: 'XXXX',
+        driverNotesShared: '',
+        driverNotes: '',
+      },
+    })
+    const privateDriver = JSON.parse(privateDriverRequest.body)
+
+    assert.deepStrictEqual(privateDriver.data.customerOrgNumber, undefined)
+    assert.deepStrictEqual(privateDriver.data.driverGDPRAccept, false)
+    assert.deepStrictEqual(privateDriver.data.driverISWarrantyDriver, true)
+    assert.deepStrictEqual(privateDriver.data.driverAcceptsMarketing, true)
+    assert.deepStrictEqual(privateDriver.data.driverFirstName, 'sdfsdf')
+    assert.deepStrictEqual(privateDriver.data.driverLastName, 'sdf')
+    assert.deepStrictEqual(privateDriver.data.driverEmail, 'newGuy.putri@lulzec.com')
+    assert.deepStrictEqual(privateDriver.data.driverPhoneNumber, '0183212342')
+    assert.deepStrictEqual(privateDriver.data.driverAddress, '234123')
+    assert.deepStrictEqual(privateDriver.data.driverZipCode, '32112')
+    assert.deepStrictEqual(privateDriver.data.driverAddressCity, '24')
+    assert.deepStrictEqual(privateDriver.data.driverCountry, 'AF')
+    assert.deepStrictEqual(privateDriver.data.driverHasCard, false)
+    assert.strictEqual(privateDriverRequest.statusCode, 201)
+
+    const driverGotJobRequest = await app.inject({
+      method: 'PATCH',
+      url: '/customer/driver',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        driverID: privateDriver.data.driverID,
+        customerOrgNumber: '5593921082',
+        driverGDPRAccept: false,
+        driverISWarrantyDriver: true,
+        driverAcceptsMarketing: true,
+        driverFirstName: 'sdfsdf',
+        driverLastName: 'sdf',
+        driverEmail: 'newGuy.putri@lulzec.com',
+        driverPhoneNumber: '0183212342',
+        driverAddress: '234123',
+        driverZipCode: '32112',
+        driverAddressCity: '23',
+        driverCountry: 'AF',
+        driverHasCard: false,
+        driverCardNumber: 'XXXX-XXXX-XXXX',
+        driverCardValidTo: '2025-01-01',
+        driverKeyNumber: 'XXXX',
+        driverNotesShared: '',
+        driverNotes: '',
+      },
+    })
+
+    const privateDriverGotJob = JSON.parse(driverGotJobRequest.body)
+
+    console.log('privateDriverGotJob')
+    console.log('privateDriverGotJob')
+    console.log(privateDriverGotJob)
+    console.log('privateDriverGotJob')
+
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverID, privateDriver.data.driverID)
+    assert.deepStrictEqual(privateDriverGotJob.driver.customerOrgNumber, '5593921082')
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverGDPRAccept, false)
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverISWarrantyDriver, true)
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverAcceptsMarketing, true)
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverFirstName, 'sdfsdf')
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverLastName, 'sdf')
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverEmail, 'newGuy.putri@lulzec.com')
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverPhoneNumber, '0183212342')
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverAddress, '234123')
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverZipCode, '32112')
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverAddressCity, '23')
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverCountry, 'AF')
+    assert.deepStrictEqual(privateDriverGotJob.driver.driverHasCard, false)
+    assert.strictEqual(privateDriverRequest.statusCode, 201)
   })
 })

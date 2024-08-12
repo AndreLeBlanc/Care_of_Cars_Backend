@@ -309,7 +309,7 @@ export async function editDriverDetails(driver: DriverCreate): Promise<Either<st
     const [updatedDriver] = await db
       .update(drivers)
       .set({
-        customerOrgNumber: driver.customerOrgNumber,
+        customerOrgNumber: driver.customerOrgNumber ? driver.customerOrgNumber : sql`null`,
         driverExternalNumber: driver.driverExternalNumber,
         driverGDPRAccept: driver.driverGDPRAccept,
         driverISWarrantyDriver: driver.driverISWarrantyDriver,

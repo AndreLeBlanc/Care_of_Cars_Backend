@@ -568,6 +568,7 @@ export const customers = async (fastify: FastifyInstance) => {
         driverKeyNumber: driverKeyNumber ? DriverKeyNumber(driverKeyNumber) : undefined,
         driverNotesShared: driverNotesShared ? DriverNotesShared(driverNotesShared) : undefined,
       }
+
       const editedDriver: Either<string, Driver> = await editDriverDetails(driverDetails)
 
       match(
