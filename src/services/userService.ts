@@ -283,6 +283,7 @@ export async function verifyUser(email: UserEmail): Promise<Either<string, Verif
       .from(users)
       .innerJoin(roles, eq(users.roleID, roles.roleID))
       .where(and(eq(users.email, email)))
+      .limit(1)
     return verifiedUser ? right(verifiedUser) : left('Login failed, incorrect email or password')
   } catch (e) {
     return left(errorHandling(e))
