@@ -1034,7 +1034,7 @@ export const stores = pgTable('stores', {
     .$type<StoreOrgNumber>()
     .unique()
     .notNull(),
-  storeName: varchar('storeName', { length: 3 }).$type<StoreName>().notNull().unique(),
+  storeName: varchar('storeName', { length: 128 }).$type<StoreName>().notNull().unique(),
   storeWebSite: varchar('storeWebSite').$type<StoreWebSite>(),
   storeVatNumber: varchar('storeVatNumber', { length: 32 }).$type<StoreVatNumber>(),
   storeFSkatt: boolean('storeFSkatt').$type<StoreFSkatt>().notNull(),

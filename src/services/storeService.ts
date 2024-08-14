@@ -180,7 +180,14 @@ export type StoresPaginated = {
   totalStores: ResultCount
   totalPage: Page
   perPage: Limit
-  data: { storeName: StoreName; storeID: StoreID; storeOrgNumber: StoreOrgNumber }[]
+  data: {
+    storeName: StoreName
+    storeID: StoreID
+    storeOrgNumber: StoreOrgNumber
+    storePhone: StorePhone
+    storeAddress: StoreAddress
+    storeEmail: StoreEmail
+  }[]
 }
 
 export type StoreWithSeparateDates = {
@@ -980,6 +987,9 @@ export async function getStoresPaginate(
           storeID: stores.storeID,
           storeName: stores.storeName,
           storeOrgNumber: stores.storeOrgNumber,
+          storePhone: stores.storePhone,
+          storeAddress: stores.storeAddress,
+          storeEmail: stores.storeEmail,
         })
         .from(stores)
         .where(condition)

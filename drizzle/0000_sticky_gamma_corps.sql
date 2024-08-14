@@ -13,10 +13,12 @@ END $$;
 CREATE TABLE IF NOT EXISTS "companycustomers" (
 	"customerOrgNumber" varchar(11) PRIMARY KEY NOT NULL,
 	"customerCompanyName" varchar(255) NOT NULL,
-	"companyAddress" varchar(256),
-	"companyZipCode" varchar(16),
-	"companyAddressCity" varchar(256),
-	"companyCountry" varchar(256),
+	"companyAddress" varchar(256) NOT NULL,
+	"companyZipCode" varchar(16) NOT NULL,
+	"companyEmail" varchar(256) NOT NULL,
+	"companyPhone" varchar(16) NOT NULL,
+	"companyAddressCity" varchar(256) NOT NULL,
+	"companyCountry" varchar(256) NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
@@ -271,11 +273,11 @@ CREATE TABLE IF NOT EXISTS "orders" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "permissions" (
 	"permissionID" serial PRIMARY KEY NOT NULL,
-	"permissionName" varchar(256) NOT NULL,
+	"permissionTitle" varchar(256) NOT NULL,
 	"description" text,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "permissions_permissionName_unique" UNIQUE("permissionName")
+	CONSTRAINT "permissions_permissionTitle_unique" UNIQUE("permissionTitle")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "productCategories" (
@@ -366,7 +368,7 @@ CREATE TABLE IF NOT EXISTS "roles" (
 CREATE TABLE IF NOT EXISTS "serviceCategories" (
 	"serviceCategoryID" serial PRIMARY KEY NOT NULL,
 	"serviceCategoryName" varchar(256) NOT NULL,
-	"description" text,
+	"serviceCategoryDescription" varchar,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "serviceCategories_serviceCategoryName_unique" UNIQUE("serviceCategoryName")
@@ -457,7 +459,7 @@ CREATE TABLE IF NOT EXISTS "storepaymentinfo" (
 CREATE TABLE IF NOT EXISTS "stores" (
 	"storeID" serial PRIMARY KEY NOT NULL,
 	"storeOrgNumber" varchar(11) NOT NULL,
-	"storeName" varchar NOT NULL,
+	"storeName" varchar(128) NOT NULL,
 	"storeWebSite" varchar,
 	"storeVatNumber" varchar(32),
 	"storeFSkatt" boolean NOT NULL,
@@ -773,6 +775,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "roleToPermissions" ADD CONSTRAINT "roleToPermissions_roleID_roles_roleID_fk" FOREIGN KEY ("roleID") REFERENCES "public"."roles"("roleID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "roleToPermissions" ADD CONSTRAINT "roleToPermissions_permissionID_permissions_permissionID_fk" FOREIGN KEY ("permissionID") REFERENCES "public"."permissions"("permissionID") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -856,5 +864,5 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "storeid_idx" ON "storespecialhours" ("storeID");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "day_idx" ON "storespecialhours" ("day");
+CREATE INDEX IF NOT EXISTS "storeid_idx" ON "storespecialhours" USING btree ("storeID");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "day_idx" ON "storespecialhours" USING btree ("day");
