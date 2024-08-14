@@ -164,6 +164,8 @@ export const ToDate = make<ToDate>()
 
 export type DriverExternalNumber = Brand<string, 'driverExternalNumber'>
 export const DriverExternalNumber = make<DriverExternalNumber>()
+export type CompanyPhone = Brand<string, 'companyPhone'>
+export const CompanyPhone = make<CompanyPhone>()
 export type DriverGDPRAccept = Brand<boolean, 'driverGDPRAccept'>
 export const DriverGDPRAccept = make<DriverGDPRAccept>()
 export type DriverISWarrantyCustomer = Brand<boolean, 'customerISWarrantyCustomer'>
@@ -957,13 +959,17 @@ export const companycustomers = pgTable('companycustomers', {
   customerOrgNumber: varchar('customerOrgNumber', { length: 11 })
     .$type<CustomerOrgNumber>()
     .primaryKey(),
-  customerComapanyName: varchar('customerComapanyName', { length: 255 })
+  customerCompanyName: varchar('customerCompanyName', { length: 255 })
     .$type<CustomerCompanyName>()
     .notNull(),
-  companyAddress: varchar('companyAddress', { length: 256 }).$type<CompanyAddress>(),
-  companyZipCode: varchar('companyZipCode', { length: 16 }).$type<CompanyZipCode>(),
-  companyAddressCity: varchar('companyAddressCity', { length: 256 }).$type<CompanyAddressCity>(),
-  companyCountry: varchar('companyCountry', { length: 256 }).$type<CompanyCountry>(),
+  companyAddress: varchar('companyAddress', { length: 256 }).$type<CompanyAddress>().notNull(),
+  companyZipCode: varchar('companyZipCode', { length: 16 }).$type<CompanyZipCode>().notNull(),
+  companyEmail: varchar('companyEmail', { length: 256 }).$type<CompanyEmail>().notNull(),
+  companyPhone: varchar('companyPhone', { length: 16 }).$type<CompanyPhone>().notNull(),
+  companyAddressCity: varchar('companyAddressCity', { length: 256 })
+    .$type<CompanyAddressCity>()
+    .notNull(),
+  companyCountry: varchar('companyCountry', { length: 256 }).$type<CompanyCountry>().notNull(),
   ...dbDates,
 })
 
@@ -1028,7 +1034,7 @@ export const stores = pgTable('stores', {
     .$type<StoreOrgNumber>()
     .unique()
     .notNull(),
-  storeName: varchar('storeName', { length: 3 }).$type<StoreName>().notNull().unique(),
+  storeName: varchar('storeName', { length: 128 }).$type<StoreName>().notNull().unique(),
   storeWebSite: varchar('storeWebSite').$type<StoreWebSite>(),
   storeVatNumber: varchar('storeVatNumber', { length: 32 }).$type<StoreVatNumber>(),
   storeFSkatt: boolean('storeFSkatt').$type<StoreFSkatt>().notNull(),

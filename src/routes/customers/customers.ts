@@ -5,8 +5,8 @@ import { Either, match } from '../../utils/helper.js'
 import {
   AddCustomerBodySchema,
   CreateCustomerType,
-  CreateDriverBodySchema,
-  CreateDriverType,
+  DriverBodySchema,
+  DriverBodySchemaType,
   GetCompanyByOrgNumberSchema,
   GetCompanyByOrgNumberSchemaType,
   GetDriverByIDSchema,
@@ -15,8 +15,6 @@ import {
   ListCustomersQueryParamSchemaType,
   PatchCompanyBodySchema,
   PatchCompanyType,
-  PatchDriverBodySchema,
-  PatchDriverType,
   SearchSchema,
   SearchSchemaType,
 } from './customerSchema.js'
@@ -56,6 +54,8 @@ import {
   CompanyAddress,
   CompanyAddressCity,
   CompanyCountry,
+  CompanyEmail,
+  CompanyPhone,
   CompanyReference,
   CompanyZipCode,
   CustomerCardNumber,
@@ -174,9 +174,11 @@ export const customers = async (fastify: FastifyInstance) => {
     },
     async (req, rep) => {
       const {
-        companyOrgNumber,
-        companyName,
+        customerOrgNumber,
+        customerCompanyName,
         companyAddress,
+        companyEmail,
+        companyPhone,
         companyAddressCity,
         companyCountry,
         companyZipCode,
@@ -202,11 +204,13 @@ export const customers = async (fastify: FastifyInstance) => {
       } = req.body
 
       const companyDetails = {
-        customerOrgNumber: CustomerOrgNumber(companyOrgNumber),
-        customerCompanyName: CustomerCompanyName(companyName),
+        customerOrgNumber: CustomerOrgNumber(customerOrgNumber),
+        customerCompanyName: CustomerCompanyName(customerCompanyName),
         companyReference: CompanyReference(companyReference),
         companyAddress: CompanyAddress(companyAddress),
         companyZipCode: CompanyZipCode(companyZipCode),
+        companyEmail: CompanyEmail(companyEmail),
+        companyPhone: CompanyPhone(companyPhone),
         companyAddressCity: CompanyAddressCity(companyAddressCity),
         companyCountry: CompanyCountry(companyCountry),
       }
@@ -268,6 +272,8 @@ export const customers = async (fastify: FastifyInstance) => {
         customerOrgNumber,
         customerCompanyName,
         companyAddress,
+        companyEmail,
+        companyPhone,
         companyAddressCity,
         companyCountry,
         companyZipCode,
@@ -275,10 +281,12 @@ export const customers = async (fastify: FastifyInstance) => {
       const companyDetails: CustomerCompanyCreate = {
         customerOrgNumber: CustomerOrgNumber(customerOrgNumber),
         customerCompanyName: CustomerCompanyName(customerCompanyName),
-        companyAddress: companyAddress ? CompanyAddress(companyAddress) : undefined,
-        companyZipCode: companyZipCode ? CompanyZipCode(companyZipCode) : undefined,
-        companyAddressCity: companyAddressCity ? CompanyAddressCity(companyAddressCity) : undefined,
-        companyCountry: companyCountry ? CompanyCountry(companyCountry) : undefined,
+        companyAddress: CompanyAddress(companyAddress),
+        companyZipCode: CompanyZipCode(companyZipCode),
+        companyEmail: CompanyEmail(companyEmail),
+        companyPhone: CompanyPhone(companyPhone),
+        companyAddressCity: CompanyAddressCity(companyAddressCity),
+        companyCountry: CompanyCountry(companyCountry),
       }
       const editedCompany: Either<string, Company> = await editCompanyDetails(companyDetails)
 
@@ -356,8 +364,8 @@ export const customers = async (fastify: FastifyInstance) => {
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
 
       const advanced: AdvancedSearch = {
-        companyOrg: request.body.companyOrg
-          ? CustomerOrgNumber(request.body.companyOrg)
+        customerOrgNumber: request.body.customerOrgNumber
+          ? CustomerOrgNumber(request.body.customerOrgNumber)
           : undefined,
         from: request.body.from ? SubmissionTime(new Date(request.body.from)) : undefined,
         to: request.body.to ? PickupTime(new Date(request.body.to)) : undefined,
@@ -370,7 +378,6 @@ export const customers = async (fastify: FastifyInstance) => {
           : undefined,
       }
 
-      console.log('advanced', advanced)
       const drivers: Either<string, DriversPaginate> = await getDriversPaginate(
         brandedSearch,
         brandedLimit,
@@ -419,7 +426,7 @@ export const customers = async (fastify: FastifyInstance) => {
   )
 
   //Create Private Driver
-  fastify.post<{ Body: CreateDriverType; Reply: object }>(
+  fastify.post<{ Body: DriverBodySchemaType; Reply: object }>(
     '/driver',
     {
       preHandler: async (request, reply, done) => {
@@ -429,12 +436,12 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        body: CreateDriverBodySchema,
+        body: DriverBodySchema,
       },
     },
     async (req, rep) => {
       const {
-        companyOrgNumber,
+        customerOrgNumber,
         driverExternalNumber,
         driverGDPRAccept,
         driverISWarrantyDriver,
@@ -456,7 +463,7 @@ export const customers = async (fastify: FastifyInstance) => {
       } = req.body
 
       const driverDetails = {
-        customerOrgNumber: companyOrgNumber ? CustomerOrgNumber(companyOrgNumber) : undefined,
+        customerOrgNumber: customerOrgNumber ? CustomerOrgNumber(customerOrgNumber) : undefined,
         driverExternalNumber: driverExternalNumber
           ? DriverExternalNumber(driverExternalNumber)
           : undefined,
@@ -500,7 +507,7 @@ export const customers = async (fastify: FastifyInstance) => {
   )
 
   //edit driver
-  fastify.patch<{ Body: PatchDriverType; Reply: object }>(
+  fastify.patch<{ Body: DriverBodySchemaType; Reply: object }>(
     '/driver',
     {
       preHandler: async (request, reply, done) => {
@@ -510,11 +517,12 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        body: PatchDriverBodySchema,
+        body: DriverBodySchema,
       },
     },
     async (request, reply) => {
       const {
+        customerOrgNumber,
         driverExternalNumber,
         driverGDPRAccept,
         driverISWarrantyDriver,
@@ -536,6 +544,7 @@ export const customers = async (fastify: FastifyInstance) => {
       } = request.body
 
       const driverDetails: DriverCreate = {
+        customerOrgNumber: customerOrgNumber ? CustomerOrgNumber(customerOrgNumber) : undefined,
         driverExternalNumber: driverExternalNumber
           ? DriverExternalNumber(driverExternalNumber)
           : undefined,
@@ -559,6 +568,7 @@ export const customers = async (fastify: FastifyInstance) => {
         driverKeyNumber: driverKeyNumber ? DriverKeyNumber(driverKeyNumber) : undefined,
         driverNotesShared: driverNotesShared ? DriverNotesShared(driverNotesShared) : undefined,
       }
+
       const editedDriver: Either<string, Driver> = await editDriverDetails(driverDetails)
 
       match(
