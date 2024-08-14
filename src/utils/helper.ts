@@ -7,9 +7,13 @@ export function isEmail(emailAddress: string) {
   return emailAddress?.match(regex)
 }
 
-export const employeeID = Type.Integer()
-export const localQualID = Type.Integer()
-export const globalQualID = Type.Integer()
+export const driverID = Type.Integer({ minimum: 0 })
+export const EmployeeID = Type.Integer({ minimum: 0 })
+export const LocalQualID = Type.Integer({ minimum: 0 })
+export const GlobalQualID = Type.Integer({ minimum: 0 })
+export const UserID = Type.Integer({ minimum: 0 })
+export const FirstName = Type.String({ minLength: 3, maxLength: 128 })
+export const LastName = Type.String({ minLength: 3, maxLength: 128 })
 
 export function timeStringToMS(time: string | undefined): number | undefined {
   if (time == undefined) {

@@ -1,5 +1,7 @@
 import { FastifyInstance } from 'fastify'
 
+import { Either, match } from '../../utils/helper.js'
+
 import {
   AddCustomerBodySchema,
   CreateCustomerType,
@@ -11,17 +13,16 @@ import {
   GetDriverByIDSchemaType,
   ListCustomersQueryParamSchema,
   ListCustomersQueryParamSchemaType,
-  ListDriversCompanyQueryParamSchema,
-  ListDriversCompanyQueryParamSchemaType,
-  ListDriversQueryParamSchema,
-  ListDriversQueryParamSchemaType,
   PatchCompanyBodySchema,
   PatchCompanyType,
   PatchDriverBodySchema,
   PatchDriverType,
+  SearchSchema,
+  SearchSchemaType,
 } from './customerSchema.js'
 
 import {
+  AdvancedSearch,
   Company,
   CustomerCompanyCreate,
   CustomersPaginate,
@@ -30,7 +31,6 @@ import {
   DriversPaginate,
   createCompany,
   createNewDriver,
-  deleteCompany,
   deleteDriver,
   editCompanyDetails,
   editDriverDetails,
@@ -79,7 +79,12 @@ import {
   DriverNotesShared,
   DriverPhoneNumber,
   DriverZipCode,
+  LocalServiceID,
   PermissionTitle,
+  PickupTime,
+  ServiceCategoryID,
+  ServiceID,
+  SubmissionTime,
 } from '../../schema/schema.js'
 
 export const customers = async (fastify: FastifyInstance) => {
@@ -102,47 +107,55 @@ export const customers = async (fastify: FastifyInstance) => {
         querystring: ListCustomersQueryParamSchema,
       },
     },
-    async function (request) {
+    async function (request, res) {
       const { search = '', limit = 10, page = 1 } = request.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
-      const result: CustomersPaginate = await getCustomersPaginate(
+      const customersList: Either<string, CustomersPaginate> = await getCustomersPaginate(
         brandedSearch,
         brandedLimit,
         brandedPage,
         offset,
       )
 
-      const message: ResponseMessage = fastify.responseMessage(
-        ModelName('Customers'),
-        ResultCount(result.data.length),
-      )
-      const requestUrl: RequestUrl = RequestUrl(
-        request.protocol + '://' + request.hostname + request.url,
-      )
-      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
-      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
+      match(
+        customersList,
+        (customers: CustomersPaginate) => {
+          const message: ResponseMessage = fastify.responseMessage(
+            ModelName('Customers'),
+            ResultCount(customers.data.length),
+          )
+          const requestUrl: RequestUrl = RequestUrl(
+            request.protocol + '://' + request.hostname + request.url,
+          )
+          const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+            requestUrl,
+            Page(customers.totalPage),
+            Page(page),
+          )
+          const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+            requestUrl,
+            Page(customers.totalPage),
+            Page(page),
+          )
 
-      return {
-        message: message,
-        totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl: previousUrl,
-        totalPage: result.totalPage,
-        page: page,
-        limit: limit,
-        data: result.data,
-      }
+          return res.code(200).send({
+            message: message,
+            totalItems: customers.totalItems,
+            nextUrl: nextUrl,
+            previousUrl: previousUrl,
+            totalPage: customers.totalPage,
+            page: page,
+            limit: limit,
+            data: customers.data,
+          })
+        },
+        (err) => {
+          res.code(504).send({ message: err })
+        },
+      )
     },
   )
 
@@ -219,17 +232,20 @@ export const customers = async (fastify: FastifyInstance) => {
         driverCountry: DriverCountry(driverCountry),
       }
 
-      const createdDriver:
-        | {
-            company: Company
-            driver: Driver
-          }
-        | undefined = await createCompany(companyDetails, driverDetails)
-      return rep.status(201).send({
-        message: 'company / driver created',
-        data: createdDriver,
-        customerAdded: true,
-      })
+      const createdDriver: Either<string, { company: Company; driver: Driver }> =
+        await createCompany(companyDetails, driverDetails)
+      match(
+        createdDriver,
+        (driver: { company: Company; driver: Driver }) => {
+          return rep.status(201).send({
+            message: 'company / driver created',
+            data: driver,
+          })
+        },
+        (err) => {
+          return rep.status(504).send({ message: err })
+        },
+      )
     },
   )
 
@@ -264,13 +280,20 @@ export const customers = async (fastify: FastifyInstance) => {
         companyAddressCity: companyAddressCity ? CompanyAddressCity(companyAddressCity) : undefined,
         companyCountry: companyCountry ? CompanyCountry(companyCountry) : undefined,
       }
-      const editedCompany: Company | undefined = await editCompanyDetails(companyDetails)
+      const editedCompany: Either<string, Company> = await editCompanyDetails(companyDetails)
 
-      reply.status(201).send({
-        message: 'Company details edited',
+      match(
         editedCompany,
-        customerEdited: true,
-      })
+        (comp: Company) => {
+          reply.status(201).send({
+            message: 'Company details edited',
+            comp,
+          })
+        },
+        (err) => {
+          reply.status(504).send({ message: err })
+        },
+      )
     },
   )
 
@@ -290,113 +313,25 @@ export const customers = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const { orgNumber } = request.params
-      const companyDetails: Company | undefined = await getCompanyById(CustomerOrgNumber(orgNumber))
-      if (companyDetails == null) {
-        return reply.status(404).send({ message: "Company doesn't exist!" })
-      }
-      return reply.status(200).send({ message: 'Company found', companyDetails })
-    },
-  )
-
-  //Delete Company and drivers
-  fastify.delete<{ Params: GetCompanyByOrgNumberSchemaType }>(
-    '/:orgNumber',
-    {
-      preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = PermissionTitle('delete_company')
-        await fastify.authorize(request, reply, permissionName)
-        done()
-        return reply
-      },
-      schema: {
-        params: GetCompanyByOrgNumberSchema,
-      },
-    },
-    async (request, reply) => {
-      const { orgNumber } = request.params
-      const deletedCompany: CustomerOrgNumber | undefined = await deleteCompany(
+      const companyDetails: Either<string, Company> = await getCompanyById(
         CustomerOrgNumber(orgNumber),
       )
-      if (deletedCompany == null) {
-        return reply.status(404).send({ message: "Company doesn't exist!" })
-      }
-      return reply.status(200).send({ message: 'Company deleted', orgNumber: deletedCompany })
+      match(
+        companyDetails,
+        (comp: Company) => {
+          return reply.status(200).send({ message: 'Company found', comp })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
-  /**
-   * -----------------
-   * DRIVERS
-   * -----------------
-   * */
-
-  //Get drivers
-  fastify.get<{ Querystring: ListDriversQueryParamSchemaType }>(
-    '/all-drivers',
-    {
-      preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = PermissionTitle('list_drivers')
-        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
-        if (!authorizeStatus) {
-          return reply
-            .status(403)
-            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
-        }
-        done()
-        return reply
-      },
-      schema: {
-        querystring: ListDriversQueryParamSchema,
-      },
-    },
-    async function (request) {
-      const { search = '', limit = 10, page = 1 } = request.query
-      const brandedSearch = Search(search)
-      const brandedLimit = Limit(limit)
-      const brandedPage = Page(page)
-      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
-
-      const result: DriversPaginate = await getDriversPaginate(
-        brandedSearch,
-        brandedLimit,
-        brandedPage,
-        offset,
-      )
-
-      const message: ResponseMessage = fastify.responseMessage(
-        ModelName('Drivers'),
-        ResultCount(result.data.length),
-      )
-      const requestUrl: RequestUrl = RequestUrl(
-        request.protocol + '://' + request.hostname + request.url,
-      )
-      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
-      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
-
-      return {
-        message: message,
-        totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl: previousUrl,
-        totalPage: result.totalPage,
-        page: page,
-        limit: limit,
-        data: result.data,
-      }
-    },
-  )
-
-  //Get drivers by orgNumber
-  fastify.get<{ Querystring: ListDriversCompanyQueryParamSchemaType }>(
-    '/company-drivers',
+  fastify.post<{
+    Body: SearchSchemaType
+  }>(
+    '/list-drivers',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('list_company_drivers')
@@ -410,51 +345,76 @@ export const customers = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        querystring: ListDriversCompanyQueryParamSchema,
+        body: SearchSchema,
       },
     },
-    async function (request) {
-      const { search = '', limit = 10, page = 1, companyOrgNumber } = request.query
+    async function (request, res) {
+      const { search = '', limit = 10, page = 1 } = request.body
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
-      const result: DriversPaginate = await getDriversPaginate(
+
+      const advanced: AdvancedSearch = {
+        companyOrg: request.body.companyOrg
+          ? CustomerOrgNumber(request.body.companyOrg)
+          : undefined,
+        from: request.body.from ? SubmissionTime(new Date(request.body.from)) : undefined,
+        to: request.body.to ? PickupTime(new Date(request.body.to)) : undefined,
+        service: request.body.service ? ServiceID(request.body.service) : undefined,
+        localService: request.body.localService
+          ? LocalServiceID(request.body.localService)
+          : undefined,
+        serviceCategory: request.body.serviceCategory
+          ? ServiceCategoryID(request.body.serviceCategory)
+          : undefined,
+      }
+
+      console.log('advanced', advanced)
+      const drivers: Either<string, DriversPaginate> = await getDriversPaginate(
         brandedSearch,
         brandedLimit,
         brandedPage,
         offset,
-        CustomerOrgNumber(companyOrgNumber),
+        advanced,
       )
 
-      const message: ResponseMessage = fastify.responseMessage(
-        ModelName('Company Drivers'),
-        ResultCount(result.data.length),
-      )
-      const requestUrl: RequestUrl = RequestUrl(
-        request.protocol + '://' + request.hostname + request.url,
-      )
-      const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
-      const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
-        requestUrl,
-        Page(result.totalPage),
-        Page(page),
-      )
+      match(
+        drivers,
+        (drivers: DriversPaginate) => {
+          const message: ResponseMessage = fastify.responseMessage(
+            ModelName('Company Drivers'),
+            ResultCount(drivers.data.length),
+          )
+          const requestUrl: RequestUrl = RequestUrl(
+            request.protocol + '://' + request.hostname + request.url,
+          )
+          const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+            requestUrl,
+            Page(drivers.totalPage),
+            Page(page),
+          )
+          const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+            requestUrl,
+            Page(drivers.totalPage),
+            Page(page),
+          )
 
-      return {
-        message: message,
-        totalItems: result.totalItems,
-        nextUrl: nextUrl,
-        previousUrl: previousUrl,
-        totalPage: result.totalPage,
-        page: page,
-        limit: limit,
-        data: result.data,
-      }
+          return res.code(200).send({
+            message: message,
+            totalItems: drivers.totalItems,
+            nextUrl: nextUrl,
+            previousUrl: previousUrl,
+            totalPage: drivers.totalPage,
+            page: page,
+            limit: limit,
+            data: drivers.data,
+          })
+        },
+        (err) => {
+          return res.code(504).send({ message: err })
+        },
+      )
     },
   )
 
@@ -496,7 +456,7 @@ export const customers = async (fastify: FastifyInstance) => {
       } = req.body
 
       const driverDetails = {
-        customerOrgNumber: CustomerOrgNumber(companyOrgNumber),
+        customerOrgNumber: companyOrgNumber ? CustomerOrgNumber(companyOrgNumber) : undefined,
         driverExternalNumber: driverExternalNumber
           ? DriverExternalNumber(driverExternalNumber)
           : undefined,
@@ -521,12 +481,21 @@ export const customers = async (fastify: FastifyInstance) => {
         driverCountry: DriverCountry(driverCountry),
       }
 
-      const createdDriver: Driver | undefined = await createNewDriver(driverDetails)
-      return rep.status(201).send({
-        message: 'Driver Created',
-        data: createdDriver,
-        driverCreated: true,
-      })
+      const createdDriver: Either<string, Driver> = await createNewDriver(driverDetails)
+      match(
+        createdDriver,
+        (driver: Driver) => {
+          return rep.status(201).send({
+            message: 'Driver Created',
+            data: driver,
+          })
+        },
+        (err) => {
+          return rep.status(504).send({
+            message: err,
+          })
+        },
+      )
     },
   )
 
@@ -590,20 +559,22 @@ export const customers = async (fastify: FastifyInstance) => {
         driverKeyNumber: driverKeyNumber ? DriverKeyNumber(driverKeyNumber) : undefined,
         driverNotesShared: driverNotesShared ? DriverNotesShared(driverNotesShared) : undefined,
       }
-      const editedCompany: Driver | undefined = await editDriverDetails(driverDetails)
+      const editedDriver: Either<string, Driver> = await editDriverDetails(driverDetails)
 
-      if (editedCompany) {
-        reply.status(201).send({
-          message: 'Driver details edited',
-          editedCompany,
-          driverEdited: true,
-        })
-      } else {
-        reply.status(201).send({
-          message: 'Failed to edit drivers details',
-          editedCompany,
-        })
-      }
+      match(
+        editedDriver,
+        (driver: Driver) => {
+          reply.status(201).send({
+            message: 'Driver details edited',
+            driver,
+          })
+        },
+        (err) => {
+          reply.status(404).send({
+            message: err,
+          })
+        },
+      )
     },
   )
 
@@ -623,11 +594,16 @@ export const customers = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const { driverID } = request.params
-      const driverDetails: Driver | undefined = await getDriverById(DriverID(driverID))
-      if (driverDetails == null) {
-        return reply.status(404).send({ message: "Driver doesn't exist!" })
-      }
-      return reply.status(200).send({ message: 'Drivers details found', driverDetails })
+      const driverDetails: Either<string, Driver> = await getDriverById(DriverID(driverID))
+      match(
+        driverDetails,
+        (driver: Driver) => {
+          return reply.status(200).send({ message: 'Drivers details found', driver })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 
@@ -647,13 +623,16 @@ export const customers = async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const { driverID } = request.params
-      const deletedDriver: DriverID | undefined = await deleteDriver(DriverID(driverID))
-      if (deletedDriver == null) {
-        return reply.status(404).send({ message: "Driver doesn't exist!" })
-      }
-      return reply
-        .status(200)
-        .send({ message: 'Driver deleted', deletedDriverEmail: deletedDriver })
+      const deletedDriver: Either<string, DriverID> = await deleteDriver(DriverID(driverID))
+      match(
+        deletedDriver,
+        (deleted: DriverID) => {
+          return reply.status(200).send({ message: 'Driver deleted', deletedDriverEmail: deleted })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
     },
   )
 }

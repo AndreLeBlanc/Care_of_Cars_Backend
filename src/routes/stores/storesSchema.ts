@@ -1,17 +1,17 @@
 import { Static, Type } from '@sinclair/typebox'
 
 import { CreatedAndUpdatedAT } from '../../utils/helper.js'
-const storeName = Type.String()
-const storeWebSite = Type.String()
+const storeName = Type.String({ minLength: 3 })
+const storeWebSite = Type.String({ format: 'uri' })
 const storeVatNumber = Type.String({ maxLength: 32 })
 const storeFSkatt = Type.Boolean()
-const storeOrgNumber = Type.String({ maxLength: 11 })
+const storeOrgNumber = Type.String({ minLength: 8, maxLength: 11 })
 export const storeID = Type.Integer()
 const storeStatus = Type.Boolean()
 const storeEmail = Type.String({ format: 'email' })
 const storePhone = Type.String({ pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$' })
 const storeAddress = Type.String()
-const storeZipCode = Type.String()
+const storeZipCode = Type.String({ minLength: 3, maxLength: 16 })
 const storeCity = Type.String()
 const storeCountry = Type.String()
 const storeDescription = Type.String()

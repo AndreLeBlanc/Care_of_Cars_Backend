@@ -1,10 +1,8 @@
 import { Static, Type } from '@sinclair/typebox'
 
-import { driverID } from '../customers/customerSchema.js'
+import { CreatedAndUpdatedAT, driverID } from '../../utils/helper.js'
 
-import { CreatedAndUpdatedAT } from '../../utils/helper.js'
-
-const driverCarID = Type.Integer({ minimum: 0 })
+export const driverCarID = Type.Integer({ minimum: 0 })
 const driverCarRegistrationNumber = Type.String({ minLength: 3, maxLength: 11 })
 const driverCarBrand = Type.String({ maxLength: 128 })
 const driverCarModel = Type.String({ maxLength: 128 })
@@ -32,6 +30,12 @@ export const DriverCarIDSchema = Type.Object({
 })
 
 export type DriverCarIDSchemaType = Static<typeof DriverCarIDSchema>
+
+export const DriverCarRegSchema = Type.Object({
+  driverCarReg: driverCarRegistrationNumber,
+})
+
+export type DriverCarRegSchemaType = Static<typeof DriverCarRegSchema>
 
 export const DriverCarDateSchema = Type.Composite([DriverCarSchema, CreatedAndUpdatedAT])
 

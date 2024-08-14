@@ -1,0 +1,1 @@
+ALTER TABLE "serviceCategories" RENAME COLUMN "description" TO "serviceCategoryDescription";

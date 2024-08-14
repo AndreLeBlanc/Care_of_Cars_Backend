@@ -3,17 +3,39 @@ import bcrypt from 'bcryptjs'
 
 import { db } from '../config/db-connect.js'
 
-import { RoleID, RoleName, StoreID, roles, userBelongsToStore, users } from '../schema/schema.js'
+import {
+  EmployeeActive,
+  RoleID,
+  RoleName,
+  StoreID,
+  roles,
+  userBelongsToStore,
+  users,
+} from '../schema/schema.js'
 
 import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
+import { Either, errorHandling, left, right } from '../utils/helper.js'
+
+import { Employee, dineroDBReturn } from './employeeService.js'
+
 import {
+  EmployeeComment,
+  EmployeeHourlyRate,
+  EmployeeHourlyRateCurrency,
+  EmployeePersonalNumber,
+  EmployeePin,
+  EmploymentNumber,
   IsSuperAdmin,
+  ShortUserName,
+  Signature,
   UserEmail,
   UserFirstName,
   UserID,
   UserLastName,
   UserPassword,
+  employeeStore,
+  employees,
 } from '../schema/schema.js'
 
 export type UserStore = {
@@ -24,8 +46,10 @@ export type UserStore = {
 export type UserInfo = {
   userID: UserID
   firstName: UserFirstName
+  roleID: RoleID
   lastName: UserLastName
   email: UserEmail
+  isSuperAdmin: IsSuperAdmin
   createdAt: Date
   updatedAt: Date
 }
@@ -35,6 +59,7 @@ export type PatchUserInfo = {
   firstName: UserFirstName
   lastName: UserLastName
   email: UserEmail
+  roleID: RoleID
 }
 
 export type userInfoPassword = UserInfo & {
@@ -62,6 +87,29 @@ export type UsersPaginated = {
   data: UserInfo[]
 }
 
+export type CreateUserEmployee = {
+  firstName: UserFirstName
+  lastName: UserLastName
+  email: UserEmail
+  passwordHash: UserPassword
+  roleID: RoleID
+  isSuperAdmin: IsSuperAdmin
+  shortUserName: ShortUserName
+  employmentNumber: EmploymentNumber
+  employeePersonalNumber: EmployeePersonalNumber
+  signature: Signature
+  employeePin?: EmployeePin
+  employeeActive: EmployeeActive
+  employeeComment?: EmployeeComment
+  employeeHourlyRateCurrency?: EmployeeHourlyRateCurrency
+  employeeHourlyRate?: EmployeeHourlyRate
+}
+
+export type CreatedUserEmployee = {
+  user: CreatedUser
+  employee: Employee
+}
+
 export async function createUser(
   firstName: UserFirstName,
   lastName: UserLastName,
@@ -69,19 +117,101 @@ export async function createUser(
   passwordHash: UserPassword,
   roleID: RoleID,
   isSuperAdmin: IsSuperAdmin = IsSuperAdmin(false),
-): Promise<CreatedUser> {
-  const [user] = await db
-    .insert(users)
-    .values({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: passwordHash,
-      roleID: roleID,
-      isSuperAdmin: isSuperAdmin,
+): Promise<Either<string, CreatedUser>> {
+  try {
+    const [user] = await db
+      .insert(users)
+      .values({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: passwordHash,
+        roleID: roleID,
+        isSuperAdmin: isSuperAdmin,
+      })
+      .returning()
+    return user ? right(user) : left('no user created')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function createUserEmployee(
+  userEmp: CreateUserEmployee,
+  stores: StoreID[],
+): Promise<Either<string, CreatedUserEmployee>> {
+  if (stores.length < 1) {
+    return left('no store given')
+  }
+  try {
+    const userEmployee = await db.transaction(async (tx) => {
+      const [user] = await tx
+        .insert(users)
+        .values({
+          firstName: userEmp.firstName,
+          lastName: userEmp.lastName,
+          email: userEmp.email,
+          password: userEmp.passwordHash,
+          roleID: userEmp.roleID,
+          isSuperAdmin: userEmp.isSuperAdmin,
+        })
+        .returning()
+
+      const [createdEmployee] = await tx
+        .insert(employees)
+        .values({
+          userID: user.userID,
+          shortUserName: userEmp.shortUserName,
+          employmentNumber: userEmp.employmentNumber,
+          employeePersonalNumber: userEmp.employeePersonalNumber,
+          signature: userEmp.signature,
+          employeePin: userEmp.employeePin,
+          employeeActive: userEmp.employeeActive,
+          employeeComment: userEmp.employeeComment,
+          employeeHourlyRateCurrency: userEmp.employeeHourlyRateCurrency,
+          employeeHourlyRate: userEmp.employeeHourlyRate,
+        })
+        .returning()
+
+      const employeeIDStoreID = stores.map((store) => {
+        return { storeID: store, employeeID: createdEmployee.employeeID }
+      })
+
+      const employeeStores = await tx
+        .insert(employeeStore)
+        .values(employeeIDStoreID)
+        .onConflictDoNothing()
+        .returning({ storeID: employeeStore.storeID })
+
+      const createdEmployeeWithUndefined = {
+        userID: createdEmployee.userID,
+        employeeID: createdEmployee.employeeID,
+        shortUserName: createdEmployee.shortUserName,
+        employmentNumber: createdEmployee.employmentNumber,
+        employeePersonalNumber: createdEmployee.employeePersonalNumber,
+        signature: createdEmployee.signature,
+        employeeHourlyRateDinero: dineroDBReturn(
+          createdEmployee.employeeHourlyRate,
+          createdEmployee.employeeHourlyRateCurrency,
+        ),
+        employeePin: createdEmployee.employeePin ?? undefined,
+        employeeActive: createdEmployee.employeeActive,
+        employeeComment: createdEmployee.employeeComment ?? undefined,
+        createdAt: createdEmployee.createdAt,
+        updatedAt: createdEmployee.updatedAt,
+      }
+      return {
+        user: user,
+        employee: {
+          ...createdEmployeeWithUndefined,
+          storeIDs: employeeStores.map((row) => row.storeID),
+        },
+      }
     })
-    .returning()
-  return user
+    return userEmployee ? right(userEmployee) : left('no user created')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
 export async function getUsersPaginate(
@@ -89,120 +219,148 @@ export async function getUsersPaginate(
   limit = Limit(10),
   page = Page(1),
   offset = Offset(0),
-): Promise<UsersPaginated> {
+): Promise<Either<string, UsersPaginated>> {
   const condition = or(
     ilike(users.firstName, '%' + search + '%'),
     ilike(users.lastName, '%' + search + '%'),
     ilike(users.email, '%' + search + '%'),
   )
-  const { totalUsers, usersList } = await db.transaction(async (tx) => {
-    const [totalUsers] = await tx
-      .select({
-        count: sql`count(*)`.mapWith(Number).as('count'),
-      })
-      .from(users)
-      .where(condition)
+  try {
+    const { totalUsers, usersList } = await db.transaction(async (tx) => {
+      const [totalUsers] = await tx
+        .select({
+          count: sql`count(*)`.mapWith(Number).as('count'),
+        })
+        .from(users)
+        .where(condition)
 
-    const usersList = await tx
-      .select({
-        userID: users.userID,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        email: users.email,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-      })
-      .from(users)
-      .where(or(condition))
-      .orderBy(desc(users.userID))
-      .limit(limit || 10)
-      .offset(offset || 0)
-    return { totalUsers: totalUsers, usersList: usersList }
-  })
-  const totalPage = Math.ceil(totalUsers.count / limit)
+      const usersList = await tx
+        .select({
+          userID: users.userID,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          roleID: users.roleID,
+          isSuperAdmin: users.isSuperAdmin,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        })
+        .from(users)
+        .where(or(condition))
+        .orderBy(desc(users.userID))
+        .limit(limit || 10)
+        .offset(offset || 0)
+      return { totalUsers: totalUsers, usersList: usersList }
+    })
+    const totalPage = Math.ceil(totalUsers.count / limit)
 
-  return {
-    totalUsers: totalUsers.count,
-    totalPage,
-    perPage: page,
-    data: usersList,
+    return right({
+      totalUsers: totalUsers.count,
+      totalPage,
+      perPage: page,
+      data: usersList,
+    })
+  } catch (e) {
+    return left(errorHandling(e))
   }
 }
 
-export async function verifyUser(email: UserEmail): Promise<VerifyUser | undefined> {
-  const [results] = await db
-    .select({
-      userID: users.userID,
-      userFirstName: users.firstName,
-      userLastName: users.lastName,
-      userEmail: users.email,
-      userPassword: users.password,
-      isSuperAdmin: users.isSuperAdmin,
-      role: {
-        roleID: roles.roleID,
-        roleName: roles.roleName,
-      },
-    })
-    .from(users)
-    .innerJoin(roles, eq(users.roleID, roles.roleID))
-    .where(and(eq(users.email, email)))
-  return results
+export async function verifyUser(email: UserEmail): Promise<Either<string, VerifyUser>> {
+  try {
+    const [verifiedUser] = await db
+      .select({
+        userID: users.userID,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+        userEmail: users.email,
+        userPassword: users.password,
+        isSuperAdmin: users.isSuperAdmin,
+        role: {
+          roleID: roles.roleID,
+          roleName: roles.roleName,
+        },
+      })
+      .from(users)
+      .innerJoin(roles, eq(users.roleID, roles.roleID))
+      .where(and(eq(users.email, email)))
+    return verifiedUser ? right(verifiedUser) : left('Login failed, incorrect email or password')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
 export async function getUserByID(
   id: UserID,
   checkPassword?: boolean,
-): Promise<UserInfo | undefined> {
-  const [user] = await db
-    .select({
-      userID: users.userID,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      email: users.email,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt,
-      ...(checkPassword ? { password: users.password } : {}),
-    })
-    .from(users)
-    .where(eq(users.userID, id))
-  return user ?? undefined
+): Promise<Either<string, UserInfo>> {
+  try {
+    const [user] = await db
+      .select({
+        userID: users.userID,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        roleID: users.roleID,
+        isSuperAdmin: users.isSuperAdmin,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        ...(checkPassword ? { password: users.password } : {}),
+      })
+      .from(users)
+      .where(eq(users.userID, id))
+    return user ? right(user) : left('user not found')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
-export async function updateUserByID(user: PatchUserInfo): Promise<UserInfo> {
+export async function updateUserByID(user: PatchUserInfo): Promise<Either<string, UserInfo>> {
   const userWithUpdatedAt = { ...user, updatedAt: new Date() }
-  const [updatedUser] = await db
-    .update(users)
-    .set(userWithUpdatedAt)
-    .where(eq(users.userID, user.userID))
-    .returning({
-      userID: users.userID,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      email: users.email,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt,
-    })
-  return updatedUser
+  try {
+    const [updatedUser] = await db
+      .update(users)
+      .set(userWithUpdatedAt)
+      .where(eq(users.userID, user.userID))
+      .returning({
+        userID: users.userID,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        isSuperAdmin: users.isSuperAdmin,
+        roleID: users.roleID,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+    return updatedUser ? right(updatedUser) : left('user not found')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
 export async function updateUserPasswordByID(
   id: UserID,
   password: UserPassword,
-): Promise<UserInfo> {
-  const userWithUpdatedAt = { password: password, updatedAt: new Date() }
-  const [updatedUser] = await db
-    .update(users)
-    .set(userWithUpdatedAt)
-    .where(eq(users.userID, id))
-    .returning({
-      userID: users.userID,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      email: users.email,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt,
-    })
-  return updatedUser
+): Promise<Either<string, UserInfo>> {
+  try {
+    const userWithUpdatedAt = { password: password, updatedAt: new Date() }
+    const [updatedUser] = await db
+      .update(users)
+      .set(userWithUpdatedAt)
+      .where(eq(users.userID, id))
+      .returning({
+        userID: users.userID,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        isSuperAdmin: users.isSuperAdmin,
+        roleID: users.roleID,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+    return updatedUser ? right(updatedUser) : left('user not found')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
 export async function generatePasswordHash(password: UserPassword): Promise<UserPassword> {
@@ -212,58 +370,74 @@ export async function generatePasswordHash(password: UserPassword): Promise<User
 
 export async function isStrongPassword(password: UserPassword): Promise<boolean> {
   // TODO: add more strict checking's
-  return password.length >= 3
+  return password.length >= 8
 }
 
-export async function DeleteUser(userID: UserID): Promise<UserWithSuperAdmin | undefined> {
-  const [deletedUser] = await db.delete(users).where(eq(users.userID, userID)).returning({
-    userID: users.userID,
-    firstName: users.firstName,
-    lastName: users.lastName,
-    email: users.email,
-    isSuperAdmin: users.isSuperAdmin,
-    createdAt: users.createdAt,
-    updatedAt: users.updatedAt,
-  })
-  if (deletedUser.isSuperAdmin != null) {
-    return deletedUser
-  } else {
-    return undefined
+export async function DeleteUser(userID: UserID): Promise<Either<string, UserWithSuperAdmin>> {
+  try {
+    const [deletedUser] = await db.delete(users).where(eq(users.userID, userID)).returning({
+      userID: users.userID,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      email: users.email,
+      roleID: users.roleID,
+      isSuperAdmin: users.isSuperAdmin,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    })
+    return deletedUser ? right(deletedUser) : left('user not found')
+  } catch (e) {
+    return left(errorHandling(e))
   }
 }
 
 export async function assignToStore(
   userID: UserID,
   storeID: StoreID,
-): Promise<UserStore | undefined> {
-  const [newUserForStore] = await db
-    .insert(userBelongsToStore)
-    .values({ userID: userID, storeID: storeID })
-    .returning()
-  return newUserForStore
-    ? { storeID: StoreID(newUserForStore.storeID), userID: UserID(newUserForStore.userID) }
-    : undefined
+): Promise<Either<string, UserStore>> {
+  try {
+    const [newUserForStore] = await db
+      .insert(userBelongsToStore)
+      .values({ userID: userID, storeID: storeID })
+      .returning()
+    return newUserForStore
+      ? right({ storeID: StoreID(newUserForStore.storeID), userID: UserID(newUserForStore.userID) })
+      : left('store or user not found')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
 export async function deleteStoreUser(
   userID: UserID,
   storeID: StoreID,
-): Promise<UserStore | undefined> {
-  const [deletedUserForStore] = await db
-    .delete(userBelongsToStore)
-    .where(and(eq(userBelongsToStore.storeID, storeID), eq(userBelongsToStore.userID, userID)))
-    .returning()
-  return deletedUserForStore
-    ? { storeID: StoreID(deletedUserForStore.storeID), userID: UserID(deletedUserForStore.userID) }
-    : undefined
+): Promise<Either<string, UserStore>> {
+  try {
+    const [deletedUserForStore] = await db
+      .delete(userBelongsToStore)
+      .where(and(eq(userBelongsToStore.storeID, storeID), eq(userBelongsToStore.userID, userID)))
+      .returning()
+    return deletedUserForStore
+      ? right({
+          storeID: StoreID(deletedUserForStore.storeID),
+          userID: UserID(deletedUserForStore.userID),
+        })
+      : left('store or user not found')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }
 
-export async function selectStoreUsers(storeID: StoreID): Promise<UserID[] | undefined> {
-  const usersForStore = await db
-    .select({ userID: userBelongsToStore.userID })
-    .from(userBelongsToStore)
-    .where(eq(userBelongsToStore.storeID, storeID))
+export async function selectStoreUsers(storeID: StoreID): Promise<Either<string, UserID[]>> {
+  try {
+    const usersForStore = await db
+      .select({ userID: userBelongsToStore.userID })
+      .from(userBelongsToStore)
+      .where(eq(userBelongsToStore.storeID, storeID))
 
-  const brandedUsersForStore: UserID[] = usersForStore.map((user) => UserID(user.userID))
-  return usersForStore ? brandedUsersForStore : undefined
+    const brandedUsersForStore: UserID[] = usersForStore.map((user) => UserID(user.userID))
+    return usersForStore ? right(brandedUsersForStore) : left('no users found')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
 }

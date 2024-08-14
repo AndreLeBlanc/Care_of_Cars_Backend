@@ -1,35 +1,31 @@
 import { fastifyJwt } from '@fastify/jwt'
 
+import fs from 'node:fs'
+
 import * as dotenv from 'dotenv'
 import { FastifyInstance, FastifyServerOptions, fastify } from 'fastify'
 import cors from '@fastify/cors'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
+import jwt from './plugins/jwt.js'
 import pagination from './plugins/pagination.js'
 
-import jwt from './plugins/jwt.js'
+import { customers } from './routes/customers/customers.js'
+import { driverCars } from './routes/driverCars/driverCars.js'
+import { employees } from './routes/employees/employees.js'
+import { orders } from './routes/orders/orders.js'
 import { permissions } from './routes/permissions/permissions.js'
+import { productsRoute } from './routes/product/products.js'
+import { qualificationsRoute } from './routes/qulifications/qualifcations.js'
+import { rentCar } from './routes/rentCar/rentCars.js'
 import { roleToPermissions } from './routes/role-to-permission/roleToPermissons.js'
 import { roles } from './routes/roles/roles.js'
-import { serviceCategory } from './routes/category/category.js'
-import { services } from './routes/services/services.js'
-import { users } from './routes/users/users.js'
-
-import { employees } from './routes/employees/employees.js'
-
-import { stores } from './routes/stores/stores.js'
-
 import { root } from './routes/root.js'
 import seedSuperAdmin from './plugins/seed.js'
-
-import { customers } from './routes/customers/customers.js'
-import { rentCar } from './routes/rentCar/rent-car.js'
-
-import { productsRoute } from './routes/product/products.js'
-
-import { driverCars } from './routes/driverCars/driverCars.js'
-
-import { qualificationsRoute } from './routes/qulifications/qualifcations.js'
+import { serviceCategory } from './routes/category/category.js'
+import { services } from './routes/services/services.js'
+import { stores } from './routes/stores/stores.js'
+import { users } from './routes/users/users.js'
 
 const defaultOptions = {
   logger: true,
@@ -39,8 +35,23 @@ dotenv.config()
 export interface AppOptions extends FastifyServerOptions {}
 // Pass --options via CLI arguments in command to enable these options.
 
+const isHttps =
+  fs.existsSync('/etc/letsencrypt/live/xn--rdamlen-hxa3m.se/privkey.pem') &&
+  fs.existsSync('/etc/letsencrypt/live/xn--rdamlen-hxa3m.se/fullchain.pem')
+
 export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
-  const app: FastifyInstance = fastify({ ...defaultOptions, ...options })
+  const app: FastifyInstance = fastify({
+    ...defaultOptions,
+    ...options,
+    ...(isHttps
+      ? {
+          https: {
+            key: fs.readFileSync('/etc/letsencrypt/live/xn--rdamlen-hxa3m.se/privkey.pem'),
+            cert: fs.readFileSync('/etc/letsencrypt/live/xn--rdamlen-hxa3m.se/fullchain.pem'),
+          },
+        }
+      : null),
+  })
 
   // Place here your custom code!
 
@@ -87,6 +98,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
   app.register(seedSuperAdmin)
   app.register(fastifySwaggerUI, { prefix: '/docs' })
 
+  app.register(orders, { prefix: '/orders' })
   app.register(permissions, { prefix: '/permissions' })
   app.register(roleToPermissions, { prefix: '/roleToPermissions' })
   app.register(roles, { prefix: '/roles' })
