@@ -2,6 +2,8 @@ import {
   CompanyAddress,
   CompanyAddressCity,
   CompanyCountry,
+  CompanyEmail,
+  CompanyPhone,
   CompanyReference,
   CompanyZipCode,
   CustomerCardNumber,
@@ -50,10 +52,12 @@ import { Either, errorHandling, isEmail, left, match, right } from '../utils/hel
 export type CustomerCompanyCreate = {
   customerOrgNumber: CustomerOrgNumber
   customerCompanyName: CustomerCompanyName
-  companyAddress?: CompanyAddress
-  companyZipCode?: CompanyZipCode
-  companyAddressCity?: CompanyAddressCity
-  companyCountry?: CompanyCountry
+  companyAddress: CompanyAddress
+  companyZipCode: CompanyZipCode
+  companyEmail: CompanyEmail
+  companyPhone: CompanyPhone
+  companyAddressCity: CompanyAddressCity
+  companyCountry: CompanyCountry
 }
 
 export type DriverCreate = {
@@ -131,9 +135,11 @@ export async function createCompany(
     let [existingCompany] = await db
       .select({
         customerOrgNumber: companycustomers.customerOrgNumber,
-        customerComapanyName: companycustomers.customerComapanyName,
+        customerCompanyName: companycustomers.customerCompanyName,
         companyAddress: companycustomers.companyAddress,
         companyZipCode: companycustomers.companyZipCode,
+        companyEmail: companycustomers.companyEmail,
+        companyPhone: companycustomers.companyPhone,
         companyAddressCity: companycustomers.companyAddressCity,
         companyCountry: companycustomers.companyCountry,
         createdAt: companycustomers.createdAt,
@@ -147,38 +153,33 @@ export async function createCompany(
         .insert(companycustomers)
         .values({
           customerOrgNumber: company.customerOrgNumber,
-          customerComapanyName: company.customerCompanyName,
+          customerCompanyName: company.customerCompanyName,
           companyAddress: company.companyAddress,
+          companyZipCode: company.companyZipCode,
+          companyEmail: company.companyEmail,
+          companyPhone: company.companyPhone,
           companyAddressCity: company.companyAddressCity,
           companyCountry: company.companyCountry,
-          companyZipCode: company.companyZipCode,
         })
         .returning({
           customerOrgNumber: companycustomers.customerOrgNumber,
-          customerComapanyName: companycustomers.customerComapanyName,
+          customerCompanyName: companycustomers.customerCompanyName,
           companyAddress: companycustomers.companyAddress,
           companyZipCode: companycustomers.companyZipCode,
+          companyEmail: companycustomers.companyEmail,
+          companyPhone: companycustomers.companyPhone,
           companyAddressCity: companycustomers.companyAddressCity,
           companyCountry: companycustomers.companyCountry,
           createdAt: companycustomers.createdAt,
           updatedAt: companycustomers.updatedAt,
         })
     }
-    const existingCompanyBranded: Company = {
-      customerOrgNumber: existingCompany.customerOrgNumber,
-      customerCompanyName: existingCompany.customerComapanyName,
-      companyAddress: existingCompany.companyAddress ?? undefined,
-      companyAddressCity: existingCompany.companyAddressCity ?? undefined,
-      companyCountry: existingCompany.companyCountry ?? undefined,
-      companyZipCode: existingCompany.companyZipCode ?? undefined,
-      createdAt: existingCompany.createdAt,
-      updatedAt: existingCompany.updatedAt,
-    }
+
     const createdDriver: Either<string, Driver> = await createNewDriver(driver)
     return match(
       createdDriver,
       (driver: Driver) => {
-        return right({ company: existingCompanyBranded, driver: driver })
+        return right({ company: existingCompany, driver: driver })
       },
       (err) => {
         return left(err)
@@ -254,11 +255,14 @@ export async function editCompanyDetails(
     const [updatedCompany] = await db
       .update(companycustomers)
       .set({
+        customerOrgNumber: company.customerOrgNumber,
+        customerCompanyName: company.customerCompanyName,
         companyAddress: company.companyAddress,
-        companyAddressCity: company.companyAddressCity,
-        customerComapanyName: company.customerCompanyName,
-        companyCountry: company.companyCountry,
         companyZipCode: company.companyZipCode,
+        companyEmail: company.companyEmail,
+        companyPhone: company.companyPhone,
+        companyAddressCity: company.companyAddressCity,
+        companyCountry: company.companyCountry,
         updatedAt: new Date(),
       })
       .where(eq(companycustomers.customerOrgNumber, company.customerOrgNumber))
@@ -267,11 +271,13 @@ export async function editCompanyDetails(
     return updatedCompany
       ? right({
           customerOrgNumber: updatedCompany.customerOrgNumber,
-          customerCompanyName: updatedCompany.customerComapanyName,
-          companyAddress: updatedCompany.companyAddress ?? undefined,
-          companyZipCode: updatedCompany.companyZipCode ?? undefined,
-          companyAddressCity: updatedCompany.companyAddressCity ?? undefined,
-          companyCountry: updatedCompany.companyCountry ?? undefined,
+          customerCompanyName: updatedCompany.customerCompanyName,
+          companyAddress: updatedCompany.companyAddress,
+          companyZipCode: updatedCompany.companyZipCode,
+          companyEmail: updatedCompany.companyEmail,
+          companyPhone: updatedCompany.companyPhone,
+          companyAddressCity: updatedCompany.companyAddressCity,
+          companyCountry: updatedCompany.companyCountry,
           createdAt: updatedCompany.createdAt,
           updatedAt: updatedCompany.updatedAt,
         })
@@ -303,6 +309,7 @@ export async function editDriverDetails(driver: DriverCreate): Promise<Either<st
     const [updatedDriver] = await db
       .update(drivers)
       .set({
+        customerOrgNumber: driver.customerOrgNumber ? driver.customerOrgNumber : sql`null`,
         driverExternalNumber: driver.driverExternalNumber,
         driverGDPRAccept: driver.driverGDPRAccept,
         driverISWarrantyDriver: driver.driverISWarrantyDriver,
@@ -328,6 +335,7 @@ export async function editDriverDetails(driver: DriverCreate): Promise<Either<st
 
     return updatedDriver
       ? right({
+          customerOrgNumber: updatedDriver.customerOrgNumber ?? undefined,
           driverID: updatedDriver.driverID,
           driverExternalNumber: updatedDriver.driverExternalNumber ?? undefined,
           driverGDPRAccept: updatedDriver.driverGDPRAccept,
@@ -378,7 +386,7 @@ export async function getCustomersPaginate(
   try {
     const returnData = await db.transaction(async (tx) => {
       const condition = or(
-        ilike(companycustomers.customerComapanyName, '%' + search + '%'),
+        ilike(companycustomers.customerCompanyName, '%' + search + '%'),
         ilike(companycustomers.customerOrgNumber, '%' + search + '%'),
       )
 
@@ -392,11 +400,13 @@ export async function getCustomersPaginate(
       const customersList = await tx
         .select({
           customerOrgNumber: companycustomers.customerOrgNumber,
-          customerComapanyName: companycustomers.customerComapanyName,
-          customerAddress: companycustomers.companyAddress,
-          customerZipCode: companycustomers.companyZipCode,
-          customerAddressCity: companycustomers.companyAddressCity,
-          customerCountry: companycustomers.companyCountry,
+          customerCompanyName: companycustomers.customerCompanyName,
+          companyAddress: companycustomers.companyAddress,
+          companyZipCode: companycustomers.companyZipCode,
+          companyAddressCity: companycustomers.companyAddressCity,
+          companyEmail: companycustomers.companyEmail,
+          companyPhone: companycustomers.companyPhone,
+          companyCountry: companycustomers.companyCountry,
           createdAt: companycustomers.createdAt,
           updatedAt: companycustomers.updatedAt,
         })
@@ -408,28 +418,13 @@ export async function getCustomersPaginate(
       return { totalItems, customersList }
     })
 
-    const customersBrandedList = returnData.customersList.map((item) => {
-      return {
-        customerOrgNumber: CustomerOrgNumber(item.customerOrgNumber),
-        customerCompanyName: CustomerCompanyName(item.customerComapanyName),
-        companyAddress: item.customerAddress ? CompanyAddress(item.customerAddress) : undefined,
-        companyAddressCity: item.customerAddressCity
-          ? CompanyAddressCity(item.customerAddressCity)
-          : undefined,
-        companyCountry: item.customerCountry ? CompanyCountry(item.customerCountry) : undefined,
-        companyZipCode: item.customerZipCode ? CompanyZipCode(item.customerZipCode) : undefined,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-      }
-    })
-
     const totalPage = Math.ceil(returnData.totalItems.count / limit)
 
     return right({
       totalItems: returnData.totalItems.count,
       totalPage,
       perPage: page,
-      data: customersBrandedList,
+      data: returnData.customersList,
     })
   } catch (e) {
     return left(errorHandling(e))
@@ -437,7 +432,7 @@ export async function getCustomersPaginate(
 }
 
 export type AdvancedSearch = {
-  companyOrg?: CustomerOrgNumber
+  customerOrgNumber?: CustomerOrgNumber
   from?: SubmissionTime
   to?: PickupTime
   service?: ServiceID
@@ -457,9 +452,11 @@ export async function getDriversPaginate(
     const returnData = await db.transaction(async (tx) => {
       let condition
 
-      if (advanced?.companyOrg) {
+      if (advanced?.customerOrgNumber) {
         condition = and(
-          advanced.companyOrg ? eq(drivers.customerOrgNumber, advanced.companyOrg) : undefined,
+          advanced.customerOrgNumber
+            ? eq(drivers.customerOrgNumber, advanced.customerOrgNumber)
+            : undefined,
           or(
             isEmail(search)
               ? ilike(drivers.driverEmail, '%' + search + '%')
@@ -595,29 +592,20 @@ export async function getCompanyById(
     const [companyDetails] = await db
       .select({
         customerOrgNumber: companycustomers.customerOrgNumber,
-        customerComapanyName: companycustomers.customerComapanyName,
-        customerAddress: companycustomers.companyAddress,
-        customerZipCode: companycustomers.companyZipCode,
-        customerAddressCity: companycustomers.companyAddressCity,
-        customerCountry: companycustomers.companyCountry,
+        customerCompanyName: companycustomers.customerCompanyName,
+        companyAddress: companycustomers.companyAddress,
+        companyZipCode: companycustomers.companyZipCode,
+        companyAddressCity: companycustomers.companyAddressCity,
+        companyEmail: companycustomers.companyEmail,
+        companyPhone: companycustomers.companyPhone,
+        companyCountry: companycustomers.companyCountry,
         createdAt: companycustomers.createdAt,
         updatedAt: companycustomers.updatedAt,
       })
       .from(companycustomers)
       .where(eq(companycustomers.customerOrgNumber, orgNumber))
 
-    return companyDetails
-      ? right({
-          customerOrgNumber: companyDetails.customerOrgNumber,
-          customerCompanyName: companyDetails.customerComapanyName,
-          companyAddress: companyDetails.customerAddress ?? undefined,
-          companyAddressCity: companyDetails.customerAddressCity ?? undefined,
-          companyCountry: companyDetails.customerCountry ?? undefined,
-          companyZipCode: companyDetails.customerZipCode ?? undefined,
-          createdAt: companyDetails.createdAt,
-          updatedAt: companyDetails.updatedAt,
-        })
-      : left("Can't find company")
+    return companyDetails ? right(companyDetails) : left("Can't find company")
   } catch (e) {
     return left(errorHandling(e))
   }

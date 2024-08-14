@@ -145,6 +145,9 @@ export const StorePaginateReply = Type.Object({
       storeName: storeName,
       storeOrgNumber: storeOrgNumber,
       storeID: storeID,
+      storePhone: storePhone,
+      storeAddress: storeAddress,
+      storeEmail: storeEmail,
     }),
   ),
 })

@@ -4,11 +4,11 @@ import { LocalServiceIDSchema, ServiceIDSchema } from '../services/serviceSchema
 import { PickupTimeSchema, SubmissionTimeSchema } from '../orders/ordersSchema.js'
 import { CategoryIDSchema } from '../category/categorySchema.js'
 import { driverID } from '../../utils/helper.js'
-const companyOrgNumber = Type.String({ maxLength: 11 })
-const companyName = Type.String({ maxLength: 255 })
+const customerOrgNumber = Type.String({ maxLength: 11 })
+const customerCompanyName = Type.String({ maxLength: 255 })
 const companyReference = Type.String({ maxLength: 255 })
 const companyEmail = Type.String({ format: 'email' })
-const companyPhoneNumber = Type.String({
+const companyPhone = Type.String({
   pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
 })
 const companyAddress = Type.String({ maxLength: 255 })
@@ -29,7 +29,6 @@ const driverAddress = Type.String({ maxLength: 255 })
 const driverZipCode = Type.String({ maxLength: 16 })
 const driverAddressCity = Type.String({ maxLength: 255 })
 const driverCountry = Type.String({ maxLength: 255 })
-const customerCompanyName = Type.String({ maxLength: 255 })
 const driverHasCard = Type.Boolean()
 const driverCardNumber = Type.String({ maxLength: 255 })
 const driverCardValidTo = Type.String({ format: 'date' })
@@ -38,11 +37,11 @@ const driverNotesShared = Type.String()
 const driverNotes = Type.String()
 
 export const AddCustomerBodySchema = Type.Object({
-  companyOrgNumber: companyOrgNumber,
-  companyName: companyName,
+  customerOrgNumber: customerOrgNumber,
+  customerCompanyName: customerCompanyName,
   companyReference: companyReference,
   companyEmail: companyEmail,
-  companyPhoneNumber: companyPhoneNumber,
+  companyPhone: companyPhone,
   companyAddress: companyAddress,
   companyZipCode: companyZipCode,
   companyAddressCity: companyAddressCity,
@@ -68,10 +67,12 @@ export const AddCustomerBodySchema = Type.Object({
 })
 
 export const PatchCompanyBodySchema = Type.Object({
-  customerOrgNumber: companyOrgNumber,
+  customerOrgNumber: customerOrgNumber,
   customerCompanyName: customerCompanyName,
   companyAddress: companyAddress,
   companyZipCode: companyZipCode,
+  companyEmail: companyEmail,
+  companyPhone: companyPhone,
   companyAddressCity: companyAddressCity,
   companyCountry: companyCountry,
 })
@@ -84,7 +85,8 @@ export const GetDriverByIDSchema = Type.Object({
   driverID: driverID,
 })
 
-const DriverBodySchema = Type.Object({
+export const DriverBodySchema = Type.Object({
+  customerOrgNumber: Type.Optional(customerOrgNumber),
   driverExternalNumber: Type.Optional(driverExternalNumber),
   driverGDPRAccept: driverGDPRAccept,
   driverISWarrantyDriver: driverISWarrantyDriver,
@@ -110,11 +112,6 @@ export const PatchDriverBodySchema = Type.Composite([
   Type.Object({ driverID: driverID }),
 ])
 
-export const CreateDriverBodySchema = Type.Composite([
-  DriverBodySchema,
-  Type.Object({ companyOrgNumber: Type.Optional(companyOrgNumber) }),
-])
-
 export const ListCustomersQueryParamSchema = Type.Object({
   search: Type.Optional(Type.String()),
   limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
@@ -125,7 +122,7 @@ export const SearchSchema = Type.Object({
   search: Type.Optional(Type.String()),
   limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
-  companyOrg: Type.Optional(companyOrgNumber),
+  customerOrgNumber: Type.Optional(customerOrgNumber),
   from: Type.Optional(SubmissionTimeSchema),
   to: Type.Optional(PickupTimeSchema),
   service: Type.Optional(ServiceIDSchema),
@@ -140,4 +137,4 @@ export type GetCompanyByOrgNumberSchemaType = Static<typeof GetCompanyByOrgNumbe
 export type CreateCustomerType = Static<typeof AddCustomerBodySchema>
 export type PatchCompanyType = Static<typeof PatchCompanyBodySchema>
 export type PatchDriverType = Static<typeof PatchDriverBodySchema>
-export type CreateDriverType = Static<typeof CreateDriverBodySchema>
+export type DriverBodySchemaType = Static<typeof DriverBodySchema>

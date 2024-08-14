@@ -1,40 +1,12 @@
 {
-  "version": "6",
+  "version": "7",
   "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "6",
-      "when": 1722695261907,
-      "tag": "0000_curious_firedrake",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1722766822735,
-      "tag": "0001_massive_lady_deathstrike",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1722980593642,
-      "tag": "0002_motionless_dakota_north",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1723156186514,
-      "tag": "0003_special_the_stranger",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1723156422901,
-      "tag": "0004_nebulous_whizzer",
+      "version": "7",
+      "when": 1723549258935,
+      "tag": "0000_sticky_gamma_corps",
       "breakpoints": true
     }
   ]
