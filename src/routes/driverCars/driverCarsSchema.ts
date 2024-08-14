@@ -4,7 +4,7 @@ import { driverID } from '../customers/customerSchema.js'
 
 import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 
-const driverCarID = Type.Integer({ minimum: 0 })
+export const driverCarID = Type.Integer({ minimum: 0 })
 const driverCarRegistrationNumber = Type.String({ minLength: 3, maxLength: 11 })
 const driverCarBrand = Type.String({ maxLength: 128 })
 const driverCarModel = Type.String({ maxLength: 128 })

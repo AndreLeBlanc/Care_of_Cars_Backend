@@ -209,7 +209,7 @@ export async function permissions(fastify: FastifyInstance) {
         permissionTitle: PermissionTitle(request.body.permissionTitle),
         permissionDescription: request.body.description
           ? PermissionDescription(request.body.description)
-          : null,
+          : undefined,
       })
       match(
         permission,

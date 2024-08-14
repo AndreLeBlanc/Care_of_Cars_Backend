@@ -4,6 +4,7 @@ import { initDrizzle } from './config/db-connect.js'
 async function start() {
   console.log('starting')
   try {
+    await new Promise((resolve) => setTimeout(resolve, 10000)) // 3 sec
     await initDrizzle()
     const app = await buildApp()
     await app.listen({ port: 3000, host: '0.0.0.0' })

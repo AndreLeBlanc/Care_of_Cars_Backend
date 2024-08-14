@@ -252,20 +252,11 @@ export async function getProductsPaginated(
         ),
       )
       // Query for total items count
-      const [{ count: totalItems }] = await tx
-        .select({
-          count: sql`COUNT(*)`.mapWith(Number).as('count'),
-        })
+      const [totalItems] = await tx
+        .select({ count: sql`COUNT(*)`.mapWith(Number).as('count') }) //{
         .from(products)
         .where(condition)
-        .unionAll(
-          tx
-            .select({
-              count: sql`COUNT(*)`.mapWith(Number).as('count'),
-            })
-            .from(localProducts)
-            .where(conditionLocal),
-        )
+        .fullJoin(localProducts, conditionLocal)
 
       // Query for paginated products
       const productList = await tx
@@ -359,10 +350,10 @@ export async function getProductsPaginated(
       }
     })
 
-    const totalPage = Math.ceil(totalItems / limit)
+    const totalPage = Math.ceil(totalItems.count / limit)
 
     return right({
-      totalItems: totalItems,
+      totalItems: totalItems.count,
       totalPage,
       perPage: page,
       products: productsBrandedList,
