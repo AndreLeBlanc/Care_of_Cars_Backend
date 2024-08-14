@@ -11,21 +11,19 @@ import {
   ServiceVariantIDSchema,
 } from '../services/serviceSchema.js'
 
-import { driverID } from '../customers/customerSchema.js'
-
-import { CreatedAndUpdatedAT, EmployeeID } from '../../utils/helper.js'
+import { CreatedAndUpdatedAT, EmployeeID, driverID } from '../../utils/helper.js'
 
 export const OrderID = Type.Integer({ minimum: 0 })
 const OrderNotesSchema = Type.String()
 const OrderStatusSchema = Type.String()
-const PickupTimeSchema = Type.String({ format: 'date' })
+export const PickupTimeSchema = Type.String({ format: 'date' })
 const ServiceCostNumberSchema = Type.Number()
 const ServiceDay1Schema = Type.String({ format: 'time' })
 const ServiceDay2Schema = Type.String({ format: 'time' })
 const ServiceDay3Schema = Type.String({ format: 'time' })
 const ServiceDay4Schema = Type.String({ format: 'time' })
 const ServiceDay5Schema = Type.String({ format: 'time' })
-const SubmissionTimeSchema = Type.String({ format: 'date' })
+export const SubmissionTimeSchema = Type.String({ format: 'date' })
 const VatFreeSchema = Type.Boolean()
 const DiscountSchema = Type.Number()
 const TotalCost = Type.Number()
