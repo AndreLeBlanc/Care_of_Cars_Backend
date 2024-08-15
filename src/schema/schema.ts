@@ -524,7 +524,7 @@ export const employees = pgTable('employees', {
   employeeHourlyRateCurrency: varchar(
     'employeeHourlyRateCurrency',
   ).$type<EmployeeHourlyRateCurrency>(),
-  employeePin: varchar('employeePin', { length: 4 }).$type<EmployeePin>(),
+  employeePin: varchar('employeePin', { length: 4 }).$type<EmployeePin>().notNull(),
   employeeComment: varchar('employeeComment').$type<EmployeeComment>(),
   employeeCheckedIn: timestamp('checkedIn'),
   employeeCheckedOut: timestamp('checkedOut'),
@@ -532,9 +532,11 @@ export const employees = pgTable('employees', {
   ...dbDates,
 })
 
-export const employeesRelations = relations(employees, ({ many }) => ({
+export const employeesRelations = relations(employees, ({ many, one }) => ({
   employeeSpecialHours: many(employeeSpecialHours),
   employeeWorkingHours: many(employeeWorkingHours),
+  employeeStore: many(employeeStore),
+  users: one(users),
 }))
 
 export const employeeWorkingHours = pgTable(
@@ -616,6 +618,11 @@ export const employeeStore = pgTable(
   },
 )
 
+export const employeeStoreRelations = relations(employeeStore, ({ one }) => ({
+  employees: one(employees),
+  stores: one(stores),
+}))
+
 export const employeeSpecialHours = pgTable(
   'employeeSpecialHours',
   {
@@ -670,6 +677,11 @@ export const users = pgTable('users', {
     .notNull(),
   ...dbDates,
 })
+
+export const usersRelations = relations(users, ({ one }) => ({
+  employees: one(employees),
+  roles: one(roles),
+}))
 
 export const roles = pgTable('roles', {
   roleID: serial('roleID').$type<RoleID>().primaryKey(),

@@ -15,18 +15,18 @@ const EmployeeSpceialHoursID = Type.Integer()
 const WorkTimeDescriptionSchema = Type.String()
 const workTimeSchema = Type.String({ format: 'time' })
 const workDateTimeSchema = Type.String({ format: 'date-time' })
-const shortUserName = Type.String({ maxLength: 4 })
-const employmentNumber = Type.String({ maxLength: 128 })
-const employeePersonalNumber = Type.String({ maxLength: 16 })
-const signature = Type.String({ maxLength: 4 })
+export const shortUserName = Type.String({ maxLength: 4 })
+export const employmentNumber = Type.String({ maxLength: 128 })
+export const employeePersonalNumber = Type.String({ maxLength: 16 })
+export const signature = Type.String({ maxLength: 4 })
 export const EmployeeHourlyRateSchema = Type.Optional(Type.Number({ minimum: 0 }))
 const employeePin = Type.String()
-const employeeActive = Type.Boolean()
+export const employeeActive = Type.Boolean()
 const employeeComment = Type.String()
 export const EmployeeHourlyRateCurrencySchema = Type.Optional(Type.String())
-const employeeCheckedIn = Type.String({ format: 'date' })
-const employeeCheckedOut = Type.String({ format: 'date' })
-const employeeCheckinStatus = Type.Boolean()
+export const employeeCheckedIn = Type.String({ format: 'date' })
+export const employeeCheckedOut = Type.String({ format: 'date' })
+export const employeeCheckinStatus = Type.Boolean()
 
 export const EmployeeNoUserSchema = Type.Object({
   shortUserName: shortUserName,
@@ -35,7 +35,7 @@ export const EmployeeNoUserSchema = Type.Object({
   signature: signature,
   employeePin: employeePin,
   employeeActive: employeeActive,
-  employeeComment: employeeComment,
+  employeeComment: Type.Optional(employeeComment),
 })
 
 export const EmployeeSchema = Type.Composite([
@@ -98,6 +98,7 @@ export const EmployeeReplySchema = Type.Composite([
 export type EmployeeReplySchemaType = Static<typeof EmployeeReplySchema>
 
 export const SelectedEmployeeSchema = Type.Composite([
+  EmployeeMessageSchema,
   EmployeeSchema,
   Type.Object({
     employeeID: EmployeeID,
@@ -111,6 +112,22 @@ export const SelectedEmployeeSchema = Type.Composite([
 ])
 
 export type SelectedEmployeeSchemaType = Static<typeof SelectedEmployeeSchema>
+
+export const CreatedEmployeeUserSchema = Type.Composite([
+  EmployeeSchema,
+  Type.Object({
+    employeeID: EmployeeID,
+    storeIDs: Type.Array(storeID),
+    employeeHourlyRateCurrency: EmployeeHourlyRateCurrencySchema,
+    employeeHourlyRate: EmployeeHourlyRateSchema,
+    employeeCheckedIn: Type.Optional(employeeCheckedIn),
+    employeeCheckedOut: Type.Optional(employeeCheckedOut),
+    createdAt: Type.Any(),
+    updatedAt: Type.Any(),
+  }),
+])
+
+export type CreatedEmployeeUserSchemaType = Static<typeof CreatedEmployeeUserSchema>
 
 export const ListEmployeesReplySchema = Type.Composite([
   EmployeeMessageSchema,

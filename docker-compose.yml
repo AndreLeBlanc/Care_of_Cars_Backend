@@ -7,7 +7,7 @@ services:
       POSTGRES_DB: superdbdocker
     ports:
       - '5432:5432'
-    # command: ['sh', '-c', 'rm -rf /var/lib/postgresql/data/* && docker-entrypoint.sh postgres']
+    command: ['sh', '-c', 'rm -rf /var/lib/postgresql/data/* && docker-entrypoint.sh postgres']
 
   deployapp:
     build:

@@ -19,9 +19,14 @@ import {
   PatchUserPassword,
   PatchUserPasswordType,
   PatchUserSchema,
+  MessageSchemaType,
+  MessageSchema,
+  CreateUserEmployeeSchema,
   PatchUserSchemaType,
   StoreUserResponseSchema,
   StoreUserResponseSchemaType,
+  LoginUserEmployeeSchema,
+  LoginUserEmployeeSchemaType,
   StoreUserSchema,
   StoreUserSchemaType,
 } from './userSchema.js'
@@ -41,6 +46,7 @@ import {
   assignToStore,
   createUser,
   createUserEmployee,
+  LoginEmployee,
   deleteStoreUser,
   generatePasswordHash,
   getUserByID,
@@ -49,6 +55,7 @@ import {
   selectStoreUsers,
   updateUserByID,
   updateUserPasswordByID,
+  verifyEmployee,
   userInfoPassword,
   verifyUser,
 } from '../../services/userService.js'
@@ -75,6 +82,8 @@ import {
 } from '../../schema/schema.js'
 
 import { getRoleWithPermissions } from '../../services/roleToPermissionService.js'
+import { PermissionIDDescName } from '../../services/permissionService.js'
+import { CreatedRole } from '../../services/roleService.js'
 
 import {
   Limit,
@@ -227,10 +236,10 @@ export async function users(fastify: FastifyInstance) {
       },
 
       schema: {
-        body: CreateUser,
+        body: CreateUserEmployeeSchema,
         response: {
-          201: { CreateUserEmpReplySchema },
-          504: { StoreUserResponseSchema },
+          201: CreateUserEmpReplySchema,
+          504: StoreUserResponseSchema,
         },
       },
     },
@@ -258,7 +267,9 @@ export async function users(fastify: FastifyInstance) {
         signature: Signature(request.body.employee.signature),
         employeePin: EmployeePin(request.body.employee.employeePin),
         employeeActive: EmployeeActive(request.body.employee.employeeActive),
-        employeeComment: EmployeeComment(request.body.employee.employeeComment),
+        employeeComment: request.body.employee.employeeComment
+          ? EmployeeComment(request.body.employee.employeeComment)
+          : undefined,
         employeeHourlyRateCurrency: request.body.employee.employeeHourlyRateCurrency
           ? EmployeeHourlyRateCurrency(request.body.employee.employeeHourlyRateCurrency as Currency)
           : undefined,
@@ -274,9 +285,18 @@ export async function users(fastify: FastifyInstance) {
       match(
         createdUser,
         (userEmployee: CreatedUserEmployee) => {
+          const { employeeHourlyRateDinero, createdAt, updatedAt, ...rest } = userEmployee.employee
+
           return reply.status(201).send({
             message: 'User and employee created',
-            ...userEmployee,
+            user: userEmployee.user,
+            employee: {
+              employeeHourlyRate: employeeHourlyRateDinero?.getAmount(),
+              employeeHourlyRateCurrency: employeeHourlyRateDinero?.getCurrency(),
+              createdAt: createdAt.toISOString(),
+              updatedAt: updatedAt.toISOString(),
+              ...rest,
+            },
           })
         },
         (error) => {
@@ -300,28 +320,80 @@ export async function users(fastify: FastifyInstance) {
       return match(
         userWithPassword,
         async (user: VerifyUser) => {
-          const match = await bcrypt.compare(password, user.userPassword)
-          if (match) {
+          const passwordRes = await bcrypt.compare(password, user.userPassword)
+          if (passwordRes) {
             const token = fastify.jwt.sign({ user })
             const rolePermissions = await getRoleWithPermissions(RoleID(user.role.roleID))
-
-            return reply.status(200).send({
-              message: 'Login success',
-              loginSuccess: true,
-              token: token,
-              user: {
-                id: user.userID,
-                firstName: user.userFirstName,
-                lastName: user.userLastName,
-                email: user.userEmail,
-                isSuperAdmin: user.isSuperAdmin,
-                role: {
-                  id: user.role.roleID,
-                  roleName: user.role.roleName,
-                  rolePermissions: rolePermissions,
-                },
+            match(
+              rolePermissions,
+              (roleP: { role: CreatedRole; roleHasPermission: PermissionIDDescName[] }) => {
+                return reply.status(200).send({
+                  message: 'Login success',
+                  loginSuccess: true,
+                  token: token,
+                  user: {
+                    id: user.userID,
+                    firstName: user.userFirstName,
+                    lastName: user.userLastName,
+                    email: user.userEmail,
+                    isSuperAdmin: user.isSuperAdmin,
+                    role: roleP,
+                  },
+                })
               },
-            })
+              (rolePerr: string) => {
+                return reply.status(403).send({ message: rolePerr })
+              },
+            )
+          } else {
+            return reply.status(403).send({ message: 'Login failed, incorrect email or password' })
+          }
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.post<{ Body: LoginUserType; Reply: LoginUserEmployeeSchemaType | MessageSchemaType }>(
+    '/employee/login',
+    {
+      schema: {
+        body: LoginUser,
+        response: { 200: LoginUserEmployeeSchema, 403: MessageSchema },
+      },
+    },
+    async (request, reply) => {
+      const { email, password } = request.body
+      const userWithPassword: Either<string, LoginEmployee> = await verifyEmployee(UserEmail(email))
+
+      return match(
+        userWithPassword,
+        async (user: LoginEmployee) => {
+          const passwordRes = await bcrypt.compare(password, user.password)
+          if (passwordRes) {
+            const token = fastify.jwt.sign({ user })
+            const rolePermissions = await getRoleWithPermissions(user.roleID)
+            match(
+              rolePermissions,
+              (roleP: { role: CreatedRole; roleHasPermission: PermissionIDDescName[] }) => {
+                const { employeeHourlyRate, ...rest } = user
+
+                return reply.status(200).send({
+                  message: 'Login success',
+                  loginSuccess: true,
+                  token: token,
+                  employeeHourlyRate: employeeHourlyRate?.getAmount(),
+                  employeeHourlyRateCurrency: employeeHourlyRate?.getCurrency(),
+                  ...rest,
+                  role: roleP,
+                })
+              },
+              (rolePerr: string) => {
+                return reply.status(403).send({ message: rolePerr })
+              },
+            )
           } else {
             return reply.status(403).send({ message: 'Login failed, incorrect email or password' })
           }

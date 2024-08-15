@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 
 import { CreatedAndUpdatedAT } from '../../utils/helper.js'
-const storeName = Type.String({ minLength: 3 })
+export const storeName = Type.String({ minLength: 3 })
 const storeWebSite = Type.String({ format: 'uri' })
 const storeVatNumber = Type.String({ maxLength: 32 })
 const storeFSkatt = Type.Boolean()

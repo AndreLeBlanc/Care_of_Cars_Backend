@@ -16,7 +16,7 @@ import {
 import { Brand, make } from 'ts-brand'
 
 import { PermissionIDDescName } from './permissionService.js'
-import { Role } from './roleService.js'
+import { CreatedRole } from './roleService.js'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
 
@@ -190,7 +190,7 @@ export async function listRolesToPermissions(): Promise<Either<string, Permissio
 
 export async function getRoleWithPermissions(
   roleID: RoleID,
-): Promise<Either<string, { role: Role; roleHasPermission: PermissionIDDescName[] }>> {
+): Promise<Either<string, { role: CreatedRole; roleHasPermission: PermissionIDDescName[] }>> {
   try {
     const rolePerms = await db.transaction(async (tx) => {
       const roleWithPermissions = await tx
@@ -204,14 +204,16 @@ export async function getRoleWithPermissions(
         .leftJoin(permissions, eq(roleToPermissions.permissionID, permissions.permissionID))
         .where(eq(roles.roleID, roleID))
 
-      const [role] = await tx.select().from(roles).where(eq(roles.roleID, roleID)).limit(1)
+      const [role] = await tx
+        .select({ roleID: roles.roleID, roleName: roles.roleName, description: roles.description })
+        .from(roles)
+        .where(eq(roles.roleID, roleID))
+        .limit(1)
 
-      const roleBranded: Role = {
+      const roleBranded: CreatedRole = {
         roleID: role.roleID,
         roleName: role.roleName,
         description: role.description ?? undefined,
-        createdAt: role.createdAt,
-        updatedAt: role.updatedAt,
       }
 
       return { role: roleBranded, roleWithPermissions: roleWithPermissions }

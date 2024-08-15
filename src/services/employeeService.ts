@@ -156,7 +156,7 @@ type EmployeeNoRate = {
   employmentNumber: EmploymentNumber
   employeePersonalNumber: EmployeePersonalNumber
   signature: Signature
-  employeePin?: EmployeePin
+  employeePin: EmployeePin
   employeeActive: EmployeeActive
   employeeComment?: EmployeeComment
 }
@@ -187,7 +187,7 @@ export type EmployeePaginated = {
     employmentNumber: EmploymentNumber
     employeePersonalNumber: EmployeePersonalNumber
     signature: Signature
-    employeePin?: EmployeePin
+    employeePin: EmployeePin
     employeeActive: EmployeeActive
     employeeComment?: EmployeeComment
     firstName: UserFirstName
@@ -1097,7 +1097,7 @@ export async function putEmployee(
           createdEmployee.employeeHourlyRate,
           createdEmployee.employeeHourlyRateCurrency,
         ),
-        employeePin: createdEmployee.employeePin ?? undefined,
+        employeePin: createdEmployee.employeePin,
         employeeActive: createdEmployee.employeeActive,
         employeeComment: createdEmployee.employeeComment ?? undefined,
         createdAt: createdEmployee.createdAt,
@@ -1137,7 +1137,7 @@ export async function getEmployee(employeeID: EmployeeID): Promise<Either<string
         signature: fetchedEmployee.signature,
         employeeHourlyRate: fetchedEmployee.employeeHourlyRate ?? undefined,
         employeeHourlyRateCurrency: fetchedEmployee.employeeHourlyRateCurrency ?? undefined,
-        employeePin: fetchedEmployee.employeePin ?? undefined,
+        employeePin: fetchedEmployee.employeePin,
         employeeActive: fetchedEmployee.employeeActive,
         employeeComment: fetchedEmployee.employeeComment ?? undefined,
         employeeCheckedIn: employees.employeeCheckedIn
@@ -1182,7 +1182,7 @@ export async function deleteEmployee(employeeID: EmployeeID): Promise<Either<str
         signature: deletedEmployee.signature,
         employeeHourlyRate: deletedEmployee.employeeHourlyRate ?? undefined,
         employeeHourlyRateCurrency: deletedEmployee.employeeHourlyRateCurrency ?? undefined,
-        employeePin: deletedEmployee.employeePin ?? undefined,
+        employeePin: deletedEmployee.employeePin,
         employeeActive: deletedEmployee.employeeActive,
         employeeComment: deletedEmployee.employeeComment ?? undefined,
         createdAt: deletedEmployee.createdAt,
@@ -1197,6 +1197,15 @@ export async function deleteEmployee(employeeID: EmployeeID): Promise<Either<str
   } catch (e) {
     return left(errorHandling(e))
   }
+}
+
+export function isCheckedIn(checkin: Date | null, checkout: Date | null): EmployeeCheckinStatus {
+  let checkinStatus = EmployeeCheckinStatus(false)
+  if (checkin != null) {
+    const status = checkout == null || checkout < checkin
+    checkinStatus = EmployeeCheckinStatus(status)
+  }
+  return checkinStatus
 }
 
 export async function getEmployeesPaginate(
@@ -1252,13 +1261,7 @@ export async function getEmployeesPaginate(
         .offset(offset || 0)
 
       const listedEmployeeWithNull = employeesList.map((employee) => {
-        let checkinStatus = EmployeeCheckinStatus(false)
-        if (employee.employeeCheckedIn != null) {
-          const status =
-            employee.employeeCheckedOut == null ||
-            employee.employeeCheckedOut < employee.employeeCheckedIn
-          checkinStatus = EmployeeCheckinStatus(status)
-        }
+        let checkinStatus = isCheckedIn(employee.employeeCheckedIn, employee.employeeCheckedOut)
         return {
           userID: employee.userID,
           firstName: employee.firstName,
@@ -1272,7 +1275,7 @@ export async function getEmployeesPaginate(
             employee.employeeHourlyRate,
             employee.employeeHourlyRateCurrency,
           ),
-          employeePin: employee.employeePin ?? undefined,
+          employeePin: employee.employeePin,
           employeeComment: employee.employeeComment ?? undefined,
           employeeActive: employee.employeeActive,
           employeeCheckIn: employee.employeeCheckedIn

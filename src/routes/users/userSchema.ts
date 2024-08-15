@@ -1,19 +1,34 @@
 import { Static, Type } from '@sinclair/typebox'
 
 import {
-  CreateEmployeeSchema,
   EmployeeHourlyRateCurrencySchema,
   EmployeeHourlyRateSchema,
   EmployeeNoUserSchema,
+  employeeCheckedIn,
+  employeeCheckedOut,
+  signature,
+  employeeActive,
+  shortUserName,
+  employmentNumber,
+  employeePersonalNumber,
+  employeeCheckinStatus,
+  CreatedEmployeeUserSchema,
 } from '../employees/employeesSchema.js'
+
+import { PermissionIDDescNameSchema } from '../permissions/permissionSchema.js'
 
 import { EmployeeID, FirstName, LastName, UserID } from '../../utils/helper.js'
 
-import { RoleID } from '../roles/roleSchema.js'
-import { storeID } from '../stores/storesSchema.js'
+import { RoleID, RoleName, RoleReplySchema } from '../roles/roleSchema.js'
+import { storeID, storeName } from '../stores/storesSchema.js'
 
-const userEmail = Type.String({ format: 'email' })
+const userEmail = Type.String()
+const message = Type.String()
 const isSuperAdmin = Type.Boolean()
+
+export const MessageSchema = Type.Object({ message: message })
+
+export type MessageSchemaType = Static<typeof MessageSchema>
 
 export const CreateUser = Type.Object({
   firstName: FirstName,
@@ -30,7 +45,7 @@ export const CreatedUser = Type.Object({
 })
 
 export const CreateUserReply = Type.Object({
-  message: Type.String(),
+  message: message,
   firstName: FirstName,
   lastName: LastName,
   email: userEmail,
@@ -106,14 +121,54 @@ export const StoreUserSchema = Type.Object({
 export type StoreUserSchemaType = Static<typeof StoreUserSchema>
 
 export const StoreUserResponseSchema = Type.Object({
-  message: Type.String(),
+  message: message,
 })
 export type StoreUserResponseSchemaType = Static<typeof StoreUserResponseSchema>
 
 export const CreateUserEmpReplySchema = Type.Object({
-  message: Type.String(),
-  user: CreatedUser,
-  employee: CreateEmployeeSchema,
+  message: message,
+  user: Type.Object({
+    userID: UserID,
+    firstName: FirstName,
+    roleID: RoleID,
+    lastName: LastName,
+    email: userEmail,
+    isSuperAdmin: isSuperAdmin,
+    createdAt: Type.Any(),
+    updatedAt: Type.Any(),
+  }),
+  employee: CreatedEmployeeUserSchema,
 })
 
 export type CreateUserEmpReplySchemaType = Static<typeof CreateUserEmpReplySchema>
+
+export const LoginUserEmployeeSchema = Type.Object({
+  message: message,
+  token: Type.String(),
+  loginSuccess: Type.Boolean(),
+  userID: UserID,
+  firstName: FirstName,
+  lastName: LastName,
+  email: userEmail,
+  isSuperAdmin: isSuperAdmin,
+  roleID: RoleID,
+  roleName: RoleName,
+  employeeID: Type.Optional(EmployeeID),
+  shortUserName: Type.Optional(shortUserName),
+  employmentNumber: Type.Optional(employmentNumber),
+  employeePersonalNumber: Type.Optional(employeePersonalNumber),
+  signature: Type.Optional(signature),
+  employeeActive: Type.Optional(employeeActive),
+  employeeHourlyRateCurrency: Type.Optional(EmployeeHourlyRateCurrencySchema),
+  employeeHourlyRate: Type.Optional(EmployeeHourlyRateSchema),
+  employeeCheckedIn: Type.Optional(employeeCheckedIn),
+  employeeCheckedOut: Type.Optional(employeeCheckedOut),
+  employeeCheckinStatus: Type.Optional(employeeCheckinStatus),
+  role: Type.Object({
+    role: RoleReplySchema,
+    roleHasPermission: Type.Array(PermissionIDDescNameSchema),
+  }),
+  stores: Type.Array(Type.Object({ storeName: storeName, storeID: storeID })),
+})
+
+export type LoginUserEmployeeSchemaType = Static<typeof LoginUserEmployeeSchema>

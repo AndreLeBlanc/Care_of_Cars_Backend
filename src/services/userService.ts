@@ -17,9 +17,11 @@ import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
 
-import { Employee, dineroDBReturn } from './employeeService.js'
+import { Employee, dineroDBReturn, isCheckedIn } from './employeeService.js'
+import { StoreIDName } from './storeService.js'
 
 import {
+  EmployeeID,
   EmployeeComment,
   EmployeeHourlyRate,
   EmployeeHourlyRateCurrency,
@@ -33,8 +35,12 @@ import {
   UserFirstName,
   UserID,
   UserLastName,
+  stores,
+  EmployeeHourlyRateDinero,
   UserPassword,
   employeeStore,
+  EmployeeCheckIn,
+  EmployeeCheckOut,
   employees,
 } from '../schema/schema.js'
 
@@ -98,7 +104,7 @@ export type CreateUserEmployee = {
   employmentNumber: EmploymentNumber
   employeePersonalNumber: EmployeePersonalNumber
   signature: Signature
-  employeePin?: EmployeePin
+  employeePin: EmployeePin
   employeeActive: EmployeeActive
   employeeComment?: EmployeeComment
   employeeHourlyRateCurrency?: EmployeeHourlyRateCurrency
@@ -108,6 +114,29 @@ export type CreateUserEmployee = {
 export type CreatedUserEmployee = {
   user: CreatedUser
   employee: Employee
+}
+
+export type LoginEmployee = {
+  userID: UserID
+  firstName: UserFirstName
+  lastName: UserLastName
+  email: UserEmail
+  password: UserPassword
+  isSuperAdmin: IsSuperAdmin
+  roleID: RoleID
+  roleName: RoleName
+  employeeID?: EmployeeID
+  shortUserName?: ShortUserName
+  employmentNumber?: EmploymentNumber
+  employeePersonalNumber?: EmployeePersonalNumber
+  signature?: Signature
+  employeeHourlyRate?: EmployeeHourlyRateDinero
+  employeePin?: EmployeePin
+  employeeActive?: EmployeeActive
+  employeeComment?: EmployeeComment
+  employeeCheckedIn?: EmployeeCheckIn
+  employeeCheckedOut?: EmployeeCheckOut
+  stores: StoreIDName[]
 }
 
 export async function createUser(
@@ -194,7 +223,7 @@ export async function createUserEmployee(
           createdEmployee.employeeHourlyRate,
           createdEmployee.employeeHourlyRateCurrency,
         ),
-        employeePin: createdEmployee.employeePin ?? undefined,
+        employeePin: createdEmployee.employeePin,
         employeeActive: createdEmployee.employeeActive,
         employeeComment: createdEmployee.employeeComment ?? undefined,
         createdAt: createdEmployee.createdAt,
@@ -285,6 +314,83 @@ export async function verifyUser(email: UserEmail): Promise<Either<string, Verif
       .where(and(eq(users.email, email)))
       .limit(1)
     return verifiedUser ? right(verifiedUser) : left('Login failed, incorrect email or password')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function verifyEmployee(email: UserEmail): Promise<Either<string, LoginEmployee>> {
+  try {
+    const [verifiedUser] = await db
+      .select({
+        userID: users.userID,
+        firstName: users.firstName,
+        password: users.password,
+        lastName: users.lastName,
+        email: users.email,
+        isSuperAdmin: users.isSuperAdmin,
+        roleID: roles.roleID,
+        roleName: roles.roleName,
+        employeeID: employees.employeeID,
+        shortUserName: employees.shortUserName,
+        employmentNumber: employees.employmentNumber,
+        employeePersonalNumber: employees.employeePersonalNumber,
+        signature: employees.signature,
+        EmployeeActive: employees.employeeActive,
+        employeeHourlyRate: employees.employeeHourlyRate,
+        employeeHourlyRateCurrency: employees.employeeHourlyRateCurrency,
+        employeePin: employees.employeePin,
+        employeeActive: employees.employeeActive,
+        employeeComment: employees.employeeComment,
+        employeeCheckedIn: employees.employeeCheckedIn,
+        employeeCheckedOut: employees.employeeCheckedOut,
+        stores: sql<
+          StoreIDName[]
+        >`json_agg(json_build_object('storeID', ${employeeStore.storeID}, 'storeName', ${stores.storeName}))`.as(
+          'tagname',
+        ),
+      })
+      .from(users)
+      .where(and(eq(users.email, email)))
+      .innerJoin(roles, eq(users.roleID, roles.roleID))
+      .leftJoin(employees, eq(users.userID, employees.userID))
+      .leftJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
+      .leftJoin(stores, eq(stores.storeID, employeeStore.storeID))
+      .groupBy(users.userID, roles.roleID, employees.employeeID)
+
+    return verifiedUser
+      ? right({
+          userID: verifiedUser.userID,
+          firstName: verifiedUser.firstName,
+          lastName: verifiedUser.lastName,
+          email: verifiedUser.email,
+          password: verifiedUser.password,
+          isSuperAdmin: verifiedUser.isSuperAdmin,
+          roleID: verifiedUser.roleID,
+          roleName: verifiedUser.roleName,
+          employeeID: verifiedUser.employeeID ?? undefined,
+          shortUserName: verifiedUser.shortUserName ?? undefined,
+          employmentNumber: verifiedUser.employmentNumber ?? undefined,
+          employeePersonalNumber: verifiedUser.employeePersonalNumber ?? undefined,
+          signature: verifiedUser.signature ?? undefined,
+          employeeHourlyRate: dineroDBReturn(
+            verifiedUser.employeeHourlyRate,
+            verifiedUser.employeeHourlyRateCurrency,
+          ),
+          employeeActive: verifiedUser.employeeActive ?? undefined,
+          employeeCheckedIn: verifiedUser.employeeCheckedIn
+            ? EmployeeCheckIn(verifiedUser.employeeCheckedIn.toISOString())
+            : undefined,
+          employeeCheckedOut: verifiedUser.employeeCheckedOut
+            ? EmployeeCheckOut(verifiedUser.employeeCheckedOut?.toISOString())
+            : undefined,
+          employeeCheckinStatus: isCheckedIn(
+            verifiedUser.employeeCheckedIn,
+            verifiedUser.employeeCheckedOut,
+          ),
+          stores: verifiedUser.stores,
+        })
+      : left('Login failed, incorrect email or password')
   } catch (e) {
     return left(errorHandling(e))
   }
