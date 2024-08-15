@@ -21,6 +21,7 @@ export default fp<SupportPluginOptions>(async (fastify) => {
 
         if (
           !requestPath?.startsWith('/users/login') &&
+          !requestPath?.startsWith('/users/employee/login') &&
           !requestPath?.startsWith('/docs') &&
           requestPath != '/' &&
           requestPath != '/example'

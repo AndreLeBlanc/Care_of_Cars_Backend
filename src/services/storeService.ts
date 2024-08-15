@@ -64,6 +64,11 @@ import { and, between, eq, ilike, or, sql } from 'drizzle-orm'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
 
+export type StoreIDName = {
+  storeName: StoreName
+  storeID: StoreID
+}
+
 export type StoreSpecialHoursCreate = {
   storeID: StoreID
   day: Day

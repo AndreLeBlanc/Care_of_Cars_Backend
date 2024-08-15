@@ -215,7 +215,7 @@ export const employees = async (fastify: FastifyInstance) => {
       schema: {
         body: CreateEmployeeSchema,
         response: {
-          201: { ...EmployeeMessageSchema, ...SelectedEmployeeSchema },
+          201: SelectedEmployeeSchema,
           504: EmployeeMessageSchema,
         },
       },
@@ -238,7 +238,9 @@ export const employees = async (fastify: FastifyInstance) => {
           : undefined,
         employeePin: EmployeePin(req.body.employeePin),
         employeeActive: EmployeeActive(req.body.employeeActive),
-        employeeComment: EmployeeComment(req.body.employeeComment),
+        employeeComment: req.body.employeeComment
+          ? EmployeeComment(req.body.employeeComment)
+          : undefined,
       }
 
       const createdEmployee: Either<string, Employee> = await putEmployee(
@@ -253,11 +255,9 @@ export const employees = async (fastify: FastifyInstance) => {
           const { employeeHourlyRateDinero, ...rest } = employee
           return rep.status(201).send({
             message: 'Employee Created/updated successfully',
-            ...{
-              employeeHourlyRate: employeeHourlyRateDinero?.getAmount(),
-              employeeHourlyRateCurrency: employeeHourlyRateDinero?.getCurrency(),
-              ...rest,
-            },
+            employeeHourlyRate: employeeHourlyRateDinero?.getAmount(),
+            employeeHourlyRateCurrency: employeeHourlyRateDinero?.getCurrency(),
+            ...rest,
           })
         },
         (err) => {

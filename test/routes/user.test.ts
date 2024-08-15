@@ -13,7 +13,8 @@ describe('POST /users/login HTTP', async () => {
 
   before(async () => {
     await initDrizzle()
-    app = await buildApp({ logger: false }) // Assigning to the existing variable
+    await new Promise((f) => setTimeout(f, 1500))
+    app = await buildApp({ logger: false })
     const response = await app.inject({
       method: 'POST',
       url: '/users/login',
@@ -23,7 +24,6 @@ describe('POST /users/login HTTP', async () => {
       },
     })
     const parsedResponse = JSON.parse(response.body)
-    console.log(parsedResponse)
     jwt = 'Bearer ' + parsedResponse.token
 
     const roleResp = await app.inject({
@@ -287,5 +287,148 @@ describe('POST /users/login HTTP', async () => {
       assert.deepStrictEqual(parsedGetResponse.message, 'user not found')
       assert.deepStrictEqual(getDeletedResponse.statusCode, 404)
     }
+  })
+
+  it('Create user and employee in one', async () => {
+    const strings = ['balsdf', 'zzzzzzzzzzzz', 'dsfsdfsewrwrfsdfr']
+    const perms: number[] = []
+    const roles: number[] = []
+    for (const [i, name] of strings.entries()) {
+      assert.deepStrictEqual(name, strings[i])
+      const responsePerm = await app.inject({
+        method: 'POST',
+        url: '/permissions',
+        headers: {
+          Authorization: jwt,
+        },
+        payload: {
+          permissionTitle: name,
+          description: name,
+        },
+      })
+      const parsedresponsePerm = JSON.parse(responsePerm.body)
+      perms.push(parsedresponsePerm.data.permissionID)
+      const responseRole = await app.inject({
+        method: 'POST',
+        url: '/roles',
+        headers: {
+          Authorization: jwt,
+        },
+        payload: { roleName: name, description: name },
+      })
+      const parsedresponseRoles = JSON.parse(responseRole.body)
+      roles.push(parsedresponseRoles.data.roleID)
+
+      for (const perm of perms) {
+        const roleToPerm = await app.inject({
+          method: 'POST',
+          url: '/roleToPermissions',
+          headers: {
+            Authorization: jwt,
+          },
+          payload: {
+            permissionID: perm,
+            roleID: parsedresponseRoles.data.roleID,
+          },
+        })
+        console.log('JSON.parse(roleToPerm.body)')
+        console.log(JSON.parse(roleToPerm.body))
+        console.log('JSON.parse(roleToPerm.body)')
+        console.log('JSON.parse(roleToPerm.body)')
+      }
+    }
+
+    const responseStore = await app.inject({
+      method: 'POST',
+      url: '/stores',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        storeName: 'the store',
+        storeOrgNumber: '66s6dd5552',
+        storeFSkatt: true,
+        storeStatus: true,
+        storeEmail: 'mystore@store.is',
+        storePhone: '0762757764',
+        storeAddress: 'a street',
+        storeZipCode: '32121',
+        storeCity: 'Reykavik',
+        storeCountry: 'Iceland',
+        storeDescription: 'A store',
+        storeContactPerson: 'kalle Anka',
+        storeMaxUsers: 1024,
+        storeAllowCarAPI: true,
+        storeAllowSendSMS: true,
+        storeSendSMS: true,
+        storeUsesCheckin: true,
+        storeUsesPIN: true,
+      },
+    })
+
+    const parsedresponseStore = JSON.parse(responseStore.body)
+    console.log('parsedresponseStore')
+    console.log(parsedresponseStore)
+    console.log('parsedresponseStore')
+    assert.deepStrictEqual(responseStore.statusCode, 201)
+
+    const responseUserEmp = await app.inject({
+      method: 'POST',
+      url: '/users/employee',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        user: {
+          firstName: 'inserT',
+          lastName: 'lastNamesdfs',
+          email: '23423123sed@sdfsdfs.is',
+          isSuperAdmin: 'false',
+          password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
+          roleID: roles[0],
+        },
+        employee: {
+          shortUserName: ',,dd',
+          employmentNumber: '46564235',
+          employeePersonalNumber: '234134234',
+          signature: 'poir',
+          employeePin: 'sdfe',
+          employeeActive: true,
+          employeeComment: 'a comment for this user',
+          storeID: [parsedresponseStore.store.storeID],
+          employeeHourlyRateCurrency: 'DKK',
+          employeeHourlyRate: 100,
+        },
+      },
+    })
+
+    const responseUserEmpParsed = JSON.parse(responseUserEmp.body)
+
+    assert.deepStrictEqual(responseUserEmpParsed.user.firstName, 'inserT')
+
+    const responseUserEmpLogin = await app.inject({
+      method: 'POST',
+      url: '/users/employee/login',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        email: '23423123sed@sdfsdfs.is',
+        password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
+      },
+    })
+
+    const responseUserEmpLoginParsed = JSON.parse(responseUserEmpLogin.body)
+
+    assert.deepStrictEqual(responseUserEmpLoginParsed.lastName, 'lastNamesdfs')
+    assert.deepStrictEqual(
+      responseUserEmpLoginParsed.role.roleHasPermission[0].permissionID,
+      perms[0],
+    )
+    assert.deepStrictEqual(responseUserEmpLoginParsed.role.role.roleID, roles[0])
+    assert.deepStrictEqual(
+      responseUserEmpLoginParsed.stores[0].storeID,
+      parsedresponseStore.store.storeID,
+    )
   })
 })

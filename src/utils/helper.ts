@@ -1,4 +1,5 @@
-import { Type } from '@sinclair/typebox'
+import { Type, TObject } from '@sinclair/typebox'
+import { TypeCompiler } from '@sinclair/typebox/compiler'
 /**
  * return if email is correct, is Valid email
  * */
@@ -14,6 +15,27 @@ export const GlobalQualID = Type.Integer({ minimum: 0 })
 export const UserID = Type.Integer({ minimum: 0 })
 export const FirstName = Type.String({ minLength: 3, maxLength: 128 })
 export const LastName = Type.String({ minLength: 3, maxLength: 128 })
+
+export interface ValidatorFactoryReturn<T> {
+  schema: TObject
+  verify: (data: T) => T
+}
+
+export const validatorFactory = <T extends unknown>(schema: TObject): ValidatorFactoryReturn<T> => {
+  const C = TypeCompiler.Compile(schema)
+
+  const verify = (data: T): T => {
+    const isValid = C.Check(data)
+    if (isValid) {
+      return data
+    }
+    throw new Error(
+      JSON.stringify([...C.Errors(data)].map(({ path, message }) => ({ path, message }))),
+    )
+  }
+
+  return { schema, verify }
+}
 
 export function timeStringToMS(time: string | undefined): number | undefined {
   if (time == undefined) {
@@ -57,16 +79,22 @@ export interface Right<A> {
 }
 
 export function errorHandling(e: unknown): string {
+  console.log('error: ', e)
   if (e instanceof Error && e.message.startsWith('duplicate key')) {
-    return ''
+    return (
+      'Please provide a unqiue and existing value for: ' +
+      e.message.split(' ').splice(-1)[0].split('_')[1]
+    )
+  }
+  if (e instanceof Error && e.message.includes('violates foreign key constraint')) {
+    return (
+      'Please provide a unqiue and existing value for: ' +
+      e.message.split(' ').splice(-1)[0].split('_')[3]
+    )
   }
   return 'error'
 }
 
-/**
- * @category model
- * @since 2.0.0
- */
 export type Either<E, A> = Left<E> | Right<A>
 
 // -------------------------------------------------------------------------------------
