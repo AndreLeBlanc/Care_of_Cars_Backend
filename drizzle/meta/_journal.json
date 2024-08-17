@@ -8,6 +8,13 @@
       "when": 1723549258935,
       "tag": "0000_sticky_gamma_corps",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1723886454022,
+      "tag": "0001_safe_night_thrasher",
+      "breakpoints": true
     }
   ]
 }
