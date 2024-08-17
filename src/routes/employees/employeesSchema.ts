@@ -24,9 +24,10 @@ const employeePin = Type.String()
 export const employeeActive = Type.Boolean()
 const employeeComment = Type.String()
 export const EmployeeHourlyRateCurrencySchema = Type.Optional(Type.String())
-export const employeeCheckedIn = Type.String({ format: 'date' })
-export const employeeCheckedOut = Type.String({ format: 'date' })
+export const employeeCheckedIn = Type.String({ format: 'date-time' })
+export const employeeCheckedOut = Type.String({ format: 'date-time' })
 export const employeeCheckinStatus = Type.Boolean()
+const MessageSchema = Type.String()
 
 export const EmployeeNoUserSchema = Type.Object({
   shortUserName: shortUserName,
@@ -66,7 +67,7 @@ export const ListEmployeeWorkingHoursSchema = Type.Object({
 
 export type ListEmployeeWorkingHoursSchemaType = Static<typeof ListEmployeeWorkingHoursSchema>
 
-export const EmployeeMessageSchema = Type.Object({ message: Type.String() })
+export const EmployeeMessageSchema = Type.Object({ message: MessageSchema })
 export type EmployeeMessageSchemaType = Static<typeof EmployeeMessageSchema>
 
 export const EmployeeIDSchema = Type.Object({ employeeID: Type.Number() })
@@ -170,6 +171,7 @@ export const ListEmployeesSchema = Type.Object({
 export type ListEmployeesSchemaType = Static<typeof ListEmployeesSchema>
 
 export const CheckInTimesSchema = Type.Object({
+  message: MessageSchema,
   employeeID: EmployeeID,
   employeeCheckIn: Type.Optional(employeeCheckedIn),
   employeeCheckOut: Type.Optional(employeeCheckedOut),
