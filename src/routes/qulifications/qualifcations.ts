@@ -32,7 +32,6 @@ import {
 } from './qualificationsSchema.js'
 
 import {
-  CreateQualificationsGlobal,
   CreateQualificationsLocal,
   EmployeeGlobalQualifications,
   EmployeeLocalQualifications,
