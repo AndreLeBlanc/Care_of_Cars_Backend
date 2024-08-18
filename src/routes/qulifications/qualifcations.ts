@@ -74,7 +74,7 @@ import {
 import { Search } from '../../plugins/pagination.js'
 
 import { Either, match } from '../../utils/helper.js'
-import { EmployeeIDSchemaType } from '../employees/employeesSchema.js'
+import { EmployeeIDSchema, EmployeeIDSchemaType } from '../employees/employeesSchema.js'
 
 export const qualificationsRoute = async (fastify: FastifyInstance) => {
   fastify.put<{
@@ -370,7 +370,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
     Params: EmployeeIDSchemaType
     Reply: EmployeesQualsSchemaType | { message: QualificationMessageType }
   }>(
-    '/employee:employeeID',
+    '/employee/:employeeID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('get_employees_qualification')
@@ -379,7 +379,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        params: GlobalQualIDSchema,
+        params: EmployeeIDSchema,
         response: {
           200: EmployeesQualsSchema,
           404: { message: QualificationMessage },
@@ -409,7 +409,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
     Params: EmployeeIDSchemaType
     Reply: EmployeesQualsStatusSchemaType | { message: QualificationMessageType }
   }>(
-    '/employeeStatus:employeeID',
+    '/employeeStatus/:employeeID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle(

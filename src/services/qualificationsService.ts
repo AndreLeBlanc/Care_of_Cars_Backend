@@ -437,7 +437,7 @@ export async function getEmployeeQualifications(
         .from(employeeGlobalQualifications)
         .rightJoin(
           qualificationsGlobal,
-          eq(employeeGlobalQualifications.globalQualID, qualificationsLocal.localQualID),
+          eq(employeeGlobalQualifications.globalQualID, qualificationsGlobal.globalQualID),
         )
         .where(eq(employeeGlobalQualifications.employeeID, employeeID))
       return { localQualsList, globalQualsList }
