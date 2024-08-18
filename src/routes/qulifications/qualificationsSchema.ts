@@ -28,17 +28,19 @@ export const DeleteLocalQalsSchema = Type.Array(LocalQualIDSchema)
 
 export type DeleteLocalQalsSchemaType = Static<typeof DeleteLocalQalsSchema>
 
-export const QualificationsLocalSchema = Type.Array(
-  Type.Object({
-    localQualID: Type.Optional(LocalQualID),
-    storeID: storeID,
-    localQualName: LocalQualNameSchema,
-    createdAt: Type.String({ format: 'date-time' }),
-    updatedAt: Type.String({ format: 'date-time' }),
-  }),
-)
+export const QualificationsLocalSchema = Type.Object({
+  localQualID: LocalQualID,
+  storeID: storeID,
+  localQualName: LocalQualNameSchema,
+  createdAt: Type.String({ format: 'date-time' }),
+  updatedAt: Type.String({ format: 'date-time' }),
+})
 
 export type QualificationsLocalSchemaType = Static<typeof QualificationsLocalSchema>
+
+export const QualificationsLocalArraySchema = Type.Array(QualificationsLocalSchema)
+
+export type QualificationsLocalArraySchemaType = Static<typeof QualificationsLocalArraySchema>
 
 export const CreateQualificationsGlobalSchema = Type.Array(
   Type.Object({
@@ -49,16 +51,18 @@ export const CreateQualificationsGlobalSchema = Type.Array(
 
 export type CreateQualificationsGlobalSchemaType = Static<typeof CreateQualificationsGlobalSchema>
 
-export const QualificationsGlobalSchema = Type.Array(
-  Type.Object({
-    globalQualID: GlobalQualID,
-    globalQualName: GlobalQualNameSchema,
-    createdAt: Type.String({ format: 'date-time' }),
-    updatedAt: Type.String({ format: 'date-time' }),
-  }),
-)
+export const QualificationsGlobalSchema = Type.Object({
+  globalQualID: GlobalQualID,
+  globalQualName: GlobalQualNameSchema,
+  createdAt: Type.String({ format: 'date-time' }),
+  updatedAt: Type.String({ format: 'date-time' }),
+})
 
 export type QualificationsGlobalSchemaType = Static<typeof QualificationsGlobalSchema>
+
+export const QualificationsGlobalArraySchema = Type.Array(QualificationsGlobalSchema)
+
+export type QualificationsGlobalArraySchemaType = Static<typeof QualificationsGlobalArraySchema>
 
 export const QualificationMessage = Type.String()
 export type QualificationMessageType = Static<typeof QualificationMessage>
@@ -67,8 +71,19 @@ export const ListQualsReplySchema = Type.Object({
   message: QualificationMessage,
   totalLocalQuals: Type.Integer(),
   totalGlobalQuals: Type.Integer(),
-  localQuals: Type.Array(Type.Composite([LocalQualIDSchema, CreateQualificationsLocalSchema])),
-  globalQuals: Type.Array(CreateQualificationsGlobalSchema),
+  localQuals: Type.Array(
+    Type.Object({
+      localQualID: LocalQualID,
+      storeID: storeID,
+      localQualName: LocalQualNameSchema,
+    }),
+  ),
+  globalQuals: Type.Array(
+    Type.Object({
+      globalQualID: Type.Optional(GlobalQualID),
+      globalQualName: GlobalQualNameSchema,
+    }),
+  ),
 })
 
 export type ListQualsReplySchemaType = Static<typeof ListQualsReplySchema>

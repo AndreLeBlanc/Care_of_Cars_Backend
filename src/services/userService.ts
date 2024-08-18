@@ -21,10 +21,13 @@ import { Employee, dineroDBReturn, isCheckedIn } from './employeeService.js'
 import { StoreIDName } from './storeService.js'
 
 import {
-  EmployeeID,
+  EmployeeCheckIn,
+  EmployeeCheckOut,
   EmployeeComment,
   EmployeeHourlyRate,
   EmployeeHourlyRateCurrency,
+  EmployeeHourlyRateDinero,
+  EmployeeID,
   EmployeePersonalNumber,
   EmployeePin,
   EmploymentNumber,
@@ -35,13 +38,10 @@ import {
   UserFirstName,
   UserID,
   UserLastName,
-  stores,
-  EmployeeHourlyRateDinero,
   UserPassword,
   employeeStore,
-  EmployeeCheckIn,
-  EmployeeCheckOut,
   employees,
+  stores,
 } from '../schema/schema.js'
 
 export type UserStore = {

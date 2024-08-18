@@ -10,9 +10,7 @@ import { FastifyJwtNamespace } from '@fastify/jwt'
 
 import { Either } from '../utils/helper.js'
 
-export interface SupportPluginOptions {}
-
-export default fp<SupportPluginOptions>(async (fastify) => {
+export default fp(async (fastify) => {
   fastify.addHook(
     'preHandler',
     async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -42,8 +40,7 @@ export default fp<SupportPluginOptions>(async (fastify) => {
       permissionName: PermissionTitle,
     ): Promise<boolean> {
       try {
-        const userData: any = request.user
-        console.log(userData, permissionName)
+        console.log(request.user, permissionName)
         return true
         //  const hasPermission: Either<string, boolean> = await roleHasPermission(
         //    RoleID(userData.userWithPassword.role.roleID),
@@ -85,12 +82,11 @@ export default fp<SupportPluginOptions>(async (fastify) => {
       permissionName: PermissionTitle,
     ): Promise<boolean> {
       try {
-        const userData: any = request.user
         const hasPermission: Either<string, boolean> = await roleHasPermission(
           RoleID(1), //userData.userWithPassword.role.roleID),
           permissionName,
         )
-        console.log(userData)
+        console.log(request.user)
         console.log('hasPermission', hasPermission)
         return true
         //        if (userData.user) {
@@ -104,6 +100,7 @@ export default fp<SupportPluginOptions>(async (fastify) => {
         //      }
         //      return false
       } catch (e) {
+        console.log(e)
         return true
       }
     },

@@ -1,6 +1,6 @@
+import { Static, Type } from '@sinclair/typebox'
 import { CreateRentCarBookingSchema } from '../rentCar/rentCarSchema.js'
 import { driverCarID } from '../driverCars/driverCarsSchema.js'
-import { Static, Type } from '@sinclair/typebox'
 import { storeID } from '../stores/storesSchema.js'
 
 import {
@@ -10,7 +10,7 @@ import {
   ServiceVariantIDSchema,
 } from '../services/serviceSchema.js'
 
-import { CreatedAndUpdatedAT, EmployeeID, driverID, OrderID } from '../../utils/helper.js'
+import { CreatedAndUpdatedAT, EmployeeID, OrderID, driverID } from '../../utils/helper.js'
 
 const OrderNotesSchema = Type.String()
 const OrderStatusSchema = Type.String()

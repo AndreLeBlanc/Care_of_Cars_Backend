@@ -1,18 +1,18 @@
 import { Static, Type } from '@sinclair/typebox'
 
 import {
+  CreatedEmployeeUserSchema,
   EmployeeHourlyRateCurrencySchema,
   EmployeeHourlyRateSchema,
   EmployeeNoUserSchema,
+  employeeActive,
   employeeCheckedIn,
   employeeCheckedOut,
-  signature,
-  employeeActive,
-  shortUserName,
-  employmentNumber,
-  employeePersonalNumber,
   employeeCheckinStatus,
-  CreatedEmployeeUserSchema,
+  employeePersonalNumber,
+  employmentNumber,
+  shortUserName,
+  signature,
 } from '../employees/employeesSchema.js'
 
 import { PermissionIDDescNameSchema } from '../permissions/permissionSchema.js'
