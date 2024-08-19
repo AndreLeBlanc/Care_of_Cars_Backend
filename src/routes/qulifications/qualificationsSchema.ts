@@ -1,42 +1,62 @@
 import { Static, Type } from '@sinclair/typebox'
 
-import { CreatedAndUpdatedAT, EmployeeID, GlobalQualID, LocalQualID } from '../../utils/helper.js'
+import { EmployeeID, GlobalQualID, LocalQualID } from '../../utils/helper.js'
 import { storeID } from '../stores/storesSchema.js'
 
 export const LocalQualIDSchema = Type.Object({ localQualID: LocalQualID })
 export type LocalQualIDSchemaType = Static<typeof LocalQualIDSchema>
 export const GlobalQualIDSchema = Type.Object({ globalQualID: GlobalQualID })
-export type GlobalQualIDSchemaType = Static<typeof GlobalQualIDSchema>
-const LocalQualNameSchema = Type.String({ minLength: 3, maxLength: 64 })
-const GlobalQualNameSchema = Type.String({ minLength: 3, maxLength: 64 })
+export const LocalQualNameSchema = Type.String({ minLength: 3, maxLength: 64 })
+export const GlobalQualNameSchema = Type.String({ minLength: 3, maxLength: 64 })
 export type GlobalQualNameSchemaType = Static<typeof GlobalQualNameSchema>
+export type GlobalQualIDSchemaType = Static<typeof GlobalQualIDSchema>
 
-export const CreateQualificationsLocalSchema = Type.Object({
-  localQualID: Type.Optional(LocalQualID),
-  storeID: storeID,
-  localQualName: LocalQualNameSchema,
-})
-
+export const CreateQualificationsLocalSchema = Type.Array(
+  Type.Object({
+    localQualID: Type.Optional(LocalQualID),
+    storeID: storeID,
+    localQualName: LocalQualNameSchema,
+  }),
+)
 export type CreateQualificationsLocalSchemaType = Static<typeof CreateQualificationsLocalSchema>
 
-export const QualificationsLocalSchema = Type.Object({
-  qual: CreateQualificationsLocalSchema,
-  dates: CreatedAndUpdatedAT,
-})
+export const DeleteGlobalQalsSchema = Type.Array(GlobalQualIDSchema)
+
+export type DeleteGlobalQalsSchemaType = Static<typeof DeleteGlobalQalsSchema>
+
+export const DeleteLocalQalsSchema = Type.Array(LocalQualIDSchema)
+
+export type DeleteLocalQalsSchemaType = Static<typeof DeleteLocalQalsSchema>
+
+export const QualificationsLocalSchema = Type.Array(
+  Type.Object({
+    localQualID: Type.Optional(LocalQualID),
+    storeID: storeID,
+    localQualName: LocalQualNameSchema,
+    createdAt: Type.String({ format: 'date-time' }),
+    updatedAt: Type.String({ format: 'date-time' }),
+  }),
+)
 
 export type QualificationsLocalSchemaType = Static<typeof QualificationsLocalSchema>
 
-export const CreateQualificationsGlobalSchema = Type.Object({
-  globalQualID: Type.Optional(GlobalQualID),
-  globalQualName: GlobalQualNameSchema,
-})
+export const CreateQualificationsGlobalSchema = Type.Array(
+  Type.Object({
+    globalQualID: Type.Optional(GlobalQualID),
+    globalQualName: GlobalQualNameSchema,
+  }),
+)
 
 export type CreateQualificationsGlobalSchemaType = Static<typeof CreateQualificationsGlobalSchema>
 
-export const QualificationsGlobalSchema = Type.Object({
-  qual: CreateQualificationsGlobalSchema,
-  dates: CreatedAndUpdatedAT,
-})
+export const QualificationsGlobalSchema = Type.Array(
+  Type.Object({
+    globalQualID: GlobalQualID,
+    globalQualName: GlobalQualNameSchema,
+    createdAt: Type.String({ format: 'date-time' }),
+    updatedAt: Type.String({ format: 'date-time' }),
+  }),
+)
 
 export type QualificationsGlobalSchemaType = Static<typeof QualificationsGlobalSchema>
 
@@ -60,17 +80,15 @@ export const ListQualsSchema = Type.Object({
 })
 export type ListQualsSchemaType = Static<typeof ListQualsSchema>
 
-export const PutEmployeeLocalQualSchema = Type.Composite([
-  Type.Object({ employeeID: EmployeeID }),
-  LocalQualIDSchema,
-])
+export const PutEmployeeLocalQualSchema = Type.Array(
+  Type.Composite([Type.Object({ employeeID: EmployeeID }), LocalQualIDSchema]),
+)
 
 export type PutEmployeeLocalQualSchemaType = Static<typeof PutEmployeeLocalQualSchema>
 
-export const PutEmployeeGlobalQualSchema = Type.Composite([
-  Type.Object({ employeeID: EmployeeID }),
-  GlobalQualIDSchema,
-])
+export const PutEmployeeGlobalQualSchema = Type.Array(
+  Type.Composite([Type.Object({ employeeID: EmployeeID }), GlobalQualIDSchema]),
+)
 
 export type PutEmployeeGlobalQualSchemaType = Static<typeof PutEmployeeGlobalQualSchema>
 
