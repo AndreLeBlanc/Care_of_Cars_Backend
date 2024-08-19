@@ -128,7 +128,7 @@ export const employees = async (fastify: FastifyInstance) => {
       schema: {
         body: EmployeeIDCheckinSchema,
         response: {
-          201: { ...EmployeeMessageSchema, ...CheckInTimesSchema },
+          201: CheckInTimesSchema,
           504: EmployeeMessageSchema,
         },
       },
