@@ -31,8 +31,8 @@ import {
   deleteRentCarByRegNumber,
   editRentCar,
   getRentCarBooking,
-  getRentCarByID,
   getRentCarBookingByOrderID,
+  getRentCarByID,
   getRentCarPaginate,
 } from '../../services/rentCarService.js'
 
@@ -59,7 +59,7 @@ import {
   RentCarBookingIDSchemaType,
 } from './rentCarSchema.js'
 
-import { OrderIDSchemaType, OrderIDSchema } from '../orders/ordersSchema.js'
+import { OrderIDSchema, OrderIDSchemaType } from '../orders/ordersSchema.js'
 
 import {
   Limit,
@@ -352,9 +352,8 @@ export const rentCar = async (fastify: FastifyInstance) => {
         submissionTime: SubmissionTime(new Date(request.body.submissionTime)),
       }
 
-      const bookingDetails: Either<string, RentCarBookingReply> = await createRentCarBooking(
-        newRentCarBooking,
-      )
+      const bookingDetails: Either<string, RentCarBookingReply> =
+        await createRentCarBooking(newRentCarBooking)
       match(
         bookingDetails,
         (booking: RentCarBookingReply) => {

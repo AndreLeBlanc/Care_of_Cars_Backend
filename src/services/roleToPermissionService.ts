@@ -15,8 +15,8 @@ import {
 
 import { Brand, make } from 'ts-brand'
 
-import { PermissionIDDescName } from './permissionService.js'
 import { CreatedRole } from './roleService.js'
+import { PermissionIDDescName } from './permissionService.js'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
 

@@ -770,27 +770,27 @@ function calcTime(
         return num ? num : 0
       }
 
-      ;(worktimes.totalTimes.monday = WorkDuration(
+      worktimes.totalTimes.monday = WorkDuration(
         worktimes.totalTimes.monday - undefinedIsZero(timeStringToMS(emp.mondayBreak)),
-      )),
-        (worktimes.totalTimes.tuesday = WorkDuration(
-          worktimes.totalTimes.tuesday + undefinedIsZero(timeStringToMS(emp.tuesdayBreak)),
-        ))
-      ;(worktimes.totalTimes.wednesday = WorkDuration(
+      )
+
+      worktimes.totalTimes.tuesday = WorkDuration(
+        worktimes.totalTimes.tuesday + undefinedIsZero(timeStringToMS(emp.tuesdayBreak)),
+      )
+      worktimes.totalTimes.wednesday = WorkDuration(
         worktimes.totalTimes.wednesday + undefinedIsZero(timeStringToMS(emp.wednesdayBreak)),
-      )),
-        (worktimes.totalTimes.thursday = WorkDuration(
-          worktimes.totalTimes.thursday + undefinedIsZero(timeStringToMS(emp.thursdayBreak)),
-        )),
-        (worktimes.totalTimes.friday = WorkDuration(
-          worktimes.totalTimes.friday + undefinedIsZero(timeStringToMS(emp.fridayBreak)),
-        )),
-        (worktimes.totalTimes.saturday = WorkDuration(
-          undefinedIsZero(timeStringToMS(emp.saturdayBreak)),
-        )),
-        (worktimes.totalTimes.sunday = WorkDuration(
-          undefinedIsZero(timeStringToMS(emp.sundayBreak)),
-        ))
+      )
+      worktimes.totalTimes.thursday = WorkDuration(
+        worktimes.totalTimes.thursday + undefinedIsZero(timeStringToMS(emp.thursdayBreak)),
+      )
+      worktimes.totalTimes.friday = WorkDuration(
+        worktimes.totalTimes.friday + undefinedIsZero(timeStringToMS(emp.fridayBreak)),
+      )
+      worktimes.totalTimes.saturday = WorkDuration(
+        undefinedIsZero(timeStringToMS(emp.saturdayBreak)),
+      )
+
+      worktimes.totalTimes.sunday = WorkDuration(undefinedIsZero(timeStringToMS(emp.sundayBreak)))
     })
     return right(worktimes)
   }
@@ -1261,7 +1261,7 @@ export async function getEmployeesPaginate(
         .offset(offset || 0)
 
       const listedEmployeeWithNull = employeesList.map((employee) => {
-        let checkinStatus = isCheckedIn(employee.employeeCheckedIn, employee.employeeCheckedOut)
+        const checkinStatus = isCheckedIn(employee.employeeCheckedIn, employee.employeeCheckedOut)
         return {
           userID: employee.userID,
           firstName: employee.firstName,

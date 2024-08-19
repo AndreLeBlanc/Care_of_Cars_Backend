@@ -33,23 +33,18 @@ export type CreateQualificationsGlobal = {
 }
 
 export type QualificationsGlobal = {
-  qual: { globalQualID: GlobalQualID; globalQualName: GlobalQualName }
-  dates: {
-    createdAt: CreatedAt
-    updatedAt: UpdatedAt
-  }
+  globalQualID: GlobalQualID
+  globalQualName: GlobalQualName
+  createdAt: CreatedAt
+  updatedAt: UpdatedAt
 }
 
 export type QualificationsLocal = {
-  qual: {
-    storeID: StoreID
-    localQualID: LocalQualID
-    localQualName: LocalQualName
-  }
-  dates: {
-    createdAt: CreatedAt
-    updatedAt: UpdatedAt
-  }
+  storeID: StoreID
+  localQualID: LocalQualID
+  localQualName: LocalQualName
+  createdAt: CreatedAt
+  updatedAt: UpdatedAt
 }
 
 export type EmployeeQualificationsGlobal = {
@@ -109,15 +104,12 @@ export async function updateLocalQuals(
     return qual
       ? right(
           qual.map((q) => ({
-            qual: {
-              storeID: q.storeID,
-              localQualID: q.localQualID,
-              localQualName: q.localQualName,
-            },
-            dates: {
-              createdAt: CreatedAt(q.createdAt),
-              updatedAt: UpdatedAt(q.updatedAt),
-            },
+            localQualID: q.localQualID,
+            storeID: q.storeID,
+            localalQualID: q.localQualID,
+            localQualName: q.localQualName,
+            createdAt: CreatedAt(q.createdAt),
+            updatedAt: UpdatedAt(q.updatedAt),
           })),
         )
       : left("couldn't update local quals")
@@ -146,11 +138,10 @@ export async function updateGlobalQuals(
     return qual
       ? right(
           qual.map((q) => ({
-            qual: {
-              globalQualID: q.globalQualID,
-              globalQualName: q.globalQualName,
-            },
-            dates: { createdAt: CreatedAt(q.createdAt), updatedAt: UpdatedAt(q.updatedAt) },
+            globalQualID: q.globalQualID,
+            globalQualName: q.globalQualName,
+            createdAt: CreatedAt(q.createdAt),
+            updatedAt: UpdatedAt(q.updatedAt),
           })),
         )
       : left('Database failiure')
@@ -169,12 +160,12 @@ export async function getLocalQual(
       .where(eq(qualificationsLocal.localQualID, localQual))
     return qual
       ? right({
-          qual: {
-            storeID: qual.storeID,
-            localQualID: qual.localQualID,
-            localQualName: qual.localQualName,
-          },
-          dates: { createdAt: CreatedAt(qual.createdAt), updatedAt: UpdatedAt(qual.updatedAt) },
+          localQualID: qual.localQualID,
+          storeID: qual.storeID,
+          localalQualID: qual.localQualID,
+          localQualName: qual.localQualName,
+          createdAt: CreatedAt(qual.createdAt),
+          updatedAt: UpdatedAt(qual.updatedAt),
         })
       : left("couldn't get local qual")
   } catch (e) {
@@ -192,11 +183,10 @@ export async function getGlobalQual(
       .where(eq(qualificationsGlobal.globalQualID, globalQual))
     return qual
       ? right({
-          qual: {
-            globalQualID: qual.globalQualID,
-            globalQualName: qual.globalQualName,
-          },
-          dates: { createdAt: CreatedAt(qual.createdAt), updatedAt: UpdatedAt(qual.updatedAt) },
+          globalQualID: qual.globalQualID,
+          globalQualName: qual.globalQualName,
+          createdAt: CreatedAt(qual.createdAt),
+          updatedAt: UpdatedAt(qual.updatedAt),
         })
       : left('no results found')
   } catch (e) {
@@ -214,12 +204,12 @@ export async function deleteLocalQuals(
     return qual
       ? right(
           qual.map((q) => ({
-            qual: {
-              storeID: q.storeID,
-              localQualID: q.localQualID,
-              localQualName: q.localQualName,
-            },
-            dates: { createdAt: CreatedAt(q.createdAt), updatedAt: UpdatedAt(q.updatedAt) },
+            localQualID: q.localQualID,
+            storeID: q.storeID,
+            localalQualID: q.localQualID,
+            localQualName: q.localQualName,
+            createdAt: CreatedAt(q.createdAt),
+            updatedAt: UpdatedAt(q.updatedAt),
           })),
         )
       : left('Qualification not found')
@@ -239,11 +229,10 @@ export async function deleteGlobalQuals(
     return qual
       ? right(
           qual.map((q) => ({
-            qual: {
-              globalQualID: q.globalQualID,
-              globalQualName: q.globalQualName,
-            },
-            dates: { createdAt: CreatedAt(q.createdAt), updatedAt: UpdatedAt(q.updatedAt) },
+            globalQualID: q.globalQualID,
+            globalQualName: q.globalQualName,
+            createdAt: CreatedAt(q.createdAt),
+            updatedAt: UpdatedAt(q.updatedAt),
           })),
         )
       : left("Can't find qualification")
@@ -448,7 +437,7 @@ export async function getEmployeeQualifications(
         .from(employeeGlobalQualifications)
         .rightJoin(
           qualificationsGlobal,
-          eq(employeeGlobalQualifications.globalQualID, qualificationsLocal.localQualID),
+          eq(employeeGlobalQualifications.globalQualID, qualificationsGlobal.globalQualID),
         )
         .where(eq(employeeGlobalQualifications.employeeID, employeeID))
       return { localQualsList, globalQualsList }

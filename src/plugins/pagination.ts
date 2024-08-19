@@ -1,11 +1,6 @@
 import fp from 'fastify-plugin'
 
 import { Brand, make } from 'ts-brand'
-
-export interface SupportPluginOptions {
-  // Specify Support plugin options here
-}
-
 export type NextPageUrl = Brand<string, 'nextPageUrl'>
 export const NextPageUrl = make<NextPageUrl>()
 export type PreviousPageUrl = Brand<string, 'previousPageUrl'>
@@ -29,7 +24,7 @@ export const RequestUrl = make<RequestUrl>()
 
 // The use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
-export default fp<SupportPluginOptions>(async (fastify) => {
+export default fp(async (fastify) => {
   fastify.decorate('findOffset', function (limit: Limit, page: Page): Offset {
     return Offset((page - 1) * limit)
   })

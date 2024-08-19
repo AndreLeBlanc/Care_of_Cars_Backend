@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify'
 
 import {
+  BookingEnd,
+  BookingStart,
   Discount,
   DriverCarID,
   DriverID,
@@ -11,6 +13,7 @@ import {
   OrderStatus,
   PermissionTitle,
   PickupTime,
+  RentCarRegistrationNumber,
   ServiceCostNumber,
   ServiceDay1,
   ServiceDay2,
@@ -18,9 +21,6 @@ import {
   ServiceDay4,
   ServiceDay5,
   ServiceID,
-  RentCarRegistrationNumber,
-  BookingStart,
-  BookingEnd,
   StoreID,
   SubmissionTime,
   VatFree,
