@@ -45,8 +45,35 @@ export const ServiceVariantsSchema = Type.Object({
   day4: Day4Schema,
   day5: Day5Schema,
 })
+export const ServiceVariantsCreateSchema = Type.Object({
+  servicevariantID: Type.Optional(ServiceVariantIDSchema),
+  name: NameSchema,
+  serviceID: Type.Optional(ServiceIDSchema),
+  award: AwardSchema,
+  cost: CostSchema,
+  currency: CurrencySchema,
+  day1: Day1Schema,
+  day2: Day2Schema,
+  day3: Day3Schema,
+  day4: Day4Schema,
+  day5: Day5Schema,
+})
 
 export type ServiceVariantsSchemaType = Static<typeof ServiceVariantsSchema>
+
+export const LocalServiceVariantsCreateSchema = Type.Object({
+  localServicevariantID: Type.Optional(LocalServicevariantIDSchema),
+  localServiceID: Type.Optional(LocalServiceIDSchema),
+  name: NameSchema,
+  award: AwardSchema,
+  cost: CostSchema,
+  currency: CurrencySchema,
+  day1: Day1Schema,
+  day2: Day2Schema,
+  day3: Day3Schema,
+  day4: Day4Schema,
+  day5: Day5Schema,
+})
 
 export const LocalServiceVariantsSchema = Type.Object({
   localServicevariantID: Type.Optional(LocalServicevariantIDSchema),
@@ -101,6 +128,16 @@ export const ServiceSchema = Type.Composite([
   ServiceNoVariantSchema,
 ])
 export type ServiceSchemaType = Static<typeof ServiceSchema>
+
+export const ServiceCreateSchema = Type.Composite([
+  Type.Object({
+    colorForService: Type.String(),
+    serviceVariants: Type.Array(ServiceVariantsCreateSchema),
+    localServiceVariants: Type.Array(LocalServiceVariantsCreateSchema),
+  }),
+  ServiceNoVariantSchema,
+])
+export type ServiceCreateSchemaType = Static<typeof ServiceCreateSchema>
 
 export enum listServiceOrderByEnum {
   id = 'id',
