@@ -367,9 +367,6 @@ describe('POST /users/login HTTP', async () => {
     })
 
     const parsedresponseStore = JSON.parse(responseStore.body)
-    console.log('parsedresponseStore')
-    console.log(parsedresponseStore)
-    console.log('parsedresponseStore')
     assert.deepStrictEqual(responseStore.statusCode, 201)
 
     const responseUserEmp = await app.inject({
@@ -429,6 +426,149 @@ describe('POST /users/login HTTP', async () => {
     assert.deepStrictEqual(
       responseUserEmpLoginParsed.stores[0].storeID,
       parsedresponseStore.store.storeID,
+    )
+
+    const responseUserEmp2 = await app.inject({
+      method: 'POST',
+      url: '/users/employee',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        user: {
+          firstName: 'qas',
+          lastName: 'lastsadNamesdfs',
+          email: '23423123sed@s.is',
+          isSuperAdmin: 'false',
+          password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
+          roleID: roles[1],
+        },
+        employee: {
+          shortUserName: ',,dd',
+          employmentNumber: '1337',
+          employeePersonalNumber: '2342341995',
+          signature: 'por',
+          employeePin: 'ddfe',
+          employeeActive: true,
+          employeeComment: 'a comment for this user',
+          storeID: [1, parsedresponseStore.store.storeID],
+          employeeHourlyRateCurrency: 'DKK',
+          employeeHourlyRate: 100,
+        },
+      },
+    })
+
+    const responseUserEmp2Parsed = JSON.parse(responseUserEmp2.body)
+
+    assert.deepStrictEqual(responseUserEmp2Parsed.user.firstName, 'qas')
+
+    const responseUserEmp2Login = await app.inject({
+      method: 'POST',
+      url: '/users/employee/login',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        email: '23423123sed@s.is',
+        password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
+      },
+    })
+
+    const responseUserEmp2LoginParsed = JSON.parse(responseUserEmp2Login.body)
+
+    console.log('responseUserEmp2LoginParsed')
+    console.log('responseUserEmp2LoginParsed')
+    console.log(responseUserEmp2LoginParsed)
+    console.log(responseUserEmp2LoginParsed.role)
+    console.log('responseUserEmp2LoginParsed')
+    console.log('responseUserEmp2LoginParsed')
+
+    assert.deepStrictEqual(responseUserEmp2LoginParsed.lastName, 'lastsadNamesdfs')
+    assert.deepStrictEqual(
+      responseUserEmp2LoginParsed.role.roleHasPermission[0].permissionID,
+      perms[0],
+    )
+    assert.deepStrictEqual(
+      responseUserEmp2LoginParsed.role.roleHasPermission[1].permissionID,
+      perms[1],
+    )
+    assert.deepStrictEqual(responseUserEmp2LoginParsed.role.role.roleID, roles[1])
+    assert.deepStrictEqual(
+      [
+        responseUserEmp2LoginParsed.stores[0].storeID,
+        responseUserEmp2LoginParsed.stores[1].storeID,
+      ].sort(),
+      [1, parsedresponseStore.store.storeID],
+    )
+
+    const responseUserEmp3 = await app.inject({
+      method: 'POST',
+      url: '/users/employee',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        user: {
+          firstName: 'qas',
+          lastName: 'lastsadNamesdfs',
+          email: '23423123seaaad@s.is',
+          isSuperAdmin: 'false',
+          password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
+          roleID: roles[2],
+        },
+        employee: {
+          shortUserName: ',,jd',
+          employmentNumber: '1477',
+          employeePersonalNumber: '2342341925',
+          signature: 'porh',
+          employeePin: 'dffe',
+          employeeActive: true,
+          employeeComment: 'a comment for this user',
+          storeID: [1, parsedresponseStore.store.storeID],
+          employeeHourlyRateCurrency: 'SEK',
+          employeeHourlyRate: 100,
+        },
+      },
+    })
+
+    const responseUserEmp3Parsed = JSON.parse(responseUserEmp3.body)
+
+    assert.deepStrictEqual(responseUserEmp3Parsed.user.firstName, 'qas')
+
+    const responseUserEmp3Login = await app.inject({
+      method: 'POST',
+      url: '/users/employee/login',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        email: '23423123seaaad@s.is',
+        password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
+      },
+    })
+
+    const responseUserEmp3LoginParsed = JSON.parse(responseUserEmp3Login.body)
+
+    assert.deepStrictEqual(responseUserEmp3LoginParsed.lastName, 'lastsadNamesdfs')
+    assert.deepStrictEqual(
+      responseUserEmp3LoginParsed.role.roleHasPermission[0].permissionID,
+      perms[0],
+    )
+    assert.deepStrictEqual(
+      responseUserEmp3LoginParsed.role.roleHasPermission[1].permissionID,
+      perms[1],
+    )
+    assert.deepStrictEqual(
+      responseUserEmp3LoginParsed.role.roleHasPermission[2].permissionID,
+      perms[2],
+    )
+    assert.deepStrictEqual(responseUserEmp3LoginParsed.role.role.roleID, roles[2])
+    assert.deepStrictEqual(
+      [
+        responseUserEmp3LoginParsed.stores[0].storeID,
+        responseUserEmp3LoginParsed.stores[1].storeID,
+      ].sort(),
+      [1, parsedresponseStore.store.storeID],
     )
   })
 })
