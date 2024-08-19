@@ -344,8 +344,8 @@ export async function verifyEmployee(email: UserEmail): Promise<Either<string, L
           employeeHourlyRateCurrency: employees.employeeHourlyRateCurrency,
           employeeActive: employees.employeeActive,
           employeeComment: employees.employeeComment,
-          employeeCheckedIn: employees.employeeCheckedIn,
-          employeeCheckedOut: employees.employeeCheckedOut,
+          employeeCheckedIn: employeeStore.employeeCheckedIn,
+          employeeCheckedOut: employeeStore.employeeCheckedOut,
           stores: sql<
             StoreIDName[]
           >`json_agg(json_build_object('storeID', ${employeeStore.storeID}, 'storeName', ${stores.storeName}))`.as(

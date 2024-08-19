@@ -136,13 +136,14 @@ export const employees = async (fastify: FastifyInstance) => {
     },
     async (req, rep) => {
       const employeeID = EmployeeID(req.body.employeeID)
+      const storeID = StoreID(req.body.storeID)
       const checkedInStatus = req.body.employeeCheckedOut as CheckedInStatus
 
       const checkinStatus: Either<string, CheckInTimes> = await checkInCheckOut(
         employeeID,
+        storeID,
         checkedInStatus,
       )
-      console.log('checkinStatus', checkinStatus)
       match(
         checkinStatus,
         (status: CheckInTimes) => {
@@ -188,6 +189,7 @@ export const employees = async (fastify: FastifyInstance) => {
             statuses: statuses.map((emp) => {
               return {
                 employeeID: emp.employeeID,
+                shortUserName: emp.shortUserName,
                 time: emp.time ? emp.time : undefined,
                 status: emp.status,
               }
