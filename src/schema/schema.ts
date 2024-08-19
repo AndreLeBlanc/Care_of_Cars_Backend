@@ -80,6 +80,8 @@ export type StoreContactPerson = Brand<string, 'storeContactPerson'>
 export const StoreContactPerson = make<StoreContactPerson>()
 export type StoreMaxUsers = Brand<PositiveInteger<number>, 'storeMaxUsers'>
 export const StoreMaxUsers = make<StoreMaxUsers>()
+export type StoreCurrency = Brand<string, 'storeCurrency'>
+export const StoreCurrency = make<StoreCurrency>()
 export type StoreAllowCarAPI = Brand<boolean, 'storeAllowCarAPI'>
 export const StoreAllowCarAPI = make<StoreAllowCarAPI>()
 export type StoreAllowSendSMS = Brand<boolean, 'storeAllowSendSMS'>
@@ -1060,7 +1062,7 @@ export const stores = pgTable('stores', {
   storeDescription: varchar('storeDescription').$type<StoreDescription>(),
   storeContactPerson: varchar('storeContactPerson', { length: 64 }).$type<StoreContactPerson>(),
   storeMaxUsers: integer('storeMaxUsers').$type<StoreMaxUsers>(),
-  currency: varchar('currency').default('SEK'),
+  currency: varchar('currency').default('SEK').$type<StoreCurrency>(),
   storeAllowCarAPI: boolean('storeAllowCarAPI')
     .$type<StoreAllowCarAPI>()
     .default(StoreAllowCarAPI(true)),

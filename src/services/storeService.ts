@@ -18,6 +18,7 @@ import {
   StoreCity,
   StoreContactPerson,
   StoreCountry,
+  StoreCurrency,
   StoreDescription,
   StoreEmail,
   StoreFSkatt,
@@ -134,6 +135,7 @@ export type StoreCreate = {
   storeDescription?: StoreDescription
   storeContactPerson?: StoreContactPerson
   storeMaxUsers?: StoreMaxUsers
+  currency?: StoreCurrency
   storeAllowCarAPI?: StoreAllowCarAPI
   storeAllowSendSMS?: StoreAllowSendSMS
   storeSendSMS?: StoreSendSMS
@@ -157,6 +159,7 @@ export type StoreUpdateCreate = {
   storeDescription?: StoreDescription
   storeContactPerson?: StoreContactPerson
   storeMaxUsers?: StoreMaxUsers
+  currency?: StoreCurrency
   storeAllowCarAPI?: StoreAllowCarAPI
   storeAllowSendSMS?: StoreAllowSendSMS
   storeSendSMS?: StoreSendSMS
@@ -650,6 +653,7 @@ export async function createStore(
           storeDescription: stores.storeDescription,
           storeContactPerson: stores.storeContactPerson,
           storeMaxUsers: stores.storeMaxUsers,
+          currency: stores.currency,
           storeAllowCarAPI: stores.storeAllowCarAPI,
           storeAllowSendSMS: stores.storeAllowSendSMS,
           storeSendSMS: stores.storeSendSMS,
@@ -701,6 +705,7 @@ export async function createStore(
           storeDescription: newStore.storeDescription ?? undefined,
           storeContactPerson: newStore.storeContactPerson ?? undefined,
           storeMaxUsers: newStore.storeMaxUsers ?? undefined,
+          currency: newStore.currency ?? undefined,
           storeAllowCarAPI: newStore.storeAllowCarAPI ?? undefined,
           storeAllowSendSMS: newStore.storeAllowSendSMS ?? undefined,
           storeSendSMS: newStore.storeSendSMS ?? undefined,
@@ -750,6 +755,7 @@ export async function deleteStore(
       storeDescription: stores.storeDescription,
       storeContactPerson: stores.storeContactPerson,
       storeMaxUsers: stores.storeMaxUsers,
+      currency: stores.currency,
       storeAllowCarAPI: stores.storeAllowCarAPI,
       storeAllowSendSMS: stores.storeAllowSendSMS,
       storeSendSMS: stores.storeSendSMS,
@@ -777,6 +783,7 @@ export async function deleteStore(
             storeDescription: deletedStore.storeDescription ?? undefined,
             storeContactPerson: deletedStore.storeContactPerson ?? undefined,
             storeMaxUsers: deletedStore.storeMaxUsers ?? undefined,
+            currency: deletedStore.currency ?? undefined,
             storeAllowCarAPI: deletedStore.storeAllowCarAPI ?? undefined,
             storeAllowSendSMS: deletedStore.storeAllowSendSMS ?? undefined,
             storeSendSMS: deletedStore.storeSendSMS ?? undefined,
@@ -825,6 +832,7 @@ export async function updateStoreByStoreID(
             storeDescription: stores.storeDescription,
             storeContactPerson: stores.storeContactPerson,
             storeMaxUsers: stores.storeMaxUsers,
+            currency: stores.currency,
             storeAllowCarAPI: stores.storeAllowCarAPI,
             storeAllowSendSMS: stores.storeAllowSendSMS,
             storeSendSMS: stores.storeSendSMS,
@@ -875,6 +883,7 @@ export async function updateStoreByStoreID(
               storeDescription: updatedStore.storeDescription ?? undefined,
               storeContactPerson: updatedStore.storeContactPerson ?? undefined,
               storeMaxUsers: updatedStore.storeMaxUsers ?? undefined,
+              currency: updatedStore.currency ?? undefined,
               storeAllowCarAPI: updatedStore.storeAllowCarAPI ?? undefined,
               storeAllowSendSMS: updatedStore.storeAllowSendSMS ?? undefined,
               storeSendSMS: updatedStore.storeSendSMS ?? undefined,
@@ -906,58 +915,53 @@ export async function getStoreByID(
   storeID: StoreID,
 ): Promise<Either<string, StoreWithSeparateDates>> {
   try {
-    const { getStore, paymentInfo } = await db.transaction(async (tx) => {
-      let paymentInfo = undefined
-      const [getStore] = await tx.select().from(stores).where(eq(stores.storeID, storeID))
-      if (getStore != null) {
-        ;[paymentInfo] = await tx
-          .select()
-          .from(storepaymentinfo)
-          .where(eq(storepaymentinfo.storeID, storeID))
-      }
-      return { getStore, paymentInfo }
-    })
+    const [getStore] = await db
+      .select()
+      .from(stores)
+      .where(eq(stores.storeID, storeID))
+      .leftJoin(storepaymentinfo, eq(storepaymentinfo.storeID, storeID))
 
     return getStore
       ? right({
           store: getStore
             ? {
                 store: {
-                  storeName: getStore.storeName,
-                  storeWebSite: getStore.storeWebSite ?? undefined,
-                  storeVatNumber: getStore.storeVatNumber ?? undefined,
-                  storeFSkatt: getStore.storeFSkatt,
-                  storeID: getStore.storeID,
-                  storeOrgNumber: getStore.storeOrgNumber,
-                  storeStatus: getStore.storeStatus,
-                  storeEmail: getStore.storeEmail,
-                  storePhone: getStore.storePhone,
-                  storeAddress: getStore.storeAddress,
-                  storeZipCode: getStore.storeZipCode,
-                  storeCity: getStore.storeCity,
-                  storeCountry: getStore.storeCountry,
-                  storeDescription: getStore.storeDescription ?? undefined,
-                  storeContactPerson: getStore.storeContactPerson ?? undefined,
-                  storeMaxUsers: getStore.storeMaxUsers ?? undefined,
-                  storeAllowCarAPI: getStore.storeAllowCarAPI ?? undefined,
-                  storeAllowSendSMS: getStore.storeAllowSendSMS ?? undefined,
-                  storeSendSMS: getStore.storeSendSMS ?? undefined,
-                  storeUsesCheckin: getStore.storeUsesCheckin ?? undefined,
-                  storeUsesPIN: getStore.storeUsesPIN ?? undefined,
+                  storeName: getStore.stores.storeName,
+                  storeWebSite: getStore.stores.storeWebSite ?? undefined,
+                  storeVatNumber: getStore.stores.storeVatNumber ?? undefined,
+                  storeFSkatt: getStore.stores.storeFSkatt,
+                  storeID: getStore.stores.storeID,
+                  storeOrgNumber: getStore.stores.storeOrgNumber,
+                  storeStatus: getStore.stores.storeStatus,
+                  storeEmail: getStore.stores.storeEmail,
+                  storePhone: getStore.stores.storePhone,
+                  storeAddress: getStore.stores.storeAddress,
+                  storeZipCode: getStore.stores.storeZipCode,
+                  storeCity: getStore.stores.storeCity,
+                  storeCountry: getStore.stores.storeCountry,
+                  storeDescription: getStore.stores.storeDescription ?? undefined,
+                  storeContactPerson: getStore.stores.storeContactPerson ?? undefined,
+                  storeMaxUsers: getStore.stores.storeMaxUsers ?? undefined,
+                  currency: getStore.stores.currency ?? undefined,
+                  storeAllowCarAPI: getStore.stores.storeAllowCarAPI ?? undefined,
+                  storeAllowSendSMS: getStore.stores.storeAllowSendSMS ?? undefined,
+                  storeSendSMS: getStore.stores.storeSendSMS ?? undefined,
+                  storeUsesCheckin: getStore.stores.storeUsesCheckin ?? undefined,
+                  storeUsesPIN: getStore.stores.storeUsesPIN ?? undefined,
                 },
-                createdAt: getStore.createdAt,
-                updatedAt: getStore.updatedAt,
+                createdAt: getStore.stores.createdAt,
+                updatedAt: getStore.stores.updatedAt,
               }
             : undefined,
-          paymentInfo: paymentInfo
+          paymentInfo: getStore.storepaymentinfo
             ? {
                 storePaymentOptions: {
-                  bankgiro: paymentInfo.bankgiro ?? undefined,
-                  plusgiro: paymentInfo.plusgiro ?? undefined,
-                  paymentdays: paymentInfo.paymentdays,
+                  bankgiro: getStore.storepaymentinfo.bankgiro ?? undefined,
+                  plusgiro: getStore.storepaymentinfo.plusgiro ?? undefined,
+                  paymentdays: getStore.storepaymentinfo.paymentdays,
                 },
-                createdAt: paymentInfo.createdAt,
-                updatedAt: paymentInfo.updatedAt,
+                createdAt: getStore.storepaymentinfo.createdAt,
+                updatedAt: getStore.storepaymentinfo.updatedAt,
               }
             : undefined,
         })

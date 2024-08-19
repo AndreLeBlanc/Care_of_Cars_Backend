@@ -2,7 +2,7 @@ import { Static, Type } from '@sinclair/typebox'
 
 import { CreatedAndUpdatedAT } from '../../utils/helper.js'
 export const storeName = Type.String({ minLength: 3 })
-const storeWebSite = Type.String({ format: 'uri' })
+const storeWebSite = Type.String()
 const storeVatNumber = Type.String({ maxLength: 32 })
 const storeFSkatt = Type.Boolean()
 const storeOrgNumber = Type.String({ minLength: 8, maxLength: 11 })
@@ -26,6 +26,7 @@ const day = Type.String({ format: 'date' })
 const week = Type.String({ format: 'date' })
 const note = Type.String()
 const openingTime = Type.String({ format: 'time' })
+const currency = Type.String()
 
 const PaymentInfoSchema = Type.Object({
   bankgiro: Type.Optional(Type.String()),
@@ -49,6 +50,7 @@ export const CreateStoreSchema = Type.Object({
   storeDescription: Type.Optional(storeDescription),
   storeContactPerson: Type.Optional(storeContactPerson),
   storeMaxUsers: Type.Optional(storeMaxUsers),
+  currency: Type.Optional(currency),
   storeAllowCarAPI: Type.Optional(storeAllowCarAPI),
   storeAllowSendSMS: Type.Optional(storeAllowSendSMS),
   storeSendSMS: Type.Optional(storeSendSMS),
