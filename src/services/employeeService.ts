@@ -20,6 +20,7 @@ import {
   FridayStart,
   FridayStop,
   GlobalQualID,
+  IsSuperAdmin,
   LocalQualID,
   MondayBreak,
   MondayStart,
@@ -39,6 +40,7 @@ import {
   TuesdayBreak,
   TuesdayStart,
   TuesdayStop,
+  UserEmail,
   UserFirstName,
   UserID,
   UserLastName,
@@ -54,6 +56,7 @@ import {
   employeeStore,
   employeeWorkingHours,
   employees,
+  stores,
   users,
 } from '../schema/schema.js'
 
@@ -64,6 +67,8 @@ import { db } from '../config/db-connect.js'
 import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.js'
 
 import { and, eq, gte, ilike, lte, or, sql } from 'drizzle-orm'
+
+import { StoreIDName } from './storeService.js'
 
 export type WorkingHours = {
   mondayStart?: MondayStart
@@ -147,6 +152,26 @@ export type WorkingHoursCreated = WorkingHours & {
   storeID: StoreID
   createdAt: Date
   updatedAt: Date
+}
+
+export type GetEmployee = {
+  userID: UserID
+  firstName: UserFirstName
+  lastName: UserLastName
+  email: UserEmail
+  isSuperAdmin: IsSuperAdmin
+  employeeID?: EmployeeID
+  shortUserName?: ShortUserName
+  employmentNumber?: EmploymentNumber
+  employeePersonalNumber?: EmployeePersonalNumber
+  signature?: Signature
+  employeeHourlyRate?: EmployeeHourlyRateDinero
+  employeePin?: EmployeePin
+  employeeActive?: EmployeeActive
+  employeeComment?: EmployeeComment
+  employeeCheckedIn?: EmployeeCheckIn
+  employeeCheckedOut?: EmployeeCheckOut
+  storeIDs: StoreIDName[]
 }
 
 type EmployeeNoRate = {
@@ -1114,47 +1139,70 @@ export async function putEmployee(
   }
 }
 
-export async function getEmployee(employeeID: EmployeeID): Promise<Either<string, Employee>> {
+export async function getEmployee(employeeID: EmployeeID): Promise<Either<string, GetEmployee>> {
   try {
-    const fetchedEmployeeWithStores = await db.transaction(async (tx) => {
-      const [fetchedEmployee] = await tx
-        .select()
-        .from(employees)
-        .where(eq(employees.employeeID, employeeID))
-      if (fetchedEmployee == null) return undefined
+    const [verifiedUser] = await db
+      .select({
+        userID: users.userID,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        isSuperAdmin: users.isSuperAdmin,
+        employeeID: employees.employeeID,
+        shortUserName: employees.shortUserName,
+        employmentNumber: employees.employmentNumber,
+        employeePersonalNumber: employees.employeePersonalNumber,
+        signature: employees.signature,
+        EmployeeActive: employees.employeeActive,
+        employeeHourlyRate: employees.employeeHourlyRate,
+        employeeHourlyRateCurrency: employees.employeeHourlyRateCurrency,
+        employeeActive: employees.employeeActive,
+        employeeComment: employees.employeeComment,
+        employeeCheckedIn: employees.employeeCheckedIn,
+        employeeCheckedOut: employees.employeeCheckedOut,
+        storeIDs: sql<
+          StoreIDName[]
+        >`json_agg(json_build_object('storeID', ${employeeStore.storeID}, 'storeName', ${stores.storeName}))`.as(
+          'tagname',
+        ),
+      })
+      .from(employees)
+      .where(and(eq(employees.employeeID, employeeID)))
+      .innerJoin(users, eq(users.userID, employees.userID))
+      .leftJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
+      .leftJoin(stores, eq(stores.storeID, employeeStore.storeID))
+      .groupBy(users.userID, employees.employeeID)
 
-      const employeeStores = await tx
-        .select()
-        .from(employeeStore)
-        .where(eq(employeeStore.employeeID, employeeID))
-
-      const fetchedEmployeeWithNull = {
-        userID: fetchedEmployee.userID,
-        employeeID: fetchedEmployee.employeeID,
-        shortUserName: fetchedEmployee.shortUserName,
-        employmentNumber: fetchedEmployee.employmentNumber,
-        employeePersonalNumber: fetchedEmployee.employeePersonalNumber,
-        signature: fetchedEmployee.signature,
-        employeeHourlyRate: fetchedEmployee.employeeHourlyRate ?? undefined,
-        employeeHourlyRateCurrency: fetchedEmployee.employeeHourlyRateCurrency ?? undefined,
-        employeePin: fetchedEmployee.employeePin,
-        employeeActive: fetchedEmployee.employeeActive,
-        employeeComment: fetchedEmployee.employeeComment ?? undefined,
-        employeeCheckedIn: employees.employeeCheckedIn
-          ? undefined
-          : EmployeeCheckIn(employees.employeeCheckedIn),
-        employeeCheckedOut: employees.employeeCheckedOut
-          ? undefined
-          : EmployeeCheckOut(employees.employeeCheckedOut),
-        createdAt: fetchedEmployee.createdAt,
-        updatedAt: fetchedEmployee.updatedAt,
-      }
-      return { ...fetchedEmployeeWithNull, storeIDs: employeeStores.map((row) => row.storeID) }
-    })
-    if (fetchedEmployeeWithStores == null) {
-      return left('employee not found')
-    }
-    return right(fetchedEmployeeWithStores)
+    return verifiedUser
+      ? right({
+          userID: verifiedUser.userID,
+          firstName: verifiedUser.firstName,
+          lastName: verifiedUser.lastName,
+          email: verifiedUser.email,
+          isSuperAdmin: verifiedUser.isSuperAdmin,
+          employeeID: verifiedUser.employeeID ?? undefined,
+          shortUserName: verifiedUser.shortUserName ?? undefined,
+          employmentNumber: verifiedUser.employmentNumber ?? undefined,
+          employeePersonalNumber: verifiedUser.employeePersonalNumber ?? undefined,
+          signature: verifiedUser.signature ?? undefined,
+          employeeHourlyRate: dineroDBReturn(
+            verifiedUser.employeeHourlyRate,
+            verifiedUser.employeeHourlyRateCurrency,
+          ),
+          employeeActive: verifiedUser.employeeActive ?? undefined,
+          employeeCheckedIn: verifiedUser.employeeCheckedIn
+            ? EmployeeCheckIn(verifiedUser.employeeCheckedIn.toISOString())
+            : undefined,
+          employeeCheckedOut: verifiedUser.employeeCheckedOut
+            ? EmployeeCheckOut(verifiedUser.employeeCheckedOut?.toISOString())
+            : undefined,
+          employeeCheckinStatus: isCheckedIn(
+            verifiedUser.employeeCheckedIn,
+            verifiedUser.employeeCheckedOut,
+          ),
+          storeIDs: verifiedUser.storeIDs,
+        })
+      : left('Login failed, incorrect email or password')
   } catch (e) {
     return left(errorHandling(e))
   }

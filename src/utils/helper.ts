@@ -16,6 +16,8 @@ export const UserID = Type.Integer({ minimum: 0 })
 export const FirstName = Type.String({ minLength: 3, maxLength: 128 })
 export const LastName = Type.String({ minLength: 3, maxLength: 128 })
 export const OrderID = Type.Integer({ minimum: 0 })
+export const userEmail = Type.String()
+export const isSuperAdmin = Type.Boolean()
 
 export interface ValidatorFactoryReturn<T> {
   schema: TObject
