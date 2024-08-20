@@ -92,6 +92,7 @@ import {
   CreateEmployee,
   Employee,
   EmployeePaginated,
+  GetEmployee,
   ListCheckInStatus,
   SpecialWorkingHours,
   WorkingHours,
@@ -176,9 +177,8 @@ export const employees = async (fastify: FastifyInstance) => {
     async (request, rep) => {
       const storeID = StoreID(request.params.storeID)
 
-      const checkinStatusList: Either<string, ListCheckInStatus[]> = await listCheckedinStatus(
-        storeID,
-      )
+      const checkinStatusList: Either<string, ListCheckInStatus[]> =
+        await listCheckedinStatus(storeID)
 
       match(
         checkinStatusList,
@@ -338,18 +338,18 @@ export const employees = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const fetchedEmployee: Either<string, Employee> = await getEmployee(
+      const fetchedEmployee: Either<string, GetEmployee> = await getEmployee(
         EmployeeID(request.params.employeeID),
       )
       match(
         fetchedEmployee,
-        (employee: Employee) => {
-          const { employeeHourlyRateDinero, ...rest } = employee
+        (employee: GetEmployee) => {
+          const { employeeHourlyRate, ...rest } = employee
           return reply.status(200).send({
             message: 'Employee fetched',
             ...{
-              employeeHourlyRate: employeeHourlyRateDinero?.getAmount(),
-              employeeHourlyRateCurrency: employeeHourlyRateDinero?.getCurrency(),
+              employeeHourlyRate: employeeHourlyRate?.getAmount(),
+              employeeHourlyRateCurrency: employeeHourlyRate?.getCurrency(),
               ...rest,
             },
           })
@@ -672,9 +672,8 @@ export const employees = async (fastify: FastifyInstance) => {
     },
     async function (request, reply) {
       const hoursID = EmployeeSpceialHoursID(request.query.employeeSpceialHoursID)
-      const hours: Either<string, SpecialWorkingHours> = await getEmployeeSpecialWorkingHoursByID(
-        hoursID,
-      )
+      const hours: Either<string, SpecialWorkingHours> =
+        await getEmployeeSpecialWorkingHoursByID(hoursID)
       match(
         hours,
         (specialHours: SpecialWorkingHours) => {
@@ -768,9 +767,8 @@ export const employees = async (fastify: FastifyInstance) => {
     },
     async function (request, reply) {
       const hoursID = EmployeeSpceialHoursID(request.query.employeeSpceialHoursID)
-      const hours: Either<string, SpecialWorkingHours> = await getEmployeeSpecialWorkingHoursByID(
-        hoursID,
-      )
+      const hours: Either<string, SpecialWorkingHours> =
+        await getEmployeeSpecialWorkingHoursByID(hoursID)
       match(
         hours,
         (specialHours: SpecialWorkingHours) => {
