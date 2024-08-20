@@ -15,6 +15,7 @@ import {
 } from './rentCarService.js'
 
 import {
+  Amount,
   Cost,
   Discount,
   DriverCarID,
@@ -70,6 +71,7 @@ export type Order = OrderBase & {
 export type CreateOrderServices = {
   serviceID: ServiceID
   serviceVariantID?: ServiceID
+  amount: Amount
   day1?: ServiceDay1
   day1Work?: string
   day1Employee?: EmployeeID
@@ -97,6 +99,7 @@ export type OrderServices = CreateOrderServices & {
 export type CreateOrderLocalServices = {
   localServiceID: LocalServiceID
   localServiceVariantID?: LocalServiceID
+  amount: Amount
   day1?: ServiceDay1
   day1Work?: string
   day1Employee?: EmployeeID
@@ -146,6 +149,7 @@ type OrderNoBrand = {
 type OrderLocalServicesNoBrand = {
   localServiceID: LocalServiceID
   localServiceVariantID?: LocalServiceID
+  amount: Amount
   day1?: ServiceDay1 | null
   day1Work?: string | null
   day1Employee?: EmployeeID | null
@@ -170,6 +174,7 @@ type OrderLocalServicesNoBrand = {
 type OrderServicesNoBrand = {
   serviceID: ServiceID
   ServiceVariantID?: ServiceID
+  amount: Amount
   day1?: ServiceDay1 | null
   day1Work?: string | null
   day1Employee?: EmployeeID | null
@@ -223,6 +228,7 @@ function brandOrder(
     return {
       orderID: service.orderID,
       serviceID: service.serviceID,
+      amount: service.amount,
       serviceServiceVariantID: service.ServiceVariantID ?? undefined,
       day1: service.day1 ?? undefined,
       day1Work: service.day1Work ?? undefined,
@@ -251,6 +257,7 @@ function brandOrder(
     return {
       orderID: local.orderID,
       localServiceID: local.localServiceID,
+      amount: local.amount,
       localServiceVariantID: local.localServiceVariantID ?? undefined,
       day1: local.day1 ?? undefined,
       day1Work: local.day1Work ?? undefined,
@@ -335,6 +342,7 @@ export async function createOrder(
             set: {
               serviceID: sql`"excluded"."serviceID"`,
               serviceVariantID: sql`"excluded"."serviceVariantID"`,
+              amount: sql`"excluded"."amount"`,
               day1: sql`"excluded"."day1"`,
               day1Work: sql`"excluded"."day1Work"`,
               day1Employee: sql`"excluded"."day1Employee"`,
@@ -371,6 +379,7 @@ export async function createOrder(
             set: {
               localServiceID: sql`"excluded"."localServiceID"`,
               serviceVariantID: sql`"excluded"."serviceVariantID"`,
+              amount: sql`"excluded"."amount"`,
               day1: sql`"excluded"."day1"`,
               day1Work: sql`"excluded"."day1Work"`,
               day1Employee: sql`"excluded"."day1Employee"`,

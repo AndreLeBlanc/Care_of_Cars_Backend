@@ -440,6 +440,8 @@ export const DriverCarNotes = make<DriverCarNotes>()
 
 export type OrderID = Brand<number, 'orderID'>
 export const OrderID = make<OrderID>()
+export type Amount = Brand<number, 'amount'>
+export const Amount = make<Amount>()
 export type Cost = Brand<number, 'cost'>
 export const Cost = make<Cost>()
 export type OrderNotes = Brand<string, 'orderNotes'>
@@ -1497,6 +1499,7 @@ export const orderServices = pgTable(
       .$type<ServiceID>()
       .references(() => services.serviceID, { onDelete: 'cascade' })
       .notNull(),
+    amount: integer('amount').$type<Amount>().notNull(),
     serviceVariantID: integer('serviceVariantID')
       .$type<ServiceID>()
       .references(() => serviceVariants.serviceVariantID, { onDelete: 'cascade' }),
@@ -1557,6 +1560,7 @@ export const orderLocalServices = pgTable(
       .$type<OrderID>()
       .references(() => orders.orderID, { onDelete: 'cascade' })
       .notNull(),
+    amount: integer('amount').$type<Amount>().notNull(),
     localServiceID: integer('localServiceID')
       .$type<LocalServiceID>()
       .references(() => localServices.localServiceID, { onDelete: 'cascade' })
