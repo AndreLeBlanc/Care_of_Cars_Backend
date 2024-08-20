@@ -1703,7 +1703,7 @@ export const bills = pgTable('bills', {
     .references(() => drivers.driverID, { onDelete: 'no action' }),
   customerOrgNumber: varchar('customerOrgNumber', { length: 11 })
     .$type<CustomerOrgNumber>()
-    .references(() => companycustomers.customerOrgNumber, { onDelete: 'cascade' }),
+    .references(() => companycustomers.customerOrgNumber, { onDelete: 'no action' }),
   driverExternalNumber: varchar('driverExternalNumber', {
     length: 256,
   }).$type<DriverExternalNumber>(),
@@ -1749,10 +1749,10 @@ export const billOrders = pgTable(
   {
     billID: integer('billID')
       .$type<BillID>()
-      .references(() => bills.billID, { onDelete: 'set null' }),
+      .references(() => bills.billID, { onDelete: 'cascade' }),
     orderID: integer('orderID')
       .$type<OrderID>()
-      .references(() => orders.orderID, { onDelete: 'set null' }),
+      .references(() => orders.orderID, { onDelete: 'cascade' }),
   },
   (billOrder) => {
     return {
