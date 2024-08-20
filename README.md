@@ -305,12 +305,12 @@ Diagrams of the db schema can be found in doc/schema. To generate new schemas ru
 
 ```
 tbls doc
-´´´
+```
+
 This command is automatically run with
 
 ```
-
 npm run generate
-´´´
+```
 
 ## Don't Panic. It's the first helpful or intelligible thing anybody's said to me all day
