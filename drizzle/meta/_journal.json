@@ -22,6 +22,20 @@
       "when": 1724097705383,
       "tag": "0002_nasty_patch",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1724141008760,
+      "tag": "0003_spotty_namorita",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1724143445160,
+      "tag": "0004_open_madame_hydra",
+      "breakpoints": true
     }
   ]
 }

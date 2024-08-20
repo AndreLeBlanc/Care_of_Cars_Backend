@@ -12,7 +12,7 @@
     "start": "npm run build:ts && node dist/index.js",
     "build:ts": "tsc",
     "dockerDev": "nodemon dist/index.js",
-    "generate": "drizzle-kit generate --config=src/config/drizzle.config.ts",
+    "generate": "drizzle-kit generate --config=src/config/drizzle.config.ts && tbls doc --force",
     "deployDocker": "npm run build:ts && node dist/index.js",
     "drizzle-studio": "npx drizzle-kit studio --config=src/config/drizzle.config.ts"
   },
