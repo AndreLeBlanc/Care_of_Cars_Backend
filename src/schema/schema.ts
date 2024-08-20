@@ -1683,8 +1683,15 @@ export const rentCarBookingsRelations = relations(rentCarBookings, ({ one }) => 
   orders: one(orders),
 }))
 
+export const billStatus = ['bill', 'creditBill', 'cashBill'] as const
+
+export const billStatuspgEnum = pgEnum('billStatus', billStatus)
+
+// Samlingsfaktura/collective invoice is not a type. We have to check if a bill has more than one order to determine if it is one.
+
 export const bills = pgTable('bills', {
   billID: serial('orderID').$type<BillID>().primaryKey(),
+  billStatus: billStatuspgEnum('billStatus').notNull(),
   bookedBy: integer('employeeID')
     .$type<EmployeeID>()
     .references(() => employees.employeeID, { onDelete: 'no action' }),
