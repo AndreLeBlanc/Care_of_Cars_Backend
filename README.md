@@ -126,7 +126,7 @@ For production mode
 
 ### `npm run test`
 
-Run the test cases.
+Run the test cases. This runs best in the docker containers. See testing.
 
 ## Learn More
 
@@ -289,12 +289,26 @@ function example(id: number)
 
 ## Deploying to dev server.
 
-We are currently using http://141.94.70.202:3000/docs/static/index.html as our dev server.
+We are currently using http://rödamålen.se:3000/docs/static/index.html as our dev server.
 
 Log in using ssh.
 
 check out the commit you want to run.
 
 Build the docker container and run it. See section on docker.
+
+## Visualizing database schema
+
+Diagrams of the db schema can be found in doc/schema. To generate new schemas run
+
+```
+tbls doc
+´´´
+This command is automatically run with
+
+```
+
+npm run generate
+´´´
 
 ## Don't Panic. It's the first helpful or intelligible thing anybody's said to me all day
