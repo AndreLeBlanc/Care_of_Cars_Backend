@@ -198,6 +198,7 @@ export type CheckInTimesSchemaType = Static<typeof CheckInTimesSchema>
 export const EmployeeIDCheckinSchema = Type.Object({
   employeeID: EmployeeID,
   employeeCheckedOut: Type.Union([Type.Literal('CheckedIn'), Type.Literal('CheckedOut')]),
+  storeID: storeID,
 })
 
 export type EmployeeIDCheckinSchemaType = Static<typeof EmployeeIDCheckinSchema>
@@ -208,6 +209,7 @@ export const ListCheckInStatusSchema = Type.Composite([
     statuses: Type.Array(
       Type.Object({
         employeeID: EmployeeID,
+        shortUserName: shortUserName,
         time: Type.Optional(Type.String({ format: 'date' })),
         status: Type.Union([Type.Literal('CheckedIn'), Type.Literal('CheckedOut')]),
       }),

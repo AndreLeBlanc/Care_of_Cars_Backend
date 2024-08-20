@@ -528,8 +528,6 @@ export const employees = pgTable('employees', {
   ).$type<EmployeeHourlyRateCurrency>(),
   employeePin: varchar('employeePin', { length: 4 }).$type<EmployeePin>().notNull(),
   employeeComment: varchar('employeeComment').$type<EmployeeComment>(),
-  employeeCheckedIn: timestamp('checkedIn'),
-  employeeCheckedOut: timestamp('checkedOut'),
   employeeActive: boolean('employeeActive').$type<EmployeeActive>().notNull(),
   ...dbDates,
 })
@@ -612,6 +610,8 @@ export const employeeStore = pgTable(
         onDelete: 'cascade',
       })
       .notNull(),
+    employeeCheckedIn: timestamp('checkedIn'),
+    employeeCheckedOut: timestamp('checkedOut'),
   },
   (employeeStore) => {
     return {
