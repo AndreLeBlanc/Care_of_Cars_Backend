@@ -299,6 +299,8 @@ Build the docker container and run it. See section on docker.
 
 ## Visualizing database schema
 
+We use: [tbls](https://github.com/k1LoW/tbls) to generate the docs. Please install using the instructions provided in the link.
+
 Diagrams of the db schema can be found in doc/schema. To generate new schemas run
 
 ```
