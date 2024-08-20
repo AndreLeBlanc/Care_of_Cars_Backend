@@ -12,11 +12,12 @@ import {
   LocalServiceQualsSchemaType,
   MessageSchema,
   MessageSchemaType,
+  ServiceCreateSchema,
+  ServiceCreateSchemaType,
   ServiceDeleteQual,
   ServiceDeleteQualType,
   ServiceLocalQualSchema,
   ServiceLocalQualSchemaType,
-  ServiceSchema,
   ServiceSchemaType,
   ServicesPaginatedSchema,
   ServicesPaginatedSchemaType,
@@ -95,7 +96,7 @@ import { Either, match } from '../../utils/helper.js'
 
 export async function services(fastify: FastifyInstance) {
   fastify.put<{
-    Body: ServiceSchemaType
+    Body: ServiceCreateSchemaType
     Reply: (ServiceSchemaType & MessageSchemaType) | MessageSchemaType
   }>(
     '/',
@@ -103,18 +104,18 @@ export async function services(fastify: FastifyInstance) {
       preHandler: async (request, reply, done) => {
         const permissionName = PermissionTitle('create_service')
         console.log(permissionName, request.body)
-        //   const authorizeStatus = await fastify.authorize(request, reply, permissionName)
-        //   if (!authorizeStatus) {
-        //     return reply
-        //       .status(403)
-        //       .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
-        //   }
+        const authorizeStatus = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply
+            .status(403)
+            .send({ message: `Permission denied, user doesn't have permission ${permissionName}` })
+        }
         done()
         return reply
       },
       schema: {
-        body: ServiceSchema,
-        //   response: { 201: { ...ServiceSchema, ...MessageSchema }, 504: MessageSchema },
+        body: ServiceCreateSchema,
+        //   response: { 201: { ...ServiceCreateSchema, ...MessageSchema }, 504: MessageSchema },
       },
     },
 
@@ -426,9 +427,8 @@ export async function services(fastify: FastifyInstance) {
         localServiceID: LocalServiceID(request.body.localServiceID),
         globalQualID: GlobalQualID(request.body.globalQualID),
       }
-      const service: Either<string, LocalServiceGlobalQual> = await setLocalServiceQualifications(
-        serviceQual,
-      )
+      const service: Either<string, LocalServiceGlobalQual> =
+        await setLocalServiceQualifications(serviceQual)
       match(
         service,
         (servQual: LocalServiceGlobalQual) => {
@@ -467,9 +467,8 @@ export async function services(fastify: FastifyInstance) {
         localServiceID: LocalServiceID(request.body.localServiceID),
         localQualID: LocalQualID(request.body.localQualID),
       }
-      const service: Either<string, LocalServiceLocalQual> = await setLocalServiceLocalQual(
-        serviceQual,
-      )
+      const service: Either<string, LocalServiceLocalQual> =
+        await setLocalServiceLocalQual(serviceQual)
       match(
         service,
         (servQual: LocalServiceLocalQual) => {
