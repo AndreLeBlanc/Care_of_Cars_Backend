@@ -455,6 +455,9 @@ export const VatFree = make<VatFree>()
 export type Discount = Brand<number, 'discount'>
 export const Discount = make<Discount>()
 
+export type BillID = Brand<number, 'billID'>
+export const BillID = make<BillID>()
+
 export type CheckedInStatus = 'CheckedIn' | 'CheckedOut'
 
 export const colorForService = [
@@ -539,6 +542,8 @@ export const employeesRelations = relations(employees, ({ many, one }) => ({
   employeeWorkingHours: many(employeeWorkingHours),
   employeeStore: many(employeeStore),
   users: one(users),
+  bills: many(bills),
+  orders: many(orders),
 }))
 
 export const employeeWorkingHours = pgTable(
@@ -1038,6 +1043,7 @@ export const driverRelations = relations(drivers, ({ one, many }) => ({
     references: [companycustomers.customerOrgNumber],
   }),
   orders: many(orders),
+  bills: many(bills),
 }))
 
 export const companycustomersRelations = relations(companycustomers, ({ many }) => ({
@@ -1129,11 +1135,12 @@ export const rentcars = pgTable('rentCars', {
   ...dbDates,
 })
 
-export const rentcarsRelations = relations(rentcars, ({ one }) => ({
+export const rentcarsRelations = relations(rentcars, ({ one, many }) => ({
   stores: one(stores, {
     fields: [rentcars.storeID],
     references: [stores.storeID],
   }),
+  rentCarBookings: many(rentCarBookings),
 }))
 
 export const storepaymentinfo = pgTable('storepaymentinfo', {
@@ -1348,11 +1355,12 @@ export const qualificationsLocal = pgTable(
   },
 )
 
-export const qualificationsLocalRelations = relations(qualificationsLocal, ({ one }) => ({
+export const qualificationsLocalRelations = relations(qualificationsLocal, ({ one, many }) => ({
   stores: one(stores, {
     fields: [qualificationsLocal.storeID],
     references: [stores.storeID],
   }),
+  employeeLocalQualifications: many(employeeLocalQualifications),
 }))
 
 export const qualificationsGlobal = pgTable('qualificationsGlobal', {
@@ -1363,6 +1371,10 @@ export const qualificationsGlobal = pgTable('qualificationsGlobal', {
     .notNull(),
   ...dbDates,
 })
+
+export const qualificationsGlobalRelations = relations(qualificationsGlobal, ({ many }) => ({
+  employeeGlobalQualifications: many(employeeGlobalQualifications),
+}))
 
 export const employeeLocalQualifications = pgTable(
   'employeeLocalQualifications',
@@ -1385,6 +1397,14 @@ export const employeeLocalQualifications = pgTable(
       }),
     }
   },
+)
+
+export const employeeLocalQualificationsRelations = relations(
+  employeeLocalQualifications,
+  ({ one }) => ({
+    employees: one(employees),
+    employeeLocalQualifications: one(employeeLocalQualifications),
+  }),
 )
 
 export const employeeGlobalQualifications = pgTable(
@@ -1411,6 +1431,14 @@ export const employeeGlobalQualifications = pgTable(
       }),
     }
   },
+)
+
+export const employeeGlobalQualificationsRelations = relations(
+  employeeGlobalQualifications,
+  ({ one }) => ({
+    employees: one(employees),
+    qualificationsGlobal: one(qualificationsGlobal),
+  }),
 )
 
 export const userBelongsToStore = pgTable(
@@ -1486,6 +1514,8 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   }),
   orderServices: many(orderServices),
   orderLocalServices: many(orderLocalServices),
+  bills: one(billOrders),
+  rentCarBookings: one(rentCarBookings),
 }))
 
 export const orderServices = pgTable(
@@ -1505,27 +1535,27 @@ export const orderServices = pgTable(
       .references(() => serviceVariants.serviceVariantID, { onDelete: 'cascade' }),
     day1: timestamp('day1').$type<ServiceDay1>(),
     day1Work: interval('day1Work'),
-    day1Employee: integer('employeeID')
+    day1Employee: integer('day1Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     day2: timestamp('day2').$type<ServiceDay2>(),
     day2Work: interval('day1Work'),
-    day2Employee: integer('employeeID')
+    day2Employee: integer('day2Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     day3: timestamp('day3').$type<ServiceDay3>(),
     day3Work: interval('day1Work'),
-    day3Employee: integer('employeeID')
+    day3Employee: integer('day3Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     day4: timestamp('day4').$type<ServiceDay4>(),
     day4Work: interval('day1Work'),
-    day4Employee: integer('employeeID')
+    day4Employee: integer('day4Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     day5: timestamp('day5').$type<ServiceDay5>(),
     day5Work: interval('day1Work'),
-    day5Employee: integer('employeeID')
+    day5Employee: integer('day5Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     cost: real('cost').$type<ServiceCostNumber>().notNull(),
@@ -1551,6 +1581,10 @@ export const orderServicesRelations = relations(orderServices, ({ one }) => ({
     fields: [orderServices.serviceID],
     references: [services.serviceID],
   }),
+  day1Employee: one(employees, {
+    fields: [orderServices.day1Employee],
+    references: [employees.employeeID],
+  }),
 }))
 
 export const orderLocalServices = pgTable(
@@ -1570,27 +1604,27 @@ export const orderLocalServices = pgTable(
       .references(() => localServiceVariants.serviceVariantID, { onDelete: 'cascade' }),
     day1: timestamp('day1').$type<ServiceDay1>(),
     day1Work: interval('day1Work'),
-    day1Employee: integer('employeeID')
+    day1Employee: integer('day1Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     day2: timestamp('day2').$type<ServiceDay2>(),
     day2Work: interval('day1Work'),
-    day2Employee: integer('employeeID')
+    day2Employee: integer('day2Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     day3: timestamp('day3').$type<ServiceDay3>(),
     day3Work: interval('day1Work'),
-    day3Employee: integer('employeeID')
+    day3Employee: integer('day3Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     day4: timestamp('day4').$type<ServiceDay4>(),
     day4Work: interval('day1Work'),
-    day4Employee: integer('employeeID')
+    day4Employee: integer('day4Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     day5: timestamp('day5').$type<ServiceDay5>(),
     day5Work: interval('day1Work'),
-    day5Employee: integer('employeeID')
+    day5Employee: integer('day5Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     cost: real('cost').$type<ServiceCostNumber>().notNull(),
@@ -1616,6 +1650,10 @@ export const orderLocalServicesRelations = relations(orderLocalServices, ({ one 
     fields: [orderLocalServices.localServiceID],
     references: [localServices.localServiceID],
   }),
+  day1Employee: one(employees, {
+    fields: [orderLocalServices.day1Employee],
+    references: [employees.employeeID],
+  }),
 }))
 
 export const bookingStatuspgEnum = pgEnum('orderStatus', bookingStatus)
@@ -1639,3 +1677,93 @@ export const rentCarBookings = pgTable('rentCarBookings', {
   submissionTime: timestamp('submissionTime').$type<SubmissionTime>().notNull(),
   ...dbDates,
 })
+
+export const rentCarBookingsRelations = relations(rentCarBookings, ({ one }) => ({
+  rentcars: one(rentcars),
+  orders: one(orders),
+}))
+
+export const billStatus = ['bill', 'creditBill', 'cashBill'] as const
+
+export const billStatuspgEnum = pgEnum('billStatus', billStatus)
+
+// Samlingsfaktura/collective invoice is not a type. We have to check if a bill has more than one order to determine if it is one.
+
+export const bills = pgTable('bills', {
+  billID: serial('orderID').$type<BillID>().primaryKey(),
+  billStatus: billStatuspgEnum('billStatus').notNull(),
+  bookedBy: integer('employeeID')
+    .$type<EmployeeID>()
+    .references(() => employees.employeeID, { onDelete: 'no action' }),
+  billingDate: date('billingDate').notNull(),
+  paymentDate: date('paymentDate').notNull(),
+  paymentDays: integer('paymentDays').notNull(),
+  driverID: integer('driverID')
+    .$type<DriverID>()
+    .references(() => drivers.driverID, { onDelete: 'no action' }),
+  customerOrgNumber: varchar('customerOrgNumber', { length: 11 })
+    .$type<CustomerOrgNumber>()
+    .references(() => companycustomers.customerOrgNumber, { onDelete: 'cascade' }),
+  driverExternalNumber: varchar('driverExternalNumber', {
+    length: 256,
+  }).$type<DriverExternalNumber>(),
+  companyReference: varchar('companyReference', { length: 255 }).$type<CompanyReference>(),
+  driverFirstName: varchar('driverFirstName', { length: 128 }).$type<DriverFirstName>().notNull(),
+  driverLastName: varchar('driverLastName', { length: 128 }).$type<DriverLastName>().notNull(),
+  driverEmail: varchar('driverEmail', { length: 256 }).$type<DriverEmail>().notNull().unique(),
+  driverPhoneNumber: varchar('driverPhoneNumber', { length: 32 })
+    .$type<DriverPhoneNumber>()
+    .notNull()
+    .unique(),
+  driverAddress: varchar('driverAddress', { length: 256 }).$type<DriverAddress>().notNull(),
+  driverZipCode: varchar('driverZipCode', { length: 16 }).$type<DriverZipCode>().notNull(),
+  driverAddressCity: varchar('driverAddressCity', { length: 256 })
+    .$type<DriverAddressCity>()
+    .notNull(),
+  driverCountry: varchar('driverCountry', { length: 256 }).$type<DriverCountry>().notNull(),
+  driverHasCard: boolean('driverHasCard').$type<DriverHasCard>().default(DriverHasCard(false)),
+  driverCardValidTo: date('driverCardValidTo', { mode: 'date' }).$type<DriverCardValidTo>(),
+  driverCardNumber: varchar('driverCardNumber', { length: 256 }).$type<CustomerCardNumber>(),
+  driverKeyNumber: varchar('driverKeyNumber', { length: 256 }).$type<DriverKeyNumber>(),
+  ...dbDates,
+})
+
+export const billsRelations = relations(bills, ({ many, one }) => ({
+  billOrder: many(billOrders),
+  drivers: one(drivers, {
+    fields: [bills.driverID],
+    references: [drivers.driverID],
+  }),
+  employees: one(employees, {
+    fields: [bills.bookedBy],
+    references: [employees.employeeID],
+  }),
+  companycustomers: one(companycustomers, {
+    fields: [bills.customerOrgNumber],
+    references: [companycustomers.customerOrgNumber],
+  }),
+}))
+
+export const billOrders = pgTable(
+  'billOrders',
+  {
+    billID: integer('billID')
+      .$type<BillID>()
+      .references(() => bills.billID, { onDelete: 'set null' }),
+    orderID: integer('orderID')
+      .$type<OrderID>()
+      .references(() => orders.orderID, { onDelete: 'set null' }),
+  },
+  (billOrder) => {
+    return {
+      pk: primaryKey({
+        columns: [billOrder.billID, billOrder.orderID],
+      }),
+    }
+  },
+)
+
+export const billOrdersRelations = relations(billOrders, ({ one }) => ({
+  orders: one(orders),
+  bills: one(bills),
+}))
