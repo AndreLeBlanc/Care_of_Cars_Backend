@@ -228,8 +228,10 @@ export const customers = async (fastify: FastifyInstance) => {
         driverZipCode: DriverZipCode(driverZipCode),
         driverAddressCity: DriverAddressCity(driverAddressCity),
         driverHasCard: DriverHasCard(driverHasCard),
-        driverCardValidTo: DriverCardValidTo(new Date(driverCardValidTo)),
-        driverCardNumber: CustomerCardNumber(driverCardNumber),
+        driverCardValidTo: driverCardValidTo
+          ? DriverCardValidTo(new Date(driverCardValidTo))
+          : undefined,
+        driverCardNumber: driverCardNumber ? CustomerCardNumber(driverCardNumber) : undefined,
         driverKeyNumber: DriverKeyNumber(driverKeyNumber),
         driverNotesShared: DriverNotesShared(driverNotesShared),
         driverNotes: DriverNotes(driverNotes),

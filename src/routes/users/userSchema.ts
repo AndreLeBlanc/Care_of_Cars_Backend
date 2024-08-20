@@ -1,7 +1,6 @@
 import { Static, Type } from '@sinclair/typebox'
 
 import {
-  CreatedEmployeeUserSchema,
   EmployeeHourlyRateCurrencySchema,
   EmployeeHourlyRateSchema,
   EmployeeNoUserSchema,
@@ -9,6 +8,7 @@ import {
   employeeCheckedIn,
   employeeCheckedOut,
   employeeCheckinStatus,
+  employeeComment,
   employeePersonalNumber,
   employmentNumber,
   shortUserName,
@@ -17,14 +17,19 @@ import {
 
 import { PermissionIDDescNameSchema } from '../permissions/permissionSchema.js'
 
-import { EmployeeID, FirstName, LastName, UserID } from '../../utils/helper.js'
+import {
+  EmployeeID,
+  FirstName,
+  LastName,
+  UserID,
+  isSuperAdmin,
+  userEmail,
+} from '../../utils/helper.js'
 
 import { RoleID, RoleName, RoleReplySchema } from '../roles/roleSchema.js'
 import { storeID, storeName } from '../stores/storesSchema.js'
 
-const userEmail = Type.String()
 const message = Type.String()
-const isSuperAdmin = Type.Boolean()
 
 export const MessageSchema = Type.Object({ message: message })
 
@@ -137,7 +142,23 @@ export const CreateUserEmpReplySchema = Type.Object({
     createdAt: Type.Any(),
     updatedAt: Type.Any(),
   }),
-  employee: CreatedEmployeeUserSchema,
+  employee: Type.Object({
+    userID: UserID,
+    shortUserName: shortUserName,
+    employmentNumber: employmentNumber,
+    employeePersonalNumber: employeePersonalNumber,
+    signature: signature,
+    employeeActive: employeeActive,
+    employeeComment: Type.Optional(employeeComment),
+    employeeID: EmployeeID,
+    storeIDs: Type.Array(storeID),
+    employeeHourlyRateCurrency: EmployeeHourlyRateCurrencySchema,
+    employeeHourlyRate: EmployeeHourlyRateSchema,
+    employeeCheckedIn: Type.Optional(employeeCheckedIn),
+    employeeCheckedOut: Type.Optional(employeeCheckedOut),
+    createdAt: Type.Any(),
+    updatedAt: Type.Any(),
+  }),
 })
 
 export type CreateUserEmpReplySchemaType = Static<typeof CreateUserEmpReplySchema>

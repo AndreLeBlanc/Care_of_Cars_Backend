@@ -26,6 +26,7 @@ const VatFreeSchema = Type.Boolean()
 const DiscountSchema = Type.Number()
 const TotalCost = Type.Number()
 const CurrencySchema = Type.String()
+const amount = Type.Number({ minimum: 0 })
 
 export const MessageSchema = Type.Object({ message: Type.String() })
 
@@ -65,6 +66,7 @@ export type OrderSchemaType = Static<typeof OrderSchema>
 export const CreateOrderServicesSchema = Type.Object({
   serviceID: ServiceIDSchema,
   serviceVariantID: ServiceVariantIDSchema,
+  amount: amount,
   day1: Type.String({ format: 'date' }),
   day1Work: ServiceDay1Schema,
   day1Employee: Type.Optional(EmployeeID),
@@ -91,6 +93,7 @@ export type CreateOrderServicesSchemaType = Static<typeof CreateOrderServicesSch
 export const CreateOrderLocalServicesSchema = Type.Object({
   localServiceID: LocalServiceIDSchema,
   localServiceVariantID: LocalServicevariantIDSchema,
+  amount: amount,
   day1: Type.String({ format: 'date' }),
   day1Work: ServiceDay1Schema,
   day1Employee: EmployeeID,

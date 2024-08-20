@@ -20,6 +20,7 @@ import {
   FridayStart,
   FridayStop,
   GlobalQualID,
+  IsSuperAdmin,
   LocalQualID,
   MondayBreak,
   MondayStart,
@@ -39,6 +40,7 @@ import {
   TuesdayBreak,
   TuesdayStart,
   TuesdayStop,
+  UserEmail,
   UserFirstName,
   UserID,
   UserLastName,
@@ -54,6 +56,7 @@ import {
   employeeStore,
   employeeWorkingHours,
   employees,
+  stores,
   users,
 } from '../schema/schema.js'
 
@@ -63,7 +66,9 @@ import { db } from '../config/db-connect.js'
 
 import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.js'
 
-import { and, eq, gte, ilike, lte, or, sql } from 'drizzle-orm'
+import { and, eq, gte, ilike, isNull, lte, or, sql } from 'drizzle-orm'
+
+import { StoreIDName } from './storeService.js'
 
 export type WorkingHours = {
   mondayStart?: MondayStart
@@ -149,6 +154,26 @@ export type WorkingHoursCreated = WorkingHours & {
   updatedAt: Date
 }
 
+export type GetEmployee = {
+  userID: UserID
+  firstName: UserFirstName
+  lastName: UserLastName
+  email: UserEmail
+  isSuperAdmin: IsSuperAdmin
+  employeeID?: EmployeeID
+  shortUserName?: ShortUserName
+  employmentNumber?: EmploymentNumber
+  employeePersonalNumber?: EmployeePersonalNumber
+  signature?: Signature
+  employeeHourlyRate?: EmployeeHourlyRateDinero
+  employeePin?: EmployeePin
+  employeeActive?: EmployeeActive
+  employeeComment?: EmployeeComment
+  employeeCheckedIn?: EmployeeCheckIn
+  employeeCheckedOut?: EmployeeCheckOut
+  storeIDs: StoreIDName[]
+}
+
 type EmployeeNoRate = {
   userID: UserID
   employeeID?: EmployeeID
@@ -207,6 +232,7 @@ export type CheckInTimes = {
 
 export type ListCheckInStatus = {
   employeeID: EmployeeID
+  shortUserName: ShortUserName
   time: EmployeeCheckIn | EmployeeCheckOut | undefined
   status: CheckedInStatus
 }
@@ -968,8 +994,9 @@ export async function listCheckedinStatus(
     const employeesList = await db
       .select({
         employeeID: employees.employeeID,
-        employeeCheckedIn: employees.employeeCheckedIn,
-        employeeCheckedOut: employees.employeeCheckedOut,
+        shortUserName: employees.shortUserName,
+        employeeCheckedIn: employeeStore.employeeCheckedIn,
+        employeeCheckedOut: employeeStore.employeeCheckedOut,
       })
       .from(employees)
       .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
@@ -993,6 +1020,7 @@ export async function listCheckedinStatus(
       const status = toListCheckinStatus(employee.employeeCheckedIn, employee.employeeCheckedOut)
       return {
         employeeID: employee.employeeID,
+        shortUserName: employee.shortUserName,
         time: status?.time,
         status: status.status,
       }
@@ -1005,6 +1033,7 @@ export async function listCheckedinStatus(
 
 export async function checkInCheckOut(
   employeeID: EmployeeID,
+  storeID: StoreID,
   checkIn: CheckedInStatus,
 ): Promise<Either<string, CheckInTimes>> {
   const timestamp: Date = new Date()
@@ -1013,43 +1042,58 @@ export async function checkInCheckOut(
       switch (checkIn) {
         case 'CheckedIn':
           const [setCheckinTime] = await db
-            .update(employees)
+            .update(employeeStore)
             .set({ employeeCheckedIn: timestamp })
-            .where(eq(employees.employeeID, employeeID))
-            .returning({
-              employeeID: employees.employeeID,
-              employeeCheckedIn: employees.employeeCheckedIn ?? undefined,
-              employeeCheckedOut: employees.employeeCheckedOut ?? undefined,
-            })
+            .where(
+              and(
+                eq(employeeStore.employeeID, employeeID),
+                or(
+                  isNull(employeeStore.employeeCheckedIn),
+                  lte(employeeStore.employeeCheckedIn, employeeStore.employeeCheckedOut),
+                ),
+                eq(employeeStore.storeID, storeID),
+              ),
+            )
+            .returning()
 
-          return right({
-            employeeID: setCheckinTime.employeeID,
-            employeeCheckIn: setCheckinTime.employeeCheckedIn
-              ? EmployeeCheckIn(setCheckinTime.employeeCheckedIn.toISOString())
-              : undefined,
-            employeeCheckOut: setCheckinTime.employeeCheckedOut
-              ? EmployeeCheckOut(setCheckinTime.employeeCheckedOut.toISOString())
-              : undefined,
-          })
+          return setCheckinTime
+            ? right({
+                employeeID: setCheckinTime.employeeID,
+                employeeCheckIn: setCheckinTime.employeeCheckedIn
+                  ? EmployeeCheckIn(setCheckinTime.employeeCheckedIn.toISOString())
+                  : undefined,
+                employeeCheckOut: setCheckinTime.employeeCheckedOut
+                  ? EmployeeCheckOut(setCheckinTime.employeeCheckedOut.toISOString())
+                  : undefined,
+              })
+            : left('Already checked in')
+
         case 'CheckedOut':
           const [setCheckOutTime] = await db
-            .update(employees)
+            .update(employeeStore)
             .set({ employeeCheckedOut: timestamp })
-            .where(eq(employees.employeeID, employeeID))
-            .returning({
-              employeeID: employees.employeeID,
-              employeeCheckedIn: employees.employeeCheckedIn,
-              employeeCheckedOut: employees.employeeCheckedOut,
-            })
-          return right({
-            employeeID: setCheckOutTime.employeeID,
-            employeeCheckIn: setCheckOutTime.employeeCheckedIn
-              ? EmployeeCheckIn(setCheckOutTime.employeeCheckedIn.toISOString())
-              : undefined,
-            employeeCheckOut: setCheckOutTime.employeeCheckedOut
-              ? EmployeeCheckOut(setCheckOutTime.employeeCheckedOut.toISOString())
-              : undefined,
-          })
+            .where(
+              and(
+                eq(employeeStore.employeeID, employeeID),
+                or(
+                  isNull(employeeStore.employeeCheckedOut),
+                  lte(employeeStore.employeeCheckedOut, employeeStore.employeeCheckedIn),
+                ),
+                eq(employeeStore.storeID, storeID),
+              ),
+            )
+            .returning()
+          return setCheckOutTime
+            ? right({
+                employeeID: setCheckOutTime.employeeID,
+                employeeCheckIn: setCheckOutTime.employeeCheckedIn
+                  ? EmployeeCheckIn(setCheckOutTime.employeeCheckedIn.toISOString())
+                  : undefined,
+                employeeCheckOut: setCheckOutTime.employeeCheckedOut
+                  ? EmployeeCheckOut(setCheckOutTime.employeeCheckedOut.toISOString())
+                  : undefined,
+              })
+            : left('Already checked out')
       }
     }
     return left("couldn't checkin/out")
@@ -1114,47 +1158,70 @@ export async function putEmployee(
   }
 }
 
-export async function getEmployee(employeeID: EmployeeID): Promise<Either<string, Employee>> {
+export async function getEmployee(employeeID: EmployeeID): Promise<Either<string, GetEmployee>> {
   try {
-    const fetchedEmployeeWithStores = await db.transaction(async (tx) => {
-      const [fetchedEmployee] = await tx
-        .select()
-        .from(employees)
-        .where(eq(employees.employeeID, employeeID))
-      if (fetchedEmployee == null) return undefined
+    const [verifiedUser] = await db
+      .select({
+        userID: users.userID,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        isSuperAdmin: users.isSuperAdmin,
+        employeeID: employees.employeeID,
+        shortUserName: employees.shortUserName,
+        employmentNumber: employees.employmentNumber,
+        employeePersonalNumber: employees.employeePersonalNumber,
+        signature: employees.signature,
+        EmployeeActive: employees.employeeActive,
+        employeeHourlyRate: employees.employeeHourlyRate,
+        employeeHourlyRateCurrency: employees.employeeHourlyRateCurrency,
+        employeeActive: employees.employeeActive,
+        employeeComment: employees.employeeComment,
+        employeeCheckedIn: employeeStore.employeeCheckedIn,
+        employeeCheckedOut: employeeStore.employeeCheckedOut,
+        storeIDs: sql<
+          StoreIDName[]
+        >`json_agg(json_build_object('storeID', ${employeeStore.storeID}, 'storeName', ${stores.storeName}))`.as(
+          'tagname',
+        ),
+      })
+      .from(employees)
+      .where(and(eq(employees.employeeID, employeeID)))
+      .innerJoin(users, eq(users.userID, employees.userID))
+      .leftJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
+      .leftJoin(stores, eq(stores.storeID, employeeStore.storeID))
+      .groupBy(users.userID, employees.employeeID)
 
-      const employeeStores = await tx
-        .select()
-        .from(employeeStore)
-        .where(eq(employeeStore.employeeID, employeeID))
-
-      const fetchedEmployeeWithNull = {
-        userID: fetchedEmployee.userID,
-        employeeID: fetchedEmployee.employeeID,
-        shortUserName: fetchedEmployee.shortUserName,
-        employmentNumber: fetchedEmployee.employmentNumber,
-        employeePersonalNumber: fetchedEmployee.employeePersonalNumber,
-        signature: fetchedEmployee.signature,
-        employeeHourlyRate: fetchedEmployee.employeeHourlyRate ?? undefined,
-        employeeHourlyRateCurrency: fetchedEmployee.employeeHourlyRateCurrency ?? undefined,
-        employeePin: fetchedEmployee.employeePin,
-        employeeActive: fetchedEmployee.employeeActive,
-        employeeComment: fetchedEmployee.employeeComment ?? undefined,
-        employeeCheckedIn: employees.employeeCheckedIn
-          ? undefined
-          : EmployeeCheckIn(employees.employeeCheckedIn),
-        employeeCheckedOut: employees.employeeCheckedOut
-          ? undefined
-          : EmployeeCheckOut(employees.employeeCheckedOut),
-        createdAt: fetchedEmployee.createdAt,
-        updatedAt: fetchedEmployee.updatedAt,
-      }
-      return { ...fetchedEmployeeWithNull, storeIDs: employeeStores.map((row) => row.storeID) }
-    })
-    if (fetchedEmployeeWithStores == null) {
-      return left('employee not found')
-    }
-    return right(fetchedEmployeeWithStores)
+    return verifiedUser
+      ? right({
+          userID: verifiedUser.userID,
+          firstName: verifiedUser.firstName,
+          lastName: verifiedUser.lastName,
+          email: verifiedUser.email,
+          isSuperAdmin: verifiedUser.isSuperAdmin,
+          employeeID: verifiedUser.employeeID ?? undefined,
+          shortUserName: verifiedUser.shortUserName ?? undefined,
+          employmentNumber: verifiedUser.employmentNumber ?? undefined,
+          employeePersonalNumber: verifiedUser.employeePersonalNumber ?? undefined,
+          signature: verifiedUser.signature ?? undefined,
+          employeeHourlyRate: dineroDBReturn(
+            verifiedUser.employeeHourlyRate,
+            verifiedUser.employeeHourlyRateCurrency,
+          ),
+          employeeActive: verifiedUser.employeeActive ?? undefined,
+          employeeCheckedIn: verifiedUser.employeeCheckedIn
+            ? EmployeeCheckIn(verifiedUser.employeeCheckedIn.toISOString())
+            : undefined,
+          employeeCheckedOut: verifiedUser.employeeCheckedOut
+            ? EmployeeCheckOut(verifiedUser.employeeCheckedOut?.toISOString())
+            : undefined,
+          employeeCheckinStatus: isCheckedIn(
+            verifiedUser.employeeCheckedIn,
+            verifiedUser.employeeCheckedOut,
+          ),
+          storeIDs: verifiedUser.storeIDs,
+        })
+      : left('Login failed, incorrect email or password')
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -1248,8 +1315,8 @@ export async function getEmployeesPaginate(
           employeePin: employees.employeePin,
           employeeComment: employees.employeeComment,
           employeeActive: employees.employeeActive,
-          employeeCheckedIn: employees.employeeCheckedIn,
-          employeeCheckedOut: employees.employeeCheckedOut,
+          employeeCheckedIn: employeeStore.employeeCheckedIn,
+          employeeCheckedOut: employeeStore.employeeCheckedOut,
           createdAt: employees.createdAt,
           updatedAt: employees.updatedAt,
         })

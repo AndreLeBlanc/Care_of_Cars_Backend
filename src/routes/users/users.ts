@@ -374,11 +374,11 @@ export async function users(fastify: FastifyInstance) {
           const passwordRes = await bcrypt.compare(password, user.password)
           if (passwordRes) {
             const token = fastify.jwt.sign({ user })
-            const rolePermissions = await getRoleWithPermissions(user.roleID)
+            const rolePermissions = await getRoleWithPermissions(user.user.roleID)
             match(
               rolePermissions,
               (roleP: { role: CreatedRole; roleHasPermission: PermissionIDDescName[] }) => {
-                const { employeeHourlyRate, ...rest } = user
+                const { employeeHourlyRate, ...rest } = user.user
 
                 return reply.status(200).send({
                   message: 'Login success',

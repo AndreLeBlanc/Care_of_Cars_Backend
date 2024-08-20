@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 
 import {
+  Amount,
   BookingEnd,
   BookingStart,
   Discount,
@@ -117,6 +118,7 @@ export async function orders(fastify: FastifyInstance) {
         const services: CreateOrderServices[] = req.body.services.map((service) => ({
           serviceID: ServiceID(service.serviceID),
           serviceVariantID: ServiceID(service.serviceVariantID),
+          amount: Amount(service.amount),
           day1: service.day1 ? ServiceDay1(service.day1) : undefined,
           day1Work: service.day1Work ? service.day1Work : undefined,
           day1Employee: service.day1Employee ? EmployeeID(service.day1Employee) : undefined,
@@ -141,6 +143,7 @@ export async function orders(fastify: FastifyInstance) {
         const localServices: CreateOrderLocalServices[] = req.body.services.map((service) => ({
           localServiceID: LocalServiceID(service.serviceID),
           localServiceVariantID: LocalServiceID(service.serviceVariantID),
+          amount: Amount(service.amount),
           day1: service.day1 ? ServiceDay1(service.day1) : undefined,
           day1Work: service.day1Work ? service.day1Work : undefined,
           day1Employee: service.day1Employee ? EmployeeID(service.day1Employee) : undefined,

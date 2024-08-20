@@ -80,6 +80,8 @@ export type StoreContactPerson = Brand<string, 'storeContactPerson'>
 export const StoreContactPerson = make<StoreContactPerson>()
 export type StoreMaxUsers = Brand<PositiveInteger<number>, 'storeMaxUsers'>
 export const StoreMaxUsers = make<StoreMaxUsers>()
+export type StoreCurrency = Brand<string, 'storeCurrency'>
+export const StoreCurrency = make<StoreCurrency>()
 export type StoreAllowCarAPI = Brand<boolean, 'storeAllowCarAPI'>
 export const StoreAllowCarAPI = make<StoreAllowCarAPI>()
 export type StoreAllowSendSMS = Brand<boolean, 'storeAllowSendSMS'>
@@ -438,6 +440,8 @@ export const DriverCarNotes = make<DriverCarNotes>()
 
 export type OrderID = Brand<number, 'orderID'>
 export const OrderID = make<OrderID>()
+export type Amount = Brand<number, 'amount'>
+export const Amount = make<Amount>()
 export type Cost = Brand<number, 'cost'>
 export const Cost = make<Cost>()
 export type OrderNotes = Brand<string, 'orderNotes'>
@@ -526,8 +530,6 @@ export const employees = pgTable('employees', {
   ).$type<EmployeeHourlyRateCurrency>(),
   employeePin: varchar('employeePin', { length: 4 }).$type<EmployeePin>().notNull(),
   employeeComment: varchar('employeeComment').$type<EmployeeComment>(),
-  employeeCheckedIn: timestamp('checkedIn'),
-  employeeCheckedOut: timestamp('checkedOut'),
   employeeActive: boolean('employeeActive').$type<EmployeeActive>().notNull(),
   ...dbDates,
 })
@@ -610,6 +612,8 @@ export const employeeStore = pgTable(
         onDelete: 'cascade',
       })
       .notNull(),
+    employeeCheckedIn: timestamp('checkedIn'),
+    employeeCheckedOut: timestamp('checkedOut'),
   },
   (employeeStore) => {
     return {
@@ -1060,7 +1064,7 @@ export const stores = pgTable('stores', {
   storeDescription: varchar('storeDescription').$type<StoreDescription>(),
   storeContactPerson: varchar('storeContactPerson', { length: 64 }).$type<StoreContactPerson>(),
   storeMaxUsers: integer('storeMaxUsers').$type<StoreMaxUsers>(),
-  currency: varchar('currency').default('SEK'),
+  currency: varchar('currency').default('SEK').$type<StoreCurrency>(),
   storeAllowCarAPI: boolean('storeAllowCarAPI')
     .$type<StoreAllowCarAPI>()
     .default(StoreAllowCarAPI(true)),
@@ -1495,6 +1499,7 @@ export const orderServices = pgTable(
       .$type<ServiceID>()
       .references(() => services.serviceID, { onDelete: 'cascade' })
       .notNull(),
+    amount: integer('amount').$type<Amount>().notNull(),
     serviceVariantID: integer('serviceVariantID')
       .$type<ServiceID>()
       .references(() => serviceVariants.serviceVariantID, { onDelete: 'cascade' }),
@@ -1555,6 +1560,7 @@ export const orderLocalServices = pgTable(
       .$type<OrderID>()
       .references(() => orders.orderID, { onDelete: 'cascade' })
       .notNull(),
+    amount: integer('amount').$type<Amount>().notNull(),
     localServiceID: integer('localServiceID')
       .$type<LocalServiceID>()
       .references(() => localServices.localServiceID, { onDelete: 'cascade' })

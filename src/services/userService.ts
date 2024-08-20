@@ -117,26 +117,28 @@ export type CreatedUserEmployee = {
 }
 
 export type LoginEmployee = {
-  userID: UserID
-  firstName: UserFirstName
-  lastName: UserLastName
-  email: UserEmail
   password: UserPassword
-  isSuperAdmin: IsSuperAdmin
-  roleID: RoleID
-  roleName: RoleName
-  employeeID?: EmployeeID
-  shortUserName?: ShortUserName
-  employmentNumber?: EmploymentNumber
-  employeePersonalNumber?: EmployeePersonalNumber
-  signature?: Signature
-  employeeHourlyRate?: EmployeeHourlyRateDinero
-  employeePin?: EmployeePin
-  employeeActive?: EmployeeActive
-  employeeComment?: EmployeeComment
-  employeeCheckedIn?: EmployeeCheckIn
-  employeeCheckedOut?: EmployeeCheckOut
-  stores: StoreIDName[]
+  user: {
+    userID: UserID
+    firstName: UserFirstName
+    lastName: UserLastName
+    email: UserEmail
+    isSuperAdmin: IsSuperAdmin
+    roleID: RoleID
+    roleName: RoleName
+    employeeID?: EmployeeID
+    shortUserName?: ShortUserName
+    employmentNumber?: EmploymentNumber
+    employeePersonalNumber?: EmployeePersonalNumber
+    signature?: Signature
+    employeeHourlyRate?: EmployeeHourlyRateDinero
+    employeePin?: EmployeePin
+    employeeActive?: EmployeeActive
+    employeeComment?: EmployeeComment
+    employeeCheckedIn?: EmployeeCheckIn
+    employeeCheckedOut?: EmployeeCheckOut
+    stores: StoreIDName[]
+  }
 }
 
 export async function createUser(
@@ -323,32 +325,33 @@ export async function verifyEmployee(email: UserEmail): Promise<Either<string, L
   try {
     const [verifiedUser] = await db
       .select({
-        userID: users.userID,
-        firstName: users.firstName,
         password: users.password,
-        lastName: users.lastName,
-        email: users.email,
-        isSuperAdmin: users.isSuperAdmin,
-        roleID: roles.roleID,
-        roleName: roles.roleName,
-        employeeID: employees.employeeID,
-        shortUserName: employees.shortUserName,
-        employmentNumber: employees.employmentNumber,
-        employeePersonalNumber: employees.employeePersonalNumber,
-        signature: employees.signature,
-        EmployeeActive: employees.employeeActive,
-        employeeHourlyRate: employees.employeeHourlyRate,
-        employeeHourlyRateCurrency: employees.employeeHourlyRateCurrency,
-        employeePin: employees.employeePin,
-        employeeActive: employees.employeeActive,
-        employeeComment: employees.employeeComment,
-        employeeCheckedIn: employees.employeeCheckedIn,
-        employeeCheckedOut: employees.employeeCheckedOut,
-        stores: sql<
-          StoreIDName[]
-        >`json_agg(json_build_object('storeID', ${employeeStore.storeID}, 'storeName', ${stores.storeName}))`.as(
-          'tagname',
-        ),
+        user: {
+          userID: users.userID,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          isSuperAdmin: users.isSuperAdmin,
+          roleID: roles.roleID,
+          roleName: roles.roleName,
+          employeeID: employees.employeeID,
+          shortUserName: employees.shortUserName,
+          employmentNumber: employees.employmentNumber,
+          employeePersonalNumber: employees.employeePersonalNumber,
+          signature: employees.signature,
+          EmployeeActive: employees.employeeActive,
+          employeeHourlyRate: employees.employeeHourlyRate,
+          employeeHourlyRateCurrency: employees.employeeHourlyRateCurrency,
+          employeeActive: employees.employeeActive,
+          employeeComment: employees.employeeComment,
+          employeeCheckedIn: employeeStore.employeeCheckedIn,
+          employeeCheckedOut: employeeStore.employeeCheckedOut,
+          stores: sql<
+            StoreIDName[]
+          >`json_agg(json_build_object('storeID', ${employeeStore.storeID}, 'storeName', ${stores.storeName}))`.as(
+            'tagname',
+          ),
+        },
       })
       .from(users)
       .where(and(eq(users.email, email)))
@@ -360,35 +363,37 @@ export async function verifyEmployee(email: UserEmail): Promise<Either<string, L
 
     return verifiedUser
       ? right({
-          userID: verifiedUser.userID,
-          firstName: verifiedUser.firstName,
-          lastName: verifiedUser.lastName,
-          email: verifiedUser.email,
           password: verifiedUser.password,
-          isSuperAdmin: verifiedUser.isSuperAdmin,
-          roleID: verifiedUser.roleID,
-          roleName: verifiedUser.roleName,
-          employeeID: verifiedUser.employeeID ?? undefined,
-          shortUserName: verifiedUser.shortUserName ?? undefined,
-          employmentNumber: verifiedUser.employmentNumber ?? undefined,
-          employeePersonalNumber: verifiedUser.employeePersonalNumber ?? undefined,
-          signature: verifiedUser.signature ?? undefined,
-          employeeHourlyRate: dineroDBReturn(
-            verifiedUser.employeeHourlyRate,
-            verifiedUser.employeeHourlyRateCurrency,
-          ),
-          employeeActive: verifiedUser.employeeActive ?? undefined,
-          employeeCheckedIn: verifiedUser.employeeCheckedIn
-            ? EmployeeCheckIn(verifiedUser.employeeCheckedIn.toISOString())
-            : undefined,
-          employeeCheckedOut: verifiedUser.employeeCheckedOut
-            ? EmployeeCheckOut(verifiedUser.employeeCheckedOut?.toISOString())
-            : undefined,
-          employeeCheckinStatus: isCheckedIn(
-            verifiedUser.employeeCheckedIn,
-            verifiedUser.employeeCheckedOut,
-          ),
-          stores: verifiedUser.stores,
+          user: {
+            userID: verifiedUser.user.userID,
+            firstName: verifiedUser.user.firstName,
+            lastName: verifiedUser.user.lastName,
+            email: verifiedUser.user.email,
+            isSuperAdmin: verifiedUser.user.isSuperAdmin,
+            roleID: verifiedUser.user.roleID,
+            roleName: verifiedUser.user.roleName,
+            employeeID: verifiedUser.user.employeeID ?? undefined,
+            shortUserName: verifiedUser.user.shortUserName ?? undefined,
+            employmentNumber: verifiedUser.user.employmentNumber ?? undefined,
+            employeePersonalNumber: verifiedUser.user.employeePersonalNumber ?? undefined,
+            signature: verifiedUser.user.signature ?? undefined,
+            employeeHourlyRate: dineroDBReturn(
+              verifiedUser.user.employeeHourlyRate,
+              verifiedUser.user.employeeHourlyRateCurrency,
+            ),
+            employeeActive: verifiedUser.user.employeeActive ?? undefined,
+            employeeCheckedIn: verifiedUser.user.employeeCheckedIn
+              ? EmployeeCheckIn(verifiedUser.user.employeeCheckedIn.toISOString())
+              : undefined,
+            employeeCheckedOut: verifiedUser.user.employeeCheckedOut
+              ? EmployeeCheckOut(verifiedUser.user.employeeCheckedOut?.toISOString())
+              : undefined,
+            employeeCheckinStatus: isCheckedIn(
+              verifiedUser.user.employeeCheckedIn,
+              verifiedUser.user.employeeCheckedOut,
+            ),
+            stores: verifiedUser.user.stores,
+          },
         })
       : left('Login failed, incorrect email or password')
   } catch (e) {
