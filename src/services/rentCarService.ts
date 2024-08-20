@@ -76,6 +76,19 @@ export type RentCarBookingReply = RentCarBooking & {
   updatedAt: Date
 }
 
+export type RentCarBookingReplyNoBrand = {
+  rentCarBookingID?: RentCarBookingID
+  orderID?: OrderID | null
+  rentCarRegistrationNumber: RentCarRegistrationNumber
+  bookingStart: BookingStart
+  bookingEnd: BookingEnd
+  bookedBy: EmployeeID | null
+  bookingStatus: OrderStatus
+  submissionTime: SubmissionTime
+  createdAt: Date
+  updatedAt: Date
+}
+
 export type RentCarAvailablity = {
   available: RentCar[]
   unavailable: RentCar[]
@@ -336,6 +349,34 @@ export async function getRentCarBooking(
       .select()
       .from(rentCarBookings)
       .where(eq(rentCarBookings.rentCarBookingID, bookingID))
+
+    return fetchedBooking
+      ? right({
+          rentCarBookingID: fetchedBooking.rentCarBookingID,
+          orderID: fetchedBooking.orderID ?? undefined,
+          rentCarRegistrationNumber: fetchedBooking.rentCarRegistrationNumber,
+          bookingStart: fetchedBooking.bookingStart,
+          bookingEnd: fetchedBooking.bookingEnd,
+          bookedBy: fetchedBooking.bookedBy ?? undefined,
+          bookingStatus: fetchedBooking.bookingStatus,
+          submissionTime: fetchedBooking.submissionTime,
+          createdAt: fetchedBooking.createdAt,
+          updatedAt: fetchedBooking.updatedAt,
+        })
+      : left('no booking found')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function getRentCarBookingByOrderID(
+  bookingID: OrderID,
+): Promise<Either<string, RentCarBookingReply>> {
+  try {
+    const [fetchedBooking] = await db
+      .select()
+      .from(rentCarBookings)
+      .where(eq(rentCarBookings.orderID, bookingID))
 
     return fetchedBooking
       ? right({

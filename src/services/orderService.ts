@@ -9,6 +9,12 @@ import { Either, errorHandling, left, right } from '../utils/helper.js'
 import Dinero, { Currency } from 'dinero.js'
 
 import {
+  RentCarBooking,
+  RentCarBookingReply,
+  RentCarBookingReplyNoBrand,
+} from './rentCarService.js'
+
+import {
   Cost,
   Discount,
   DriverCarID,
@@ -32,6 +38,7 @@ import {
   orderLocalServices,
   orderServices,
   orders,
+  rentCarBookings,
 } from '../schema/schema.js'
 
 type OrderBase = {
@@ -117,7 +124,8 @@ export type OrderLocalServices = CreateOrderLocalServices & {
 
 export type OrderWithServices = { order: Order } & { services: OrderServices[] } & {
   localServices: OrderLocalServices[]
-}
+} & { rentCarBooking?: RentCarBookingReply }
+
 type OrderNoBrand = {
   driverCarID: DriverCarID
   driverID: DriverID
@@ -188,6 +196,7 @@ function brandOrder(
   newOrder: OrderNoBrand,
   newOrderServices: OrderServicesNoBrand[],
   newOrderlocalServices: OrderLocalServicesNoBrand[],
+  newBooking?: RentCarBookingReplyNoBrand | null,
 ): OrderWithServices {
   const orderBranded: Omit<Order, 'cost'> = {
     orderID: newOrder.orderID,
@@ -264,10 +273,26 @@ function brandOrder(
       orderNotes: local.orderNotes ?? undefined,
     }
   })
+
+  const brandedBooking = newBooking
+    ? {
+        rentCarBookingID: newBooking.rentCarBookingID,
+        orderID: newBooking.orderID ?? undefined,
+        rentCarRegistrationNumber: newBooking.rentCarRegistrationNumber,
+        bookingStart: newBooking.bookingStart,
+        bookingEnd: newBooking.bookingEnd,
+        bookedBy: newBooking.bookedBy ?? undefined,
+        bookingStatus: newBooking.bookingStatus,
+        submissionTime: newBooking.submissionTime,
+        createdAt: newBooking.createdAt,
+        updatedAt: newBooking.updatedAt,
+      }
+    : undefined
   return {
     order: { cost: Cost(cost), ...orderBranded },
     services: serviceBranded,
     localServices: localBranded,
+    rentCarBooking: brandedBooking,
   }
 }
 
@@ -275,6 +300,7 @@ export async function createOrder(
   order: CreateOrder,
   services: CreateOrderServices[],
   localServices: CreateOrderLocalServices[],
+  booking: RentCarBooking,
 ): Promise<Either<string, OrderWithServices>> {
   try {
     return await db.transaction(async (tx) => {
@@ -367,8 +393,17 @@ export async function createOrder(
             },
           })
           .returning()
-        const branded = brandOrder(newOrder, newOrderServices, newOrderlocalServices)
 
+        const [newBooking] = await db
+          .insert(rentCarBookings)
+          .values(booking)
+          .onConflictDoUpdate({
+            target: [rentCarBookings.rentCarBookingID, rentCarBookings.orderID],
+            set: booking,
+          })
+          .returning()
+
+        const branded = brandOrder(newOrder, newOrderServices, newOrderlocalServices, newBooking)
         return right(branded)
       } else {
         return left("Couldn't place order")
@@ -405,21 +440,37 @@ export async function deleteOrder(order: OrderID): Promise<Either<string, OrderW
 
 export async function getOrder(order: OrderID): Promise<Either<string, OrderWithServices>> {
   try {
+    //    TODODO
+    //    TODODO
+    //    TODODO
+    //    TODODO
+    //    TODODO
     return await db.transaction(async (tx) => {
-      const deletedOrderServices = await tx
+      const fetchedOrderServices = await tx
         .select()
         .from(orderServices)
         .where(eq(orderServices.orderID, order))
 
-      const deletedOrderLocalServices = await tx
+      const fetchedOrderLocalServices = await tx
         .select()
         .from(orderLocalServices)
         .where(eq(orderLocalServices.orderID, order))
 
-      const [deletedOrder] = await tx.select().from(orders).where(eq(orders.orderID, order))
+      const [fetchedOrder] = await tx
+        .select()
+        .from(orders)
+        .where(eq(orders.orderID, order))
+        .leftJoin(rentCarBookings, eq(rentCarBookings.orderID, order))
 
-      return deletedOrder
-        ? right(brandOrder(deletedOrder, deletedOrderServices, deletedOrderLocalServices))
+      return fetchedOrder
+        ? right(
+            brandOrder(
+              fetchedOrder.orders,
+              fetchedOrderServices,
+              fetchedOrderLocalServices,
+              fetchedOrder.rentCarBookings,
+            ),
+          )
         : left("Couldn't find order")
     })
   } catch (e) {

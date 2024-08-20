@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify'
 
 import {
+  BookingEnd,
+  BookingStart,
   Discount,
   DriverCarID,
   DriverID,
@@ -11,6 +13,7 @@ import {
   OrderStatus,
   PermissionTitle,
   PickupTime,
+  RentCarRegistrationNumber,
   ServiceCostNumber,
   ServiceDay1,
   ServiceDay2,
@@ -59,6 +62,7 @@ import {
   deleteOrder,
   getOrder,
 } from '../../services/orderService.js'
+import { RentCarBooking } from '../../services/rentCarService.js'
 
 export async function orders(fastify: FastifyInstance) {
   fastify.put<{
@@ -158,10 +162,24 @@ export async function orders(fastify: FastifyInstance) {
           orderNotes: OrderNotes(service.orderNotes),
         }))
 
+        const newRentCarBooking: RentCarBooking | undefined = {
+          rentCarRegistrationNumber: RentCarRegistrationNumber(
+            req.body.rentCarBooking.rentCarRegistrationNumber,
+          ),
+          bookingStart: BookingStart(new Date(req.body.rentCarBooking.bookingStart)),
+          bookingEnd: BookingEnd(new Date(req.body.rentCarBooking.bookingEnd)),
+          bookedBy: req.body.rentCarBooking.bookedBy
+            ? EmployeeID(req.body.rentCarBooking.bookedBy)
+            : undefined,
+          bookingStatus: req.body.rentCarBooking.bookingStatus as OrderStatus,
+          submissionTime: SubmissionTime(new Date(req.body.rentCarBooking.submissionTime)),
+        }
+
         const newOrder: Either<string, OrderWithServices> = await createOrder(
           order,
           services,
           localServices,
+          newRentCarBooking,
         )
         match(
           newOrder,

@@ -57,7 +57,7 @@ const str = [
 ]
 
 let jwt = ''
-describe('category tests', async () => {
+describe('Permissions tests', async () => {
   let app: FastifyInstance
 
   before(async () => {

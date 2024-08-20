@@ -1,4 +1,4 @@
-import { Type, TObject } from '@sinclair/typebox'
+import { TObject, Type } from '@sinclair/typebox'
 import { TypeCompiler } from '@sinclair/typebox/compiler'
 /**
  * return if email is correct, is Valid email
@@ -15,13 +15,14 @@ export const GlobalQualID = Type.Integer({ minimum: 0 })
 export const UserID = Type.Integer({ minimum: 0 })
 export const FirstName = Type.String({ minLength: 3, maxLength: 128 })
 export const LastName = Type.String({ minLength: 3, maxLength: 128 })
+export const OrderID = Type.Integer({ minimum: 0 })
 
 export interface ValidatorFactoryReturn<T> {
   schema: TObject
   verify: (data: T) => T
 }
 
-export const validatorFactory = <T extends unknown>(schema: TObject): ValidatorFactoryReturn<T> => {
+export const validatorFactory = <T extends TObject>(schema: TObject): ValidatorFactoryReturn<T> => {
   const C = TypeCompiler.Compile(schema)
 
   const verify = (data: T): T => {
@@ -54,7 +55,7 @@ export function timeStringToMS(time: string | undefined): number | undefined {
   return undefined
 }
 
-//@ts-ignore
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 export type PositiveInteger<T extends number> = `${T}` extends '0' | `-${any}` | `${any}.${any}`
   ? never
   : T

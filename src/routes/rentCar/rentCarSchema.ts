@@ -1,6 +1,5 @@
-import { CreatedAndUpdatedAT, EmployeeID } from '../../utils/helper.js'
+import { CreatedAndUpdatedAT, EmployeeID, OrderID } from '../../utils/helper.js'
 import { Static, Type } from '@sinclair/typebox'
-import { OrderID } from '../orders/ordersSchema.js'
 import { storeID } from '../stores/storesSchema.js'
 
 const RentCarRegistrationNumber = Type.String({ minLength: 3, maxLength: 11 })

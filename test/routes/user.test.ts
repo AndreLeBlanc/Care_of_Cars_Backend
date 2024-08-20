@@ -13,8 +13,8 @@ describe('POST /users/login HTTP', async () => {
 
   before(async () => {
     await initDrizzle()
-    await new Promise((f) => setTimeout(f, 1500))
     app = await buildApp({ logger: false })
+    await new Promise((f) => setTimeout(f, 1500))
     const response = await app.inject({
       method: 'POST',
       url: '/users/login',
@@ -38,7 +38,6 @@ describe('POST /users/login HTTP', async () => {
       },
     })
     newRole = JSON.parse(roleResp.body).data.roleID
-    console.log('new role: '), newRole
   })
 
   after(async () => {

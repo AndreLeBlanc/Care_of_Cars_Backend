@@ -31,6 +31,7 @@ import {
   deleteRentCarByRegNumber,
   editRentCar,
   getRentCarBooking,
+  getRentCarBookingByOrderID,
   getRentCarByID,
   getRentCarPaginate,
 } from '../../services/rentCarService.js'
@@ -57,6 +58,8 @@ import {
   PatchRentCarBodySchemaType,
   RentCarBookingIDSchemaType,
 } from './rentCarSchema.js'
+
+import { OrderIDSchema, OrderIDSchemaType } from '../orders/ordersSchema.js'
 
 import {
   Limit,
@@ -349,9 +352,8 @@ export const rentCar = async (fastify: FastifyInstance) => {
         submissionTime: SubmissionTime(new Date(request.body.submissionTime)),
       }
 
-      const bookingDetails: Either<string, RentCarBookingReply> = await createRentCarBooking(
-        newRentCarBooking,
-      )
+      const bookingDetails: Either<string, RentCarBookingReply> =
+        await createRentCarBooking(newRentCarBooking)
       match(
         bookingDetails,
         (booking: RentCarBookingReply) => {
@@ -385,6 +387,40 @@ export const rentCar = async (fastify: FastifyInstance) => {
       const { bookingID } = request.params
       const bookingDetails: Either<string, RentCarBookingReply> = await getRentCarBooking(
         RentCarBookingID(bookingID),
+      )
+      match(
+        bookingDetails,
+        (booking: RentCarBookingReply) => {
+          return reply.status(200).send({ message: 'Rent Car booking found', ...booking })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Params: OrderIDSchemaType
+    Reply: CreateRentCarBookingReplySchemaType | MessageSchemaType
+  }>(
+    '/bookingOrder/:orderID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_rent_car_booking')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: OrderIDSchema,
+        response: { 200: CreateRentCarBookingReplySchema, 404: MessageSchema },
+      },
+    },
+    async (request, reply) => {
+      const { orderID } = request.params
+      const bookingDetails: Either<string, RentCarBookingReply> = await getRentCarBookingByOrderID(
+        OrderID(orderID),
       )
       match(
         bookingDetails,

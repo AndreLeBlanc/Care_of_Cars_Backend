@@ -3,7 +3,7 @@ import { fastifyJwt } from '@fastify/jwt'
 import fs from 'node:fs'
 
 import * as dotenv from 'dotenv'
-import { FastifyInstance, FastifyServerOptions, fastify } from 'fastify'
+import { FastifyInstance, fastify } from 'fastify'
 import cors from '@fastify/cors'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
@@ -32,7 +32,6 @@ const defaultOptions = {
   ignoreTrailingSlash: true,
 }
 dotenv.config()
-export interface AppOptions extends FastifyServerOptions {}
 // Pass --options via CLI arguments in command to enable these options.
 
 const isHttps =

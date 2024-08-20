@@ -1,8 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
-
-import { storeID } from '../stores/storesSchema.js'
-
+import { CreateRentCarBookingSchema } from '../rentCar/rentCarSchema.js'
 import { driverCarID } from '../driverCars/driverCarsSchema.js'
+import { storeID } from '../stores/storesSchema.js'
 
 import {
   LocalServiceIDSchema,
@@ -11,9 +10,8 @@ import {
   ServiceVariantIDSchema,
 } from '../services/serviceSchema.js'
 
-import { CreatedAndUpdatedAT, EmployeeID, driverID } from '../../utils/helper.js'
+import { CreatedAndUpdatedAT, EmployeeID, OrderID, driverID } from '../../utils/helper.js'
 
-export const OrderID = Type.Integer({ minimum: 0 })
 const OrderNotesSchema = Type.String()
 const OrderStatusSchema = Type.String()
 export const PickupTimeSchema = Type.String({ format: 'date' })
@@ -121,6 +119,7 @@ export const CreateOrderBodySchema = Type.Composite([
   Type.Object({
     services: Type.Array(CreateOrderServicesSchema),
     localServices: Type.Array(CreateOrderLocalServicesSchema),
+    rentCarBooking: CreateRentCarBookingSchema,
   }),
 ])
 

@@ -71,10 +71,6 @@ import {
 } from '../schema/schema.js'
 dotenv.config()
 
-export interface SupportPluginOptions {
-  // Specify Support plugin options here
-}
-
 export enum seedResult {
   Failed,
   WrongConfig,
@@ -82,7 +78,7 @@ export enum seedResult {
   AlreadySeeded,
 }
 
-export default fp<SupportPluginOptions>(async () => {
+export default fp(async () => {
   async function seedSuperAdmin(): Promise<seedResult> {
     const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
     const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
@@ -212,16 +208,9 @@ export default fp<SupportPluginOptions>(async () => {
       } else {
         return seedResult.WrongConfig
       }
-    } catch (err: any) {
-      //console.log(err?.detail);
-      // console.dir(err?.code);
-      if (err.code == '23505') {
-        console.info('Already seeded superadmin, skipping')
-        return seedResult.AlreadySeeded
-      } else {
-        console.error(err)
-        return seedResult.Failed
-      }
+    } catch (err: unknown) {
+      console.error(err)
+      return seedResult.Failed
     }
   }
   if (process.env.RUN_SEED === 'true') {

@@ -1353,7 +1353,7 @@ export const qualificationsLocalRelations = relations(qualificationsLocal, ({ on
 
 export const qualificationsGlobal = pgTable('qualificationsGlobal', {
   globalQualID: serial('globalQualID').$type<GlobalQualID>().primaryKey(),
-  globalQualName: varchar('localQualName', { length: 64 })
+  globalQualName: varchar('globalQualName', { length: 64 })
     .unique()
     .$type<GlobalQualName>()
     .notNull(),
