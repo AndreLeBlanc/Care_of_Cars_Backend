@@ -457,6 +457,8 @@ export const Discount = make<Discount>()
 
 export type BillID = Brand<number, 'billID'>
 export const BillID = make<BillID>()
+export type PaymentDays = Brand<number, 'paymentDays'>
+export const PaymentDays = make<PaymentDays>()
 
 export type CheckedInStatus = 'CheckedIn' | 'CheckedOut'
 
@@ -1492,7 +1494,7 @@ export const orders = pgTable(
     pickupTime: timestamp('submissionTime').$type<PickupTime>().notNull(),
     vatFree: boolean('vatFree').$type<VatFree>().notNull(),
     orderStatus: orderStatuspgEnum('orderStatus').notNull(),
-    currency: varchar('currency', { length: 5 }).notNull(),
+    currency: varchar('currency').notNull(),
     discount: real('discount').$type<Discount>().notNull(),
     ...dbDates,
   },
@@ -1529,6 +1531,7 @@ export const orderServices = pgTable(
       .$type<ServiceID>()
       .references(() => services.serviceID, { onDelete: 'cascade' })
       .notNull(),
+    name: varchar('name', { length: 256 }).$type<ServiceName>().notNull(),
     amount: integer('amount').$type<Amount>().notNull(),
     serviceVariantID: integer('serviceVariantID')
       .$type<ServiceID>()
@@ -1559,7 +1562,7 @@ export const orderServices = pgTable(
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     cost: real('cost').$type<ServiceCostNumber>().notNull(),
-    discount: real('discount').$type<ServiceCostNumber>().notNull(),
+    currency: varchar('currency').notNull(),
     vatFree: boolean('vatFree').$type<VatFree>().notNull(),
     orderNotes: varchar('orderNotes').$type<OrderNotes>(),
   },
@@ -1595,6 +1598,7 @@ export const orderLocalServices = pgTable(
       .references(() => orders.orderID, { onDelete: 'cascade' })
       .notNull(),
     amount: integer('amount').$type<Amount>().notNull(),
+    name: varchar('name', { length: 256 }).$type<ServiceName>().notNull(),
     localServiceID: integer('localServiceID')
       .$type<LocalServiceID>()
       .references(() => localServices.localServiceID, { onDelete: 'cascade' })
@@ -1628,7 +1632,7 @@ export const orderLocalServices = pgTable(
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     cost: real('cost').$type<ServiceCostNumber>().notNull(),
-    discount: real('discount').$type<ServiceCostNumber>().notNull(),
+    currency: varchar('currency').notNull(),
     vatFree: boolean('vatFree').$type<VatFree>().notNull(),
     orderNotes: varchar('orderNotes').$type<OrderNotes>(),
   },
@@ -1687,6 +1691,8 @@ export const billStatus = ['bill', 'creditBill', 'cashBill'] as const
 
 export const billStatuspgEnum = pgEnum('billStatus', billStatus)
 
+export type BillStatus = (typeof billStatus)[number]
+
 // Samlingsfaktura/collective invoice is not a type. We have to check if a bill has more than one order to determine if it is one.
 
 export const bills = pgTable('bills', {
@@ -1697,10 +1703,11 @@ export const bills = pgTable('bills', {
     .references(() => employees.employeeID, { onDelete: 'no action' }),
   billingDate: date('billingDate').notNull(),
   paymentDate: date('paymentDate').notNull(),
-  paymentDays: integer('paymentDays').notNull(),
+  paymentDays: integer('paymentDays').$type<PaymentDays>().notNull(),
   driverID: integer('driverID')
     .$type<DriverID>()
-    .references(() => drivers.driverID, { onDelete: 'no action' }),
+    .references(() => drivers.driverID, { onDelete: 'no action' })
+    .notNull(),
   customerOrgNumber: varchar('customerOrgNumber', { length: 11 })
     .$type<CustomerOrgNumber>()
     .references(() => companycustomers.customerOrgNumber, { onDelete: 'no action' }),
@@ -1749,10 +1756,12 @@ export const billOrders = pgTable(
   {
     billID: integer('billID')
       .$type<BillID>()
-      .references(() => bills.billID, { onDelete: 'cascade' }),
+      .references(() => bills.billID, { onDelete: 'cascade' })
+      .notNull(),
     orderID: integer('orderID')
       .$type<OrderID>()
-      .references(() => orders.orderID, { onDelete: 'cascade' }),
+      .references(() => orders.orderID, { onDelete: 'cascade' })
+      .notNull(),
   },
   (billOrder) => {
     return {

@@ -6,8 +6,6 @@ import { eq, sql } from 'drizzle-orm'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
 
-import Dinero, { Currency } from 'dinero.js'
-
 import {
   RentCarBooking,
   RentCarBookingReply,
@@ -26,6 +24,7 @@ import {
   OrderNotes,
   OrderStatus,
   PickupTime,
+  ServiceCostCurrency,
   ServiceCostNumber,
   ServiceDay1,
   ServiceDay2,
@@ -33,6 +32,7 @@ import {
   ServiceDay4,
   ServiceDay5,
   ServiceID,
+  ServiceName,
   StoreID,
   SubmissionTime,
   VatFree,
@@ -41,6 +41,7 @@ import {
   orders,
   rentCarBookings,
 } from '../schema/schema.js'
+import { Currency } from 'dinero.js'
 
 type OrderBase = {
   driverCarID: DriverCarID
@@ -51,12 +52,13 @@ type OrderBase = {
   submissionTime: SubmissionTime
   pickupTime: PickupTime
   vatFree: VatFree
+  discount: Discount
+  currency: ServiceCostCurrency
   orderStatus: OrderStatus
 }
 
 export type CreateOrder = OrderBase & {
   orderID?: OrderID
-  currency: Currency
   discount: Discount
 }
 
@@ -65,12 +67,13 @@ export type Order = OrderBase & {
   orderID: OrderID
   updatedAt: Date
   createdAt: Date
-  discount: Dinero.Dinero
+  discount: Discount
 }
 
 export type CreateOrderServices = {
   serviceID: ServiceID
   serviceVariantID?: ServiceID
+  name: ServiceName
   amount: Amount
   day1?: ServiceDay1
   day1Work?: string
@@ -88,7 +91,7 @@ export type CreateOrderServices = {
   day5Work?: string
   day5Employee?: EmployeeID
   cost: ServiceCostNumber
-  discount: ServiceCostNumber
+  currency: ServiceCostCurrency
   vatFree: VatFree
   orderNotes?: OrderNotes
 }
@@ -99,6 +102,7 @@ export type OrderServices = CreateOrderServices & {
 export type CreateOrderLocalServices = {
   localServiceID: LocalServiceID
   localServiceVariantID?: LocalServiceID
+  name: ServiceName
   amount: Amount
   day1?: ServiceDay1
   day1Work?: string
@@ -116,7 +120,7 @@ export type CreateOrderLocalServices = {
   day5Work?: string
   day5Employee?: EmployeeID
   cost: ServiceCostNumber
-  discount: ServiceCostNumber
+  currency: ServiceCostCurrency
   vatFree: VatFree
   orderNotes?: OrderNotes
 }
@@ -140,8 +144,8 @@ type OrderNoBrand = {
   vatFree: VatFree
   orderStatus: OrderStatus
   orderID: OrderID
-  currency: string
   discount: Discount
+  currency: string
   updatedAt: Date
   createdAt: Date
 }
@@ -150,6 +154,7 @@ type OrderLocalServicesNoBrand = {
   localServiceID: LocalServiceID
   localServiceVariantID?: LocalServiceID
   amount: Amount
+  name: ServiceName
   day1?: ServiceDay1 | null
   day1Work?: string | null
   day1Employee?: EmployeeID | null
@@ -166,7 +171,7 @@ type OrderLocalServicesNoBrand = {
   day5Work?: string | null
   day5Employee?: EmployeeID | null
   cost: ServiceCostNumber
-  discount: ServiceCostNumber
+  currency: string
   vatFree: VatFree
   orderNotes?: OrderNotes | null
   orderID: OrderID
@@ -174,6 +179,7 @@ type OrderLocalServicesNoBrand = {
 type OrderServicesNoBrand = {
   serviceID: ServiceID
   ServiceVariantID?: ServiceID
+  name: ServiceName
   amount: Amount
   day1?: ServiceDay1 | null
   day1Work?: string | null
@@ -191,7 +197,7 @@ type OrderServicesNoBrand = {
   day5Work?: string | null
   day5Employee?: EmployeeID | null
   cost: ServiceCostNumber
-  discount: ServiceCostNumber
+  currency: string
   vatFree: VatFree
   orderNotes?: OrderNotes | null
   orderID: OrderID
@@ -216,18 +222,17 @@ function brandOrder(
     orderStatus: newOrder.orderStatus,
     updatedAt: newOrder.updatedAt,
     createdAt: newOrder.createdAt,
-    discount: Dinero({
-      amount: newOrder.discount,
-      currency: newOrder.currency as Dinero.Currency,
-    }),
+    discount: newOrder.discount,
+    currency: ServiceCostCurrency(newOrder.currency as Currency),
   }
 
   let cost = 0
   const serviceBranded: OrderServices[] = newOrderServices.map((service) => {
-    cost = cost + service.cost - service.discount
+    cost = cost + service.cost
     return {
       orderID: service.orderID,
       serviceID: service.serviceID,
+      name: service.name,
       amount: service.amount,
       serviceServiceVariantID: service.ServiceVariantID ?? undefined,
       day1: service.day1 ?? undefined,
@@ -246,17 +251,18 @@ function brandOrder(
       day5Work: service.day5Work ?? undefined,
       day5Employee: service.day5Employee ?? undefined,
       cost: service.cost,
-      discount: service.discount,
+      currency: ServiceCostCurrency(service.currency as Currency),
       vatFree: service.vatFree,
       orderNotes: service.orderNotes ?? undefined,
     }
   })
 
   const localBranded: OrderLocalServices[] = newOrderlocalServices.map((local) => {
-    cost = cost + local.cost - local.discount
+    cost = cost + local.cost
     return {
       orderID: local.orderID,
       localServiceID: local.localServiceID,
+      name: local.name,
       amount: local.amount,
       localServiceVariantID: local.localServiceVariantID ?? undefined,
       day1: local.day1 ?? undefined,
@@ -275,7 +281,7 @@ function brandOrder(
       day5Work: local.day5Work ?? undefined,
       day5Employee: local.day5Employee ?? undefined,
       cost: local.cost,
-      discount: local.discount,
+      currency: ServiceCostCurrency(local.currency as Currency),
       vatFree: local.vatFree,
       orderNotes: local.orderNotes ?? undefined,
     }
@@ -328,6 +334,7 @@ export async function createOrder(
             .returning()
         )[0]
       }
+
       if (newOrder != null) {
         const servicesWithOrderID = services.map((service) => ({
           orderID: newOrder.orderID,
@@ -342,6 +349,7 @@ export async function createOrder(
             set: {
               serviceID: sql`"excluded"."serviceID"`,
               serviceVariantID: sql`"excluded"."serviceVariantID"`,
+              name: sql`"excluded"."name"`,
               amount: sql`"excluded"."amount"`,
               day1: sql`"excluded"."day1"`,
               day1Work: sql`"excluded"."day1Work"`,
@@ -359,7 +367,7 @@ export async function createOrder(
               day5Work: sql`"excluded"."day5Work"`,
               day5Employee: sql`"excluded"."day5Employee"`,
               cost: sql`"excluded"."cost"`,
-              discount: sql`"excluded"."discount"`,
+              currency: sql`"excluded"."currency"`,
               vatFree: sql`"excluded"."vatFree"`,
               orderNotes: sql`"excluded"."orderNotes"`,
             },
@@ -379,6 +387,7 @@ export async function createOrder(
             set: {
               localServiceID: sql`"excluded"."localServiceID"`,
               serviceVariantID: sql`"excluded"."serviceVariantID"`,
+              name: sql`"excluded"."name"`,
               amount: sql`"excluded"."amount"`,
               day1: sql`"excluded"."day1"`,
               day1Work: sql`"excluded"."day1Work"`,
@@ -396,7 +405,7 @@ export async function createOrder(
               day5Work: sql`"excluded"."day5Work"`,
               day5Employee: sql`"excluded"."day5Employee"`,
               cost: sql`"excluded"."cost"`,
-              discount: sql`"excluded"."discount"`,
+              currency: sql`"excluded"."currency"`,
               vatFree: sql`"excluded"."vatFree"`,
               orderNotes: sql`"excluded"."orderNotes"`,
             },
@@ -449,39 +458,37 @@ export async function deleteOrder(order: OrderID): Promise<Either<string, OrderW
 
 export async function getOrder(order: OrderID): Promise<Either<string, OrderWithServices>> {
   try {
-    //    TODODO
-    //    TODODO
-    //    TODODO
-    //    TODODO
-    //    TODODO
-    return await db.transaction(async (tx) => {
-      const fetchedOrderServices = await tx
-        .select()
-        .from(orderServices)
-        .where(eq(orderServices.orderID, order))
+    const fetchedOrders = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.orderID, order))
+      .leftJoin(rentCarBookings, eq(rentCarBookings.orderID, order))
+      .leftJoin(orderLocalServices, eq(orderLocalServices.orderID, order))
+      .leftJoin(orderServices, eq(orderServices.orderID, order))
 
-      const fetchedOrderLocalServices = await tx
-        .select()
-        .from(orderLocalServices)
-        .where(eq(orderLocalServices.orderID, order))
+    const serviceLists = fetchedOrders.reduce<{
+      serv: OrderServicesNoBrand[]
+      local: OrderLocalServicesNoBrand[]
+    }>(
+      (acc, order) => {
+        if (order.orderServices != null) {
+          acc.serv.push(order.orderServices)
+        }
+        return acc
+      },
+      { serv: [], local: [] },
+    )
 
-      const [fetchedOrder] = await tx
-        .select()
-        .from(orders)
-        .where(eq(orders.orderID, order))
-        .leftJoin(rentCarBookings, eq(rentCarBookings.orderID, order))
-
-      return fetchedOrder
-        ? right(
-            brandOrder(
-              fetchedOrder.orders,
-              fetchedOrderServices,
-              fetchedOrderLocalServices,
-              fetchedOrder.rentCarBookings,
-            ),
-          )
-        : left("Couldn't find order")
-    })
+    return fetchedOrders[0]
+      ? right(
+          brandOrder(
+            fetchedOrders[0].orders,
+            serviceLists.serv,
+            serviceLists.local,
+            fetchedOrders[0].rentCarBookings,
+          ),
+        )
+      : left("Couldn't find order")
   } catch (e) {
     return left(errorHandling(e))
   }

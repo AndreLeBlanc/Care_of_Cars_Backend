@@ -336,8 +336,8 @@ export async function services(fastify: FastifyInstance) {
       },
 
       schema: {
-        params: getServiceByIDSchema,
-        response: {},
+        //    params: getServiceByIDSchema,
+        //  response: {},
       },
     },
     async (request, reply) => {

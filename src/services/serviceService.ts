@@ -39,7 +39,7 @@ import {
   services,
 } from '../schema/schema.js'
 
-import Dinero from 'dinero.js'
+import Dinero, { Currency } from 'dinero.js'
 
 import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
@@ -263,7 +263,6 @@ export async function createService(
               .values({ ...addToService, storeID: service.storeID })
               .returning()
       } else {
-        console.log('service', service)
         ;[insertedService] = service.serviceID
           ? await tx
               .update(services)
@@ -279,14 +278,12 @@ export async function createService(
         brander(insertedService)
 
       if ('localServiceID' in insertedService && 'localServiceVariants' in service) {
-        const variCurrency = service.cost.getCurrency()
-        const variCost = ServiceCostNumber(service.cost.getAmount())
         const serviceVariantArr = service.localServiceVariants.map((serviceVariant) => ({
           serviceVariantID: serviceVariant.serviceVariantID,
           localServiceID: insertedService.localServiceID,
           name: serviceVariant.name,
-          cost: variCost,
-          currency: variCurrency,
+          cost: ServiceCostNumber(serviceVariant.cost.getAmount()),
+          currency: serviceVariant.cost.getCurrency(),
           award: serviceVariant.award,
           day1: serviceVariant.day1,
           day2: serviceVariant.day2,
@@ -334,17 +331,15 @@ export async function createService(
         return match(
           insertedServiceBranded,
           (brandedService) => right({ ...brandedService, localServiceVariants: variantsDinero }),
-          (err) => left(err),
+          (err) => left(errorHandling(err)),
         )
       } else if ('serviceID' in insertedService && 'serviceVariants' in service) {
-        const variCurrency = service.cost.getCurrency()
-        const variCost = ServiceCostNumber(service.cost.getAmount())
         const serviceVariantArr = service.serviceVariants.map((serviceVariant) => ({
           serviceVariantID: serviceVariant.serviceVariantID,
           serviceID: insertedService.serviceID,
           name: serviceVariant.name,
-          cost: variCost,
-          currency: variCurrency,
+          cost: ServiceCostNumber(serviceVariant.cost.getAmount()),
+          currency: serviceVariant.cost.getCurrency(),
           award: serviceVariant.award,
           day1: serviceVariant.day1,
           day2: serviceVariant.day2,
@@ -438,15 +433,15 @@ export async function getServicesPaginate(
       orderBy === listServiceOrderByEnum.name
         ? desc(services.name)
         : orderBy === listServiceOrderByEnum.serviceCategoryID
-        ? desc(serviceCategories.serviceCategoryID)
-        : desc(services.serviceID)
+          ? desc(serviceCategories.serviceCategoryID)
+          : desc(services.serviceID)
   } else if (order === serviceOrderEnum.asc) {
     orderCondition =
       orderBy === listServiceOrderByEnum.name
         ? asc(services.name)
         : orderBy === listServiceOrderByEnum.serviceCategoryID
-        ? asc(serviceCategories.serviceCategoryID)
-        : asc(services.serviceID)
+          ? asc(serviceCategories.serviceCategoryID)
+          : asc(services.serviceID)
   } else {
     orderCondition = desc(services.serviceID) // Default to descending order by service ID
   }
@@ -457,15 +452,15 @@ export async function getServicesPaginate(
       orderBy === listServiceOrderByEnum.name
         ? desc(services.name)
         : orderBy === listServiceOrderByEnum.serviceCategoryID
-        ? desc(serviceCategories.serviceCategoryID)
-        : desc(localServices.localServiceID)
+          ? desc(serviceCategories.serviceCategoryID)
+          : desc(localServices.localServiceID)
   } else if (order === serviceOrderEnum.asc) {
     orderConditionLocal =
       orderBy === listServiceOrderByEnum.name
         ? asc(localServices.name)
         : orderBy === listServiceOrderByEnum.serviceCategoryID
-        ? asc(serviceCategories.serviceCategoryID)
-        : asc(localServices.localServiceID)
+          ? asc(serviceCategories.serviceCategoryID)
+          : asc(localServices.localServiceID)
   } else {
     orderConditionLocal = desc(localServices.localServiceID) // Default to descending order by service ID
   }
@@ -555,25 +550,85 @@ export async function getServiceById(serviceID: {
   id: ServiceID | LocalServiceID
 }): Promise<Either<string, Service | LocalService>> {
   try {
-    let servicesDetail
     if (serviceID.type === 'Global') {
-      console.log('i am here')
-      servicesDetail = await db.query.services.findFirst({
-        where: eq(services.serviceID, serviceID.id as ServiceID),
-        with: {
-          serviceCategories: true,
-          serviceVariants: true,
+      const servicesDetail = await db
+        .select()
+        .from(services)
+        .where(eq(services.serviceID, serviceID.id as ServiceID))
+        .leftJoin(serviceVariants, eq(serviceVariants.serviceID, services.serviceID))
+
+      const variants = servicesDetail.reduce<ServiceVariant[]>((acc, serviceVariant) => {
+        if (serviceVariant.serviceVariants != null) {
+          acc.push({
+            serviceVariantID: serviceVariant.serviceVariants.serviceVariantID,
+            serviceID: serviceVariant.services.serviceID,
+            name: serviceVariant.serviceVariants.name,
+            cost: ServiceCostDinero(
+              Dinero({
+                amount: serviceVariant.serviceVariants.cost,
+                currency: serviceVariant.serviceVariants.currency as Currency,
+              }),
+            ),
+            award: serviceVariant.serviceVariants.award,
+            day1: serviceVariant.serviceVariants.day1 ?? undefined,
+            day2: serviceVariant.serviceVariants.day2 ?? undefined,
+            day3: serviceVariant.serviceVariants.day3 ?? undefined,
+            day4: serviceVariant.serviceVariants.day4 ?? undefined,
+            day5: serviceVariant.serviceVariants.day5 ?? undefined,
+          })
+        }
+        return acc
+      }, [])
+
+      const branded = brander(servicesDetail[0].services)
+      return match(
+        branded,
+        (brandedService) => right({ ...brandedService, serviceVariants: variants }),
+        (err) => {
+          return left(err)
         },
-      })
+      )
     } else {
-      servicesDetail = await db.query.localServices.findFirst({
-        where: eq(localServices.localServiceID, serviceID.id as LocalServiceID),
-        with: {
-          serviceCategories: true,
+      const servicesDetail = await db
+        .select()
+        .from(localServices)
+        .where(eq(localServices.localServiceID, serviceID.id as LocalServiceID))
+        .leftJoin(
+          localServiceVariants,
+          eq(localServiceVariants.localServiceID, serviceID.id as LocalServiceID),
+        )
+
+      const variants = servicesDetail.reduce<LocalServiceVariant[]>((acc, serviceVariant) => {
+        if (serviceVariant.localServiceVariants != null) {
+          acc.push({
+            serviceVariantID: serviceVariant.localServiceVariants.serviceVariantID,
+            localServiceID: serviceVariant.localServices.localServiceID,
+            name: serviceVariant.localServiceVariants.name,
+            cost: ServiceCostDinero(
+              Dinero({
+                amount: serviceVariant.localServiceVariants.cost,
+                currency: serviceVariant.localServiceVariants.currency as Currency,
+              }),
+            ),
+            award: serviceVariant.localServiceVariants.award,
+            day1: serviceVariant.localServiceVariants.day1 ?? undefined,
+            day2: serviceVariant.localServiceVariants.day2 ?? undefined,
+            day3: serviceVariant.localServiceVariants.day3 ?? undefined,
+            day4: serviceVariant.localServiceVariants.day4 ?? undefined,
+            day5: serviceVariant.localServiceVariants.day5 ?? undefined,
+          })
+        }
+        return acc
+      }, [])
+      const branded = brander(servicesDetail[0].localServices)
+      return match(
+        branded,
+        (brandedService) => right({ ...brandedService, serviceVariants: variants }),
+        (err) => {
+          return left(errorHandling(err))
         },
-      })
+      )
     }
-    return servicesDetail ? brander(servicesDetail) : left("Couldn't find service")
   } catch (e) {
     return left(errorHandling(e))
   }
