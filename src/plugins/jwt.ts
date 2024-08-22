@@ -86,6 +86,7 @@ export default fp(async (fastify) => {
           RoleID(1), //userData.userWithPassword.role.roleID),
           permissionName,
         )
+
         console.log(request.user)
         console.log('hasPermission', hasPermission)
         return true

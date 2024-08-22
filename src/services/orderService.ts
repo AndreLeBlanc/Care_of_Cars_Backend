@@ -59,7 +59,6 @@ type OrderBase = {
 
 export type CreateOrder = OrderBase & {
   orderID?: OrderID
-  discount: Discount
 }
 
 export type Order = OrderBase & {
@@ -101,7 +100,7 @@ export type OrderServices = CreateOrderServices & {
 }
 export type CreateOrderLocalServices = {
   localServiceID: LocalServiceID
-  localServiceVariantID?: LocalServiceID
+  serviceVariantID?: LocalServiceID
   name: ServiceName
   amount: Amount
   day1?: ServiceDay1
@@ -458,34 +457,92 @@ export async function deleteOrder(order: OrderID): Promise<Either<string, OrderW
 
 export async function getOrder(order: OrderID): Promise<Either<string, OrderWithServices>> {
   try {
-    const fetchedOrders = await db
-      .select()
+    const [fetchedOrders] = await db
+      .select({
+        order: orders,
+        orderServices: sql<
+          OrderServices[]
+        >`json_agg(json_build_object('orderID', ${orderServices.orderID}
+          'serviceID', ${orderServices.serviceID}
+          'serviceVariantID',${orderServices.serviceVariantID}
+          'name', ${orderServices.name}
+          'amount', ${orderServices.amount}
+          'day1', ${orderServices.day1}
+          'day1Work', ${orderServices.day1Work}
+          'day1Employee', ${orderServices.day1Employee}
+          'day2', ${orderServices.day2}
+          'day2Work', ${orderServices.day2Work}
+          'day2Employee', ${orderServices.day2Employee}
+          'day3', ${orderServices.day3}
+          'day3Work', ${orderServices.day3Work}
+          'day3Employee', ${orderServices.day3Employee}
+          'day4', ${orderServices.day4}
+          'day4Work', ${orderServices.day4Work}
+          'day4Employee', ${orderServices.day4Employee}
+          'day5', ${orderServices.day5}
+          'day5Work', ${orderServices.day5Work}
+          'day5Employee', ${orderServices.day5Employee}
+          'cost', ${orderServices.cost}
+          'currency', ${orderServices.currency}
+          'vatFree', ${orderServices.vatFree}
+          'orderNotes', ${orderServices.orderNotes}
+          ))`.as('tagname'),
+        rentCarBooking: rentCarBookings,
+
+        orderLocalServices: sql<
+          OrderLocalServices[]
+        >`json_agg(json_build_object('orderID', ${orderLocalServices.orderID}
+          'localServiceID', ${orderLocalServices.localServiceID}
+          'serviceVariantID', ${orderLocalServices.serviceVariantID}
+          'name', ${orderLocalServices.name}
+          'amount', ${orderLocalServices.amount}
+          'day1', ${orderLocalServices.day1}
+          'day1Work', ${orderLocalServices.day1Work}
+          'day1Employee', ${orderLocalServices.day1Employee}
+          'day2', ${orderLocalServices.day2}
+          'day2Work', ${orderLocalServices.day2Work}
+          'day2Employee', ${orderLocalServices.day2Employee}
+          'day3', ${orderLocalServices.day3}
+          'day3Work', ${orderLocalServices.day3Work}
+          'day3Employee', ${orderLocalServices.day3Employee}
+          'day4', ${orderLocalServices.day4}
+          'day4Work', ${orderLocalServices.day4Work}
+          'day4Employee', ${orderLocalServices.day4Employee}
+          'day5', ${orderLocalServices.day5}
+          'day5Work', ${orderLocalServices.day5Work}
+          'day5Employee', ${orderLocalServices.day5Employee}
+          'cost', ${orderLocalServices.cost}
+          'currency', ${orderLocalServices.currency}
+          'vatFree', ${orderLocalServices.vatFree}
+          'orderNotes', ${orderLocalServices.orderNotes}
+          ))`.as('tagname'),
+      })
       .from(orders)
       .where(eq(orders.orderID, order))
       .leftJoin(rentCarBookings, eq(rentCarBookings.orderID, order))
       .leftJoin(orderLocalServices, eq(orderLocalServices.orderID, order))
       .leftJoin(orderServices, eq(orderServices.orderID, order))
 
-    const serviceLists = fetchedOrders.reduce<{
-      serv: OrderServicesNoBrand[]
-      local: OrderLocalServicesNoBrand[]
-    }>(
-      (acc, order) => {
-        if (order.orderServices != null) {
-          acc.serv.push(order.orderServices)
-        }
-        return acc
-      },
-      { serv: [], local: [] },
-    )
+    //    const serviceLists = fetchedOrders.reduce<{
+    //      serv: OrderServicesNoBrand[]
+    //      local: OrderLocalServicesNoBrand[]
+    //    }>(
+    //      (acc, order) => {
+    //        if (order.orderServices != null) {
+    //          acc.serv.push(order.orderServices)
+    //        }
+    //        return acc
+    //      },
+    //      { serv: [], local: [] },
+    //    )
 
-    return fetchedOrders[0]
+    return fetchedOrders
       ? right(
           brandOrder(
-            fetchedOrders[0].orders,
-            serviceLists.serv,
-            serviceLists.local,
-            fetchedOrders[0].rentCarBookings,
+            fetchedOrders.order,
+            fetchedOrders.orderServices,
+            fetchedOrders.orderLocalServices,
+            fetchedOrders.rentCarBooking,
           ),
         )
       : left("Couldn't find order")
