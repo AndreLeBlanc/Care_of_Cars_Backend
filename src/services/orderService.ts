@@ -1,6 +1,6 @@
 import { db } from '../config/db-connect.js'
 
-import { eq, sql } from 'drizzle-orm'
+import { and, count, eq, ilike, or, sql } from 'drizzle-orm'
 
 //import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.js'
 
@@ -12,19 +12,30 @@ import {
   RentCarBookingReplyNoBrand,
 } from './rentCarService.js'
 
+import Dinero, { Currency } from 'dinero.js'
+
+import { OrderRowNoDineroName } from './billingService.js'
+
+import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.js'
+
 import {
   Amount,
+  Billed,
   Cost,
   Discount,
   DriverCarID,
+  DriverFirstName,
   DriverID,
+  DriverLastName,
   EmployeeID,
+  IsBilled,
   LocalServiceID,
   OrderID,
   OrderNotes,
   OrderStatus,
   PickupTime,
   ServiceCostCurrency,
+  ServiceCostDinero,
   ServiceCostNumber,
   ServiceDay1,
   ServiceDay2,
@@ -36,12 +47,31 @@ import {
   StoreID,
   SubmissionTime,
   VatFree,
+  billOrders,
+  drivers,
   orderLocalServices,
   orderServices,
   orders,
   rentCarBookings,
 } from '../schema/schema.js'
-import { Currency } from 'dinero.js'
+
+export type OrdersPaginated = {
+  totalOrders: ResultCount
+  totalPage: Page
+  perPage: Limit
+  page: Page
+  orders: {
+    driverCarID: DriverCarID
+    driverID: DriverID
+    firstName: DriverFirstName
+    lastName: DriverLastName
+    submissionTime: SubmissionTime
+    updatedAt: Date
+    total: ServiceCostDinero[]
+    orderStatus: OrderStatus
+    billed: Billed
+  }[]
+}
 
 type OrderBase = {
   driverCarID: DriverCarID
@@ -551,4 +581,121 @@ export async function getOrder(order: OrderID): Promise<Either<string, OrderWith
   }
 }
 
-//export async function listOrders(): Promise<Either<string, Order[]>> {}
+export async function listOrders(
+  search: Search,
+  limit = Limit(10),
+  page = Page(1),
+  offset = Offset(0),
+  orderStatusSearch?: OrderStatus,
+  billingStatusSearch?: IsBilled,
+): Promise<Either<string, OrdersPaginated>> {
+  try {
+    return await db.transaction(async (tx) => {
+      let condition = and(
+        or(
+          ilike(orders.submissionTime, '%' + search + '%'),
+          ilike(orders.orderStatus, '%' + search + '%'),
+          ilike(drivers.driverFirstName, '%' + search + '%'),
+          ilike(drivers.driverLastName, '%' + search + '%'),
+        ),
+      )
+      if (orderStatusSearch != null) {
+        condition = or(condition, ilike(orders.orderStatus, '%' + orderStatusSearch + '%'))
+      }
+      if (billingStatusSearch != null) {
+        if (billingStatusSearch) {
+          condition = or(
+            condition,
+            sql<boolean>`EXISTS (
+            SELECT 1 FROM ${billOrders}
+            WHERE ${billOrders.orderID} = ${orders.orderID}
+          )`,
+          )
+        } else {
+          condition = or(
+            condition,
+            sql<boolean>`NOT EXISTS (
+            SELECT 1 FROM ${billOrders}
+            WHERE ${billOrders.orderID} = ${orders.orderID}
+          )`,
+          )
+        }
+      }
+
+      const orderList = await tx
+        .select({
+          driverCarID: orders.driverCarID,
+          driverID: orders.driverID,
+          firstName: drivers.driverFirstName,
+          lastName: drivers.driverLastName,
+          submissionTime: orders.submissionTime,
+          updatedAt: orders.updatedAt,
+          orderStatus: orders.orderStatus,
+          services: sql<OrderRowNoDineroName[]>`json_agg(json_build_object(
+          'currency',${orderServices.currency}
+          'cost',${orderServices.cost}
+          'amount',${orderServices.amount}))`.as('tagname'),
+
+          localServices: sql<OrderRowNoDineroName[]>`json_agg(json_build_object(
+        'currency',${orderLocalServices.currency}
+        'cost',${orderLocalServices.cost}
+        'amount',${orderLocalServices.amount}))`.as('tagname'),
+          billed: sql<boolean>`EXISTS (
+            SELECT 1 FROM ${billOrders}
+            WHERE ${billOrders.orderID} = ${orders.orderID}
+          )`,
+        })
+        .from(orders)
+        .innerJoin(drivers, eq(orders.driverID, drivers.driverID))
+        .leftJoin(orderServices, eq(orders.orderID, orderServices.orderID))
+        .leftJoin(orderLocalServices, eq(orders.orderID, orderLocalServices.orderID))
+        .where(condition)
+        .limit(limit || 10)
+        .offset(offset || 0)
+
+      const [orderCount] = await tx
+        .select({ count: count() })
+        .from(orders)
+        .innerJoin(drivers, eq(orders.driverID, drivers.driverID))
+        .where(condition)
+
+      const totalPage = Page(Math.ceil(orderCount.count / limit))
+
+      function totalPriceCalc(
+        services: OrderRowNoDineroName[],
+        localServices: OrderRowNoDineroName[],
+      ): ServiceCostDinero[] {
+        return localServices.concat(services).map((serv) =>
+          ServiceCostDinero(
+            Dinero({
+              amount: serv.cost,
+              currency: serv.currency as Currency,
+            }).multiply(serv.amount),
+          ),
+        )
+      }
+
+      return orderList
+        ? right({
+            totalOrders: ResultCount(orderCount.count),
+            totalPage: totalPage,
+            perPage: limit,
+            page: page,
+            orders: orderList.map((order) => ({
+              driverCarID: order.driverCarID,
+              driverID: order.driverID,
+              firstName: order.firstName,
+              lastName: order.lastName,
+              submissionTime: order.submissionTime,
+              updatedAt: order.updatedAt,
+              total: totalPriceCalc(order.services, order.localServices),
+              orderStatus: order.orderStatus,
+              billed: Billed(order.billed),
+            })),
+          })
+        : left('no errors found')
+    })
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}

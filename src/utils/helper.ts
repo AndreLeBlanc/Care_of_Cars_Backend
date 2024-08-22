@@ -8,7 +8,7 @@ export function isEmail(emailAddress: string) {
   return emailAddress?.match(regex)
 }
 
-export const driverID = Type.Integer({ minimum: 0 })
+export const DriverID = Type.Integer({ minimum: 0 })
 export const EmployeeID = Type.Integer({ minimum: 0 })
 export const LocalQualID = Type.Integer({ minimum: 0 })
 export const GlobalQualID = Type.Integer({ minimum: 0 })

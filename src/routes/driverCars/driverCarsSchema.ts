@@ -1,6 +1,6 @@
 import { Static, Type } from '@sinclair/typebox'
 
-import { CreatedAndUpdatedAT, driverID } from '../../utils/helper.js'
+import { CreatedAndUpdatedAT, DriverID } from '../../utils/helper.js'
 
 export const driverCarID = Type.Integer({ minimum: 0 })
 const driverCarRegistrationNumber = Type.String({ minLength: 3, maxLength: 11 })
@@ -12,7 +12,7 @@ const driverCarChassiNumber = Type.String({ maxLength: 24 })
 const driverCarNotes = Type.String()
 
 export const DriverCarSchema = Type.Object({
-  driverID: Type.Optional(driverID),
+  driverID: Type.Optional(DriverID),
   driverCarID: Type.Optional(driverCarID),
   driverCarRegistrationNumber: driverCarRegistrationNumber,
   driverCarBrand: driverCarBrand,

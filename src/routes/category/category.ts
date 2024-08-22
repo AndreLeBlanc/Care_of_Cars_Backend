@@ -542,9 +542,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id = ServiceCategoryID(request.params.id)
-      const deletedServiceCategory: Either<string, ServiceCategory> = await deleteServiceCategory(
-        id,
-      )
+      const deletedServiceCategory: Either<string, ServiceCategory> =
+        await deleteServiceCategory(id)
       match(
         deletedServiceCategory,
         (delServCat: ServiceCategory) => {
@@ -586,9 +585,8 @@ export async function serviceCategory(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const id = ProductCategoryID(request.params.id)
-      const deletedProductCategory: Either<string, ProductCategory> = await deleteProductCategory(
-        id,
-      )
+      const deletedProductCategory: Either<string, ProductCategory> =
+        await deleteProductCategory(id)
       match(
         deletedProductCategory,
         (delProdCat: ProductCategory) => {

@@ -8,6 +8,7 @@ import {
   DriverCarID,
   DriverID,
   EmployeeID,
+  IsBilled,
   LocalServiceID,
   OrderID,
   OrderNotes,
@@ -30,16 +31,15 @@ import {
   orderStatus,
 } from '../../schema/schema.js'
 
-//import {
-//  Limit,
-//  NextPageUrl,
-//  Offset,
-//  Page,
-//  PreviousPageUrl,
-//  RequestUrl,
-//  ResultCount,
-//  Search,
-//} from '../../plugins/pagination.js'
+import {
+  Limit,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  Search,
+} from '../../plugins/pagination.js'
 
 import { Either, match } from '../../utils/helper.js'
 
@@ -48,10 +48,13 @@ import {
   CreateOrderBodyReplySchemaType,
   CreateOrderBodySchema,
   CreateOrderBodySchemaType,
+  ListOrdersQueryParamSchema,
+  ListOrdersQueryParamSchemaType,
   MessageSchema,
   MessageSchemaType,
   OrderIDSchema,
   OrderIDSchemaType,
+  OrdersPaginatedSchema,
 } from './ordersSchema.js'
 
 import {
@@ -59,9 +62,11 @@ import {
   CreateOrderLocalServices,
   CreateOrderServices,
   OrderWithServices,
+  OrdersPaginated,
   createOrder,
   deleteOrder,
   getOrder,
+  listOrders,
 } from '../../services/orderService.js'
 import { Currency } from 'dinero.js'
 import { RentCarBooking } from '../../services/rentCarService.js'
@@ -275,6 +280,81 @@ export async function orders(fastify: FastifyInstance) {
         deletedOrder,
         (removedOrder: OrderWithServices) => {
           return reply.status(200).send({ message: 'fetched order', ...removedOrder })
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{ Params: ListOrdersQueryParamSchemaType }>(
+    '/list-orders/',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('list_orders')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply.status(403).send({
+            message: `Permission denied, user doesn't have permission ${permissionName}`,
+          })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: ListOrdersQueryParamSchema,
+        response: {
+          200: { ...OrdersPaginatedSchema, MessageSchema },
+          403: MessageSchema,
+        },
+      },
+    },
+    async function (req, reply) {
+      const {
+        search = '',
+        limit = 10,
+        page = 1,
+        orderStatusSearch,
+        billingStatusSearch,
+      } = req.params
+      const brandedSearch = Search(search)
+      const brandedLimit = Limit(limit)
+      const brandedPage = Page(page)
+      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
+      const brandedOrderStatusSearch = orderStatusSearch as OrderStatus
+      const brandedBillingStatusSearch = billingStatusSearch
+        ? IsBilled(billingStatusSearch)
+        : undefined
+      const listedOrder: Either<string, OrdersPaginated> = await listOrders(
+        brandedSearch,
+        brandedLimit,
+        brandedPage,
+        offset,
+        brandedOrderStatusSearch,
+        brandedBillingStatusSearch,
+      )
+
+      match(
+        listedOrder,
+        (orders: OrdersPaginated) => {
+          const requestUrl: RequestUrl = RequestUrl(req.protocol + '://' + req.hostname + req.url)
+          const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+            requestUrl,
+            Page(orders.totalPage),
+            Page(orders.page),
+          )
+          const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+            requestUrl,
+            Page(orders.totalPage),
+            Page(orders.page),
+          )
+          return reply.status(200).send({
+            message: 'fetched order',
+            ...orders,
+            previousUrl: previousUrl,
+            nextUrl: nextUrl,
+          })
         },
         (err) => {
           return reply.status(403).send({ message: err })

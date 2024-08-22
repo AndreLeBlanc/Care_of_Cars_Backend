@@ -3,7 +3,7 @@ import { Static, Type } from '@sinclair/typebox'
 import { LocalServiceIDSchema, ServiceIDSchema } from '../services/serviceSchema.js'
 import { PickupTimeSchema, SubmissionTimeSchema } from '../orders/ordersSchema.js'
 import { CategoryIDSchema } from '../category/categorySchema.js'
-import { driverID } from '../../utils/helper.js'
+import { DriverID } from '../../utils/helper.js'
 const customerOrgNumber = Type.String({ maxLength: 11 })
 const customerCompanyName = Type.String({ maxLength: 255 })
 const companyReference = Type.String({ maxLength: 255 })
@@ -82,7 +82,7 @@ export const GetCompanyByOrgNumberSchema = Type.Object({
 })
 
 export const GetDriverByIDSchema = Type.Object({
-  driverID: driverID,
+  driverID: DriverID,
 })
 
 export const DriverBodySchema = Type.Object({
@@ -109,7 +109,7 @@ export const DriverBodySchema = Type.Object({
 
 export const PatchDriverBodySchema = Type.Composite([
   DriverBodySchema,
-  Type.Object({ driverID: driverID }),
+  Type.Object({ driverID: DriverID }),
 ])
 
 export const ListCustomersQueryParamSchema = Type.Object({

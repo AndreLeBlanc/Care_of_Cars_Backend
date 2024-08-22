@@ -71,12 +71,13 @@ type OrderRow = {
   total: ServiceCostDinero
 }
 
-type OrderRowNoDinero = {
-  name: ServiceName
+export type OrderRowNoDineroName = {
   amount: Amount
   cost: ServiceCostNumber
   currency: ServiceCostCurrency
 }
+
+type OrderRowNoDinero = OrderRowNoDineroName & { name: ServiceName }
 
 export type Bill = CreateBill & {
   billID: BillID

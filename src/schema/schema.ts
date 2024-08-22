@@ -440,6 +440,8 @@ export const DriverCarNotes = make<DriverCarNotes>()
 
 export type OrderID = Brand<number, 'orderID'>
 export const OrderID = make<OrderID>()
+export type Billed = Brand<boolean, 'orderID'>
+export const Billed = make<Billed>()
 export type Amount = Brand<number, 'amount'>
 export const Amount = make<Amount>()
 export type Cost = Brand<number, 'cost'>
@@ -457,6 +459,8 @@ export const Discount = make<Discount>()
 
 export type BillID = Brand<number, 'billID'>
 export const BillID = make<BillID>()
+export type IsBilled = Brand<boolean, 'isBilleded'>
+export const IsBilled = make<IsBilled>()
 export type PaymentDays = Brand<number, 'paymentDays'>
 export const PaymentDays = make<PaymentDays>()
 

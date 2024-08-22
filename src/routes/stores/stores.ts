@@ -825,9 +825,8 @@ export async function stores(fastify: FastifyInstance) {
         }),
       )
 
-      const updatedHours: Either<string, StoreSpecialHours[]> = await createSpecialOpeningHours(
-        storeSpecialHours,
-      )
+      const updatedHours: Either<string, StoreSpecialHours[]> =
+        await createSpecialOpeningHours(storeSpecialHours)
       match(
         updatedHours,
         (newOpeningHours: StoreSpecialHours[]) => {
@@ -882,9 +881,8 @@ export async function stores(fastify: FastifyInstance) {
         dayClose: DayClose(hours.dayClose),
       }))
 
-      const updatedHours: Either<string, StoreSpecialHours[]> = await updateSpecialOpeningHours(
-        storeSpecialHours,
-      )
+      const updatedHours: Either<string, StoreSpecialHours[]> =
+        await updateSpecialOpeningHours(storeSpecialHours)
       match(
         updatedHours,
         (updatedHours: StoreSpecialHours[]) => {

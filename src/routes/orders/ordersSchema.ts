@@ -1,6 +1,6 @@
+import { DriverCarIDSchema, driverCarID } from '../driverCars/driverCarsSchema.js'
 import { Static, Type } from '@sinclair/typebox'
 import { CreateRentCarBookingSchema } from '../rentCar/rentCarSchema.js'
-import { driverCarID } from '../driverCars/driverCarsSchema.js'
 import { storeID } from '../stores/storesSchema.js'
 
 import {
@@ -11,7 +11,14 @@ import {
   ServiceVariantIDSchema,
 } from '../services/serviceSchema.js'
 
-import { CreatedAndUpdatedAT, EmployeeID, OrderID, driverID } from '../../utils/helper.js'
+import {
+  CreatedAndUpdatedAT,
+  DriverID,
+  EmployeeID,
+  FirstName,
+  LastName,
+  OrderID,
+} from '../../utils/helper.js'
 
 const OrderNotesSchema = Type.String()
 const OrderStatusSchema = Type.String()
@@ -24,6 +31,7 @@ const ServiceDay4Schema = Type.String({ format: 'time' })
 const ServiceDay5Schema = Type.String({ format: 'time' })
 export const SubmissionTimeSchema = Type.String({ format: 'date' })
 const VatFreeSchema = Type.Boolean()
+const BilledSchema = Type.Boolean()
 const DiscountSchema = Type.Number()
 const TotalCost = Type.Number()
 const CurrencySchema = Type.String()
@@ -40,7 +48,7 @@ export type OrderIDSchemaType = Static<typeof OrderIDSchema>
 export const CreateOrderSchema = Type.Object({
   orderID: Type.Optional(OrderID),
   driverCarID: driverCarID,
-  driverID: driverID,
+  driverID: DriverID,
   storeID: storeID,
   orderNotes: Type.Optional(OrderNotesSchema),
   bookedBy: Type.Optional(EmployeeID),
@@ -140,3 +148,34 @@ export const CreateOrderBodyReplySchema = Type.Object({
 })
 
 export type CreateOrderBodyReplySchemaType = Static<typeof CreateOrderBodyReplySchema>
+
+export const ListOrdersQueryParamSchema = Type.Object({
+  search: Type.Optional(Type.String()),
+  limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+  orderStatusSearch: Type.Optional(OrderStatusSchema),
+  billingStatusSearch: Type.Optional(Type.Boolean()),
+})
+
+export type ListOrdersQueryParamSchemaType = Static<typeof ListOrdersQueryParamSchema>
+
+export const OrdersPaginatedSchema = Type.Object({
+  totalOrders: Type.Integer(),
+  totalPage: Type.Integer(),
+  perPage: Type.Integer(),
+  nextUrl: Type.Optional(Type.String({ format: 'url' })),
+  previousUrl: Type.Optional(Type.String({ format: 'url' })),
+  orders: Type.Array(
+    Type.Object({
+      driverCarID: DriverCarIDSchema,
+      driverID: DriverID,
+      firstName: FirstName,
+      lastName: LastName,
+      submissionTime: SubmissionTimeSchema,
+      updatedAt: Type.String({ format: 'date-time' }),
+      total: Type.Array(ServiceCostNumberSchema),
+      orderStatus: OrderStatusSchema,
+      billed: BilledSchema,
+    }),
+  ),
+})
