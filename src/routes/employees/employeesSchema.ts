@@ -110,7 +110,7 @@ export const SelectedEmployeeSchema = Type.Composite([
     employeeActive: employeeActive,
     employeeComment: Type.Optional(employeeComment),
     employeeID: EmployeeID,
-    storeIDs: Type.Array(Type.Object({ storeID: storeName, storeName: storeName })),
+    storeIDs: Type.Array(Type.Object({ storeID: storeID, storeName: storeName })),
     employeeHourlyRateCurrency: EmployeeHourlyRateCurrencySchema,
     employeeHourlyRate: EmployeeHourlyRateSchema,
     employeeCheckedIn: Type.Optional(employeeCheckedIn),

@@ -17,7 +17,7 @@ import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
 
-import { Employee, dineroDBReturn, isCheckedIn } from './employeeService.js'
+import { EmployeeStoreID, dineroDBReturn, isCheckedIn } from './employeeService.js'
 import { StoreIDName } from './storeService.js'
 
 import {
@@ -113,7 +113,7 @@ export type CreateUserEmployee = {
 
 export type CreatedUserEmployee = {
   user: CreatedUser
-  employee: Employee
+  employee: EmployeeStoreID
 }
 
 export type LoginEmployee = {
@@ -348,7 +348,7 @@ export async function verifyEmployee(email: UserEmail): Promise<Either<string, L
           employeeCheckedOut: employeeStore.employeeCheckedOut,
           stores: sql<
             StoreIDName[]
-          >`json_agg(json_build_object('storeID', ${employeeStore.storeID}, 'storeName', ${stores.storeName}))`.as(
+          >`json_agg(json_build_object('storeID', ${stores.storeID}, 'storeName', ${stores.storeName}))`.as(
             'tagname',
           ),
         },
@@ -359,7 +359,13 @@ export async function verifyEmployee(email: UserEmail): Promise<Either<string, L
       .leftJoin(employees, eq(users.userID, employees.userID))
       .leftJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
       .leftJoin(stores, eq(stores.storeID, employeeStore.storeID))
-      .groupBy(users.userID, roles.roleID, employees.employeeID)
+      .groupBy(
+        users.userID,
+        roles.roleID,
+        employees.employeeID,
+        employeeStore.employeeCheckedIn,
+        employeeStore.employeeCheckedOut,
+      )
 
     return verifiedUser
       ? right({
