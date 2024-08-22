@@ -472,5 +472,124 @@ describe('qualifications tests', async () => {
         storeName: parsedresponseStore2.store.storeName,
       },
     ])
+
+    const employeePatchResponse = await app.inject({
+      method: 'PUT',
+      url: '/employees',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        employeeID: parsedemployeeResponse2.employeeID,
+        userID: parseduserResponse2.userID,
+        shortUserName: 'vdv',
+        employmentNumber: 'asd23vdv2addsd',
+        employeePersonalNumber: 'aaasdqw',
+        signature: 'week',
+        employeePin: 'abds',
+        employeeActive: true,
+        employeeComment: 'a comment about me agains patched',
+        storeID: [parsedresponseStore2.store.storeID],
+      },
+    })
+
+    const parsedemployeePatchResponse = JSON.parse(employeePatchResponse.body)
+
+    assert.deepStrictEqual(employeePatchResponse.statusCode, 201)
+    assert.deepStrictEqual(parsedemployeePatchResponse.userID, parseduserResponse2.userID)
+    assert.deepStrictEqual(parsedemployeePatchResponse.employmentNumber, 'asd23vdv2addsd')
+    assert.deepStrictEqual(parsedemployeePatchResponse.employeeActive, true)
+    assert.deepStrictEqual(
+      parsedemployeePatchResponse.employeeComment,
+      'a comment about me agains patched',
+    )
+    assert.deepStrictEqual(parsedemployeePatchResponse.storeIDs, [
+      {
+        storeID: parsedresponseStore2.store.storeID,
+        storeName: parsedresponseStore2.store.storeName,
+      },
+    ])
+
+    const employeePatchResponse2 = await app.inject({
+      method: 'PUT',
+      url: '/employees',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        employeeID: parsedemployeeResponse.employeeID,
+        userID: parseduserResponse.userID,
+        shortUserName: 'dfsd',
+        employmentNumber: 'asd232addsd',
+        employeePersonalNumber: '20000101111',
+        signature: 'were',
+        employeePin: 'abss',
+        employeeActive: true,
+        employeeComment: 'a comment about me',
+        storeID: [parsedresponseStore.store.storeID, parsedresponseStore2.store.storeID],
+      },
+    })
+
+    const parsedemployeePatchResponse2 = JSON.parse(employeePatchResponse2.body)
+    assert.deepStrictEqual(employeePatchResponse2.statusCode, 201)
+    assert.deepStrictEqual(parsedemployeePatchResponse2.userID, parseduserResponse.userID)
+    assert.deepStrictEqual(parsedemployeePatchResponse2.employmentNumber, 'asd232addsd')
+    assert.deepStrictEqual(parsedemployeePatchResponse2.employeeActive, true)
+    assert.deepStrictEqual(parsedemployeePatchResponse2.storeIDs, [
+      {
+        storeID: parsedresponseStore.store.storeID,
+        storeName: parsedresponseStore.store.storeName,
+      },
+      {
+        storeID: parsedresponseStore2.store.storeID,
+        storeName: parsedresponseStore2.store.storeName,
+      },
+    ])
+
+    const employeeDELETEResponse = await app.inject({
+      method: 'GET',
+      url: '/employees/' + parsedemployeeResponse.employeeID,
+      headers: {
+        Authorization: jwt,
+      },
+    })
+
+    const parsedemployeeDELETEResponse = JSON.parse(employeeDELETEResponse.body)
+
+    assert.deepStrictEqual(employeeDELETEResponse.statusCode, 200)
+    assert.deepStrictEqual(parsedemployeeDELETEResponse.userID, parseduserResponse.userID)
+    assert.deepStrictEqual(parsedemployeeDELETEResponse.employmentNumber, 'asd232addsd')
+    assert.deepStrictEqual(parsedemployeeDELETEResponse.employeeActive, true)
+    assert.deepStrictEqual(parsedemployeeDELETEResponse.storeIDs, [
+      {
+        storeID: parsedresponseStore.store.storeID,
+        storeName: parsedresponseStore.store.storeName,
+      },
+      {
+        storeID: parsedresponseStore2.store.storeID,
+        storeName: parsedresponseStore2.store.storeName,
+      },
+    ])
+
+    const employeeDELETEResponse2 = await app.inject({
+      method: 'GET',
+      url: '/employees/' + parsedemployeeResponse2.employeeID,
+      headers: {
+        Authorization: jwt,
+      },
+    })
+
+    const parsedemployeeDELETEResponse2 = JSON.parse(employeeDELETEResponse2.body)
+
+    assert.deepStrictEqual(employeeDELETEResponse2.statusCode, 200)
+    assert.deepStrictEqual(parsedemployeeDELETEResponse2.userID, parseduserResponse2.userID)
+    assert.deepStrictEqual(parsedemployeeDELETEResponse2.employmentNumber, 'asd23vdv2addsd')
+    assert.deepStrictEqual(parsedemployeeDELETEResponse2.employeeActive, true)
+    assert.deepStrictEqual(parsedemployeeDELETEResponse2.storeIDs, [
+      {
+        storeID: parsedresponseStore2.store.storeID,
+        storeName: parsedresponseStore2.store.storeName,
+      },
+    ])
   })
 })

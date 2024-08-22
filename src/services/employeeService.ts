@@ -1134,10 +1134,12 @@ export async function putEmployee(
         return { storeID: store, employeeID: createdEmployee.employeeID }
       })
 
+      if (employeeID != null) {
+        await tx.delete(employeeStore).where(eq(employeeStore.employeeID, employeeID))
+      }
       const employeeStoresRes = await tx
         .insert(employeeStore)
         .values(employeeIDStoreID)
-        .onConflictDoNothing()
         .returning({ storeID: employeeStore.storeID })
 
       const employeeStoreNames = await tx
