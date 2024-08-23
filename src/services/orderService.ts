@@ -21,7 +21,6 @@ import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.
 import {
   Amount,
   Billed,
-  Cost,
   Discount,
   DriverCarID,
   DriverFirstName,
@@ -92,11 +91,9 @@ export type CreateOrder = OrderBase & {
 }
 
 export type Order = OrderBase & {
-  cost: Cost
   orderID: OrderID
   updatedAt: Date
   createdAt: Date
-  discount: Discount
 }
 
 export type CreateOrderServices = {
@@ -158,7 +155,7 @@ export type OrderLocalServices = CreateOrderLocalServices & {
   orderID: OrderID
 }
 
-export type OrderWithServices = { order: Order } & { services: OrderServices[] } & {
+export type OrderWithServices = Order & { services: OrderServices[] } & {
   localServices: OrderLocalServices[]
 } & { rentCarBooking?: RentCarBookingReply }
 
@@ -334,7 +331,7 @@ function brandOrder(
       }
     : undefined
   return {
-    order: { cost: Cost(cost), ...orderBranded },
+    ...orderBranded,
     services: serviceBranded,
     localServices: localBranded,
     rentCarBooking: brandedBooking,
@@ -403,76 +400,85 @@ export async function createOrder(
               ),
             )
         }
-        const newOrderServices = await tx
-          .insert(orderServices)
-          .values(servicesWithOrderID)
-          .onConflictDoUpdate({
-            target: [orderServices.orderID, orderServices.serviceID],
-            set: {
-              serviceID: sql`"excluded"."serviceID"`,
-              serviceVariantID: sql`"excluded"."serviceVariantID"`,
-              name: sql`"excluded"."name"`,
-              amount: sql`"excluded"."amount"`,
-              day1: sql`"excluded"."day1"`,
-              day1Work: sql`"excluded"."day1Work"`,
-              day1Employee: sql`"excluded"."day1Employee"`,
-              day2: sql`"excluded"."day2"`,
-              day2Work: sql`"excluded"."day2Work"`,
-              day2Employee: sql`"excluded"."day2Employee"`,
-              day3: sql`"excluded"."day3"`,
-              day3Work: sql`"excluded"."day3Work"`,
-              day3Employee: sql`"excluded"."day3Employee"`,
-              day4: sql`"excluded"."day4"`,
-              day4Work: sql`"excluded"."day4Work"`,
-              day4Employee: sql`"excluded"."day4Employee"`,
-              day5: sql`"excluded"."day5"`,
-              day5Work: sql`"excluded"."day5Work"`,
-              day5Employee: sql`"excluded"."day5Employee"`,
-              cost: sql`"excluded"."cost"`,
-              currency: sql`"excluded"."currency"`,
-              vatFree: sql`"excluded"."vatFree"`,
-              orderNotes: sql`"excluded"."orderNotes"`,
-            },
-          })
-          .returning()
+
+        let newOrderServices: OrderServicesNoBrand[] = []
+
+        if (0 < servicesWithOrderID.length) {
+          newOrderServices = await tx
+            .insert(orderServices)
+            .values(servicesWithOrderID)
+            .onConflictDoUpdate({
+              target: [orderServices.orderID, orderServices.serviceID],
+              set: {
+                serviceID: sql`"excluded"."serviceID"`,
+                serviceVariantID: sql`"excluded"."serviceVariantID"`,
+                name: sql`"excluded"."name"`,
+                amount: sql`"excluded"."amount"`,
+                day1: sql`"excluded"."day1"`,
+                day1Work: sql`"excluded"."day1Work"`,
+                day1Employee: sql`"excluded"."day1Employee"`,
+                day2: sql`"excluded"."day2"`,
+                day2Work: sql`"excluded"."day2Work"`,
+                day2Employee: sql`"excluded"."day2Employee"`,
+                day3: sql`"excluded"."day3"`,
+                day3Work: sql`"excluded"."day3Work"`,
+                day3Employee: sql`"excluded"."day3Employee"`,
+                day4: sql`"excluded"."day4"`,
+                day4Work: sql`"excluded"."day4Work"`,
+                day4Employee: sql`"excluded"."day4Employee"`,
+                day5: sql`"excluded"."day5"`,
+                day5Work: sql`"excluded"."day5Work"`,
+                day5Employee: sql`"excluded"."day5Employee"`,
+                cost: sql`"excluded"."cost"`,
+                currency: sql`"excluded"."currency"`,
+                vatFree: sql`"excluded"."vatFree"`,
+                orderNotes: sql`"excluded"."orderNotes"`,
+              },
+            })
+            .returning()
+        }
 
         const localServicesWithOrderID = localServices.map((service) => ({
           orderID: newOrder.orderID,
           ...service,
         }))
 
-        const newOrderlocalServices = await tx
-          .insert(orderLocalServices)
-          .values(localServicesWithOrderID)
-          .onConflictDoUpdate({
-            target: [orderServices.orderID, orderServices.serviceID],
-            set: {
-              localServiceID: sql`"excluded"."localServiceID"`,
-              serviceVariantID: sql`"excluded"."serviceVariantID"`,
-              name: sql`"excluded"."name"`,
-              amount: sql`"excluded"."amount"`,
-              day1: sql`"excluded"."day1"`,
-              day1Work: sql`"excluded"."day1Work"`,
-              day1Employee: sql`"excluded"."day1Employee"`,
-              day2: sql`"excluded"."day2"`,
-              day2Work: sql`"excluded"."day2Work"`,
-              day2Employee: sql`"excluded"."day2Employee"`,
-              day3: sql`"excluded"."day3"`,
-              day3Work: sql`"excluded"."day3Work"`,
-              day3Employee: sql`"excluded"."day3Employee"`,
-              day4: sql`"excluded"."day4"`,
-              day4Work: sql`"excluded"."day4Work"`,
-              day4Employee: sql`"excluded"."day4Employee"`,
-              day5: sql`"excluded"."day5"`,
-              day5Work: sql`"excluded"."day5Work"`,
-              day5Employee: sql`"excluded"."day5Employee"`,
-              cost: sql`"excluded"."cost"`,
-              currency: sql`"excluded"."currency"`,
-              vatFree: sql`"excluded"."vatFree"`,
-              orderNotes: sql`"excluded"."orderNotes"`,
-            },
-          })
-          .returning()
+        let newOrderlocalServices: OrderLocalServicesNoBrand[] = []
+
+        if (0 < localServicesWithOrderID.length) {
+          newOrderlocalServices = await tx
+            .insert(orderLocalServices)
+            .values(localServicesWithOrderID)
+            .onConflictDoUpdate({
+              target: [orderServices.orderID, orderServices.serviceID],
+              set: {
+                localServiceID: sql`"excluded"."localServiceID"`,
+                serviceVariantID: sql`"excluded"."serviceVariantID"`,
+                name: sql`"excluded"."name"`,
+                amount: sql`"excluded"."amount"`,
+                day1: sql`"excluded"."day1"`,
+                day1Work: sql`"excluded"."day1Work"`,
+                day1Employee: sql`"excluded"."day1Employee"`,
+                day2: sql`"excluded"."day2"`,
+                day2Work: sql`"excluded"."day2Work"`,
+                day2Employee: sql`"excluded"."day2Employee"`,
+                day3: sql`"excluded"."day3"`,
+                day3Work: sql`"excluded"."day3Work"`,
+                day3Employee: sql`"excluded"."day3Employee"`,
+                day4: sql`"excluded"."day4"`,
+                day4Work: sql`"excluded"."day4Work"`,
+                day4Employee: sql`"excluded"."day4Employee"`,
+                day5: sql`"excluded"."day5"`,
+                day5Work: sql`"excluded"."day5Work"`,
+                day5Employee: sql`"excluded"."day5Employee"`,
+                cost: sql`"excluded"."cost"`,
+                currency: sql`"excluded"."currency"`,
+                vatFree: sql`"excluded"."vatFree"`,
+                orderNotes: sql`"excluded"."orderNotes"`,
+              },
+            })
+            .returning()
+        }
 
         if (booking != null) {
           const [newBooking] = await db

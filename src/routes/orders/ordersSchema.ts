@@ -15,18 +15,17 @@ import { DriverID, EmployeeID, FirstName, LastName, OrderID } from '../../utils/
 
 const OrderNotesSchema = Type.String()
 const OrderStatusSchema = Type.String()
-export const PickupTimeSchema = Type.String({ format: 'date' })
+export const PickupTimeSchema = Type.String({ format: 'date-time' })
 const ServiceCostNumberSchema = Type.Number()
 const ServiceDay1Schema = Type.String({ format: 'time' })
 const ServiceDay2Schema = Type.String({ format: 'time' })
 const ServiceDay3Schema = Type.String({ format: 'time' })
 const ServiceDay4Schema = Type.String({ format: 'time' })
 const ServiceDay5Schema = Type.String({ format: 'time' })
-export const SubmissionTimeSchema = Type.String({ format: 'date' })
+export const SubmissionTimeSchema = Type.String({ format: 'date-time' })
 const VatFreeSchema = Type.Boolean()
 const BilledSchema = Type.Boolean()
 const DiscountSchema = Type.Number()
-const TotalCostSchema = Type.Number()
 const CurrencySchema = Type.String()
 const AmountSchema = Type.Number({ minimum: 0 })
 const Message = Type.String()
@@ -56,14 +55,22 @@ export const CreateOrderSchema = Type.Object({
 
 export type CreateOrderSchemaType = Static<typeof CreateOrderSchema>
 
-export const OrderSchema = Type.Composite([
-  CreateOrderSchema,
-  Type.Object({
-    order: OrderID,
-    createdAt: Type.String({ format: 'date-time' }),
-    updatedAt: Type.String({ format: 'date-time' }),
-  }),
-])
+export const OrderSchema = Type.Object({
+  orderID: OrderID,
+  driverCarID: driverCarID,
+  driverID: DriverID,
+  storeID: storeID,
+  orderNotes: Type.Optional(OrderNotesSchema),
+  bookedBy: Type.Optional(EmployeeID),
+  submissionTime: SubmissionTimeSchema,
+  pickupTime: PickupTimeSchema,
+  vatFree: VatFreeSchema,
+  orderStatus: OrderStatusSchema,
+  currency: CurrencySchema,
+  discount: DiscountSchema,
+  createdAt: Type.String({ format: 'date-time' }),
+  updatedAt: Type.String({ format: 'date-time' }),
+})
 
 export type OrderSchemaType = Static<typeof OrderSchema>
 
@@ -72,19 +79,19 @@ export const CreateOrderServicesSchema = Type.Object({
   serviceVariantID: ServiceVariantIDSchema,
   name: NameSchema,
   amount: AmountSchema,
-  day1: Type.String({ format: 'time' }),
+  day1: ServiceDay1Schema,
   day1Work: ServiceDay1Schema,
   day1Employee: Type.Optional(EmployeeID),
-  day2: Type.Optional(Type.String({ format: 'date' })),
+  day2: Type.Optional(ServiceDay2Schema),
   day2Work: Type.Optional(ServiceDay2Schema),
   day2Employee: Type.Optional(EmployeeID),
-  day3: Type.Optional(Type.String({ format: 'date' })),
+  day3: Type.Optional(ServiceDay3Schema),
   day3Work: Type.Optional(ServiceDay3Schema),
   day3Employee: Type.Optional(EmployeeID),
-  day4: Type.Optional(Type.String({ format: 'date' })),
+  day4: Type.Optional(ServiceDay4Schema),
   day4Work: Type.Optional(ServiceDay4Schema),
   day4Employee: Type.Optional(EmployeeID),
-  day5: Type.Optional(Type.String({ format: 'date' })),
+  day5: Type.Optional(ServiceDay5Schema),
   day5Work: Type.Optional(ServiceDay5Schema),
   day5Employee: Type.Optional(EmployeeID),
   cost: ServiceCostNumberSchema,
@@ -100,19 +107,19 @@ export const CreateOrderLocalServicesSchema = Type.Object({
   serviceVariantID: LocalServicevariantIDSchema,
   name: NameSchema,
   amount: AmountSchema,
-  day1: Type.String({ format: 'date' }),
+  day1: ServiceDay1Schema,
   day1Work: ServiceDay1Schema,
   day1Employee: EmployeeID,
-  day2: Type.String({ format: 'date' }),
+  day2: ServiceDay2Schema,
   day2Work: ServiceDay2Schema,
   day2Employee: EmployeeID,
-  day3: Type.String({ format: 'date' }),
+  day3: ServiceDay3Schema,
   day3Work: ServiceDay3Schema,
   day3Employee: EmployeeID,
-  day4: Type.String({ format: 'date' }),
+  day4: ServiceDay4Schema,
   day4Work: ServiceDay4Schema,
   day4Employee: EmployeeID,
-  day5: Type.String({ format: 'date' }),
+  day5: ServiceDay5Schema,
   day5Work: ServiceDay5Schema,
   day5Employee: EmployeeID,
   cost: ServiceCostNumberSchema,
@@ -138,7 +145,7 @@ export const CreateOrderBodySchema = Type.Composite([
   Type.Object({
     services: Type.Array(CreateOrderServicesSchema),
     localServices: Type.Array(CreateOrderLocalServicesSchema),
-    rentCarBooking: CreateRentCarBookingSchema,
+    rentCarBooking: Type.Optional(CreateRentCarBookingSchema),
     deleteOrderService: Type.Array(DeleteOrderServiceSchema),
     deleteOrderLocalService: Type.Array(DeleteOrderLocalServiceSchema),
   }),
@@ -146,13 +153,15 @@ export const CreateOrderBodySchema = Type.Composite([
 
 export type CreateOrderBodySchemaType = Static<typeof CreateOrderBodySchema>
 
-export const CreateOrderBodyReplySchema = Type.Object({
-  message: Message,
+export const CreateOrderBodyReplySchema = Type.Composite([
   OrderSchema,
-  cost: TotalCostSchema,
-  services: Type.Array(CreateOrderServicesSchema),
-  localServices: Type.Array(CreateOrderLocalServicesSchema),
-})
+  Type.Object({
+    message: Message,
+    rentCarBooking: Type.Optional(CreateRentCarBookingSchema),
+    services: Type.Array(CreateOrderServicesSchema),
+    localServices: Type.Array(CreateOrderLocalServicesSchema),
+  }),
+])
 
 export type CreateOrderBodyReplySchemaType = Static<typeof CreateOrderBodyReplySchema>
 

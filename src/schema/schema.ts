@@ -1495,7 +1495,7 @@ export const orders = pgTable(
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     submissionTime: timestamp('submissionTime').$type<SubmissionTime>().notNull(),
-    pickupTime: timestamp('submissionTime').$type<PickupTime>().notNull(),
+    pickupTime: timestamp('pickupTime').$type<PickupTime>().notNull(),
     vatFree: boolean('vatFree').$type<VatFree>().notNull(),
     orderStatus: orderStatuspgEnum('orderStatus').notNull(),
     currency: varchar('currency').notNull(),

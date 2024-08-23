@@ -76,7 +76,7 @@ import { RentCarBooking } from '../../services/rentCarService.js'
 export async function orders(fastify: FastifyInstance) {
   fastify.put<{
     Body: CreateOrderBodySchemaType
-    Reply: (CreateOrderBodyReplySchemaType & MessageSchemaType) | MessageSchemaType
+    Reply: CreateOrderBodyReplySchemaType | MessageSchemaType
   }>(
     '/',
     {
@@ -93,20 +93,25 @@ export async function orders(fastify: FastifyInstance) {
       },
       schema: {
         body: CreateOrderBodySchema,
-        response: { 201: { CreateOrderBodyReplySchema }, 504: MessageSchema },
+        response: { 201: CreateOrderBodyReplySchema, 504: MessageSchema },
       },
     },
 
     async (req, reply) => {
-      function isOrderStatus(value: string): value is OrderStatus {
-        return value in orderStatus
+      if (req.body.pickupTime < req.body.submissionTime) {
+        reply
+          .status(400)
+          .send({ message: 'upphämtningstiden måste vara senare än inlämningstiden' })
       }
-
+      function isOrderStatus(status: string): status is OrderStatus {
+        return orderStatus.includes(status as OrderStatus)
+      }
       const orderStatusFromBody = req.body.orderStatus
 
       const orderStatusValue: OrderStatus | undefined = isOrderStatus(orderStatusFromBody)
         ? orderStatusFromBody
         : undefined
+
       if (orderStatusValue != undefined) {
         const order: CreateOrder = {
           orderID: req.body.orderID ? OrderID(req.body.orderID) : undefined,
@@ -118,7 +123,7 @@ export async function orders(fastify: FastifyInstance) {
           submissionTime: SubmissionTime(new Date(req.body.submissionTime)),
           pickupTime: PickupTime(new Date(req.body.pickupTime)),
           vatFree: VatFree(req.body.vatFree),
-          orderStatus: orderStatusValue,
+          orderStatus: orderStatusValue as OrderStatus,
           currency: ServiceCostCurrency(req.body.currency as Dinero.Currency),
           discount: Discount(req.body.discount),
         }
@@ -212,6 +217,7 @@ export async function orders(fastify: FastifyInstance) {
           deleteLocalServices,
           newRentCarBooking,
         )
+
         match(
           newOrder,
           (order: OrderWithServices) => {

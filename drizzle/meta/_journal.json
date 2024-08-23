@@ -36,6 +36,13 @@
       "when": 1724143445160,
       "tag": "0004_open_madame_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1724430659729,
+      "tag": "0005_fuzzy_william_stryker",
+      "breakpoints": true
     }
   ]
 }

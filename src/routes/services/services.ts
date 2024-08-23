@@ -146,6 +146,11 @@ export async function services(fastify: FastifyInstance) {
         externalArticleNumber: request.body.externalArticleNumber
           ? ServiceExternalArticleNumber(request.body.externalArticleNumber)
           : undefined,
+        day1: request.body.day1 ? ServiceDay1(request.body.day1) : undefined,
+        day2: request.body.day2 ? ServiceDay2(request.body.day2) : undefined,
+        day3: request.body.day3 ? ServiceDay3(request.body.day3) : undefined,
+        day4: request.body.day4 ? ServiceDay4(request.body.day4) : undefined,
+        day5: request.body.day5 ? ServiceDay5(request.body.day5) : undefined,
       }
       if (request.body.storeID != null) {
         const localService: LocalServiceCreate & { localServiceID?: LocalServiceID } = {
