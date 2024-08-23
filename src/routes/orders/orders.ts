@@ -61,6 +61,8 @@ import {
   CreateOrder,
   CreateOrderLocalServices,
   CreateOrderServices,
+  DeleteOrderLocalService,
+  DeleteOrderService,
   OrderWithServices,
   OrdersPaginated,
   createOrder,
@@ -173,23 +175,41 @@ export async function orders(fastify: FastifyInstance) {
           orderNotes: OrderNotes(service.orderNotes),
         }))
 
-        const newRentCarBooking: RentCarBooking | undefined = {
-          rentCarRegistrationNumber: RentCarRegistrationNumber(
-            req.body.rentCarBooking.rentCarRegistrationNumber,
-          ),
-          bookingStart: BookingStart(new Date(req.body.rentCarBooking.bookingStart)),
-          bookingEnd: BookingEnd(new Date(req.body.rentCarBooking.bookingEnd)),
-          bookedBy: req.body.rentCarBooking.bookedBy
-            ? EmployeeID(req.body.rentCarBooking.bookedBy)
-            : undefined,
-          bookingStatus: req.body.rentCarBooking.bookingStatus as OrderStatus,
-          submissionTime: SubmissionTime(new Date(req.body.rentCarBooking.submissionTime)),
-        }
+        const newRentCarBooking: RentCarBooking | undefined = req.body.rentCarBooking
+          ? {
+              rentCarRegistrationNumber: RentCarRegistrationNumber(
+                req.body.rentCarBooking.rentCarRegistrationNumber,
+              ),
+              bookingStart: BookingStart(new Date(req.body.rentCarBooking.bookingStart)),
+              bookingEnd: BookingEnd(new Date(req.body.rentCarBooking.bookingEnd)),
+              bookedBy: req.body.rentCarBooking.bookedBy
+                ? EmployeeID(req.body.rentCarBooking.bookedBy)
+                : undefined,
+              bookingStatus: req.body.rentCarBooking.bookingStatus as OrderStatus,
+              submissionTime: SubmissionTime(new Date(req.body.rentCarBooking.submissionTime)),
+            }
+          : undefined
+
+        const deleteServices: DeleteOrderService[] = req.body.deleteOrderService
+          ? req.body.deleteOrderService.map((serv) => ({
+              orderID: OrderID(serv.orderID),
+              serviceID: ServiceID(serv.serviceID),
+            }))
+          : []
+
+        const deleteLocalServices: DeleteOrderLocalService[] = req.body.deleteOrderLocalService
+          ? req.body.deleteOrderLocalService.map((serv) => ({
+              orderID: OrderID(serv.orderID),
+              localServiceID: LocalServiceID(serv.localServiceID),
+            }))
+          : []
 
         const newOrder: Either<string, OrderWithServices> = await createOrder(
           order,
           services,
           localServices,
+          deleteServices,
+          deleteLocalServices,
           newRentCarBooking,
         )
         match(
@@ -210,7 +230,7 @@ export async function orders(fastify: FastifyInstance) {
 
   fastify.get<{
     Querystring: OrderIDSchemaType
-    Reply: (CreateOrderBodyReplySchemaType & MessageSchemaType) | MessageSchemaType
+    Reply: CreateOrderBodyReplySchemaType | MessageSchemaType
   }>(
     '/',
     {
@@ -228,7 +248,7 @@ export async function orders(fastify: FastifyInstance) {
       schema: {
         querystring: OrderIDSchema,
         response: {
-          200: { ...CreateOrderBodyReplySchema, MessageSchema },
+          200: CreateOrderBodyReplySchema,
           403: MessageSchema,
         },
       },
@@ -268,7 +288,7 @@ export async function orders(fastify: FastifyInstance) {
       schema: {
         querystring: OrderIDSchema,
         response: {
-          200: { ...CreateOrderBodyReplySchema, MessageSchema },
+          200: { ...CreateOrderBodyReplySchema, ...MessageSchema },
           403: MessageSchema,
         },
       },

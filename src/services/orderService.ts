@@ -162,6 +162,9 @@ export type OrderWithServices = { order: Order } & { services: OrderServices[] }
   localServices: OrderLocalServices[]
 } & { rentCarBooking?: RentCarBookingReply }
 
+export type DeleteOrderService = { orderID: OrderID; serviceID: ServiceID }
+export type DeleteOrderLocalService = { orderID: OrderID; localServiceID: LocalServiceID }
+
 type OrderNoBrand = {
   driverCarID: DriverCarID
   driverID: DriverID
@@ -342,7 +345,9 @@ export async function createOrder(
   order: CreateOrder,
   services: CreateOrderServices[],
   localServices: CreateOrderLocalServices[],
-  booking: RentCarBooking,
+  deleteOrderService: DeleteOrderService[],
+  deleteOrderLocalService: DeleteOrderLocalService[],
+  booking?: RentCarBooking,
 ): Promise<Either<string, OrderWithServices>> {
   try {
     return await db.transaction(async (tx) => {
@@ -370,6 +375,34 @@ export async function createOrder(
           ...service,
         }))
 
+        if (deleteOrderService.length > 0) {
+          await tx
+            .delete(orderServices)
+            .where(
+              or(
+                ...deleteOrderService.map((orderID) =>
+                  and(
+                    eq(orderServices.orderID, orderID.orderID),
+                    eq(orderServices.serviceID, orderID.serviceID),
+                  ),
+                ),
+              ),
+            )
+        }
+        if (deleteOrderLocalService.length > 0) {
+          await tx
+            .delete(orderLocalServices)
+            .where(
+              or(
+                ...deleteOrderLocalService.map((orderID) =>
+                  and(
+                    eq(orderLocalServices.orderID, orderID.orderID),
+                    eq(orderLocalServices.localServiceID, orderID.localServiceID),
+                  ),
+                ),
+              ),
+            )
+        }
         const newOrderServices = await tx
           .insert(orderServices)
           .values(servicesWithOrderID)
@@ -441,17 +474,22 @@ export async function createOrder(
           })
           .returning()
 
-        const [newBooking] = await db
-          .insert(rentCarBookings)
-          .values(booking)
-          .onConflictDoUpdate({
-            target: [rentCarBookings.rentCarBookingID, rentCarBookings.orderID],
-            set: booking,
-          })
-          .returning()
+        if (booking != null) {
+          const [newBooking] = await db
+            .insert(rentCarBookings)
+            .values(booking)
+            .onConflictDoUpdate({
+              target: [rentCarBookings.rentCarBookingID, rentCarBookings.orderID],
+              set: booking,
+            })
+            .returning()
 
-        const branded = brandOrder(newOrder, newOrderServices, newOrderlocalServices, newBooking)
-        return right(branded)
+          const branded = brandOrder(newOrder, newOrderServices, newOrderlocalServices, newBooking)
+          return right(branded)
+        } else {
+          const branded = brandOrder(newOrder, newOrderServices, newOrderlocalServices)
+          return right(branded)
+        }
       } else {
         return left("Couldn't place order")
       }

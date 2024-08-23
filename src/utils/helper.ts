@@ -63,8 +63,8 @@ export type PositiveInteger<T extends number> = `${T}` extends '0' | `-${any}` |
   : T
 
 export const CreatedAndUpdatedAT = Type.Object({
-  createdAt: Type.String({ format: 'date' }),
-  updatedAt: Type.String({ format: 'date' }),
+  createdAt: Type.String({ format: 'date-time' }),
+  updatedAt: Type.String({ format: 'date-time' }),
 })
 
 export interface Left<E> {

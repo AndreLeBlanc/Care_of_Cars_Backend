@@ -1,6 +1,6 @@
-import { DriverCarIDSchema, driverCarID } from '../driverCars/driverCarsSchema.js'
 import { Static, Type } from '@sinclair/typebox'
 import { CreateRentCarBookingSchema } from '../rentCar/rentCarSchema.js'
+import { driverCarID } from '../driverCars/driverCarsSchema.js'
 import { storeID } from '../stores/storesSchema.js'
 
 import {
@@ -11,14 +11,7 @@ import {
   ServiceVariantIDSchema,
 } from '../services/serviceSchema.js'
 
-import {
-  CreatedAndUpdatedAT,
-  DriverID,
-  EmployeeID,
-  FirstName,
-  LastName,
-  OrderID,
-} from '../../utils/helper.js'
+import { DriverID, EmployeeID, FirstName, LastName, OrderID } from '../../utils/helper.js'
 
 const OrderNotesSchema = Type.String()
 const OrderStatusSchema = Type.String()
@@ -33,11 +26,12 @@ export const SubmissionTimeSchema = Type.String({ format: 'date' })
 const VatFreeSchema = Type.Boolean()
 const BilledSchema = Type.Boolean()
 const DiscountSchema = Type.Number()
-const TotalCost = Type.Number()
+const TotalCostSchema = Type.Number()
 const CurrencySchema = Type.String()
-const amount = Type.Number({ minimum: 0 })
+const AmountSchema = Type.Number({ minimum: 0 })
+const Message = Type.String()
 
-export const MessageSchema = Type.Object({ message: Type.String() })
+export const MessageSchema = Type.Object({ message: Message })
 
 export type MessageSchemaType = Static<typeof MessageSchema>
 
@@ -66,7 +60,8 @@ export const OrderSchema = Type.Composite([
   CreateOrderSchema,
   Type.Object({
     order: OrderID,
-    CreatedAndUpdatedAT,
+    createdAt: Type.String({ format: 'date-time' }),
+    updatedAt: Type.String({ format: 'date-time' }),
   }),
 ])
 
@@ -76,8 +71,8 @@ export const CreateOrderServicesSchema = Type.Object({
   serviceID: ServiceIDSchema,
   serviceVariantID: ServiceVariantIDSchema,
   name: NameSchema,
-  amount: amount,
-  day1: Type.String({ format: 'date' }),
+  amount: AmountSchema,
+  day1: Type.String({ format: 'time' }),
   day1Work: ServiceDay1Schema,
   day1Employee: Type.Optional(EmployeeID),
   day2: Type.Optional(Type.String({ format: 'date' })),
@@ -104,7 +99,7 @@ export const CreateOrderLocalServicesSchema = Type.Object({
   localServiceID: LocalServiceIDSchema,
   serviceVariantID: LocalServicevariantIDSchema,
   name: NameSchema,
-  amount: amount,
+  amount: AmountSchema,
   day1: Type.String({ format: 'date' }),
   day1Work: ServiceDay1Schema,
   day1Employee: EmployeeID,
@@ -128,21 +123,33 @@ export const CreateOrderLocalServicesSchema = Type.Object({
 
 export type CreateOrderLocalServicesSchemaType = Static<typeof CreateOrderLocalServicesSchema>
 
+const DeleteOrderServiceSchema = Type.Object({
+  orderID: OrderID,
+  serviceID: ServiceIDSchema,
+})
+
+const DeleteOrderLocalServiceSchema = Type.Object({
+  orderID: OrderID,
+  localServiceID: LocalServiceIDSchema,
+})
+
 export const CreateOrderBodySchema = Type.Composite([
   CreateOrderSchema,
   Type.Object({
     services: Type.Array(CreateOrderServicesSchema),
     localServices: Type.Array(CreateOrderLocalServicesSchema),
     rentCarBooking: CreateRentCarBookingSchema,
+    deleteOrderService: Type.Array(DeleteOrderServiceSchema),
+    deleteOrderLocalService: Type.Array(DeleteOrderLocalServiceSchema),
   }),
 ])
 
 export type CreateOrderBodySchemaType = Static<typeof CreateOrderBodySchema>
 
 export const CreateOrderBodyReplySchema = Type.Object({
+  message: Message,
   OrderSchema,
-  cost: TotalCost,
-  MessageSchema,
+  cost: TotalCostSchema,
   services: Type.Array(CreateOrderServicesSchema),
   localServices: Type.Array(CreateOrderLocalServicesSchema),
 })
@@ -167,7 +174,7 @@ export const OrdersPaginatedSchema = Type.Object({
   previousUrl: Type.Optional(Type.String({ format: 'url' })),
   orders: Type.Array(
     Type.Object({
-      driverCarID: DriverCarIDSchema,
+      driverCarID: driverCarID,
       driverID: DriverID,
       firstName: FirstName,
       lastName: LastName,
