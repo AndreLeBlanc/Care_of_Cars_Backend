@@ -134,9 +134,10 @@ export async function services(fastify: FastifyInstance) {
           ? ServiceCallInterval(request.body.callInterval)
           : undefined,
         colorForService: request.body.colorForService as ColorForService,
-        warrantyCard: request.body.warrantyCard
-          ? ServiceWarrantyCard(request.body.warrantyCard)
-          : undefined,
+        warrantyCard:
+          request.body.warrantyCard != undefined
+            ? ServiceWarrantyCard(request.body.warrantyCard)
+            : undefined,
         itemNumber: request.body.itemNumber
           ? ServiceItemNumber(request.body.itemNumber)
           : undefined,
@@ -161,7 +162,9 @@ export async function services(fastify: FastifyInstance) {
             : undefined,
           localServiceVariants: request.body.localServiceVariants.map((serviceVariant) => {
             return {
-              localServicevariantID: serviceVariant.localServicevariantID ?? undefined,
+              localServicevariantID: serviceVariant.localServicevariantID
+                ? LocalServiceID(serviceVariant.localServicevariantID)
+                : undefined,
               localServiceID: serviceVariant.localServiceID
                 ? LocalServiceID(serviceVariant.localServiceID)
                 : undefined,
