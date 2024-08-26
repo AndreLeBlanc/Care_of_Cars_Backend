@@ -126,6 +126,7 @@ describe('Customer Route', () => {
       parsedResponse.data.driver.driverExternalNumber,
       response.data.driver.driverExternalNumber,
     )
+    assert(parsedResponse.data.driver.driverID != null)
     assert.deepStrictEqual(
       parsedResponse.data.driver.driverGDPRAccept,
       response.data.driver.driverGDPRAccept,
@@ -420,6 +421,8 @@ describe('Customer Route', () => {
     assert.deepStrictEqual(additionalDriver.data.driverFirstName, 'Mahan')
     assert.deepStrictEqual(additionalDriver.data.driverLastName, 'Putri')
     assert.deepStrictEqual(additionalDriver.data.driverEmail, 'newGuy.putri@abcinc.com')
+    assert.notEqual(additionalDriver.data.driverID, null)
+    assert(additionalDriver.data.driverID > 0)
     assert.deepStrictEqual(additionalDriver.data.driverPhoneNumber, '1234234')
     assert.deepStrictEqual(additionalDriver.data.driverAddress, '234123')
     assert.deepStrictEqual(additionalDriver.data.driverZipCode, '32112')
