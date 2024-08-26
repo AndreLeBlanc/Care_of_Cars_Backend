@@ -21,7 +21,6 @@ import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.
 import {
   Amount,
   Billed,
-  Cost,
   Discount,
   DriverCarID,
   DriverFirstName,
@@ -37,16 +36,16 @@ import {
   ServiceCostCurrency,
   ServiceCostDinero,
   ServiceCostNumber,
-  ServiceDay1,
-  ServiceDay2,
-  ServiceDay3,
-  ServiceDay4,
-  ServiceDay5,
   ServiceID,
   ServiceName,
   StoreID,
   SubmissionTime,
   VatFree,
+  WorkDay1,
+  WorkDay2,
+  WorkDay3,
+  WorkDay4,
+  WorkDay5,
   billOrders,
   drivers,
   orderLocalServices,
@@ -92,11 +91,9 @@ export type CreateOrder = OrderBase & {
 }
 
 export type Order = OrderBase & {
-  cost: Cost
   orderID: OrderID
   updatedAt: Date
   createdAt: Date
-  discount: Discount
 }
 
 export type CreateOrderServices = {
@@ -104,19 +101,19 @@ export type CreateOrderServices = {
   serviceVariantID?: ServiceID
   name: ServiceName
   amount: Amount
-  day1?: ServiceDay1
+  day1?: WorkDay1
   day1Work?: string
   day1Employee?: EmployeeID
-  day2?: ServiceDay2
+  day2?: WorkDay2
   day2Work?: string
   day2Employee?: EmployeeID
-  day3?: ServiceDay3
+  day3?: WorkDay3
   day3Work?: string
   day3Employee?: EmployeeID
-  day4?: ServiceDay4
+  day4?: WorkDay4
   day4Work?: string
   day4Employee?: EmployeeID
-  day5?: ServiceDay5
+  day5?: WorkDay5
   day5Work?: string
   day5Employee?: EmployeeID
   cost: ServiceCostNumber
@@ -127,25 +124,26 @@ export type CreateOrderServices = {
 
 export type OrderServices = CreateOrderServices & {
   orderID: OrderID
+  total: ServiceCostNumber
 }
 export type CreateOrderLocalServices = {
   localServiceID: LocalServiceID
   serviceVariantID?: LocalServiceID
   name: ServiceName
   amount: Amount
-  day1?: ServiceDay1
+  day1?: WorkDay1
   day1Work?: string
   day1Employee?: EmployeeID
-  day2?: ServiceDay2
+  day2?: WorkDay2
   day2Work?: string
   day2Employee?: EmployeeID
-  day3?: ServiceDay3
+  day3?: WorkDay3
   day3Work?: string
   day3Employee?: EmployeeID
-  day4?: ServiceDay4
+  day4?: WorkDay4
   day4Work?: string
   day4Employee?: EmployeeID
-  day5?: ServiceDay5
+  day5?: WorkDay5
   day5Work?: string
   day5Employee?: EmployeeID
   cost: ServiceCostNumber
@@ -156,9 +154,10 @@ export type CreateOrderLocalServices = {
 
 export type OrderLocalServices = CreateOrderLocalServices & {
   orderID: OrderID
+  total: ServiceCostNumber
 }
 
-export type OrderWithServices = { order: Order } & { services: OrderServices[] } & {
+export type OrderWithServices = Order & { services: OrderServices[] } & {
   localServices: OrderLocalServices[]
 } & { rentCarBooking?: RentCarBookingReply }
 
@@ -187,19 +186,19 @@ type OrderLocalServicesNoBrand = {
   localServiceVariantID?: LocalServiceID
   amount: Amount
   name: ServiceName
-  day1?: ServiceDay1 | null
+  day1?: WorkDay1 | null
   day1Work?: string | null
   day1Employee?: EmployeeID | null
-  day2?: ServiceDay2 | null
+  day2?: WorkDay2 | null
   day2Work?: string | null
   day2Employee?: EmployeeID | null
-  day3?: ServiceDay3 | null
+  day3?: WorkDay3 | null
   day3Work?: string | null
   day3Employee?: EmployeeID | null
-  day4?: ServiceDay4 | null
+  day4?: WorkDay4 | null
   day4Work?: string | null
   day4Employee?: EmployeeID | null
-  day5?: ServiceDay5 | null
+  day5?: WorkDay5 | null
   day5Work?: string | null
   day5Employee?: EmployeeID | null
   cost: ServiceCostNumber
@@ -213,19 +212,19 @@ type OrderServicesNoBrand = {
   ServiceVariantID?: ServiceID
   name: ServiceName
   amount: Amount
-  day1?: ServiceDay1 | null
+  day1?: WorkDay1 | null
   day1Work?: string | null
   day1Employee?: EmployeeID | null
-  day2?: ServiceDay2 | null
+  day2?: WorkDay2 | null
   day2Work?: string | null
   day2Employee?: EmployeeID | null
-  day3?: ServiceDay3 | null
+  day3?: WorkDay3 | null
   day3Work?: string | null
   day3Employee?: EmployeeID | null
-  day4?: ServiceDay4 | null
+  day4?: WorkDay4 | null
   day4Work?: string | null
   day4Employee?: EmployeeID | null
-  day5?: ServiceDay5 | null
+  day5?: WorkDay5 | null
   day5Work?: string | null
   day5Employee?: EmployeeID | null
   cost: ServiceCostNumber
@@ -283,6 +282,7 @@ function brandOrder(
       day5Work: service.day5Work ?? undefined,
       day5Employee: service.day5Employee ?? undefined,
       cost: service.cost,
+      total: ServiceCostNumber(service.cost * service.amount),
       currency: ServiceCostCurrency(service.currency as Currency),
       vatFree: service.vatFree,
       orderNotes: service.orderNotes ?? undefined,
@@ -313,6 +313,7 @@ function brandOrder(
       day5Work: local.day5Work ?? undefined,
       day5Employee: local.day5Employee ?? undefined,
       cost: local.cost,
+      total: ServiceCostNumber(local.cost * local.amount),
       currency: ServiceCostCurrency(local.currency as Currency),
       vatFree: local.vatFree,
       orderNotes: local.orderNotes ?? undefined,
@@ -334,7 +335,7 @@ function brandOrder(
       }
     : undefined
   return {
-    order: { cost: Cost(cost), ...orderBranded },
+    ...orderBranded,
     services: serviceBranded,
     localServices: localBranded,
     rentCarBooking: brandedBooking,
@@ -403,78 +404,87 @@ export async function createOrder(
               ),
             )
         }
-        const newOrderServices = await tx
-          .insert(orderServices)
-          .values(servicesWithOrderID)
-          .onConflictDoUpdate({
-            target: [orderServices.orderID, orderServices.serviceID],
-            set: {
-              serviceID: sql`"excluded"."serviceID"`,
-              serviceVariantID: sql`"excluded"."serviceVariantID"`,
-              name: sql`"excluded"."name"`,
-              amount: sql`"excluded"."amount"`,
-              day1: sql`"excluded"."day1"`,
-              day1Work: sql`"excluded"."day1Work"`,
-              day1Employee: sql`"excluded"."day1Employee"`,
-              day2: sql`"excluded"."day2"`,
-              day2Work: sql`"excluded"."day2Work"`,
-              day2Employee: sql`"excluded"."day2Employee"`,
-              day3: sql`"excluded"."day3"`,
-              day3Work: sql`"excluded"."day3Work"`,
-              day3Employee: sql`"excluded"."day3Employee"`,
-              day4: sql`"excluded"."day4"`,
-              day4Work: sql`"excluded"."day4Work"`,
-              day4Employee: sql`"excluded"."day4Employee"`,
-              day5: sql`"excluded"."day5"`,
-              day5Work: sql`"excluded"."day5Work"`,
-              day5Employee: sql`"excluded"."day5Employee"`,
-              cost: sql`"excluded"."cost"`,
-              currency: sql`"excluded"."currency"`,
-              vatFree: sql`"excluded"."vatFree"`,
-              orderNotes: sql`"excluded"."orderNotes"`,
-            },
-          })
-          .returning()
+
+        let newOrderServices: OrderServicesNoBrand[] = []
+
+        if (0 < servicesWithOrderID.length) {
+          newOrderServices = await tx
+            .insert(orderServices)
+            .values(servicesWithOrderID)
+            .onConflictDoUpdate({
+              target: [orderServices.orderID, orderServices.serviceID],
+              set: {
+                serviceID: sql`"excluded"."serviceID"`,
+                serviceVariantID: sql`"excluded"."serviceVariantID"`,
+                name: sql`"excluded"."name"`,
+                amount: sql`"excluded"."amount"`,
+                day1: sql`"excluded"."day1"`,
+                day1Work: sql`"excluded"."day1Work"`,
+                day1Employee: sql`"excluded"."day1Employee"`,
+                day2: sql`"excluded"."day2"`,
+                day2Work: sql`"excluded"."day2Work"`,
+                day2Employee: sql`"excluded"."day2Employee"`,
+                day3: sql`"excluded"."day3"`,
+                day3Work: sql`"excluded"."day3Work"`,
+                day3Employee: sql`"excluded"."day3Employee"`,
+                day4: sql`"excluded"."day4"`,
+                day4Work: sql`"excluded"."day4Work"`,
+                day4Employee: sql`"excluded"."day4Employee"`,
+                day5: sql`"excluded"."day5"`,
+                day5Work: sql`"excluded"."day5Work"`,
+                day5Employee: sql`"excluded"."day5Employee"`,
+                cost: sql`"excluded"."cost"`,
+                currency: sql`"excluded"."currency"`,
+                vatFree: sql`"excluded"."vatFree"`,
+                orderNotes: sql`"excluded"."orderNotes"`,
+              },
+            })
+            .returning()
+        }
 
         const localServicesWithOrderID = localServices.map((service) => ({
           orderID: newOrder.orderID,
           ...service,
         }))
 
-        const newOrderlocalServices = await tx
-          .insert(orderLocalServices)
-          .values(localServicesWithOrderID)
-          .onConflictDoUpdate({
-            target: [orderServices.orderID, orderServices.serviceID],
-            set: {
-              localServiceID: sql`"excluded"."localServiceID"`,
-              serviceVariantID: sql`"excluded"."serviceVariantID"`,
-              name: sql`"excluded"."name"`,
-              amount: sql`"excluded"."amount"`,
-              day1: sql`"excluded"."day1"`,
-              day1Work: sql`"excluded"."day1Work"`,
-              day1Employee: sql`"excluded"."day1Employee"`,
-              day2: sql`"excluded"."day2"`,
-              day2Work: sql`"excluded"."day2Work"`,
-              day2Employee: sql`"excluded"."day2Employee"`,
-              day3: sql`"excluded"."day3"`,
-              day3Work: sql`"excluded"."day3Work"`,
-              day3Employee: sql`"excluded"."day3Employee"`,
-              day4: sql`"excluded"."day4"`,
-              day4Work: sql`"excluded"."day4Work"`,
-              day4Employee: sql`"excluded"."day4Employee"`,
-              day5: sql`"excluded"."day5"`,
-              day5Work: sql`"excluded"."day5Work"`,
-              day5Employee: sql`"excluded"."day5Employee"`,
-              cost: sql`"excluded"."cost"`,
-              currency: sql`"excluded"."currency"`,
-              vatFree: sql`"excluded"."vatFree"`,
-              orderNotes: sql`"excluded"."orderNotes"`,
-            },
-          })
-          .returning()
+        let newOrderlocalServices: OrderLocalServicesNoBrand[] = []
 
-        if (booking != null) {
+        if (0 < localServicesWithOrderID.length) {
+          newOrderlocalServices = await tx
+            .insert(orderLocalServices)
+            .values(localServicesWithOrderID)
+            .onConflictDoUpdate({
+              target: [orderLocalServices.orderID, orderLocalServices.localServiceID],
+              set: {
+                localServiceID: sql`"excluded"."localServiceID"`,
+                serviceVariantID: sql`"excluded"."serviceVariantID"`,
+                name: sql`"excluded"."name"`,
+                amount: sql`"excluded"."amount"`,
+                day1: sql`"excluded"."day1"`,
+                day1Work: sql`"excluded"."day1Work"`,
+                day1Employee: sql`"excluded"."day1Employee"`,
+                day2: sql`"excluded"."day2"`,
+                day2Work: sql`"excluded"."day2Work"`,
+                day2Employee: sql`"excluded"."day2Employee"`,
+                day3: sql`"excluded"."day3"`,
+                day3Work: sql`"excluded"."day3Work"`,
+                day3Employee: sql`"excluded"."day3Employee"`,
+                day4: sql`"excluded"."day4"`,
+                day4Work: sql`"excluded"."day4Work"`,
+                day4Employee: sql`"excluded"."day4Employee"`,
+                day5: sql`"excluded"."day5"`,
+                day5Work: sql`"excluded"."day5Work"`,
+                day5Employee: sql`"excluded"."day5Employee"`,
+                cost: sql`"excluded"."cost"`,
+                currency: sql`"excluded"."currency"`,
+                vatFree: sql`"excluded"."vatFree"`,
+                orderNotes: sql`"excluded"."orderNotes"`,
+              },
+            })
+            .returning()
+        }
+
+        if (booking != undefined) {
           const [newBooking] = await db
             .insert(rentCarBookings)
             .values(booking)
@@ -483,7 +493,6 @@ export async function createOrder(
               set: booking,
             })
             .returning()
-
           const branded = brandOrder(newOrder, newOrderServices, newOrderlocalServices, newBooking)
           return right(branded)
         } else {
@@ -528,89 +537,95 @@ export async function getOrder(order: OrderID): Promise<Either<string, OrderWith
     const [fetchedOrders] = await db
       .select({
         order: orders,
-        orderServices: sql<
-          OrderServices[]
-        >`json_agg(json_build_object('orderID', ${orderServices.orderID}
-          'serviceID', ${orderServices.serviceID}
-          'serviceVariantID',${orderServices.serviceVariantID}
-          'name', ${orderServices.name}
-          'amount', ${orderServices.amount}
-          'day1', ${orderServices.day1}
-          'day1Work', ${orderServices.day1Work}
-          'day1Employee', ${orderServices.day1Employee}
-          'day2', ${orderServices.day2}
-          'day2Work', ${orderServices.day2Work}
-          'day2Employee', ${orderServices.day2Employee}
-          'day3', ${orderServices.day3}
-          'day3Work', ${orderServices.day3Work}
-          'day3Employee', ${orderServices.day3Employee}
-          'day4', ${orderServices.day4}
-          'day4Work', ${orderServices.day4Work}
-          'day4Employee', ${orderServices.day4Employee}
-          'day5', ${orderServices.day5}
-          'day5Work', ${orderServices.day5Work}
-          'day5Employee', ${orderServices.day5Employee}
-          'cost', ${orderServices.cost}
-          'currency', ${orderServices.currency}
-          'vatFree', ${orderServices.vatFree}
-          'orderNotes', ${orderServices.orderNotes}
-          ))`.as('tagname'),
         rentCarBooking: rentCarBookings,
-
-        orderLocalServices: sql<
-          OrderLocalServices[]
-        >`json_agg(json_build_object('orderID', ${orderLocalServices.orderID}
-          'localServiceID', ${orderLocalServices.localServiceID}
-          'serviceVariantID', ${orderLocalServices.serviceVariantID}
-          'name', ${orderLocalServices.name}
-          'amount', ${orderLocalServices.amount}
-          'day1', ${orderLocalServices.day1}
-          'day1Work', ${orderLocalServices.day1Work}
-          'day1Employee', ${orderLocalServices.day1Employee}
-          'day2', ${orderLocalServices.day2}
-          'day2Work', ${orderLocalServices.day2Work}
-          'day2Employee', ${orderLocalServices.day2Employee}
-          'day3', ${orderLocalServices.day3}
-          'day3Work', ${orderLocalServices.day3Work}
-          'day3Employee', ${orderLocalServices.day3Employee}
-          'day4', ${orderLocalServices.day4}
-          'day4Work', ${orderLocalServices.day4Work}
-          'day4Employee', ${orderLocalServices.day4Employee}
-          'day5', ${orderLocalServices.day5}
-          'day5Work', ${orderLocalServices.day5Work}
-          'day5Employee', ${orderLocalServices.day5Employee}
-          'cost', ${orderLocalServices.cost}
-          'currency', ${orderLocalServices.currency}
-          'vatFree', ${orderLocalServices.vatFree}
-          'orderNotes', ${orderLocalServices.orderNotes}
-          ))`.as('tagname'),
+        orderServices: sql<OrderServicesNoBrand[]>`
+        COALESCE(
+          JSONB_AGG(
+            CASE WHEN ${orderServices.serviceID} IS NOT NULL THEN
+              jsonb_build_object(
+                'orderID', ${orderServices.orderID},
+                'serviceID', ${orderServices.serviceID},
+                'name', ${orderServices.name},
+                'amount', ${orderServices.amount},
+                'serviceVariantID', ${orderServices.serviceVariantID},
+                'day1', ${orderServices.day1},
+                'day1Work', ${orderServices.day1Work},
+                'day1Employee', ${orderServices.day1Employee},
+                'day2', ${orderServices.day2},
+                'day2Work', ${orderServices.day2Work},
+                'day2Employee', ${orderServices.day2Employee},
+                'day3', ${orderServices.day3},
+                'day3Work', ${orderServices.day3Work},
+                'day3Employee', ${orderServices.day3Employee},
+                'day4', ${orderServices.day4},
+                'day4Work', ${orderServices.day4Work},
+                'day4Employee', ${orderServices.day4Employee},
+                'day5', ${orderServices.day5},
+                'day5Work', ${orderServices.day5Work},
+                'day5Employee', ${orderServices.day5Employee},
+                'cost', ${orderServices.cost},
+                'currency', ${orderServices.currency},
+                'vatFree', ${orderServices.vatFree},
+                'orderNotes', ${orderServices.orderNotes}
+              )
+            ELSE NULL END
+          ) FILTER (WHERE ${orderServices.serviceID} IS NOT NULL),
+          '[]'::jsonb
+        )
+      `.as('orderServices'),
+        orderLocalServices: sql<OrderLocalServicesNoBrand[]>`
+  COALESCE(
+    (SELECT JSONB_AGG(distinct_local_services)
+     FROM (
+       SELECT DISTINCT ON (${orderLocalServices.localServiceID})
+         jsonb_build_object(
+                'orderID', ${orderLocalServices.orderID},
+                'localServiceID', ${orderLocalServices.localServiceID},
+                'name', ${orderLocalServices.name},
+                'amount', ${orderLocalServices.amount},
+                'serviceVariantID', ${orderLocalServices.serviceVariantID},
+                'day1', ${orderLocalServices.day1},
+                'day1Work', ${orderLocalServices.day1Work},
+                'day1Employee', ${orderLocalServices.day1Employee},
+                'day2', ${orderLocalServices.day2},
+                'day2Work', ${orderLocalServices.day2Work},
+                'day2Employee', ${orderLocalServices.day2Employee},
+                'day3', ${orderLocalServices.day3},
+                'day3Work', ${orderLocalServices.day3Work},
+                'day3Employee', ${orderLocalServices.day3Employee},
+                'day4', ${orderLocalServices.day4},
+                'day4Work', ${orderLocalServices.day4Work},
+                'day4Employee', ${orderLocalServices.day4Employee},
+                'day5', ${orderLocalServices.day5},
+                'day5Work', ${orderLocalServices.day5Work},
+                'day5Employee', ${orderLocalServices.day5Employee},
+                'cost', ${orderLocalServices.cost},
+                'currency', ${orderLocalServices.currency},
+                'vatFree', ${orderLocalServices.vatFree},
+                'orderNotes', ${orderLocalServices.orderNotes}
+            ) as distinct_local_services
+       FROM ${orderLocalServices}
+       WHERE ${orderLocalServices.orderID} = ${orders.orderID}
+     ) subquery
+    ),
+    '[]'::jsonb
+  )
+`.as('orderLocalServices'),
       })
       .from(orders)
       .where(eq(orders.orderID, order))
-      .leftJoin(rentCarBookings, eq(rentCarBookings.orderID, order))
-      .leftJoin(orderLocalServices, eq(orderLocalServices.orderID, order))
-      .leftJoin(orderServices, eq(orderServices.orderID, order))
-
-    //    const serviceLists = fetchedOrders.reduce<{
-    //      serv: OrderServicesNoBrand[]
-    //      local: OrderLocalServicesNoBrand[]
-    //    }>(
-    //      (acc, order) => {
-    //        if (order.orderServices != null) {
-    //          acc.serv.push(order.orderServices)
-    //        }
-    //        return acc
-    //      },
-    //      { serv: [], local: [] },
-    //    )
+      .leftJoin(orderLocalServices, eq(orderLocalServices.orderID, orders.orderID))
+      .leftJoin(rentCarBookings, eq(rentCarBookings.orderID, orders.orderID))
+      .leftJoin(orderServices, eq(orderServices.orderID, orders.orderID))
+      .groupBy(orders.orderID, rentCarBookings.rentCarBookingID)
 
     return fetchedOrders
       ? right(
           brandOrder(
             fetchedOrders.order,
-            fetchedOrders.orderServices,
-            fetchedOrders.orderLocalServices,
-            fetchedOrders.rentCarBooking,
+            fetchedOrders.orderServices ? fetchedOrders.orderServices : [],
+            fetchedOrders.orderLocalServices ? fetchedOrders.orderLocalServices : [],
+            fetchedOrders.rentCarBooking?.bookedBy ? fetchedOrders.rentCarBooking : undefined,
           ),
         )
       : left("Couldn't find order")
