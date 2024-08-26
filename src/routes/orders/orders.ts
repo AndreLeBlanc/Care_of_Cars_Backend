@@ -15,6 +15,7 @@ import {
   PermissionTitle,
   PickupTime,
   RentCarRegistrationNumber,
+  ServiceCostCurrency,
   ServiceCostNumber,
   ServiceDay1,
   ServiceDay2,
@@ -22,6 +23,7 @@ import {
   ServiceDay4,
   ServiceDay5,
   ServiceID,
+  ServiceName,
   StoreID,
   SubmissionTime,
   VatFree,
@@ -38,8 +40,6 @@ import {
 //  ResultCount,
 //  Search,
 //} from '../../plugins/pagination.js'
-
-import Dinero from 'dinero.js'
 
 import { Either, match } from '../../utils/helper.js'
 
@@ -63,6 +63,7 @@ import {
   deleteOrder,
   getOrder,
 } from '../../services/orderService.js'
+import { Currency } from 'dinero.js'
 import { RentCarBooking } from '../../services/rentCarService.js'
 
 export async function orders(fastify: FastifyInstance) {
@@ -111,13 +112,14 @@ export async function orders(fastify: FastifyInstance) {
           pickupTime: PickupTime(new Date(req.body.pickupTime)),
           vatFree: VatFree(req.body.vatFree),
           orderStatus: orderStatusValue,
-          currency: req.body.currency as Dinero.Currency,
+          currency: ServiceCostCurrency(req.body.currency as Dinero.Currency),
           discount: Discount(req.body.discount),
         }
 
         const services: CreateOrderServices[] = req.body.services.map((service) => ({
           serviceID: ServiceID(service.serviceID),
           serviceVariantID: ServiceID(service.serviceVariantID),
+          name: ServiceName(service.name),
           amount: Amount(service.amount),
           day1: service.day1 ? ServiceDay1(service.day1) : undefined,
           day1Work: service.day1Work ? service.day1Work : undefined,
@@ -135,7 +137,7 @@ export async function orders(fastify: FastifyInstance) {
           day5Work: service.day5Work ? service.day5Work : undefined,
           day5Employee: service.day5Employee ? EmployeeID(service.day5Employee) : undefined,
           cost: ServiceCostNumber(service.cost),
-          discount: ServiceCostNumber(service.discount),
+          currency: ServiceCostCurrency(service.currency as Currency),
           vatFree: VatFree(service.vatFree),
           orderNotes: OrderNotes(service.orderNotes),
         }))
@@ -143,6 +145,7 @@ export async function orders(fastify: FastifyInstance) {
         const localServices: CreateOrderLocalServices[] = req.body.services.map((service) => ({
           localServiceID: LocalServiceID(service.serviceID),
           localServiceVariantID: LocalServiceID(service.serviceVariantID),
+          name: ServiceName(service.name),
           amount: Amount(service.amount),
           day1: service.day1 ? ServiceDay1(service.day1) : undefined,
           day1Work: service.day1Work ? service.day1Work : undefined,
@@ -160,7 +163,7 @@ export async function orders(fastify: FastifyInstance) {
           day5Work: service.day5Work ? service.day5Work : undefined,
           day5Employee: service.day5Employee ? EmployeeID(service.day5Employee) : undefined,
           cost: ServiceCostNumber(service.cost),
-          discount: ServiceCostNumber(service.discount),
+          currency: ServiceCostCurrency(service.currency as Currency),
           vatFree: VatFree(service.vatFree),
           orderNotes: OrderNotes(service.orderNotes),
         }))

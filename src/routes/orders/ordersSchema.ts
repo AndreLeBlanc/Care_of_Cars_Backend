@@ -6,6 +6,7 @@ import { storeID } from '../stores/storesSchema.js'
 import {
   LocalServiceIDSchema,
   LocalServicevariantIDSchema,
+  NameSchema,
   ServiceIDSchema,
   ServiceVariantIDSchema,
 } from '../services/serviceSchema.js'
@@ -66,6 +67,7 @@ export type OrderSchemaType = Static<typeof OrderSchema>
 export const CreateOrderServicesSchema = Type.Object({
   serviceID: ServiceIDSchema,
   serviceVariantID: ServiceVariantIDSchema,
+  name: NameSchema,
   amount: amount,
   day1: Type.String({ format: 'date' }),
   day1Work: ServiceDay1Schema,
@@ -83,7 +85,7 @@ export const CreateOrderServicesSchema = Type.Object({
   day5Work: Type.Optional(ServiceDay5Schema),
   day5Employee: Type.Optional(EmployeeID),
   cost: ServiceCostNumberSchema,
-  discount: DiscountSchema,
+  currency: CurrencySchema,
   vatFree: VatFreeSchema,
   orderNotes: OrderNotesSchema,
 })
@@ -93,6 +95,7 @@ export type CreateOrderServicesSchemaType = Static<typeof CreateOrderServicesSch
 export const CreateOrderLocalServicesSchema = Type.Object({
   localServiceID: LocalServiceIDSchema,
   localServiceVariantID: LocalServicevariantIDSchema,
+  name: NameSchema,
   amount: amount,
   day1: Type.String({ format: 'date' }),
   day1Work: ServiceDay1Schema,
@@ -110,7 +113,7 @@ export const CreateOrderLocalServicesSchema = Type.Object({
   day5Work: ServiceDay5Schema,
   day5Employee: EmployeeID,
   cost: ServiceCostNumberSchema,
-  discount: DiscountSchema,
+  currency: CurrencySchema,
   vatFree: VatFreeSchema,
   orderNotes: OrderNotesSchema,
 })
