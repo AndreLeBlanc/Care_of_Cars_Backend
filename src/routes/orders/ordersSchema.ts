@@ -94,7 +94,7 @@ export type CreateOrderServicesSchemaType = Static<typeof CreateOrderServicesSch
 
 export const CreateOrderLocalServicesSchema = Type.Object({
   localServiceID: LocalServiceIDSchema,
-  localServiceVariantID: LocalServicevariantIDSchema,
+  serviceVariantID: LocalServicevariantIDSchema,
   name: NameSchema,
   amount: amount,
   day1: Type.String({ format: 'date' }),
