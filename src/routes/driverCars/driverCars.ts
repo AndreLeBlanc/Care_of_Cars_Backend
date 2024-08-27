@@ -17,6 +17,8 @@ import {
   ListDriverSchemaType,
 } from './driverCarsSchema.js'
 
+import { GetDriverByIDSchema, GetDriverByIDSchemaType } from '../customers/customerSchema.js'
+
 import {
   DriverCarBrand,
   DriverCarChassiNumber,
@@ -36,6 +38,7 @@ import {
   CreateCar,
   deleteCar,
   getCar,
+  getCarByDriverID,
   getCarByReg,
   getCarsPaginated,
   putCar,
@@ -161,6 +164,47 @@ export const driverCars = async (fastify: FastifyInstance) => {
     async (request, reply) => {
       const fetchedCar: Either<string, Car> = await getCarByReg(
         DriverCarRegistrationNumber(request.params.driverCarReg),
+      )
+      match(
+        fetchedCar,
+        (car: Car) => {
+          return reply.status(200).send({
+            message: 'car fetched',
+            ...car.carInfo,
+            createdAt: car.dates.createdAt.toISOString(),
+            updatedAt: car.dates.updatedAt.toISOString(),
+          })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Params: GetDriverByIDSchemaType
+    Reply: (DriverCarMessageSchemaType & DriverCarDateSchemaType) | DriverCarMessageSchemaType
+  }>(
+    '/driverID/:driverID',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_driver_car')
+        await fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        params: GetDriverByIDSchema,
+        response: {
+          201: { DriverCarMessageSchema, ...DriverCarDateSchema },
+          404: DriverCarMessageSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const fetchedCar: Either<string, Car> = await getCarByDriverID(
+        DriverID(request.params.driverID),
       )
       match(
         fetchedCar,

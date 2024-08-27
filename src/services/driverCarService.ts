@@ -9,6 +9,7 @@ import {
   DriverCarYear,
   DriverID,
   driverCars,
+  drivers,
 } from '../schema/schema.js'
 
 import { db } from '../config/db-connect.js'
@@ -119,6 +120,49 @@ export async function getCar(driverCarID: DriverCarID): Promise<Either<string, C
       .select()
       .from(driverCars)
       .where(eq(driverCars.driverCarID, driverCarID))
+
+    return fetchedCar
+      ? right({
+          carInfo: {
+            driverCarID: fetchedCar.driverCarID,
+            driverCarBrand: fetchedCar.driverCarBrand ?? undefined,
+            driverCarChassiNumber: fetchedCar.driverCarChassiNumber ?? undefined,
+            driverCarColor: fetchedCar.driverCarColor ?? undefined,
+            driverCarModel: fetchedCar.driverCarModel ?? undefined,
+            driverCarNotes: fetchedCar.driverCarNotes ?? undefined,
+            driverCarRegistrationNumber: fetchedCar.driverCarRegistrationNumber,
+            driverCarYear: fetchedCar.driverCarYear ?? undefined,
+            driverID: fetchedCar.driverID ?? undefined,
+          },
+          dates: {
+            createdAt: fetchedCar.createdAt,
+            updatedAt: fetchedCar.updatedAt,
+          },
+        })
+      : left("couln't find car")
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function getCarByDriverID(driver: DriverID): Promise<Either<string, Car>> {
+  try {
+    const [fetchedCar] = await db
+      .select({
+        driverCarID: driverCars.driverCarID,
+        driverCarBrand: driverCars.driverCarBrand,
+        driverCarChassiNumber: driverCars.driverCarChassiNumber,
+        driverCarColor: driverCars.driverCarColor,
+        driverCarModel: driverCars.driverCarModel,
+        driverCarNotes: driverCars.driverCarNotes,
+        driverCarRegistrationNumber: driverCars.driverCarRegistrationNumber,
+        driverCarYear: driverCars.driverCarYear,
+        driverID: driverCars.driverID,
+        createdAt: driverCars.createdAt,
+        updatedAt: driverCars.updatedAt,
+      })
+      .from(driverCars)
+      .innerJoin(drivers, eq(drivers.driverID, driver))
 
     return fetchedCar
       ? right({
