@@ -614,54 +614,58 @@ export async function getCompanyById(
 export async function getDriverById(driverID: DriverID): Promise<Either<string, Driver>> {
   try {
     const [driverDetails] = await db
-      .select({
-        driverID: drivers.driverID,
-        driverExternalNumber: drivers.driverExternalNumber,
-        driverGDPRAccept: drivers.driverGDPRAccept,
-        driverISWarrantyDriver: drivers.driverISWarrantyDriver,
-        driverAcceptsMarketing: drivers.driverAcceptsMarketing,
-        driverFirstName: drivers.driverFirstName,
-        driverLastName: drivers.driverLastName,
-        driverEmail: drivers.driverEmail,
-        driverPhoneNumber: drivers.driverPhoneNumber,
-        driverAddress: drivers.driverAddress,
-        driverZipCode: drivers.driverZipCode,
-        driverAddressCity: drivers.driverAddressCity,
-        driverHasCard: drivers.driverHasCard,
-        driverCardValidTo: drivers.driverCardValidTo,
-        driverCardNumber: drivers.driverCardNumber,
-        driverKeyNumber: drivers.driverKeyNumber,
-        driverNotesShared: drivers.driverNotesShared,
-        driverNotes: drivers.driverNotes,
-        driverCountry: drivers.driverCountry,
-        createdAt: drivers.createdAt,
-        updatedAt: drivers.updatedAt,
-      })
+      .select()
       .from(drivers)
+      .leftJoin(companycustomers, eq(drivers.customerOrgNumber, companycustomers.customerOrgNumber))
       .where(eq(drivers.driverID, driverID))
+
     return driverDetails
       ? right({
-          driverID: driverDetails.driverID,
-          driverExternalNumber: driverDetails.driverExternalNumber ?? undefined,
-          driverGDPRAccept: driverDetails.driverGDPRAccept,
-          driverISWarrantyDriver: driverDetails.driverISWarrantyDriver,
-          driverAcceptsMarketing: driverDetails.driverAcceptsMarketing,
-          driverFirstName: driverDetails.driverFirstName,
-          driverLastName: driverDetails.driverLastName,
-          driverEmail: driverDetails.driverEmail,
-          driverPhoneNumber: driverDetails.driverPhoneNumber,
-          driverAddress: driverDetails.driverAddress,
-          driverZipCode: driverDetails.driverZipCode,
-          driverAddressCity: driverDetails.driverAddressCity,
-          driverHasCard: driverDetails.driverHasCard ?? undefined,
-          driverCardValidTo: driverDetails.driverCardValidTo ?? undefined,
-          driverCardNumber: driverDetails.driverCardNumber ?? undefined,
-          driverKeyNumber: driverDetails.driverKeyNumber ?? undefined,
-          driverNotesShared: driverDetails.driverNotesShared ?? undefined,
-          driverNotes: driverDetails.driverNotes ?? undefined,
-          driverCountry: driverDetails.driverCountry,
-          createdAt: driverDetails.createdAt,
-          updatedAt: driverDetails.updatedAt,
+          driverID: driverDetails.drivers.driverID,
+          driverExternalNumber: driverDetails.drivers.driverExternalNumber ?? undefined,
+          driverGDPRAccept: driverDetails.drivers.driverGDPRAccept,
+          driverISWarrantyDriver: driverDetails.drivers.driverISWarrantyDriver,
+          driverAcceptsMarketing: driverDetails.drivers.driverAcceptsMarketing,
+          driverFirstName: driverDetails.drivers.driverFirstName,
+          driverLastName: driverDetails.drivers.driverLastName,
+          driverEmail: driverDetails.drivers.driverEmail,
+          driverPhoneNumber: driverDetails.drivers.driverPhoneNumber,
+          driverAddress: driverDetails.drivers.driverAddress,
+          driverZipCode: driverDetails.drivers.driverZipCode,
+          driverAddressCity: driverDetails.drivers.driverAddressCity,
+          driverHasCard: driverDetails.drivers.driverHasCard ?? undefined,
+          driverCardValidTo: driverDetails.drivers.driverCardValidTo ?? undefined,
+          driverCardNumber: driverDetails.drivers.driverCardNumber ?? undefined,
+          driverKeyNumber: driverDetails.drivers.driverKeyNumber ?? undefined,
+          driverNotesShared: driverDetails.drivers.driverNotesShared ?? undefined,
+          driverNotes: driverDetails.drivers.driverNotes ?? undefined,
+          driverCountry: driverDetails.drivers.driverCountry,
+          createdAt: driverDetails.drivers.createdAt,
+          updatedAt: driverDetails.drivers.updatedAt,
+          customerOrgNumber: driverDetails.companycustomers
+            ? driverDetails.companycustomers.customerOrgNumber
+            : undefined,
+          customerCompanyName: driverDetails.companycustomers
+            ? driverDetails.companycustomers.customerCompanyName
+            : undefined,
+          companyAddress: driverDetails.companycustomers
+            ? driverDetails.companycustomers.companyAddress
+            : undefined,
+          companyZipCode: driverDetails.companycustomers
+            ? driverDetails.companycustomers.companyZipCode
+            : undefined,
+          companyAddressCity: driverDetails.companycustomers
+            ? driverDetails.companycustomers.companyAddressCity
+            : undefined,
+          companyEmail: driverDetails.companycustomers
+            ? driverDetails.companycustomers.companyEmail
+            : undefined,
+          companyPhone: driverDetails.companycustomers
+            ? driverDetails.companycustomers.companyPhone
+            : undefined,
+          companyCountry: driverDetails.companycustomers
+            ? driverDetails.companycustomers.companyCountry
+            : undefined,
         })
       : left("can't find driver")
   } catch (e) {
