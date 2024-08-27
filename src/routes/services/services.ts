@@ -214,7 +214,6 @@ export async function services(fastify: FastifyInstance) {
         }
         serviceData = await createService(serviceNew)
       }
-      console.log('service Data', serviceData)
       match(
         serviceData,
         (serv) => {
@@ -340,7 +339,6 @@ export async function services(fastify: FastifyInstance) {
     '/:serviceID/:type',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('view_user'))
         done()
         return reply
@@ -362,7 +360,6 @@ export async function services(fastify: FastifyInstance) {
         type: request.params.type,
         id: id,
       })
-      console.log(service)
       match(
         service,
         (fetchedService: Service | LocalService) => {
@@ -397,7 +394,6 @@ export async function services(fastify: FastifyInstance) {
       const service: Either<string, OrderServInfo> = await getServicesWithVariants(
         StoreID(request.params.storeID),
       )
-      console.log(service)
       match(
         service,
         (fetchedService: OrderServInfo) => {
@@ -736,7 +732,6 @@ export async function services(fastify: FastifyInstance) {
       } else {
         service = await getLocalServiceQualifications(LocalServiceID(request.params.serviceID))
       }
-      console.log(service)
       match(
         service,
         (fetchedService) => {
