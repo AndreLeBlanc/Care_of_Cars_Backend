@@ -33,6 +33,7 @@ import {
   LocalServiceCreate,
   LocalServiceGlobalQual,
   LocalServiceLocalQual,
+  OrderServInfo,
   Service,
   ServiceBase,
   ServiceCreate,
@@ -47,6 +48,7 @@ import {
   getServiceById,
   getServiceQualifications,
   getServicesPaginate,
+  getServicesWithVariants,
   setLocalServiceLocalQual,
   setLocalServiceQualifications,
   setServiceLocalQual,
@@ -93,6 +95,7 @@ import {
 import Dinero from 'dinero.js'
 
 import { Either, match } from '../../utils/helper.js'
+import { StoreIDSchemaType } from '../stores/storesSchema.js'
 
 export async function services(fastify: FastifyInstance) {
   fastify.put<{
@@ -363,6 +366,41 @@ export async function services(fastify: FastifyInstance) {
       match(
         service,
         (fetchedService: Service | LocalService) => {
+          return reply.status(200).send({ ...fetchedService })
+        },
+        (err) => {
+          return reply.status(404).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Params: StoreIDSchemaType
+    // Reply: (ServiceSchemaType & MessageSchemaType) | MessageSchemaType
+  }>(
+    '/order-list/:storeID',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, PermissionTitle('list_services_order'))
+        done()
+        return reply
+      },
+
+      schema: {
+        //    params: getServiceByIDSchema,
+        //  response: {},
+      },
+    },
+    async (request, reply) => {
+      const service: Either<string, OrderServInfo> = await getServicesWithVariants(
+        StoreID(request.params.storeID),
+      )
+      console.log(service)
+      match(
+        service,
+        (fetchedService: OrderServInfo) => {
           return reply.status(200).send({ ...fetchedService })
         },
         (err) => {

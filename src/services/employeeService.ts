@@ -243,6 +243,8 @@ export type CheckInTimes = {
 export type ListCheckInStatus = {
   employeeID: EmployeeID
   shortUserName: ShortUserName
+  firstName: UserFirstName
+  lastName: UserLastName
   time: EmployeeCheckIn | EmployeeCheckOut | undefined
   status: CheckedInStatus
 }
@@ -1007,6 +1009,8 @@ export async function listCheckedinStatus(
         shortUserName: employees.shortUserName,
         employeeCheckedIn: employeeStore.employeeCheckedIn,
         employeeCheckedOut: employeeStore.employeeCheckedOut,
+        firstName: users.firstName,
+        lastName: users.lastName,
       })
       .from(employees)
       .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
@@ -1026,11 +1030,13 @@ export async function listCheckedinStatus(
         time: EmployeeCheckOut(checkedout.toISOString()),
       }
     }
-    const employeeCheckinStatus = employeesList.map((employee) => {
+    const employeeCheckinStatus = employeesList.map<ListCheckInStatus>((employee) => {
       const status = toListCheckinStatus(employee.employeeCheckedIn, employee.employeeCheckedOut)
       return {
         employeeID: employee.employeeID,
         shortUserName: employee.shortUserName,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
         time: status?.time,
         status: status.status,
       }
