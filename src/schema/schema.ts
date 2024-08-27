@@ -440,6 +440,8 @@ export const DriverCarNotes = make<DriverCarNotes>()
 
 export type OrderID = Brand<number, 'orderID'>
 export const OrderID = make<OrderID>()
+export type Billed = Brand<boolean, 'orderID'>
+export const Billed = make<Billed>()
 export type Amount = Brand<number, 'amount'>
 export const Amount = make<Amount>()
 export type Cost = Brand<number, 'cost'>
@@ -454,9 +456,21 @@ export type VatFree = Brand<boolean, 'vatFree'>
 export const VatFree = make<VatFree>()
 export type Discount = Brand<number, 'discount'>
 export const Discount = make<Discount>()
+export type WorkDay1 = Brand<Date, 'serviceDay1'>
+export const WorkDay1 = make<WorkDay1>()
+export type WorkDay2 = Brand<Date, 'serviceDay2'>
+export const WorkDay2 = make<WorkDay2>()
+export type WorkDay3 = Brand<Date, 'serviceDay3'>
+export const WorkDay3 = make<WorkDay3>()
+export type WorkDay4 = Brand<Date, 'serviceDay4'>
+export const WorkDay4 = make<WorkDay4>()
+export type WorkDay5 = Brand<Date, 'serviceDay5'>
+export const WorkDay5 = make<WorkDay5>()
 
 export type BillID = Brand<number, 'billID'>
 export const BillID = make<BillID>()
+export type IsBilled = Brand<boolean, 'isBilleded'>
+export const IsBilled = make<IsBilled>()
 export type PaymentDays = Brand<number, 'paymentDays'>
 export const PaymentDays = make<PaymentDays>()
 
@@ -797,11 +811,11 @@ export const services = pgTable('services', {
   externalArticleNumber: varchar('externalArticleNumber', {
     length: 256,
   }).$type<ServiceExternalArticleNumber>(),
-  day1: time('day1').$type<ServiceDay1>(),
-  day2: time('day2').$type<ServiceDay2>(),
-  day3: time('day3').$type<ServiceDay3>(),
-  day4: time('day4').$type<ServiceDay4>(),
-  day5: time('day5').$type<ServiceDay5>(),
+  day1: interval('day1').$type<ServiceDay1>(),
+  day2: interval('day2').$type<ServiceDay2>(),
+  day3: interval('day3').$type<ServiceDay3>(),
+  day4: interval('day4').$type<ServiceDay4>(),
+  day5: interval('day5').$type<ServiceDay5>(),
   ...dbDates,
 })
 
@@ -872,11 +886,11 @@ export const localServices = pgTable('localServices', {
   externalArticleNumber: varchar('externalArticleNumber', {
     length: 256,
   }).$type<ServiceExternalArticleNumber>(),
-  day1: time('day1').$type<ServiceDay1>(),
-  day2: time('day2').$type<ServiceDay2>(),
-  day3: time('day3').$type<ServiceDay3>(),
-  day4: time('day4').$type<ServiceDay4>(),
-  day5: time('day5').$type<ServiceDay5>(),
+  day1: interval('day1').$type<ServiceDay1>(),
+  day2: interval('day2').$type<ServiceDay2>(),
+  day3: interval('day3').$type<ServiceDay3>(),
+  day4: interval('day4').$type<ServiceDay4>(),
+  day5: interval('day5').$type<ServiceDay5>(),
   ...dbDates,
 })
 
@@ -940,11 +954,11 @@ export const serviceVariants = pgTable('serviceVariants', {
   cost: real('cost').$type<ServiceCostNumber>().notNull(),
   currency: varchar('currency', { length: 5 }).notNull(),
   award: real('award').$type<Award>().notNull(),
-  day1: time('day1').$type<ServiceDay1>(),
-  day2: time('day2').$type<ServiceDay2>(),
-  day3: time('day3').$type<ServiceDay3>(),
-  day4: time('day4').$type<ServiceDay4>(),
-  day5: time('day5').$type<ServiceDay5>(),
+  day1: interval('day1').$type<ServiceDay1>(),
+  day2: interval('day2').$type<ServiceDay2>(),
+  day3: interval('day3').$type<ServiceDay3>(),
+  day4: interval('day4').$type<ServiceDay4>(),
+  day5: interval('day5').$type<ServiceDay5>(),
   serviceID: integer('serviceID')
     .$type<ServiceID>()
     .references(() => services.serviceID)
@@ -953,16 +967,16 @@ export const serviceVariants = pgTable('serviceVariants', {
 })
 
 export const localServiceVariants = pgTable('localServiceVariants', {
-  serviceVariantID: serial('serviceVariantID').$type<ServiceID>().primaryKey(),
+  serviceVariantID: serial('serviceVariantID').$type<LocalServiceID>().primaryKey(),
   name: varchar('name', { length: 256 }).$type<ServiceName>().notNull(),
   currency: varchar('currency', { length: 5 }).notNull(),
   cost: real('cost').$type<ServiceCostNumber>().notNull(),
   award: real('award').$type<Award>().notNull(),
-  day1: time('day1').$type<ServiceDay1>(),
-  day2: time('day2').$type<ServiceDay2>(),
-  day3: time('day3').$type<ServiceDay3>(),
-  day4: time('day4').$type<ServiceDay4>(),
-  day5: time('day5').$type<ServiceDay5>(),
+  day1: interval('day1').$type<ServiceDay1>(),
+  day2: interval('day2').$type<ServiceDay2>(),
+  day3: interval('day3').$type<ServiceDay3>(),
+  day4: interval('day4').$type<ServiceDay4>(),
+  day5: interval('day5').$type<ServiceDay5>(),
   localServiceID: integer('localServiceID')
     .$type<LocalServiceID>()
     .references(() => localServices.localServiceID, { onDelete: 'cascade' })
@@ -1491,7 +1505,7 @@ export const orders = pgTable(
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
     submissionTime: timestamp('submissionTime').$type<SubmissionTime>().notNull(),
-    pickupTime: timestamp('submissionTime').$type<PickupTime>().notNull(),
+    pickupTime: timestamp('pickupTime').$type<PickupTime>().notNull(),
     vatFree: boolean('vatFree').$type<VatFree>().notNull(),
     orderStatus: orderStatuspgEnum('orderStatus').notNull(),
     currency: varchar('currency').notNull(),
@@ -1536,28 +1550,28 @@ export const orderServices = pgTable(
     serviceVariantID: integer('serviceVariantID')
       .$type<ServiceID>()
       .references(() => serviceVariants.serviceVariantID, { onDelete: 'cascade' }),
-    day1: timestamp('day1').$type<ServiceDay1>(),
+    day1: timestamp('day1').$type<WorkDay1>(),
     day1Work: interval('day1Work'),
     day1Employee: integer('day1Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
-    day2: timestamp('day2').$type<ServiceDay2>(),
-    day2Work: interval('day1Work'),
+    day2: timestamp('day2').$type<WorkDay2>(),
+    day2Work: interval('day2Work'),
     day2Employee: integer('day2Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
-    day3: timestamp('day3').$type<ServiceDay3>(),
-    day3Work: interval('day1Work'),
+    day3: timestamp('day3').$type<WorkDay3>(),
+    day3Work: interval('day3Work'),
     day3Employee: integer('day3Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
-    day4: timestamp('day4').$type<ServiceDay4>(),
-    day4Work: interval('day1Work'),
+    day4: timestamp('day4').$type<WorkDay4>(),
+    day4Work: interval('day4Work'),
     day4Employee: integer('day4Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
-    day5: timestamp('day5').$type<ServiceDay5>(),
-    day5Work: interval('day1Work'),
+    day5: timestamp('day5').$type<WorkDay5>(),
+    day5Work: interval('day5Work'),
     day5Employee: integer('day5Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
@@ -1606,28 +1620,28 @@ export const orderLocalServices = pgTable(
     serviceVariantID: integer('serviceVariantID')
       .$type<LocalServiceID>()
       .references(() => localServiceVariants.serviceVariantID, { onDelete: 'cascade' }),
-    day1: timestamp('day1').$type<ServiceDay1>(),
+    day1: timestamp('day1').$type<WorkDay1>(),
     day1Work: interval('day1Work'),
     day1Employee: integer('day1Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
-    day2: timestamp('day2').$type<ServiceDay2>(),
-    day2Work: interval('day1Work'),
+    day2: timestamp('day2').$type<WorkDay2>(),
+    day2Work: interval('day2Work'),
     day2Employee: integer('day2Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
-    day3: timestamp('day3').$type<ServiceDay3>(),
-    day3Work: interval('day1Work'),
+    day3: timestamp('day3').$type<WorkDay3>(),
+    day3Work: interval('day3Work'),
     day3Employee: integer('day3Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
-    day4: timestamp('day4').$type<ServiceDay4>(),
-    day4Work: interval('day1Work'),
+    day4: timestamp('day4').$type<WorkDay4>(),
+    day4Work: interval('day4Work'),
     day4Employee: integer('day4Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
-    day5: timestamp('day5').$type<ServiceDay5>(),
-    day5Work: interval('day1Work'),
+    day5: timestamp('day5').$type<WorkDay5>(),
+    day5Work: interval('day5Work'),
     day5Employee: integer('day5Employee')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),

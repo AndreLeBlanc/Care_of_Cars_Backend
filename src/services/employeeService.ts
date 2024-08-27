@@ -193,6 +193,16 @@ export type CreateEmployee = EmployeeNoRate & {
 
 export type Employee = EmployeeNoRate & {
   employeeHourlyRateDinero?: EmployeeHourlyRateDinero
+  storeIDs: StoreIDName[] | StoreID[]
+  employeeID: EmployeeID
+  employeeCheckIn?: EmployeeCheckIn
+  employeeCheckOut?: EmployeeCheckOut
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type EmployeeStoreID = EmployeeNoRate & {
+  employeeHourlyRateDinero?: EmployeeHourlyRateDinero
   storeIDs: StoreID[]
   employeeID: EmployeeID
   employeeCheckIn?: EmployeeCheckIn
@@ -1103,11 +1113,11 @@ export async function checkInCheckOut(
 }
 
 export async function putEmployee(
-  stores: StoreID[],
+  storeList: StoreID[],
   employee: CreateEmployee,
   employeeID?: EmployeeID,
 ): Promise<Either<string, Employee>> {
-  if (stores.length < 1) {
+  if (storeList.length < 1) {
     return left('no store given')
   }
   try {
@@ -1120,15 +1130,22 @@ export async function putEmployee(
             .returning()
         : await db.insert(employees).values(employee).returning()
 
-      const employeeIDStoreID = stores.map((store) => {
+      const employeeIDStoreID = storeList.map((store) => {
         return { storeID: store, employeeID: createdEmployee.employeeID }
       })
 
+      if (employeeID != null) {
+        await tx.delete(employeeStore).where(eq(employeeStore.employeeID, employeeID))
+      }
       const employeeStoresRes = await tx
         .insert(employeeStore)
         .values(employeeIDStoreID)
-        .onConflictDoNothing()
         .returning({ storeID: employeeStore.storeID })
+
+      const employeeStoreNames = await tx
+        .select({ storeName: stores.storeName, storeID: stores.storeID })
+        .from(stores)
+        .where(or(...employeeStoresRes.map((storeID) => eq(stores.storeID, storeID.storeID))))
 
       const createdEmployeeWithUndefined = {
         userID: createdEmployee.userID,
@@ -1149,7 +1166,7 @@ export async function putEmployee(
       }
       return {
         ...createdEmployeeWithUndefined,
-        storeIDs: employeeStoresRes.map((row) => row.storeID),
+        storeIDs: employeeStoreNames,
       }
     })
     return right(createdEmployeeWithStores)
@@ -1181,7 +1198,7 @@ export async function getEmployee(employeeID: EmployeeID): Promise<Either<string
         employeeCheckedOut: employeeStore.employeeCheckedOut,
         storeIDs: sql<
           StoreIDName[]
-        >`json_agg(json_build_object('storeID', ${employeeStore.storeID}, 'storeName', ${stores.storeName}))`.as(
+        >`json_agg(json_build_object('storeID', ${stores.storeID}, 'storeName', ${stores.storeName}))`.as(
           'tagname',
         ),
       })
@@ -1190,7 +1207,12 @@ export async function getEmployee(employeeID: EmployeeID): Promise<Either<string
       .innerJoin(users, eq(users.userID, employees.userID))
       .leftJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
       .leftJoin(stores, eq(stores.storeID, employeeStore.storeID))
-      .groupBy(users.userID, employees.employeeID)
+      .groupBy(
+        users.userID,
+        employees.employeeID,
+        employeeStore.employeeCheckedIn,
+        employeeStore.employeeCheckedOut,
+      )
 
     return verifiedUser
       ? right({
@@ -1231,9 +1253,11 @@ export async function deleteEmployee(employeeID: EmployeeID): Promise<Either<str
   try {
     const deletedEmployeeWithStores = await db.transaction(async (tx) => {
       const employeeStores = await tx
-        .delete(employeeStore)
+        .select({ storeID: stores.storeID, storeName: stores.storeName })
+        .from(employeeStore)
         .where(eq(employeeStore.employeeID, employeeID))
-        .returning()
+        .innerJoin(stores, eq(employeeStore.storeID, stores.storeID))
+      await tx.delete(employeeStore).where(eq(employeeStore.employeeID, employeeID))
 
       const [deletedEmployee] = await tx
         .delete(employees)
@@ -1255,7 +1279,7 @@ export async function deleteEmployee(employeeID: EmployeeID): Promise<Either<str
         createdAt: deletedEmployee.createdAt,
         updatedAt: deletedEmployee.updatedAt,
       }
-      return { ...deletedEmployeeWithNull, storeIDs: employeeStores.map((row) => row.storeID) }
+      return { ...deletedEmployeeWithNull, storeIDs: employeeStores }
     })
     if (deletedEmployeeWithStores == null) {
       return left('employee not found')

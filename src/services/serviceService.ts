@@ -64,7 +64,7 @@ export type ServiceVariant = ServiceVariantBase & {
 
 export type LocalServiceVariant = ServiceVariantBase & {
   localServiceID?: LocalServiceID
-  serviceVariantID?: ServiceID
+  serviceVariantID?: LocalServiceID
 }
 
 export type ServicesPaginated = {
@@ -623,7 +623,8 @@ export async function getServiceById(serviceID: {
       const branded = brander(servicesDetail[0].localServices)
       return match(
         branded,
-        (brandedService) => right({ ...brandedService, serviceVariants: variants }),
+        (brandedService) =>
+          right({ ...(brandedService as LocalService), serviceVariants: variants }),
         (err) => {
           return left(errorHandling(err))
         },

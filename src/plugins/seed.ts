@@ -162,8 +162,8 @@ export default fp(async () => {
         console.log('created store status: ', store)
 
         const catService: Either<string, CreateServiceCategory> = await createServiceCategory(
-          ServiceCategoryName('seeded products'),
-          ServiceCategoryDescription('Products created during seed'),
+          ServiceCategoryName('seeded service'),
+          ServiceCategoryDescription('service created during seed'),
         )
         console.log('created service category status: ', catService)
 

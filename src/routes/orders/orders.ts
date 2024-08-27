@@ -8,6 +8,7 @@ import {
   DriverCarID,
   DriverID,
   EmployeeID,
+  IsBilled,
   LocalServiceID,
   OrderID,
   OrderNotes,
@@ -17,29 +18,28 @@ import {
   RentCarRegistrationNumber,
   ServiceCostCurrency,
   ServiceCostNumber,
-  ServiceDay1,
-  ServiceDay2,
-  ServiceDay3,
-  ServiceDay4,
-  ServiceDay5,
   ServiceID,
   ServiceName,
   StoreID,
   SubmissionTime,
   VatFree,
+  WorkDay1,
+  WorkDay2,
+  WorkDay3,
+  WorkDay4,
+  WorkDay5,
   orderStatus,
 } from '../../schema/schema.js'
 
-//import {
-//  Limit,
-//  NextPageUrl,
-//  Offset,
-//  Page,
-//  PreviousPageUrl,
-//  RequestUrl,
-//  ResultCount,
-//  Search,
-//} from '../../plugins/pagination.js'
+import {
+  Limit,
+  NextPageUrl,
+  Offset,
+  Page,
+  PreviousPageUrl,
+  RequestUrl,
+  Search,
+} from '../../plugins/pagination.js'
 
 import { Either, match } from '../../utils/helper.js'
 
@@ -48,20 +48,27 @@ import {
   CreateOrderBodyReplySchemaType,
   CreateOrderBodySchema,
   CreateOrderBodySchemaType,
+  ListOrdersQueryParamSchema,
+  ListOrdersQueryParamSchemaType,
   MessageSchema,
   MessageSchemaType,
   OrderIDSchema,
   OrderIDSchemaType,
+  OrdersPaginatedSchema,
 } from './ordersSchema.js'
 
 import {
   CreateOrder,
   CreateOrderLocalServices,
   CreateOrderServices,
+  DeleteOrderLocalService,
+  DeleteOrderService,
   OrderWithServices,
+  OrdersPaginated,
   createOrder,
   deleteOrder,
   getOrder,
+  listOrders,
 } from '../../services/orderService.js'
 import { Currency } from 'dinero.js'
 import { RentCarBooking } from '../../services/rentCarService.js'
@@ -69,7 +76,7 @@ import { RentCarBooking } from '../../services/rentCarService.js'
 export async function orders(fastify: FastifyInstance) {
   fastify.put<{
     Body: CreateOrderBodySchemaType
-    Reply: (CreateOrderBodyReplySchemaType & MessageSchemaType) | MessageSchemaType
+    Reply: CreateOrderBodyReplySchemaType | MessageSchemaType
   }>(
     '/',
     {
@@ -86,20 +93,25 @@ export async function orders(fastify: FastifyInstance) {
       },
       schema: {
         body: CreateOrderBodySchema,
-        response: { 201: { CreateOrderBodyReplySchema }, 504: MessageSchema },
+        response: { 201: CreateOrderBodyReplySchema, 504: MessageSchema },
       },
     },
 
     async (req, reply) => {
-      function isOrderStatus(value: string): value is OrderStatus {
-        return value in orderStatus
+      if (req.body.pickupTime < req.body.submissionTime) {
+        reply
+          .status(400)
+          .send({ message: 'upphämtningstiden måste vara senare än inlämningstiden' })
       }
-
+      function isOrderStatus(status: string): status is OrderStatus {
+        return orderStatus.includes(status as OrderStatus)
+      }
       const orderStatusFromBody = req.body.orderStatus
 
       const orderStatusValue: OrderStatus | undefined = isOrderStatus(orderStatusFromBody)
         ? orderStatusFromBody
         : undefined
+
       if (orderStatusValue != undefined) {
         const order: CreateOrder = {
           orderID: req.body.orderID ? OrderID(req.body.orderID) : undefined,
@@ -111,82 +123,117 @@ export async function orders(fastify: FastifyInstance) {
           submissionTime: SubmissionTime(new Date(req.body.submissionTime)),
           pickupTime: PickupTime(new Date(req.body.pickupTime)),
           vatFree: VatFree(req.body.vatFree),
-          orderStatus: orderStatusValue,
+          orderStatus: orderStatusValue as OrderStatus,
           currency: ServiceCostCurrency(req.body.currency as Dinero.Currency),
           discount: Discount(req.body.discount),
         }
 
         const services: CreateOrderServices[] = req.body.services.map((service) => ({
           serviceID: ServiceID(service.serviceID),
-          serviceVariantID: ServiceID(service.serviceVariantID),
-          name: ServiceName(service.name),
-          amount: Amount(service.amount),
-          day1: service.day1 ? ServiceDay1(service.day1) : undefined,
-          day1Work: service.day1Work ? service.day1Work : undefined,
-          day1Employee: service.day1Employee ? EmployeeID(service.day1Employee) : undefined,
-          day2: service.day2 ? ServiceDay2(service.day2) : undefined,
-          day2Work: service.day2Work ? service.day2Work : undefined,
-          day2Employee: service.day2Employee ? EmployeeID(service.day2Employee) : undefined,
-          day3: service.day3 ? ServiceDay3(service.day3) : undefined,
-          day3Work: service.day3Work ? service.day3Work : undefined,
-          day3Employee: service.day3Employee ? EmployeeID(service.day3Employee) : undefined,
-          day4: service.day4 ? ServiceDay4(service.day4) : undefined,
-          day4Work: service.day4Work ? service.day4Work : undefined,
-          day4Employee: service.day4Employee ? EmployeeID(service.day4Employee) : undefined,
-          day5: service.day5 ? ServiceDay5(service.day5) : undefined,
-          day5Work: service.day5Work ? service.day5Work : undefined,
-          day5Employee: service.day5Employee ? EmployeeID(service.day5Employee) : undefined,
-          cost: ServiceCostNumber(service.cost),
-          currency: ServiceCostCurrency(service.currency as Currency),
-          vatFree: VatFree(service.vatFree),
-          orderNotes: OrderNotes(service.orderNotes),
-        }))
-
-        const localServices: CreateOrderLocalServices[] = req.body.services.map((service) => ({
-          localServiceID: LocalServiceID(service.serviceID),
-          localServiceVariantID: LocalServiceID(service.serviceVariantID),
-          name: ServiceName(service.name),
-          amount: Amount(service.amount),
-          day1: service.day1 ? ServiceDay1(service.day1) : undefined,
-          day1Work: service.day1Work ? service.day1Work : undefined,
-          day1Employee: service.day1Employee ? EmployeeID(service.day1Employee) : undefined,
-          day2: service.day2 ? ServiceDay2(service.day2) : undefined,
-          day2Work: service.day2Work ? service.day2Work : undefined,
-          day2Employee: service.day2Employee ? EmployeeID(service.day2Employee) : undefined,
-          day3: service.day3 ? ServiceDay3(service.day3) : undefined,
-          day3Work: service.day3Work ? service.day3Work : undefined,
-          day3Employee: service.day3Employee ? EmployeeID(service.day3Employee) : undefined,
-          day4: service.day4 ? ServiceDay4(service.day4) : undefined,
-          day4Work: service.day4Work ? service.day4Work : undefined,
-          day4Employee: service.day4Employee ? EmployeeID(service.day4Employee) : undefined,
-          day5: service.day5 ? ServiceDay5(service.day5) : undefined,
-          day5Work: service.day5Work ? service.day5Work : undefined,
-          day5Employee: service.day5Employee ? EmployeeID(service.day5Employee) : undefined,
-          cost: ServiceCostNumber(service.cost),
-          currency: ServiceCostCurrency(service.currency as Currency),
-          vatFree: VatFree(service.vatFree),
-          orderNotes: OrderNotes(service.orderNotes),
-        }))
-
-        const newRentCarBooking: RentCarBooking | undefined = {
-          rentCarRegistrationNumber: RentCarRegistrationNumber(
-            req.body.rentCarBooking.rentCarRegistrationNumber,
-          ),
-          bookingStart: BookingStart(new Date(req.body.rentCarBooking.bookingStart)),
-          bookingEnd: BookingEnd(new Date(req.body.rentCarBooking.bookingEnd)),
-          bookedBy: req.body.rentCarBooking.bookedBy
-            ? EmployeeID(req.body.rentCarBooking.bookedBy)
+          serviceVariantID: service.serviceVariantID
+            ? ServiceID(service.serviceVariantID)
             : undefined,
-          bookingStatus: req.body.rentCarBooking.bookingStatus as OrderStatus,
-          submissionTime: SubmissionTime(new Date(req.body.rentCarBooking.submissionTime)),
-        }
+          name: ServiceName(service.name),
+          amount: Amount(service.amount),
+          day1: service.day1 ? WorkDay1(new Date(service.day1)) : undefined,
+          day1Work: service.day1Work ? service.day1Work : undefined,
+          day1Employee: service.day1Employee ? EmployeeID(service.day1Employee) : undefined,
+          day2: service.day2 ? WorkDay2(new Date(service.day2)) : undefined,
+          day2Work: service.day2Work ? service.day2Work : undefined,
+          day2Employee: service.day2Employee ? EmployeeID(service.day2Employee) : undefined,
+          day3: service.day3 ? WorkDay3(new Date(service.day3)) : undefined,
+          day3Work: service.day3Work ? service.day3Work : undefined,
+          day3Employee: service.day3Employee ? EmployeeID(service.day3Employee) : undefined,
+          day4: service.day4 ? WorkDay4(new Date(service.day4)) : undefined,
+          day4Work: service.day4Work ? service.day4Work : undefined,
+          day4Employee: service.day4Employee ? EmployeeID(service.day4Employee) : undefined,
+          day5: service.day5 ? WorkDay5(new Date(service.day5)) : undefined,
+          day5Work: service.day5Work ? service.day5Work : undefined,
+          day5Employee: service.day5Employee ? EmployeeID(service.day5Employee) : undefined,
+          cost: ServiceCostNumber(service.cost),
+          currency: ServiceCostCurrency(service.currency as Currency),
+          vatFree: VatFree(service.vatFree),
+          orderNotes: OrderNotes(service.orderNotes),
+        }))
+
+        const localServices: CreateOrderLocalServices[] = req.body.localServices.map(
+          (localService) => ({
+            localServiceID: LocalServiceID(localService.localServiceID),
+            localServiceVariantID: localService.serviceVariantID
+              ? LocalServiceID(localService.serviceVariantID)
+              : undefined,
+            name: ServiceName(localService.name),
+            amount: Amount(localService.amount),
+            day1: localService.day1 ? WorkDay1(new Date(localService.day1)) : undefined,
+            day1Work: localService.day1Work ? localService.day1Work : undefined,
+            day1Employee: localService.day1Employee
+              ? EmployeeID(localService.day1Employee)
+              : undefined,
+            day2: localService.day2 ? WorkDay2(new Date(localService.day2)) : undefined,
+            day2Work: localService.day2Work ? localService.day2Work : undefined,
+            day2Employee: localService.day2Employee
+              ? EmployeeID(localService.day2Employee)
+              : undefined,
+            day3: localService.day3 ? WorkDay3(new Date(localService.day3)) : undefined,
+            day3Work: localService.day3Work ? localService.day3Work : undefined,
+            day3Employee: localService.day3Employee
+              ? EmployeeID(localService.day3Employee)
+              : undefined,
+            day4: localService.day4 ? WorkDay4(new Date(localService.day4)) : undefined,
+            day4Work: localService.day4Work ? localService.day4Work : undefined,
+            day4Employee: localService.day4Employee
+              ? EmployeeID(localService.day4Employee)
+              : undefined,
+            day5: localService.day5 ? WorkDay5(new Date(localService.day5)) : undefined,
+            day5Work: localService.day5Work ? localService.day5Work : undefined,
+            day5Employee: localService.day5Employee
+              ? EmployeeID(localService.day5Employee)
+              : undefined,
+            cost: ServiceCostNumber(localService.cost),
+            currency: ServiceCostCurrency(localService.currency as Currency),
+            vatFree: VatFree(localService.vatFree),
+            orderNotes: OrderNotes(localService.orderNotes),
+          }),
+        )
+
+        const newRentCarBooking: RentCarBooking | undefined = req.body.rentCarBooking
+          ? {
+              rentCarRegistrationNumber: RentCarRegistrationNumber(
+                req.body.rentCarBooking.rentCarRegistrationNumber,
+              ),
+              bookingStart: BookingStart(new Date(req.body.rentCarBooking.bookingStart)),
+              bookingEnd: BookingEnd(new Date(req.body.rentCarBooking.bookingEnd)),
+              bookedBy: req.body.rentCarBooking.bookedBy
+                ? EmployeeID(req.body.rentCarBooking.bookedBy)
+                : undefined,
+              bookingStatus: req.body.rentCarBooking.bookingStatus as OrderStatus,
+              submissionTime: SubmissionTime(new Date(req.body.rentCarBooking.submissionTime)),
+            }
+          : undefined
+
+        const deleteServices: DeleteOrderService[] = req.body.deleteOrderService
+          ? req.body.deleteOrderService.map((serv) => ({
+              orderID: OrderID(serv.orderID),
+              serviceID: ServiceID(serv.serviceID),
+            }))
+          : []
+
+        const deleteLocalServices: DeleteOrderLocalService[] = req.body.deleteOrderLocalService
+          ? req.body.deleteOrderLocalService.map((serv) => ({
+              orderID: OrderID(serv.orderID),
+              localServiceID: LocalServiceID(serv.localServiceID),
+            }))
+          : []
 
         const newOrder: Either<string, OrderWithServices> = await createOrder(
           order,
           services,
           localServices,
+          deleteServices,
+          deleteLocalServices,
           newRentCarBooking,
         )
+
         match(
           newOrder,
           (order: OrderWithServices) => {
@@ -204,10 +251,10 @@ export async function orders(fastify: FastifyInstance) {
   )
 
   fastify.get<{
-    Querystring: OrderIDSchemaType
-    Reply: (CreateOrderBodyReplySchemaType & MessageSchemaType) | MessageSchemaType
+    Params: OrderIDSchemaType
+    //  Reply: CreateOrderBodyReplySchemaType | MessageSchemaType
   }>(
-    '/',
+    '/:orderID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('get_order')
@@ -221,15 +268,15 @@ export async function orders(fastify: FastifyInstance) {
         return reply
       },
       schema: {
-        querystring: OrderIDSchema,
+        params: OrderIDSchema,
         response: {
-          200: { ...CreateOrderBodyReplySchema, MessageSchema },
+          //  200: CreateOrderBodyReplySchema,
           403: MessageSchema,
         },
       },
     },
     async function (request, reply) {
-      const orderID = OrderID(request.query.orderID)
+      const orderID = OrderID(request.params.orderID)
       const fetchedOrder: Either<string, OrderWithServices> = await getOrder(orderID)
       match(
         fetchedOrder,
@@ -263,7 +310,7 @@ export async function orders(fastify: FastifyInstance) {
       schema: {
         querystring: OrderIDSchema,
         response: {
-          200: { ...CreateOrderBodyReplySchema, MessageSchema },
+          200: { ...CreateOrderBodyReplySchema, ...MessageSchema },
           403: MessageSchema,
         },
       },
@@ -275,6 +322,81 @@ export async function orders(fastify: FastifyInstance) {
         deletedOrder,
         (removedOrder: OrderWithServices) => {
           return reply.status(200).send({ message: 'fetched order', ...removedOrder })
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{ Params: ListOrdersQueryParamSchemaType }>(
+    '/list-orders/',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('list_orders')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply.status(403).send({
+            message: `Permission denied, user doesn't have permission ${permissionName}`,
+          })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: ListOrdersQueryParamSchema,
+        response: {
+          200: { ...OrdersPaginatedSchema, MessageSchema },
+          403: MessageSchema,
+        },
+      },
+    },
+    async function (req, reply) {
+      const {
+        search = '',
+        limit = 10,
+        page = 1,
+        orderStatusSearch,
+        billingStatusSearch,
+      } = req.params
+      const brandedSearch = Search(search)
+      const brandedLimit = Limit(limit)
+      const brandedPage = Page(page)
+      const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
+      const brandedOrderStatusSearch = orderStatusSearch as OrderStatus
+      const brandedBillingStatusSearch = billingStatusSearch
+        ? IsBilled(billingStatusSearch)
+        : undefined
+      const listedOrder: Either<string, OrdersPaginated> = await listOrders(
+        brandedSearch,
+        brandedLimit,
+        brandedPage,
+        offset,
+        brandedOrderStatusSearch,
+        brandedBillingStatusSearch,
+      )
+
+      match(
+        listedOrder,
+        (orders: OrdersPaginated) => {
+          const requestUrl: RequestUrl = RequestUrl(req.protocol + '://' + req.hostname + req.url)
+          const nextUrl: NextPageUrl | undefined = fastify.findNextPageUrl(
+            requestUrl,
+            Page(orders.totalPage),
+            Page(orders.page),
+          )
+          const previousUrl: PreviousPageUrl | undefined = fastify.findPreviousPageUrl(
+            requestUrl,
+            Page(orders.totalPage),
+            Page(orders.page),
+          )
+          return reply.status(200).send({
+            message: 'fetched order',
+            ...orders,
+            previousUrl: previousUrl,
+            nextUrl: nextUrl,
+          })
         },
         (err) => {
           return reply.status(403).send({ message: err })
