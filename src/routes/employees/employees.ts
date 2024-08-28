@@ -190,6 +190,8 @@ export const employees = async (fastify: FastifyInstance) => {
               return {
                 employeeID: emp.employeeID,
                 shortUserName: emp.shortUserName,
+                firstName: emp.firstName,
+                lastName: emp.lastName,
                 time: emp.time ? emp.time : undefined,
                 status: emp.status,
               }

@@ -137,6 +137,47 @@ export type GlobalServiceQuals = {
   globalQuals: GlobalQualID[]
 }
 
+type ServVariantOrderList = {
+  name: ServiceName
+  cost: ServiceCostNumber
+  day1?: ServiceDay1
+  day2?: ServiceDay2
+  day3?: ServiceDay3
+  day4?: ServiceDay4
+  day5?: ServiceDay5
+  serviceVariantID: ServiceID
+}
+
+export type ServiceOrder = {
+  serviceID: ServiceID
+  name: ServiceName
+  cost: ServiceCostNumber
+  serviceVariants: ServVariantOrderList[]
+}
+
+type LocalServVariantOrderList = {
+  name: ServiceName
+  cost: ServiceCostNumber
+  day1?: ServiceDay1
+  day2?: ServiceDay2
+  day3?: ServiceDay3
+  day4?: ServiceDay4
+  day5?: ServiceDay5
+  serviceVariantID: LocalServiceID
+}
+
+export type LocalServiceOrder = {
+  localServiceID: LocalServiceID
+  name: ServiceName
+  cost: ServiceCostNumber
+  serviceVariants: LocalServVariantOrderList[]
+}
+
+export type OrderServInfo = {
+  services: ServiceOrder[]
+  localServices: LocalServiceOrder[]
+}
+
 export function convertToColorEnum(str: string): ColorForService {
   if (colorForService.includes(str as ColorForService)) {
     return str as ColorForService
@@ -537,6 +578,85 @@ export async function getServicesPaginate(
         perPage: page,
         services: serviceListReady,
         localServices: localServiceListReady,
+      })
+    })
+    return res
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function getServicesWithVariants(
+  store: StoreID,
+): Promise<Either<string, OrderServInfo>> {
+  try {
+    const res = await db.transaction(async (tx) => {
+      const servs = await tx
+        .select({
+          serviceID: services.serviceID,
+          name: services.name,
+          cost: services.cost,
+          day1: services.day1,
+          day2: services.day2,
+          day3: services.day3,
+          day4: services.day4,
+          day5: services.day5,
+          serviceVariants: sql<ServVariantOrderList[]>`COALESCE(json_agg(json_build_object(
+            'name', ${serviceVariants.name},
+            'serviceVariantID', ${serviceVariants.serviceVariantID},
+            'cost', ${serviceVariants.cost},            
+            'day1', ${serviceVariants.day1},            
+            'day2', ${serviceVariants.day2},            
+            'day3', ${serviceVariants.day3},            
+            'day4', ${serviceVariants.day4},            
+            'day5', ${serviceVariants.day5}
+            )
+        ) FILTER (WHERE ${serviceVariants.serviceID} IS NOT NULL),
+        '[]'::json
+      )`,
+        })
+        .from(services)
+        .where(eq(services.hidden, ServiceHidden(false)))
+        .leftJoin(serviceVariants, eq(serviceVariants.serviceID, services.serviceID))
+        .groupBy(services.serviceID, services.name)
+
+      const locals = await tx
+        .select({
+          localServiceID: localServices.localServiceID,
+          name: localServices.name,
+          cost: localServices.cost,
+          day1: localServices.day1,
+          day2: localServices.day2,
+          day3: localServices.day3,
+          day4: localServices.day4,
+          day5: localServices.day5,
+          serviceVariants: sql<LocalServVariantOrderList[]>`COALESCE(json_agg(json_build_object(
+              'name', ${localServiceVariants.name},
+              'serviceVariantID', ${localServiceVariants.serviceVariantID},
+              'cost', ${localServiceVariants.cost},
+              'day1', ${localServiceVariants.day1},
+              'day2', ${localServiceVariants.day2},
+              'day3', ${localServiceVariants.day3},
+              'day4', ${localServiceVariants.day4},
+              'day5', ${localServiceVariants.day5}
+            )
+        ) FILTER (WHERE ${localServiceVariants.localServiceID} IS NOT NULL),
+        '[]'::json
+      )`,
+        })
+        .from(localServices)
+        .where(
+          and(eq(localServices.hidden, ServiceHidden(false)), eq(localServices.storeID, store)),
+        )
+        .leftJoin(
+          localServiceVariants,
+          eq(localServices.localServiceID, localServiceVariants.localServiceID),
+        )
+        .groupBy(localServices.localServiceID, localServices.name)
+
+      return right({
+        services: servs,
+        localServices: locals,
       })
     })
     return res

@@ -114,7 +114,7 @@ export async function createRole(
       createdAt: newRole.createdAt,
       updatedAt: newRole.updatedAt,
     }
-    return newRole ? right(roleBranded) : left("couldn't create role")
+    return newRole ? right(roleBranded) : left('could not create role')
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -134,14 +134,15 @@ export async function getRoleByID(id: RoleID): Promise<Either<string, Role>> {
       .where(eq(roles.roleID, id))
       .limit(1)
 
-    const roleBranded: Role = {
-      roleID: role.roleID,
-      roleName: role.roleName,
-      description: role.description ?? undefined,
-      createdAt: role.createdAt,
-      updatedAt: role.updatedAt,
-    }
-    return role ? right(roleBranded) : left("couldn't find role")
+    return role
+      ? right({
+          roleID: role.roleID,
+          roleName: role.roleName,
+          description: role.description ?? undefined,
+          createdAt: role.createdAt,
+          updatedAt: role.updatedAt,
+        })
+      : left('could not find role')
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -163,7 +164,7 @@ export async function updateRoleByID(role: CreatedRole): Promise<Either<string, 
       createdAt: updatedRole.createdAt,
       updatedAt: updatedRole.updatedAt,
     }
-    return updatedRole ? right(roleBranded) : left("Couldn't find role")
+    return updatedRole ? right(roleBranded) : left('could not find role')
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -180,7 +181,7 @@ export async function deleteRole(id: RoleID): Promise<Either<string, Role>> {
           createdAt: deletedRole.createdAt,
           updatedAt: deletedRole.updatedAt,
         })
-      : left("couldn't find role")
+      : left('could not find role')
   } catch (e) {
     return left(errorHandling(e))
   }

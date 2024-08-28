@@ -4,7 +4,8 @@ import fc from 'fast-check'
 import { Value } from '@sinclair/typebox/value'
 
 import { after, before, describe, it } from 'node:test'
-import assert from 'assert'
+import { deepStrictEqual } from 'assert'
+
 import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
@@ -64,9 +65,9 @@ describe('POST /users/login HTTP', async () => {
               })
 
               const parsedResponse = JSON.parse(response.body)
-              assert.deepStrictEqual(parsedResponse.message, 'Role created')
-              assert.deepStrictEqual(parsedResponse.data.description, description[i])
-              assert.strictEqual(response.statusCode, 201)
+              deepStrictEqual(parsedResponse.message, 'Role created')
+              deepStrictEqual(parsedResponse.data.description, description[i])
+              deepStrictEqual(response.statusCode, 201)
               roleIDs.push(parsedResponse.data.roleID)
               const getResponse = await app.inject({
                 method: 'GET',
@@ -76,8 +77,8 @@ describe('POST /users/login HTTP', async () => {
                 },
               })
               const parsedGetResponse = JSON.parse(getResponse.body)
-              assert.deepStrictEqual(parsedGetResponse.role.roleName, name[i])
-              assert.strictEqual(getResponse.statusCode, 200)
+              deepStrictEqual(parsedGetResponse.role.roleName, name[i])
+              deepStrictEqual(getResponse.statusCode, 200)
             }
           }
         },
@@ -96,8 +97,8 @@ describe('POST /users/login HTTP', async () => {
         },
       })
       const parsedDeleteResponse = JSON.parse(deleteResponse.body)
-      assert.deepStrictEqual(parsedDeleteResponse.message, 'Role deleted')
-      assert.deepStrictEqual(deleteResponse.statusCode, 200)
+      deepStrictEqual(parsedDeleteResponse.message, 'Role deleted')
+      deepStrictEqual(deleteResponse.statusCode, 200)
 
       const getResponse = await app.inject({
         method: 'GET',
@@ -106,9 +107,10 @@ describe('POST /users/login HTTP', async () => {
           Authorization: jwt,
         },
       })
-      //      const parsedGetResponse = JSON.parse(getResponse.body)
-      //      assert.deepStrictEqual(parsedGetResponse.message, 'role not found')
-      assert.strictEqual(getResponse.statusCode, 404)
+
+      const parsedGetResponse = JSON.parse(getResponse.body)
+      deepStrictEqual(parsedGetResponse.message, 'could not find role')
+      deepStrictEqual(getResponse.statusCode, 404)
     }
   })
 })

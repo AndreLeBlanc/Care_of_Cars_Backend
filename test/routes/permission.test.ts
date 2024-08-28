@@ -3,7 +3,8 @@ import { FastifyInstance } from 'fastify'
 import * as crypto from 'node:crypto'
 
 import { after, before, describe, it } from 'node:test'
-import assert from 'assert'
+import { deepStrictEqual } from 'assert'
+
 import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
@@ -96,9 +97,9 @@ describe('Permissions tests', async () => {
 
       const parsedResponse = JSON.parse(response.body)
 
-      assert.deepStrictEqual(parsedResponse.data.permissionTitle, name)
-      assert.deepStrictEqual(parsedResponse.data.description, name)
-      assert.deepStrictEqual(response.statusCode, 201)
+      deepStrictEqual(parsedResponse.data.permissionTitle, name)
+      deepStrictEqual(parsedResponse.data.description, name)
+      deepStrictEqual(response.statusCode, 201)
       const getResponse = await app.inject({
         method: 'GET',
         url: '/permissions/' + parsedResponse.data.permissionID,
@@ -109,9 +110,9 @@ describe('Permissions tests', async () => {
 
       const parsedGetResponse = JSON.parse(getResponse.body)
 
-      assert.deepStrictEqual(parsedGetResponse.permissionTitle, name)
-      assert.deepStrictEqual(parsedGetResponse.description, str[i])
-      assert.deepStrictEqual(getResponse.statusCode, 200)
+      deepStrictEqual(parsedGetResponse.permissionTitle, name)
+      deepStrictEqual(parsedGetResponse.description, str[i])
+      deepStrictEqual(getResponse.statusCode, 200)
 
       const newName = crypto.randomBytes(i + 3).toString('hex')
       const newDescription = crypto.randomBytes(i + 8).toString('hex')
@@ -131,9 +132,9 @@ describe('Permissions tests', async () => {
       const parsedPatchResponse = JSON.parse(patchResponse.body)
       console.log('parsedPatchResponse', parsedPatchResponse)
 
-      assert.deepStrictEqual(parsedPatchResponse.permissionTitle, newName)
-      assert.deepStrictEqual(parsedPatchResponse.description, newDescription)
-      assert.deepStrictEqual(patchResponse.statusCode, 201)
+      deepStrictEqual(parsedPatchResponse.permissionTitle, newName)
+      deepStrictEqual(parsedPatchResponse.description, newDescription)
+      deepStrictEqual(patchResponse.statusCode, 201)
 
       const deletedResponse = await app.inject({
         method: 'DELETE',
@@ -145,9 +146,9 @@ describe('Permissions tests', async () => {
 
       const deletedParsedResponse = JSON.parse(deletedResponse.body)
 
-      assert.deepStrictEqual(deletedParsedResponse.permissionTitle, newName)
-      assert.deepStrictEqual(deletedParsedResponse.description, newDescription)
-      assert.deepStrictEqual(deletedResponse.statusCode, 200)
+      deepStrictEqual(deletedParsedResponse.permissionTitle, newName)
+      deepStrictEqual(deletedParsedResponse.description, newDescription)
+      deepStrictEqual(deletedResponse.statusCode, 200)
     }
   })
 })

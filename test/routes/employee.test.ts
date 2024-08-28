@@ -6,35 +6,52 @@ import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 //import { timeStringToMS } from '../../src/utils/helper.js'
 
-import assert from 'assert'
+import { deepStrictEqual } from 'assert'
 
 // describe('interValToMiliseconds Test', () => {
 //   it('convert time to ms', async () => {
 //     const milis0 = timeStringToMS('00:00:00')
-//     assert.deepStrictEqual(milis0, 0)
+//     deepStrictEqual
+//;(milis0, 0)(
 //
-//     const milis10 = timeStringToMS('10:00:00')
-//     assert.deepStrictEqual(milis10, 36000000)
+//       const milis10 = timeStringToMS('10:00:00')
+//       deepStrictEqual
+//  milis10,
+//  36000000,
+//)(
 //
-//     const milis12 = timeStringToMS('12:59:59')
-//     assert.deepStrictEqual(milis12, 46799000)
+//       const milis12 = timeStringToMS('12:59:59')
+//       deepStrictEqual
+//  milis12,
+//  46799000,
+//)(
 //
-//     const milisMid = timeStringToMS('23:59:59')
-//     assert.deepStrictEqual(milisMid, 86399000)
+//       const milisMid = timeStringToMS('23:59:59')
+//       deepStrictEqual
+//  milisMid,
+//  86399000,
+//)(
+//     })
 //   })
-// })
 //
-// describe('first  Day of the week Test', () => {
-//   it('Cut off a worktime at the start of a week', async () => {
-//     const startDay = WorkTime(new Date('2024-07-15'))
-//     const start = WorkTime(new Date('2024-07-15'))
-//     assert.deepStrictEqual(WorkDuration(1721045410), WorkDuration(1721045410)) //firstDayOfWeek(start, startDay), WorkDuration(1721045410))
-//     assert.deepStrictEqual(firstDayOfWeek(start, startDay), WorkDuration(1720994400))
+//   describe('first  Day of the week Test', () => {
+//     it('Cut off a worktime at the start of a week', async () => {
+//       const startDay = WorkTime(new Date('2024-07-15'))
+//       const start = WorkTime(new Date('2024-07-15'))
+//       deepStrictEqual
+//  WorkDuration(1721045410),
+//  WorkDuration(1721045410),
+//)(
+//  firstDayOfWeek(start, startDay), WorkDuration(1721045410))
+//       deepStrictEqual
+//  firstDayOfWeek(start, startDay),
+//  WorkDuration(1720994400),
+//)
 //   })
 // })
 
 let jwt = ''
-describe('qualifications tests', async () => {
+describe('Employees tests', async () => {
   let app: FastifyInstance
 
   before(async () => {
@@ -59,11 +76,11 @@ describe('qualifications tests', async () => {
   })
 
   it('Create user and employee and checkin/out', async () => {
-    const strings = ['balsdf', 'zzzzzzzzzzzz', 'dsfsdfsewrwrfsdfr']
+    const strings = ['fdswerxcvdfsd', 'ffkkklllssseee', 'iuytrecvbnhgfd']
     const perms: number[] = []
     const roles: number[] = []
     for (const [i, name] of strings.entries()) {
-      assert.deepStrictEqual(name, strings[i])
+      deepStrictEqual(name, strings[i])
       const responsePerm = await app.inject({
         method: 'POST',
         url: '/permissions',
@@ -117,7 +134,7 @@ describe('qualifications tests', async () => {
     })
 
     const parsedresponseStore = JSON.parse(responseStore.body)
-    assert.deepStrictEqual(responseStore.statusCode, 201)
+    deepStrictEqual(responseStore.statusCode, 201)
 
     const responseUserEmp = await app.inject({
       method: 'POST',
@@ -127,18 +144,18 @@ describe('qualifications tests', async () => {
       },
       payload: {
         user: {
-          firstName: 'inserT',
-          lastName: 'lastNamesdfs',
+          firstName: 'My first name!',
+          lastName: 'Meerkat',
           email: '23423123sed@sdfsdfs.is',
           isSuperAdmin: 'false',
           password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
           roleID: roles[0],
         },
         employee: {
-          shortUserName: ',,dd',
-          employmentNumber: '46564235',
-          employeePersonalNumber: '234134234',
-          signature: 'poir',
+          shortUserName: 'hime',
+          employmentNumber: '3243223432',
+          employeePersonalNumber: '1991335523',
+          signature: 'lkc',
           employeePin: 'sdfe',
           employeeActive: true,
           employeeComment: 'a comment for this user',
@@ -150,7 +167,7 @@ describe('qualifications tests', async () => {
     })
 
     const responseUserEmpParsed = JSON.parse(responseUserEmp.body)
-    assert.deepStrictEqual(responseUserEmpParsed.user.firstName, 'inserT')
+    deepStrictEqual(responseUserEmpParsed.user.firstName, 'My first name!')
 
     const checkInFirst = await app.inject({
       method: 'POST',
@@ -166,7 +183,7 @@ describe('qualifications tests', async () => {
     })
     const checkInFirstParsed = JSON.parse(checkInFirst.body)
 
-    assert.deepStrictEqual(checkInFirstParsed.employeeID, responseUserEmpParsed.employee.employeeID)
+    deepStrictEqual(checkInFirstParsed.employeeID, responseUserEmpParsed.employee.employeeID)
 
     const checkoutFirst = await app.inject({
       method: 'POST',
@@ -181,10 +198,7 @@ describe('qualifications tests', async () => {
       },
     })
     const checkoutFirstParsed = JSON.parse(checkoutFirst.body)
-    assert.deepStrictEqual(
-      checkoutFirstParsed.employeeID,
-      responseUserEmpParsed.employee.employeeID,
-    )
+    deepStrictEqual(checkoutFirstParsed.employeeID, responseUserEmpParsed.employee.employeeID)
     const checkoutAgain = await app.inject({
       method: 'POST',
       url: '/employees/checkin',
@@ -199,7 +213,7 @@ describe('qualifications tests', async () => {
     })
     const checkoutAgainParsed = JSON.parse(checkoutAgain.body)
     console.log(checkoutAgainParsed)
-    assert.deepStrictEqual(checkoutAgainParsed.message, 'Already checked out')
+    deepStrictEqual(checkoutAgainParsed.message, 'Already checked out')
 
     const checkInAgain = await app.inject({
       method: 'POST',
@@ -215,7 +229,7 @@ describe('qualifications tests', async () => {
     })
     const checkInAgainParsed = JSON.parse(checkInAgain.body)
 
-    assert.deepStrictEqual(checkInAgainParsed.employeeID, responseUserEmpParsed.employee.employeeID)
+    deepStrictEqual(checkInAgainParsed.employeeID, responseUserEmpParsed.employee.employeeID)
     const checkInThrice = await app.inject({
       method: 'POST',
       url: '/employees/checkin',
@@ -230,15 +244,15 @@ describe('qualifications tests', async () => {
     })
     const checkInThriceParsed = JSON.parse(checkInThrice.body)
 
-    assert.deepStrictEqual(checkInThriceParsed.message, 'Already checked in')
+    deepStrictEqual(checkInThriceParsed.message, 'Already checked in')
   })
 
-  it('Create user and employee and checkin/out', async () => {
+  it('Create user and employee', async () => {
     const strings = ['null', 'fsdggdfwer', 'qiwej']
     const perms: number[] = []
     const roles: number[] = []
     for (const [i, name] of strings.entries()) {
-      assert.deepStrictEqual(name, strings[i])
+      deepStrictEqual(name, strings[i])
       const responsePerm = await app.inject({
         method: 'POST',
         url: '/permissions',
@@ -292,7 +306,7 @@ describe('qualifications tests', async () => {
     })
 
     const parsedresponseStore = JSON.parse(responseStore.body)
-    assert.deepStrictEqual(responseStore.statusCode, 201)
+    deepStrictEqual(responseStore.statusCode, 201)
 
     const responseStore2 = await app.inject({
       method: 'POST',
@@ -323,7 +337,7 @@ describe('qualifications tests', async () => {
     })
 
     const parsedresponseStore2 = JSON.parse(responseStore2.body)
-    assert.deepStrictEqual(responseStore2.statusCode, 201)
+    deepStrictEqual(responseStore2.statusCode, 201)
 
     const userResponse = await app.inject({
       method: 'POST',
@@ -340,7 +354,7 @@ describe('qualifications tests', async () => {
         roleID: roles[0],
       },
     })
-    assert.deepStrictEqual(userResponse.statusCode, 201)
+    deepStrictEqual(userResponse.statusCode, 201)
     const parseduserResponse = JSON.parse(userResponse.body)
 
     const userResponse2 = await app.inject({
@@ -358,7 +372,7 @@ describe('qualifications tests', async () => {
         roleID: roles[1],
       },
     })
-    assert.deepStrictEqual(userResponse2.statusCode, 201)
+    deepStrictEqual(userResponse2.statusCode, 201)
     const parseduserResponse2 = JSON.parse(userResponse2.body)
 
     const employeeResponse = await app.inject({
@@ -381,11 +395,11 @@ describe('qualifications tests', async () => {
     })
 
     const parsedemployeeResponse = JSON.parse(employeeResponse.body)
-    assert.deepStrictEqual(employeeResponse.statusCode, 201)
-    assert.deepStrictEqual(parsedemployeeResponse.userID, parseduserResponse.userID)
-    assert.deepStrictEqual(parsedemployeeResponse.employmentNumber, 'asd232asd')
-    assert.deepStrictEqual(parsedemployeeResponse.employeeActive, true)
-    assert.deepStrictEqual(parsedemployeeResponse.storeIDs, [
+    deepStrictEqual(employeeResponse.statusCode, 201)
+    deepStrictEqual(parsedemployeeResponse.userID, parseduserResponse.userID)
+    deepStrictEqual(parsedemployeeResponse.employmentNumber, 'asd232asd')
+    deepStrictEqual(parsedemployeeResponse.employeeActive, true)
+    deepStrictEqual(parsedemployeeResponse.storeIDs, [
       {
         storeID: parsedresponseStore.store.storeID,
         storeName: parsedresponseStore.store.storeName,
@@ -412,11 +426,11 @@ describe('qualifications tests', async () => {
     })
 
     const parsedemployeeResponse2 = JSON.parse(employeeResponse2.body)
-    assert.deepStrictEqual(employeeResponse2.statusCode, 201)
-    assert.deepStrictEqual(parsedemployeeResponse2.userID, parseduserResponse2.userID)
-    assert.deepStrictEqual(parsedemployeeResponse2.employmentNumber, 'asd232addsd')
-    assert.deepStrictEqual(parsedemployeeResponse2.employeeActive, true)
-    assert.deepStrictEqual(parsedemployeeResponse2.storeIDs, [
+    deepStrictEqual(employeeResponse2.statusCode, 201)
+    deepStrictEqual(parsedemployeeResponse2.userID, parseduserResponse2.userID)
+    deepStrictEqual(parsedemployeeResponse2.employmentNumber, 'asd232addsd')
+    deepStrictEqual(parsedemployeeResponse2.employeeActive, true)
+    deepStrictEqual(parsedemployeeResponse2.storeIDs, [
       {
         storeID: parsedresponseStore.store.storeID,
         storeName: parsedresponseStore.store.storeName,
@@ -437,11 +451,11 @@ describe('qualifications tests', async () => {
 
     const parsedemployeeGetResponse = JSON.parse(employeeGetResponse.body)
 
-    assert.deepStrictEqual(employeeGetResponse.statusCode, 200)
-    assert.deepStrictEqual(parsedemployeeGetResponse.userID, parseduserResponse.userID)
-    assert.deepStrictEqual(parsedemployeeGetResponse.employmentNumber, 'asd232asd')
-    assert.deepStrictEqual(parsedemployeeGetResponse.employeeActive, true)
-    assert.deepStrictEqual(parsedemployeeGetResponse.storeIDs, [
+    deepStrictEqual(employeeGetResponse.statusCode, 200)
+    deepStrictEqual(parsedemployeeGetResponse.userID, parseduserResponse.userID)
+    deepStrictEqual(parsedemployeeGetResponse.employmentNumber, 'asd232asd')
+    deepStrictEqual(parsedemployeeGetResponse.employeeActive, true)
+    deepStrictEqual(parsedemployeeGetResponse.storeIDs, [
       {
         storeID: parsedresponseStore.store.storeID,
         storeName: parsedresponseStore.store.storeName,
@@ -458,11 +472,11 @@ describe('qualifications tests', async () => {
 
     const parsedemployeeGetResponse2 = JSON.parse(employeeGetResponse2.body)
 
-    assert.deepStrictEqual(employeeGetResponse2.statusCode, 200)
-    assert.deepStrictEqual(parsedemployeeGetResponse2.userID, parseduserResponse2.userID)
-    assert.deepStrictEqual(parsedemployeeGetResponse2.employmentNumber, 'asd232addsd')
-    assert.deepStrictEqual(parsedemployeeGetResponse2.employeeActive, true)
-    assert.deepStrictEqual(parsedemployeeGetResponse2.storeIDs, [
+    deepStrictEqual(employeeGetResponse2.statusCode, 200)
+    deepStrictEqual(parsedemployeeGetResponse2.userID, parseduserResponse2.userID)
+    deepStrictEqual(parsedemployeeGetResponse2.employmentNumber, 'asd232addsd')
+    deepStrictEqual(parsedemployeeGetResponse2.employeeActive, true)
+    deepStrictEqual(parsedemployeeGetResponse2.storeIDs, [
       {
         storeID: parsedresponseStore.store.storeID,
         storeName: parsedresponseStore.store.storeName,
@@ -495,15 +509,15 @@ describe('qualifications tests', async () => {
 
     const parsedemployeePatchResponse = JSON.parse(employeePatchResponse.body)
 
-    assert.deepStrictEqual(employeePatchResponse.statusCode, 201)
-    assert.deepStrictEqual(parsedemployeePatchResponse.userID, parseduserResponse2.userID)
-    assert.deepStrictEqual(parsedemployeePatchResponse.employmentNumber, 'asd23vdv2addsd')
-    assert.deepStrictEqual(parsedemployeePatchResponse.employeeActive, true)
-    assert.deepStrictEqual(
+    deepStrictEqual(employeePatchResponse.statusCode, 201)
+    deepStrictEqual(parsedemployeePatchResponse.userID, parseduserResponse2.userID)
+    deepStrictEqual(parsedemployeePatchResponse.employmentNumber, 'asd23vdv2addsd')
+    deepStrictEqual(parsedemployeePatchResponse.employeeActive, true)
+    deepStrictEqual(
       parsedemployeePatchResponse.employeeComment,
       'a comment about me agains patched',
     )
-    assert.deepStrictEqual(parsedemployeePatchResponse.storeIDs, [
+    deepStrictEqual(parsedemployeePatchResponse.storeIDs, [
       {
         storeID: parsedresponseStore2.store.storeID,
         storeName: parsedresponseStore2.store.storeName,
@@ -531,11 +545,11 @@ describe('qualifications tests', async () => {
     })
 
     const parsedemployeePatchResponse2 = JSON.parse(employeePatchResponse2.body)
-    assert.deepStrictEqual(employeePatchResponse2.statusCode, 201)
-    assert.deepStrictEqual(parsedemployeePatchResponse2.userID, parseduserResponse.userID)
-    assert.deepStrictEqual(parsedemployeePatchResponse2.employmentNumber, 'asd232addsd')
-    assert.deepStrictEqual(parsedemployeePatchResponse2.employeeActive, true)
-    assert.deepStrictEqual(parsedemployeePatchResponse2.storeIDs, [
+    deepStrictEqual(employeePatchResponse2.statusCode, 201)
+    deepStrictEqual(parsedemployeePatchResponse2.userID, parseduserResponse.userID)
+    deepStrictEqual(parsedemployeePatchResponse2.employmentNumber, 'asd232addsd')
+    deepStrictEqual(parsedemployeePatchResponse2.employeeActive, true)
+    deepStrictEqual(parsedemployeePatchResponse2.storeIDs, [
       {
         storeID: parsedresponseStore.store.storeID,
         storeName: parsedresponseStore.store.storeName,
@@ -556,11 +570,11 @@ describe('qualifications tests', async () => {
 
     const parsedemployeeDELETEResponse = JSON.parse(employeeDELETEResponse.body)
 
-    assert.deepStrictEqual(employeeDELETEResponse.statusCode, 200)
-    assert.deepStrictEqual(parsedemployeeDELETEResponse.userID, parseduserResponse.userID)
-    assert.deepStrictEqual(parsedemployeeDELETEResponse.employmentNumber, 'asd232addsd')
-    assert.deepStrictEqual(parsedemployeeDELETEResponse.employeeActive, true)
-    assert.deepStrictEqual(parsedemployeeDELETEResponse.storeIDs, [
+    deepStrictEqual(employeeDELETEResponse.statusCode, 200)
+    deepStrictEqual(parsedemployeeDELETEResponse.userID, parseduserResponse.userID)
+    deepStrictEqual(parsedemployeeDELETEResponse.employmentNumber, 'asd232addsd')
+    deepStrictEqual(parsedemployeeDELETEResponse.employeeActive, true)
+    deepStrictEqual(parsedemployeeDELETEResponse.storeIDs, [
       {
         storeID: parsedresponseStore.store.storeID,
         storeName: parsedresponseStore.store.storeName,
@@ -581,11 +595,11 @@ describe('qualifications tests', async () => {
 
     const parsedemployeeDELETEResponse2 = JSON.parse(employeeDELETEResponse2.body)
 
-    assert.deepStrictEqual(employeeDELETEResponse2.statusCode, 200)
-    assert.deepStrictEqual(parsedemployeeDELETEResponse2.userID, parseduserResponse2.userID)
-    assert.deepStrictEqual(parsedemployeeDELETEResponse2.employmentNumber, 'asd23vdv2addsd')
-    assert.deepStrictEqual(parsedemployeeDELETEResponse2.employeeActive, true)
-    assert.deepStrictEqual(parsedemployeeDELETEResponse2.storeIDs, [
+    deepStrictEqual(employeeDELETEResponse2.statusCode, 200)
+    deepStrictEqual(parsedemployeeDELETEResponse2.userID, parseduserResponse2.userID)
+    deepStrictEqual(parsedemployeeDELETEResponse2.employmentNumber, 'asd23vdv2addsd')
+    deepStrictEqual(parsedemployeeDELETEResponse2.employeeActive, true)
+    deepStrictEqual(parsedemployeeDELETEResponse2.storeIDs, [
       {
         storeID: parsedresponseStore2.store.storeID,
         storeName: parsedresponseStore2.store.storeName,

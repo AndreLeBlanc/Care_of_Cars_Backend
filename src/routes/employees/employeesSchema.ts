@@ -210,6 +210,8 @@ export const ListCheckInStatusSchema = Type.Composite([
       Type.Object({
         employeeID: EmployeeID,
         shortUserName: shortUserName,
+        firstName: FirstName,
+        lastName: LastName,
         time: Type.Optional(Type.String({ format: 'date' })),
         status: Type.Union([Type.Literal('CheckedIn'), Type.Literal('CheckedOut')]),
       }),

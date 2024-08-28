@@ -2,7 +2,8 @@ import { FastifyInstance } from 'fastify'
 import fc from 'fast-check'
 
 import { after, before, describe, it } from 'node:test'
-import assert from 'assert'
+import { deepStrictEqual } from 'assert'
+
 import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
@@ -55,13 +56,13 @@ describe('POST /users/login HTTP', async () => {
     })
 
     const parsedResponse = JSON.parse(response.body)
-    assert.equal(parsedResponse.message, 'Login success')
-    assert.deepStrictEqual(parsedResponse.user.id, 1)
-    assert.deepStrictEqual(parsedResponse.user.firstName, 'SuperAdmin')
-    assert.deepStrictEqual(parsedResponse.user.lastName, 'SuperAdmin')
-    assert.deepStrictEqual(parsedResponse.user.isSuperAdmin, true)
-    assert.deepStrictEqual(parsedResponse.user.email, 'superadmin@test.com')
-    assert.strictEqual(response.statusCode, 200)
+    deepStrictEqual(parsedResponse.message, 'Login success')
+    deepStrictEqual(parsedResponse.user.id, 1)
+    deepStrictEqual(parsedResponse.user.firstName, 'SuperAdmin')
+    deepStrictEqual(parsedResponse.user.lastName, 'SuperAdmin')
+    deepStrictEqual(parsedResponse.user.isSuperAdmin, true)
+    deepStrictEqual(parsedResponse.user.email, 'superadmin@test.com')
+    deepStrictEqual(response.statusCode, 200)
   })
 
   it('POST /users/login returns incorrect email 403 incorrect email and password', async () => {
@@ -79,8 +80,8 @@ describe('POST /users/login HTTP', async () => {
     }
 
     const parsedResponse = JSON.parse(response.body)
-    assert.deepStrictEqual(parsedResponse.message, res.message)
-    assert.strictEqual(response.statusCode, 403)
+    deepStrictEqual(parsedResponse.message, res.message)
+    deepStrictEqual(response.statusCode, 403)
   })
 
   it('POST /users/login returns incorrect email 403 incorrect password', async () => {
@@ -98,8 +99,8 @@ describe('POST /users/login HTTP', async () => {
     }
 
     const parsedResponse = JSON.parse(response.body)
-    assert.deepStrictEqual(parsedResponse.message, res.message)
-    assert.strictEqual(response.statusCode, 403)
+    deepStrictEqual(parsedResponse.message, res.message)
+    deepStrictEqual(response.statusCode, 403)
   })
 
   it('Get /users/:id returns user not found', async () => {
@@ -116,8 +117,8 @@ describe('POST /users/login HTTP', async () => {
     }
 
     const parsedResponse = JSON.parse(response.body)
-    assert.deepStrictEqual(parsedResponse.message, res.message)
-    assert.deepStrictEqual(response.statusCode, 404)
+    deepStrictEqual(parsedResponse.message, res.message)
+    deepStrictEqual(response.statusCode, 404)
   })
 
   it('Get /users/:id returns user', async () => {
@@ -130,11 +131,11 @@ describe('POST /users/login HTTP', async () => {
     })
     const parsedResponse = JSON.parse(response.body)
 
-    assert.deepStrictEqual(parsedResponse.userID, 1)
-    assert.deepStrictEqual(parsedResponse.firstName, 'SuperAdmin')
-    assert.deepStrictEqual(parsedResponse.lastName, 'SuperAdmin')
-    assert.deepStrictEqual(parsedResponse.email, 'superadmin@test.com')
-    assert.deepStrictEqual(response.statusCode, 200)
+    deepStrictEqual(parsedResponse.userID, 1)
+    deepStrictEqual(parsedResponse.firstName, 'SuperAdmin')
+    deepStrictEqual(parsedResponse.lastName, 'SuperAdmin')
+    deepStrictEqual(parsedResponse.email, 'superadmin@test.com')
+    deepStrictEqual(response.statusCode, 200)
   })
 
   it('POST USER/ fast-check', async () => {
@@ -163,10 +164,10 @@ describe('POST /users/login HTTP', async () => {
 
           const parsedResponse = JSON.parse(response.body)
 
-          assert.deepStrictEqual(parsedResponse.firstName, firstName)
-          assert.deepStrictEqual(parsedResponse.lastName, lastName)
-          assert.deepStrictEqual(parsedResponse.email, email)
-          assert.strictEqual(response.statusCode, 201)
+          deepStrictEqual(parsedResponse.firstName, firstName)
+          deepStrictEqual(parsedResponse.lastName, lastName)
+          deepStrictEqual(parsedResponse.email, email)
+          deepStrictEqual(response.statusCode, 201)
           userIDs.push(parsedResponse.userID)
 
           const getResponse = await app.inject({
@@ -179,11 +180,11 @@ describe('POST /users/login HTTP', async () => {
 
           const parsedGetResponse = JSON.parse(getResponse.body)
 
-          assert.deepStrictEqual(parsedGetResponse.userID, parsedResponse.userID)
-          assert.deepStrictEqual(parsedGetResponse.firstName, firstName)
-          assert.deepStrictEqual(parsedGetResponse.lastName, lastName)
-          assert.deepStrictEqual(parsedGetResponse.email, email)
-          assert.deepStrictEqual(getResponse.statusCode, 200)
+          deepStrictEqual(parsedGetResponse.userID, parsedResponse.userID)
+          deepStrictEqual(parsedGetResponse.firstName, firstName)
+          deepStrictEqual(parsedGetResponse.lastName, lastName)
+          deepStrictEqual(parsedGetResponse.email, email)
+          deepStrictEqual(getResponse.statusCode, 200)
 
           const loginResponse = await app.inject({
             method: 'POST',
@@ -195,10 +196,10 @@ describe('POST /users/login HTTP', async () => {
           })
           const parsedLoginResponse = JSON.parse(loginResponse.body)
 
-          assert.deepStrictEqual(parsedLoginResponse.message, 'Login success')
-          assert.deepStrictEqual(parsedLoginResponse.user.firstName, firstName)
-          assert.deepStrictEqual(parsedLoginResponse.user.lastName, lastName)
-          assert.deepStrictEqual(loginResponse.statusCode, 200)
+          deepStrictEqual(parsedLoginResponse.message, 'Login success')
+          deepStrictEqual(parsedLoginResponse.user.firstName, firstName)
+          deepStrictEqual(parsedLoginResponse.user.lastName, lastName)
+          deepStrictEqual(loginResponse.statusCode, 200)
         },
       ),
     )
@@ -219,7 +220,7 @@ describe('POST /users/login HTTP', async () => {
       })
 
       const parsedPatched = JSON.parse(patchResponse.body)
-      assert.deepStrictEqual(parsedPatched.roleID, newRole)
+      deepStrictEqual(parsedPatched.roleID, newRole)
 
       const deletedResponse = await app.inject({
         method: 'DELETE',
@@ -230,8 +231,8 @@ describe('POST /users/login HTTP', async () => {
       })
 
       const parsedDeleteResponse = JSON.parse(deletedResponse.body)
-      assert.deepStrictEqual(parsedDeleteResponse.message, 'user deleted')
-      assert.deepStrictEqual(deletedResponse.statusCode, 200)
+      deepStrictEqual(parsedDeleteResponse.message, 'user deleted')
+      deepStrictEqual(deletedResponse.statusCode, 200)
 
       const getDeletedResponse = await app.inject({
         method: 'GET',
@@ -242,8 +243,8 @@ describe('POST /users/login HTTP', async () => {
       })
 
       const parsedGetResponse = JSON.parse(getDeletedResponse.body)
-      assert.deepStrictEqual(parsedGetResponse.message, 'user not found')
-      assert.deepStrictEqual(getDeletedResponse.statusCode, 404)
+      deepStrictEqual(parsedGetResponse.message, 'user not found')
+      deepStrictEqual(getDeletedResponse.statusCode, 404)
     }
 
     // Test patching, deleting and getting users that don't exist.
@@ -262,7 +263,7 @@ describe('POST /users/login HTTP', async () => {
         },
       })
 
-      assert.deepStrictEqual(patchResponse.statusCode, 404)
+      deepStrictEqual(patchResponse.statusCode, 404)
 
       const deletedResponse = await app.inject({
         method: 'DELETE',
@@ -272,7 +273,7 @@ describe('POST /users/login HTTP', async () => {
         },
       })
 
-      assert.deepStrictEqual(deletedResponse.statusCode, 404)
+      deepStrictEqual(deletedResponse.statusCode, 404)
 
       const getDeletedResponse = await app.inject({
         method: 'GET',
@@ -283,17 +284,17 @@ describe('POST /users/login HTTP', async () => {
       })
 
       const parsedGetResponse = JSON.parse(getDeletedResponse.body)
-      assert.deepStrictEqual(parsedGetResponse.message, 'user not found')
-      assert.deepStrictEqual(getDeletedResponse.statusCode, 404)
+      deepStrictEqual(parsedGetResponse.message, 'user not found')
+      deepStrictEqual(getDeletedResponse.statusCode, 404)
     }
   })
 
   it('Create user and employee in one', async () => {
-    const strings = ['balsdf', 'zzzzzzzzzzzz', 'dsfsdfsewrwrfsdfr']
+    const strings = ['241 Komp', 'Birjer Jarl', 'Hela Vägen']
     const perms: number[] = []
     const roles: number[] = []
     for (const [i, name] of strings.entries()) {
-      assert.deepStrictEqual(name, strings[i])
+      deepStrictEqual(name, strings[i])
       const responsePerm = await app.inject({
         method: 'POST',
         url: '/permissions',
@@ -330,10 +331,9 @@ describe('POST /users/login HTTP', async () => {
             roleID: parsedresponseRoles.data.roleID,
           },
         })
-        console.log('JSON.parse(roleToPerm.body)')
-        console.log(JSON.parse(roleToPerm.body))
-        console.log('JSON.parse(roleToPerm.body)')
-        console.log('JSON.parse(roleToPerm.body)')
+        const parsedroleToPerm = JSON.parse(roleToPerm.body)
+        deepStrictEqual(parsedroleToPerm.data.maybePermissionID, perm)
+        deepStrictEqual(parsedroleToPerm.data.maybeRoleID, parsedresponseRoles.data.roleID)
       }
     }
 
@@ -344,11 +344,11 @@ describe('POST /users/login HTTP', async () => {
         Authorization: jwt,
       },
       payload: {
-        storeName: 'the store',
+        storeName: 'the eatery',
         storeOrgNumber: '66s6dd5552',
         storeFSkatt: true,
         storeStatus: true,
-        storeEmail: 'mystore@store.is',
+        storeEmail: 'themystore@store.is',
         storePhone: '0762757764',
         storeAddress: 'a street',
         storeZipCode: '32121',
@@ -366,7 +366,7 @@ describe('POST /users/login HTTP', async () => {
     })
 
     const parsedresponseStore = JSON.parse(responseStore.body)
-    assert.deepStrictEqual(responseStore.statusCode, 201)
+    deepStrictEqual(responseStore.statusCode, 201)
 
     const responseUserEmp = await app.inject({
       method: 'POST',
@@ -376,18 +376,18 @@ describe('POST /users/login HTTP', async () => {
       },
       payload: {
         user: {
-          firstName: 'inserT',
-          lastName: 'lastNamesdfs',
-          email: '23423123sed@sdfsdfs.is',
+          firstName: 'Benjamin',
+          lastName: 'stiffler',
+          email: 'cheticamp@wweee.ca',
           isSuperAdmin: 'false',
           password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
           roleID: roles[0],
         },
         employee: {
           shortUserName: ',,dd',
-          employmentNumber: '46564235',
-          employeePersonalNumber: '234134234',
-          signature: 'poir',
+          employmentNumber: '14dfslöknn!',
+          employeePersonalNumber: '56450923424',
+          signature: 'gore',
           employeePin: 'sdfe',
           employeeActive: true,
           employeeComment: 'a comment for this user',
@@ -400,7 +400,7 @@ describe('POST /users/login HTTP', async () => {
 
     const responseUserEmpParsed = JSON.parse(responseUserEmp.body)
 
-    assert.deepStrictEqual(responseUserEmpParsed.user.firstName, 'inserT')
+    deepStrictEqual(responseUserEmpParsed.user.firstName, 'Benjamin')
 
     const responseUserEmpLogin = await app.inject({
       method: 'POST',
@@ -409,23 +409,17 @@ describe('POST /users/login HTTP', async () => {
         Authorization: jwt,
       },
       payload: {
-        email: '23423123sed@sdfsdfs.is',
+        email: 'cheticamp@wweee.ca',
         password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
       },
     })
 
     const responseUserEmpLoginParsed = JSON.parse(responseUserEmpLogin.body)
 
-    assert.deepStrictEqual(responseUserEmpLoginParsed.lastName, 'lastNamesdfs')
-    assert.deepStrictEqual(
-      responseUserEmpLoginParsed.role.roleHasPermission[0].permissionID,
-      perms[0],
-    )
-    assert.deepStrictEqual(responseUserEmpLoginParsed.role.role.roleID, roles[0])
-    assert.deepStrictEqual(
-      responseUserEmpLoginParsed.stores[0].storeID,
-      parsedresponseStore.store.storeID,
-    )
+    deepStrictEqual(responseUserEmpLoginParsed.lastName, 'stiffler')
+    deepStrictEqual(responseUserEmpLoginParsed.role.roleHasPermission[0].permissionID, perms[0])
+    deepStrictEqual(responseUserEmpLoginParsed.role.role.roleID, roles[0])
+    deepStrictEqual(responseUserEmpLoginParsed.stores[0].storeID, parsedresponseStore.store.storeID)
 
     const responseUserEmp2 = await app.inject({
       method: 'POST',
@@ -435,9 +429,9 @@ describe('POST /users/login HTTP', async () => {
       },
       payload: {
         user: {
-          firstName: 'qas',
+          firstName: 'stollenberger',
           lastName: 'lastsadNamesdfs',
-          email: '23423123sed@s.is',
+          email: 'mikeCunt@s.is',
           isSuperAdmin: 'false',
           password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
           roleID: roles[1],
@@ -459,7 +453,7 @@ describe('POST /users/login HTTP', async () => {
 
     const responseUserEmp2Parsed = JSON.parse(responseUserEmp2.body)
 
-    assert.deepStrictEqual(responseUserEmp2Parsed.user.firstName, 'qas')
+    deepStrictEqual(responseUserEmp2Parsed.user.firstName, 'stollenberger')
 
     const responseUserEmp2Login = await app.inject({
       method: 'POST',
@@ -468,31 +462,18 @@ describe('POST /users/login HTTP', async () => {
         Authorization: jwt,
       },
       payload: {
-        email: '23423123sed@s.is',
+        email: 'mikeCunt@s.is',
         password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
       },
     })
 
     const responseUserEmp2LoginParsed = JSON.parse(responseUserEmp2Login.body)
 
-    console.log('responseUserEmp2LoginParsed')
-    console.log('responseUserEmp2LoginParsed')
-    console.log(responseUserEmp2LoginParsed)
-    console.log(responseUserEmp2LoginParsed.role)
-    console.log('responseUserEmp2LoginParsed')
-    console.log('responseUserEmp2LoginParsed')
-
-    assert.deepStrictEqual(responseUserEmp2LoginParsed.lastName, 'lastsadNamesdfs')
-    assert.deepStrictEqual(
-      responseUserEmp2LoginParsed.role.roleHasPermission[0].permissionID,
-      perms[0],
-    )
-    assert.deepStrictEqual(
-      responseUserEmp2LoginParsed.role.roleHasPermission[1].permissionID,
-      perms[1],
-    )
-    assert.deepStrictEqual(responseUserEmp2LoginParsed.role.role.roleID, roles[1])
-    assert.deepStrictEqual(
+    deepStrictEqual(responseUserEmp2LoginParsed.lastName, 'lastsadNamesdfs')
+    deepStrictEqual(responseUserEmp2LoginParsed.role.roleHasPermission[0].permissionID, perms[0])
+    deepStrictEqual(responseUserEmp2LoginParsed.role.roleHasPermission[1].permissionID, perms[1])
+    deepStrictEqual(responseUserEmp2LoginParsed.role.role.roleID, roles[1])
+    deepStrictEqual(
       [
         responseUserEmp2LoginParsed.stores[0].storeID,
         responseUserEmp2LoginParsed.stores[1].storeID,
@@ -508,9 +489,9 @@ describe('POST /users/login HTTP', async () => {
       },
       payload: {
         user: {
-          firstName: 'qas',
-          lastName: 'lastsadNamesdfs',
-          email: '23423123seaaad@s.is',
+          firstName: 'walter',
+          lastName: 'white',
+          email: 'winkelBerg@s.is',
           isSuperAdmin: 'false',
           password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
           roleID: roles[2],
@@ -532,7 +513,7 @@ describe('POST /users/login HTTP', async () => {
 
     const responseUserEmp3Parsed = JSON.parse(responseUserEmp3.body)
 
-    assert.deepStrictEqual(responseUserEmp3Parsed.user.firstName, 'qas')
+    deepStrictEqual(responseUserEmp3Parsed.user.firstName, 'walter')
 
     const responseUserEmp3Login = await app.inject({
       method: 'POST',
@@ -541,28 +522,19 @@ describe('POST /users/login HTTP', async () => {
         Authorization: jwt,
       },
       payload: {
-        email: '23423123seaaad@s.is',
+        email: 'winkelBerg@s.is',
         password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
       },
     })
 
     const responseUserEmp3LoginParsed = JSON.parse(responseUserEmp3Login.body)
 
-    assert.deepStrictEqual(responseUserEmp3LoginParsed.lastName, 'lastsadNamesdfs')
-    assert.deepStrictEqual(
-      responseUserEmp3LoginParsed.role.roleHasPermission[0].permissionID,
-      perms[0],
-    )
-    assert.deepStrictEqual(
-      responseUserEmp3LoginParsed.role.roleHasPermission[1].permissionID,
-      perms[1],
-    )
-    assert.deepStrictEqual(
-      responseUserEmp3LoginParsed.role.roleHasPermission[2].permissionID,
-      perms[2],
-    )
-    assert.deepStrictEqual(responseUserEmp3LoginParsed.role.role.roleID, roles[2])
-    assert.deepStrictEqual(
+    deepStrictEqual(responseUserEmp3LoginParsed.lastName, 'white')
+    deepStrictEqual(responseUserEmp3LoginParsed.role.roleHasPermission[0].permissionID, perms[0])
+    deepStrictEqual(responseUserEmp3LoginParsed.role.roleHasPermission[1].permissionID, perms[1])
+    deepStrictEqual(responseUserEmp3LoginParsed.role.roleHasPermission[2].permissionID, perms[2])
+    deepStrictEqual(responseUserEmp3LoginParsed.role.role.roleID, roles[2])
+    deepStrictEqual(
       [
         responseUserEmp3LoginParsed.stores[0].storeID,
         responseUserEmp3LoginParsed.stores[1].storeID,
