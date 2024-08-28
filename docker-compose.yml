@@ -70,3 +70,4 @@ services:
     volumes:
       - ./dist:/usr/app/dist
       - ./test:/usr/app/test
+      - ./src:/usr/app/src

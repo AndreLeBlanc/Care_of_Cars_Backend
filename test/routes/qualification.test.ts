@@ -1,7 +1,8 @@
 import { after, before, describe, it } from 'node:test'
 import { FastifyInstance } from 'fastify'
 import { StoreID } from '../../src/schema/schema.js'
-import assert from 'assert'
+import { deepStrictEqual } from 'assert'
+
 import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
@@ -96,7 +97,7 @@ describe('qualifications tests', async () => {
       })
       const parsedResponse = JSON.parse(response.body)
 
-      assert.deepStrictEqual(parsedResponse.qualifications[0].localQualName, str[i])
+      deepStrictEqual(parsedResponse.qualifications[0].localQualName, str[i])
 
       const getResponse = await app.inject({
         method: 'GET',
@@ -107,7 +108,7 @@ describe('qualifications tests', async () => {
       })
 
       const parsedGetResponse = JSON.parse(getResponse.body)
-      assert.deepStrictEqual(parsedGetResponse.qualification.localQualName, str[i])
+      deepStrictEqual(parsedGetResponse.qualification.localQualName, str[i])
 
       const putResponse = await app.inject({
         method: 'PUT',
@@ -126,10 +127,7 @@ describe('qualifications tests', async () => {
 
       const parsedPatchResponse = JSON.parse(putResponse.body)
 
-      assert.deepStrictEqual(
-        parsedPatchResponse.qualifications[0].localQualName,
-        str[i] + 'patched',
-      )
+      deepStrictEqual(parsedPatchResponse.qualifications[0].localQualName, str[i] + 'patched')
 
       const deleteResponse = await app.inject({
         method: 'DELETE',
@@ -141,10 +139,7 @@ describe('qualifications tests', async () => {
       })
 
       const parsedDeleteResponse = JSON.parse(deleteResponse.body)
-      assert.deepStrictEqual(
-        parsedDeleteResponse.qualifications[0].localQualName,
-        str[i] + 'patched',
-      )
+      deepStrictEqual(parsedDeleteResponse.qualifications[0].localQualName, str[i] + 'patched')
 
       const getDeletedResponse = await app.inject({
         method: 'GET',
@@ -154,7 +149,7 @@ describe('qualifications tests', async () => {
         },
       })
 
-      assert.deepStrictEqual(getDeletedResponse.statusCode, 404)
+      deepStrictEqual(getDeletedResponse.statusCode, 404)
     }
 
     const responseStore = await app.inject({
@@ -164,13 +159,13 @@ describe('qualifications tests', async () => {
         Authorization: jwt,
       },
       payload: {
-        storeName: 'the store',
+        storeName: 'pizza place',
         storeOrgNumber: '66s7dd5552',
         storeFSkatt: true,
         storeStatus: true,
-        storeEmail: 'mystore@store.is',
+        storeEmail: 'pizza@place.is',
         storePhone: '0762757764',
-        storeAddress: 'a street',
+        storeAddress: 'apple drive',
         storeZipCode: '32121',
         storeCity: 'Reykavik',
         storeCountry: 'Iceland',
@@ -187,7 +182,7 @@ describe('qualifications tests', async () => {
 
     const parsedresponseStore = JSON.parse(responseStore.body)
 
-    assert.deepStrictEqual(responseStore.statusCode, 201)
+    deepStrictEqual(responseStore.statusCode, 201)
     for (let i = 0; i < str.length; i++) {
       const response = await app.inject({
         method: 'PUT',
@@ -204,7 +199,7 @@ describe('qualifications tests', async () => {
       })
 
       const parsedResponse = JSON.parse(response.body)
-      assert.deepStrictEqual(parsedResponse.qualifications[0].localQualName, str[i])
+      deepStrictEqual(parsedResponse.qualifications[0].localQualName, str[i])
     }
 
     for (let i = 0; i < str.length; i++) {
@@ -231,12 +226,9 @@ describe('qualifications tests', async () => {
       })
 
       const parsedResponse = JSON.parse(response.body)
-      assert.deepStrictEqual(parsedResponse.qualifications[0].localQualName, str[i] + 'glergx')
-      assert.deepStrictEqual(parsedResponse.qualifications[1].localQualName, str[i] + 'dsfs2sdfds')
-      assert.deepStrictEqual(
-        parsedResponse.qualifications[2].localQualName,
-        str[i] + 'Jonas is King',
-      )
+      deepStrictEqual(parsedResponse.qualifications[0].localQualName, str[i] + 'glergx')
+      deepStrictEqual(parsedResponse.qualifications[1].localQualName, str[i] + 'dsfs2sdfds')
+      deepStrictEqual(parsedResponse.qualifications[2].localQualName, str[i] + 'Jonas is King')
 
       const responsePatch = await app.inject({
         method: 'PUT',
@@ -265,31 +257,22 @@ describe('qualifications tests', async () => {
 
       const parsedResponsePatch = JSON.parse(responsePatch.body)
 
-      assert.deepStrictEqual(
-        parsedResponsePatch.qualifications[0].localQualName,
-        str[i] + 'Patched',
-      )
-      assert.deepStrictEqual(
-        parsedResponsePatch.qualifications[1].localQualName,
-        str[i] + 'Patched2',
-      )
-      assert.deepStrictEqual(
-        parsedResponsePatch.qualifications[2].localQualName,
-        str[i] + 'JPatched',
-      )
-      assert.deepStrictEqual(
+      deepStrictEqual(parsedResponsePatch.qualifications[0].localQualName, str[i] + 'Patched')
+      deepStrictEqual(parsedResponsePatch.qualifications[1].localQualName, str[i] + 'Patched2')
+      deepStrictEqual(parsedResponsePatch.qualifications[2].localQualName, str[i] + 'JPatched')
+      deepStrictEqual(
         parsedResponsePatch.qualifications[0].localQualID,
         parsedResponse.qualifications[0].localQualID,
       )
-      assert.deepStrictEqual(
+      deepStrictEqual(
         parsedResponsePatch.qualifications[1].localQualID,
         parsedResponse.qualifications[1].localQualID,
       )
-      assert.deepStrictEqual(
+      deepStrictEqual(
         parsedResponsePatch.qualifications[2].localQualID,
         parsedResponse.qualifications[2].localQualID,
       )
-      assert.deepStrictEqual(parsedResponsePatch.qualifications[1].storeID, 1)
+      deepStrictEqual(parsedResponsePatch.qualifications[1].storeID, 1)
     }
   })
 
@@ -309,7 +292,7 @@ describe('qualifications tests', async () => {
       })
       const parsedResponse = JSON.parse(response.body)
 
-      assert.deepStrictEqual(parsedResponse.qualifications[0].globalQualName, str[i])
+      deepStrictEqual(parsedResponse.qualifications[0].globalQualName, str[i])
 
       const getResponse = await app.inject({
         method: 'GET',
@@ -322,7 +305,7 @@ describe('qualifications tests', async () => {
 
       const parsedGetResponse = JSON.parse(getResponse.body)
 
-      assert.deepStrictEqual(parsedGetResponse.qualification.globalQualName, str[i])
+      deepStrictEqual(parsedGetResponse.qualification.globalQualName, str[i])
 
       const putResponse = await app.inject({
         method: 'PUT',
@@ -340,10 +323,7 @@ describe('qualifications tests', async () => {
 
       const parsedPatchResponse = JSON.parse(putResponse.body)
 
-      assert.deepStrictEqual(
-        parsedPatchResponse.qualifications[0].globalQualName,
-        str[i] + 'patched',
-      )
+      deepStrictEqual(parsedPatchResponse.qualifications[0].globalQualName, str[i] + 'patched')
 
       const deleteResponse = await app.inject({
         method: 'DELETE',
@@ -355,10 +335,7 @@ describe('qualifications tests', async () => {
       })
 
       const parsedDeleteResponse = JSON.parse(deleteResponse.body)
-      assert.deepStrictEqual(
-        parsedDeleteResponse.qualifications[0].globalQualName,
-        str[i] + 'patched',
-      )
+      deepStrictEqual(parsedDeleteResponse.qualifications[0].globalQualName, str[i] + 'patched')
 
       const getDeletedResponse = await app.inject({
         method: 'GET',
@@ -369,7 +346,7 @@ describe('qualifications tests', async () => {
         },
       })
 
-      assert.deepStrictEqual(getDeletedResponse.statusCode, 404)
+      deepStrictEqual(getDeletedResponse.statusCode, 404)
     }
 
     for (let i = 0; i < str.length; i++) {
@@ -393,12 +370,9 @@ describe('qualifications tests', async () => {
       })
 
       const parsedResponse = JSON.parse(response.body)
-      assert.deepStrictEqual(parsedResponse.qualifications[0].globalQualName, str[i] + 'glergx')
-      assert.deepStrictEqual(parsedResponse.qualifications[1].globalQualName, str[i] + 'dsfs2sdfds')
-      assert.deepStrictEqual(
-        parsedResponse.qualifications[2].globalQualName,
-        str[i] + 'Jonas is King',
-      )
+      deepStrictEqual(parsedResponse.qualifications[0].globalQualName, str[i] + 'glergx')
+      deepStrictEqual(parsedResponse.qualifications[1].globalQualName, str[i] + 'dsfs2sdfds')
+      deepStrictEqual(parsedResponse.qualifications[2].globalQualName, str[i] + 'Jonas is King')
 
       const responsePatch = await app.inject({
         method: 'PUT',
@@ -424,27 +398,18 @@ describe('qualifications tests', async () => {
 
       const parsedResponsePatch = JSON.parse(responsePatch.body)
 
-      assert.deepStrictEqual(
-        parsedResponsePatch.qualifications[0].globalQualName,
-        str[i] + 'Patched',
-      )
-      assert.deepStrictEqual(
-        parsedResponsePatch.qualifications[1].globalQualName,
-        str[i] + 'Patched2',
-      )
-      assert.deepStrictEqual(
-        parsedResponsePatch.qualifications[2].globalQualName,
-        str[i] + 'JPatched',
-      )
-      assert.deepStrictEqual(
+      deepStrictEqual(parsedResponsePatch.qualifications[0].globalQualName, str[i] + 'Patched')
+      deepStrictEqual(parsedResponsePatch.qualifications[1].globalQualName, str[i] + 'Patched2')
+      deepStrictEqual(parsedResponsePatch.qualifications[2].globalQualName, str[i] + 'JPatched')
+      deepStrictEqual(
         parsedResponsePatch.qualifications[0].globalQualID,
         parsedResponse.qualifications[0].globalQualID,
       )
-      assert.deepStrictEqual(
+      deepStrictEqual(
         parsedResponsePatch.qualifications[1].globalQualID,
         parsedResponse.qualifications[1].globalQualID,
       )
-      assert.deepStrictEqual(
+      deepStrictEqual(
         parsedResponsePatch.qualifications[2].globalQualID,
         parsedResponse.qualifications[2].globalQualID,
       )
@@ -452,11 +417,11 @@ describe('qualifications tests', async () => {
   })
 
   it('Create user and employee and assign quals', async () => {
-    const strings = ['balsdf', 'zzzzzzzzzzzz', 'dsfsdfsewrwrfsdfr']
+    const strings = ['vncmx,zksj', 'fredeswlsd', 'Göran Andersson']
     const perms: number[] = []
     const roles: number[] = []
     for (const [i, name] of strings.entries()) {
-      assert.deepStrictEqual(name, strings[i])
+      deepStrictEqual(name, strings[i])
       const responsePerm = await app.inject({
         method: 'POST',
         url: '/permissions',
@@ -529,7 +494,7 @@ describe('qualifications tests', async () => {
     })
 
     const parsedresponseStore = JSON.parse(responseStore.body)
-    assert.deepStrictEqual(responseStore.statusCode, 201)
+    deepStrictEqual(responseStore.statusCode, 201)
 
     const responseUserEmp = await app.inject({
       method: 'POST',
@@ -539,8 +504,8 @@ describe('qualifications tests', async () => {
       },
       payload: {
         user: {
-          firstName: 'inserT',
-          lastName: 'lastNamesdfs',
+          firstName: 'Mitch',
+          lastName: 'Mcgonal',
           email: '23423123sed@sdfsdfs.is',
           isSuperAdmin: 'false',
           password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
@@ -548,9 +513,9 @@ describe('qualifications tests', async () => {
         },
         employee: {
           shortUserName: ',,dd',
-          employmentNumber: '46564235',
-          employeePersonalNumber: '234134234',
-          signature: 'poir',
+          employmentNumber: 'lkdsfjwesd9',
+          employeePersonalNumber: '4442346456',
+          signature: 'noir',
           employeePin: 'sdfe',
           employeeActive: true,
           employeeComment: 'a comment for this user',
@@ -563,7 +528,7 @@ describe('qualifications tests', async () => {
 
     const responseUserEmpParsed = JSON.parse(responseUserEmp.body)
 
-    assert.deepStrictEqual(responseUserEmpParsed.user.firstName, 'inserT')
+    deepStrictEqual(responseUserEmpParsed.user.firstName, 'Mitch')
 
     const responseUserEmpLogin = await app.inject({
       method: 'POST',
@@ -579,16 +544,10 @@ describe('qualifications tests', async () => {
 
     const responseUserEmpLoginParsed = JSON.parse(responseUserEmpLogin.body)
 
-    assert.deepStrictEqual(responseUserEmpLoginParsed.lastName, 'lastNamesdfs')
-    assert.deepStrictEqual(
-      responseUserEmpLoginParsed.role.roleHasPermission[0].permissionID,
-      perms[0],
-    )
-    assert.deepStrictEqual(responseUserEmpLoginParsed.role.role.roleID, roles[0])
-    assert.deepStrictEqual(
-      responseUserEmpLoginParsed.stores[0].storeID,
-      parsedresponseStore.store.storeID,
-    )
+    deepStrictEqual(responseUserEmpLoginParsed.lastName, 'lastNamesdfs')
+    deepStrictEqual(responseUserEmpLoginParsed.role.roleHasPermission[0].permissionID, perms[0])
+    deepStrictEqual(responseUserEmpLoginParsed.role.role.roleID, roles[0])
+    deepStrictEqual(responseUserEmpLoginParsed.stores[0].storeID, parsedresponseStore.store.storeID)
 
     const responseUserEmp2 = await app.inject({
       method: 'POST',
@@ -599,7 +558,7 @@ describe('qualifications tests', async () => {
       payload: {
         user: {
           firstName: 'qas',
-          lastName: 'lastsadNamesdfs',
+          lastName: 'heisenberg',
           email: '23423123sed@s.is',
           isSuperAdmin: 'false',
           password: 'fdfsdfsdfdsfdsfsdewf2332werwfew',
@@ -622,7 +581,7 @@ describe('qualifications tests', async () => {
 
     const responseUserEmp2Parsed = JSON.parse(responseUserEmp2.body)
 
-    assert.deepStrictEqual(responseUserEmp2Parsed.user.firstName, 'qas')
+    deepStrictEqual(responseUserEmp2Parsed.user.firstName, 'qas')
     const localQuals: {
       localQualID: number
       localQualName: string
@@ -649,7 +608,7 @@ describe('qualifications tests', async () => {
         storeID: StoreID(1),
       })
 
-      assert.deepStrictEqual(parsedResponse.qualifications[0].localQualName, str[i])
+      deepStrictEqual(parsedResponse.qualifications[0].localQualName, str[i])
 
       const responseEmpQual = await app.inject({
         method: 'POST',
@@ -666,7 +625,7 @@ describe('qualifications tests', async () => {
       })
       const responseEmpQualParsed = JSON.parse(responseEmpQual.body)
 
-      assert.deepStrictEqual(
+      deepStrictEqual(
         responseEmpQualParsed.qualification[0].employeeID,
         responseUserEmpParsed.employee.employeeID,
       )
@@ -679,7 +638,7 @@ describe('qualifications tests', async () => {
         },
       })
       const responseGetEmpQualarsed = JSON.parse(responseGetEmpQual.body)
-      assert.deepStrictEqual(responseGetEmpQualarsed.localQuals.sort(), localQuals.sort())
+      deepStrictEqual(responseGetEmpQualarsed.localQuals.sort(), localQuals.sort())
     }
     const localQualsBack = structuredClone(localQuals)
     while (localQuals.length > 0) {
@@ -699,7 +658,7 @@ describe('qualifications tests', async () => {
         ],
       })
       const responseEmpQualparsed = JSON.parse(responseEmpQual.body)
-      assert.deepStrictEqual(responseEmpQualparsed.qualification[0].localQualID, q?.localQualID)
+      deepStrictEqual(responseEmpQualparsed.qualification[0].localQualID, q?.localQualID)
 
       const responseGetEmpQual = await app.inject({
         method: 'GET',
@@ -709,7 +668,7 @@ describe('qualifications tests', async () => {
         },
       })
       const responseGetEmpQualarsed = JSON.parse(responseGetEmpQual.body)
-      assert.deepStrictEqual(responseGetEmpQualarsed.localQuals.sort(), localQuals.sort())
+      deepStrictEqual(responseGetEmpQualarsed.localQuals.sort(), localQuals.sort())
     }
 
     const globalQuals: {
@@ -735,7 +694,7 @@ describe('qualifications tests', async () => {
         employeeID: parsedResponse.qualifications[0].employeeID,
       })
 
-      assert.deepStrictEqual(parsedResponse.qualifications[0].globalQualName, str[i])
+      deepStrictEqual(parsedResponse.qualifications[0].globalQualName, str[i])
 
       const responseEmpQual = await app.inject({
         method: 'POST',
@@ -752,7 +711,7 @@ describe('qualifications tests', async () => {
       })
       const responseEmpQualParsed = JSON.parse(responseEmpQual.body)
 
-      assert.deepStrictEqual(
+      deepStrictEqual(
         responseEmpQualParsed.qualification[0].employeeID,
         responseUserEmpParsed.employee.employeeID,
       )
@@ -769,7 +728,7 @@ describe('qualifications tests', async () => {
         .sort()
         .map((x: { globalQualID?: number | undefined; globalQualName: string }) => x.globalQualID)
       const exp = globalQuals.sort().map((x) => x.globalQualID)
-      assert.deepStrictEqual(res, exp)
+      deepStrictEqual(res, exp)
     }
 
     const globalQualsBack = structuredClone(globalQuals)
@@ -790,7 +749,7 @@ describe('qualifications tests', async () => {
         ],
       })
       const responseEmpQualparsed = JSON.parse(responseEmpQual.body)
-      assert.deepStrictEqual(responseEmpQualparsed.qualification[0].globalQualID, q?.globalQualID)
+      deepStrictEqual(responseEmpQualparsed.qualification[0].globalQualID, q?.globalQualID)
 
       const responseGetEmpQual = await app.inject({
         method: 'GET',
@@ -804,7 +763,7 @@ describe('qualifications tests', async () => {
         .sort()
         .map((x: { globalQualID?: number | undefined; globalQualName: string }) => x.globalQualID)
       const exp = globalQuals.sort().map((x) => x.globalQualID)
-      assert.deepStrictEqual(res, exp)
+      deepStrictEqual(res, exp)
     }
 
     const responseEmpQual = await app.inject({
@@ -838,23 +797,23 @@ describe('qualifications tests', async () => {
     })
     const responseEmpQualParsed = JSON.parse(responseEmpQual.body)
 
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualParsed.qualification[0].globalQualID,
       globalQualsBack[0].globalQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualParsed.qualification[1].globalQualID,
       globalQualsBack[1].globalQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualParsed.qualification[2].globalQualID,
       globalQualsBack[2].globalQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualParsed.qualification[3].globalQualID,
       globalQualsBack[3].globalQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualParsed.qualification[4].globalQualID,
       globalQualsBack[4].globalQualID,
     )
@@ -890,23 +849,23 @@ describe('qualifications tests', async () => {
     })
     const responseEmpQualDelParsed = JSON.parse(responseEmpQualDel.body)
 
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualDelParsed.qualification[0].globalQualID,
       globalQualsBack[0].globalQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualDelParsed.qualification[1].globalQualID,
       globalQualsBack[1].globalQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualDelParsed.qualification[2].globalQualID,
       globalQualsBack[2].globalQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualDelParsed.qualification[3].globalQualID,
       globalQualsBack[3].globalQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualDelParsed.qualification[4].globalQualID,
       globalQualsBack[4].globalQualID,
     )
@@ -938,19 +897,19 @@ describe('qualifications tests', async () => {
     })
     const responseEmpQualLocalParsed = JSON.parse(responseEmpQualLocal.body)
 
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualLocalParsed.qualification[0].localQualID,
       localQualsBack[0].localQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualLocalParsed.qualification[1].localQualID,
       localQualsBack[1].localQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualLocalParsed.qualification[2].localQualID,
       localQualsBack[2].localQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualLocalParsed.qualification[3].localQualID,
       localQualsBack[3].localQualID,
     )
@@ -982,19 +941,19 @@ describe('qualifications tests', async () => {
     })
     const responseEmpQualLocalDelParsed = JSON.parse(responseEmpQualLocalDel.body)
 
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualLocalDelParsed.qualification[0].localQualID,
       localQualsBack[0].localQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualLocalDelParsed.qualification[1].localQualID,
       localQualsBack[1].localQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualLocalDelParsed.qualification[2].localQualID,
       localQualsBack[2].localQualID,
     )
-    assert.deepStrictEqual(
+    deepStrictEqual(
       responseEmpQualLocalDelParsed.qualification[3].localQualID,
       localQualsBack[3].localQualID,
     )

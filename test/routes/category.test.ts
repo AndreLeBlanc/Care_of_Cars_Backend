@@ -3,7 +3,8 @@ import { FastifyInstance } from 'fastify'
 import * as crypto from 'node:crypto'
 
 import { after, before, describe, it } from 'node:test'
-import assert from 'assert'
+import { deepStrictEqual } from 'assert'
+
 import { buildApp } from '../../src/app.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
@@ -72,6 +73,7 @@ describe('category tests', async () => {
       },
     })
     const parsedResponse = JSON.parse(response.body)
+
     console.log('login info: ', parsedResponse)
 
     jwt = 'Bearer ' + parsedResponse.token
@@ -98,9 +100,9 @@ describe('category tests', async () => {
 
       const parsedResponse = JSON.parse(response.body)
 
-      assert.deepStrictEqual(parsedResponse.serviceCategoryName, name)
-      assert.deepStrictEqual(parsedResponse.serviceCategoryDescription, name)
-      assert.deepStrictEqual(response.statusCode, 201)
+      deepStrictEqual(parsedResponse.serviceCategoryName, name)
+      deepStrictEqual(parsedResponse.serviceCategoryDescription, name)
+      deepStrictEqual(response.statusCode, 201)
       const getResponse = await app.inject({
         method: 'GET',
         url: '/category/service/' + parsedResponse.serviceCategoryID,
@@ -111,9 +113,9 @@ describe('category tests', async () => {
 
       const parsedGetResponse = JSON.parse(getResponse.body)
 
-      assert.deepStrictEqual(parsedGetResponse.serviceCategoryName, name)
-      assert.deepStrictEqual(parsedGetResponse.serviceCategoryDescription, str[i])
-      assert.deepStrictEqual(getResponse.statusCode, 200)
+      deepStrictEqual(parsedGetResponse.serviceCategoryName, name)
+      deepStrictEqual(parsedGetResponse.serviceCategoryDescription, str[i])
+      deepStrictEqual(getResponse.statusCode, 200)
 
       const newName = crypto.randomBytes(i + 3).toString('hex')
       const newDescription = crypto.randomBytes(i + 8).toString('hex')
@@ -132,9 +134,9 @@ describe('category tests', async () => {
 
       const parsedPatchResponse = JSON.parse(patchResponse.body)
 
-      assert.deepStrictEqual(parsedPatchResponse.serviceCategoryName, newName)
-      assert.deepStrictEqual(parsedPatchResponse.serviceCategoryDescription, newDescription)
-      assert.deepStrictEqual(patchResponse.statusCode, 201)
+      deepStrictEqual(parsedPatchResponse.serviceCategoryName, newName)
+      deepStrictEqual(parsedPatchResponse.serviceCategoryDescription, newDescription)
+      deepStrictEqual(patchResponse.statusCode, 201)
 
       const deletedResponse = await app.inject({
         method: 'DELETE',
@@ -146,9 +148,9 @@ describe('category tests', async () => {
 
       const deletedParsedResponse = JSON.parse(deletedResponse.body)
 
-      assert.deepStrictEqual(deletedParsedResponse.serviceCategoryName, newName)
-      assert.deepStrictEqual(deletedParsedResponse.serviceCategoryDescription, newDescription)
-      assert.deepStrictEqual(deletedResponse.statusCode, 200)
+      deepStrictEqual(deletedParsedResponse.serviceCategoryName, newName)
+      deepStrictEqual(deletedParsedResponse.serviceCategoryDescription, newDescription)
+      deepStrictEqual(deletedResponse.statusCode, 200)
     }
   })
 
@@ -169,9 +171,9 @@ describe('category tests', async () => {
 
       const parsedResponse = JSON.parse(response.body)
 
-      assert.deepStrictEqual(parsedResponse.serviceCategoryName, name)
-      assert.deepStrictEqual(parsedResponse.serviceCategoryDescription, name)
-      assert.deepStrictEqual(response.statusCode, 201)
+      deepStrictEqual(parsedResponse.serviceCategoryName, name)
+      deepStrictEqual(parsedResponse.serviceCategoryDescription, name)
+      deepStrictEqual(response.statusCode, 201)
       const getResponse = await app.inject({
         method: 'GET',
         url: '/category/service/' + parsedResponse.serviceCategoryID,
@@ -182,9 +184,9 @@ describe('category tests', async () => {
 
       const parsedGetResponse = JSON.parse(getResponse.body)
 
-      assert.deepStrictEqual(parsedGetResponse.serviceCategoryName, name)
-      assert.deepStrictEqual(parsedGetResponse.serviceCategoryDescription, str[i])
-      assert.deepStrictEqual(getResponse.statusCode, 200)
+      deepStrictEqual(parsedGetResponse.serviceCategoryName, name)
+      deepStrictEqual(parsedGetResponse.serviceCategoryDescription, str[i])
+      deepStrictEqual(getResponse.statusCode, 200)
 
       const newName = crypto.randomBytes(i + 3).toString('hex')
       const newDescription = crypto.randomBytes(i + 8).toString('hex')
@@ -203,9 +205,9 @@ describe('category tests', async () => {
 
       const parsedPatchResponse = JSON.parse(patchResponse.body)
 
-      assert.deepStrictEqual(parsedPatchResponse.serviceCategoryName, newName)
-      assert.deepStrictEqual(parsedPatchResponse.serviceCategoryDescription, newDescription)
-      assert.deepStrictEqual(patchResponse.statusCode, 201)
+      deepStrictEqual(parsedPatchResponse.serviceCategoryName, newName)
+      deepStrictEqual(parsedPatchResponse.serviceCategoryDescription, newDescription)
+      deepStrictEqual(patchResponse.statusCode, 201)
 
       const deletedResponse = await app.inject({
         method: 'DELETE',
@@ -217,9 +219,9 @@ describe('category tests', async () => {
 
       const deletedParsedResponse = JSON.parse(deletedResponse.body)
 
-      assert.deepStrictEqual(deletedParsedResponse.serviceCategoryName, newName)
-      assert.deepStrictEqual(deletedParsedResponse.serviceCategoryDescription, newDescription)
-      assert.deepStrictEqual(deletedResponse.statusCode, 200)
+      deepStrictEqual(deletedParsedResponse.serviceCategoryName, newName)
+      deepStrictEqual(deletedParsedResponse.serviceCategoryDescription, newDescription)
+      deepStrictEqual(deletedResponse.statusCode, 200)
     }
   })
 })
