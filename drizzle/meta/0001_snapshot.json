@@ -1,9 +1,279 @@
 {
-  "id": "bbacc268-c603-45d4-b174-0d40b4c1a684",
-  "prevId": "74be6473-7de2-4582-b89c-ecb4c3c251f1",
+  "id": "3667a823-827e-48fe-8ff9-1a03b7537a84",
+  "prevId": "ae3687fe-74d1-4cf0-b69c-fdfeb473f635",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.billOrders": {
+      "name": "billOrders",
+      "schema": "",
+      "columns": {
+        "billID": {
+          "name": "billID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "orderID": {
+          "name": "orderID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "billOrders_billID_bills_orderID_fk": {
+          "name": "billOrders_billID_bills_orderID_fk",
+          "tableFrom": "billOrders",
+          "tableTo": "bills",
+          "columnsFrom": [
+            "billID"
+          ],
+          "columnsTo": [
+            "orderID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "billOrders_orderID_orders_orderID_fk": {
+          "name": "billOrders_orderID_orders_orderID_fk",
+          "tableFrom": "billOrders",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "orderID"
+          ],
+          "columnsTo": [
+            "orderID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "billOrders_billID_orderID_pk": {
+          "name": "billOrders_billID_orderID_pk",
+          "columns": [
+            "billID",
+            "orderID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.bills": {
+      "name": "bills",
+      "schema": "",
+      "columns": {
+        "orderID": {
+          "name": "orderID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "billStatus": {
+          "name": "billStatus",
+          "type": "billStatus",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "employeeID": {
+          "name": "employeeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "billingDate": {
+          "name": "billingDate",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "paymentDate": {
+          "name": "paymentDate",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "paymentDays": {
+          "name": "paymentDays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverID": {
+          "name": "driverID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "customerOrgNumber": {
+          "name": "customerOrgNumber",
+          "type": "varchar(11)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverExternalNumber": {
+          "name": "driverExternalNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "companyReference": {
+          "name": "companyReference",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverFirstName": {
+          "name": "driverFirstName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverLastName": {
+          "name": "driverLastName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverEmail": {
+          "name": "driverEmail",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverPhoneNumber": {
+          "name": "driverPhoneNumber",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverAddress": {
+          "name": "driverAddress",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverZipCode": {
+          "name": "driverZipCode",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverAddressCity": {
+          "name": "driverAddressCity",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverCountry": {
+          "name": "driverCountry",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverHasCard": {
+          "name": "driverHasCard",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "driverCardValidTo": {
+          "name": "driverCardValidTo",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverCardNumber": {
+          "name": "driverCardNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverKeyNumber": {
+          "name": "driverKeyNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bills_employeeID_employees_employeeID_fk": {
+          "name": "bills_employeeID_employees_employeeID_fk",
+          "tableFrom": "bills",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "employeeID"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bills_driverID_drivers_driverID_fk": {
+          "name": "bills_driverID_drivers_driverID_fk",
+          "tableFrom": "bills",
+          "tableTo": "drivers",
+          "columnsFrom": [
+            "driverID"
+          ],
+          "columnsTo": [
+            "driverID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bills_customerOrgNumber_companycustomers_customerOrgNumber_fk": {
+          "name": "bills_customerOrgNumber_companycustomers_customerOrgNumber_fk",
+          "tableFrom": "bills",
+          "tableTo": "companycustomers",
+          "columnsFrom": [
+            "customerOrgNumber"
+          ],
+          "columnsTo": [
+            "customerOrgNumber"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bills_driverEmail_unique": {
+          "name": "bills_driverEmail_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "driverEmail"
+          ]
+        },
+        "bills_driverPhoneNumber_unique": {
+          "name": "bills_driverPhoneNumber_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "driverPhoneNumber"
+          ]
+        }
+      }
+    },
     "public.companycustomers": {
       "name": "companycustomers",
       "schema": "",
@@ -599,6 +869,18 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "checkedIn": {
+          "name": "checkedIn",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checkedOut": {
+          "name": "checkedOut",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -908,18 +1190,6 @@
         "employeeComment": {
           "name": "employeeComment",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "checkedIn": {
-          "name": "checkedIn",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "checkedOut": {
-          "name": "checkedOut",
-          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
@@ -1258,31 +1528,31 @@
         },
         "day1": {
           "name": "day1",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day2": {
           "name": "day2",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day3": {
           "name": "day3",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day4": {
           "name": "day4",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day5": {
           "name": "day5",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
@@ -1422,31 +1692,31 @@
         },
         "day1": {
           "name": "day1",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day2": {
           "name": "day2",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day3": {
           "name": "day3",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day4": {
           "name": "day4",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day5": {
           "name": "day5",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
@@ -1507,6 +1777,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "localServiceID": {
           "name": "localServiceID",
           "type": "integer",
@@ -1531,8 +1813,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "employeeID": {
-          "name": "employeeID",
+        "day1Employee": {
+          "name": "day1Employee",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -1543,9 +1825,33 @@
           "primaryKey": false,
           "notNull": false
         },
+        "day2Work": {
+          "name": "day2Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day2Employee": {
+          "name": "day2Employee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "day3": {
           "name": "day3",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3Work": {
+          "name": "day3Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3Employee": {
+          "name": "day3Employee",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -1555,9 +1861,33 @@
           "primaryKey": false,
           "notNull": false
         },
+        "day4Work": {
+          "name": "day4Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day4Employee": {
+          "name": "day4Employee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "day5": {
           "name": "day5",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5Work": {
+          "name": "day5Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5Employee": {
+          "name": "day5Employee",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -1567,9 +1897,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "discount": {
-          "name": "discount",
-          "type": "real",
+        "currency": {
+          "name": "currency",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
@@ -1627,12 +1957,64 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "orderLocalServices_employeeID_employees_employeeID_fk": {
-          "name": "orderLocalServices_employeeID_employees_employeeID_fk",
+        "orderLocalServices_day1Employee_employees_employeeID_fk": {
+          "name": "orderLocalServices_day1Employee_employees_employeeID_fk",
           "tableFrom": "orderLocalServices",
           "tableTo": "employees",
           "columnsFrom": [
+            "day1Employee"
+          ],
+          "columnsTo": [
             "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderLocalServices_day2Employee_employees_employeeID_fk": {
+          "name": "orderLocalServices_day2Employee_employees_employeeID_fk",
+          "tableFrom": "orderLocalServices",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day2Employee"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderLocalServices_day3Employee_employees_employeeID_fk": {
+          "name": "orderLocalServices_day3Employee_employees_employeeID_fk",
+          "tableFrom": "orderLocalServices",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day3Employee"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderLocalServices_day4Employee_employees_employeeID_fk": {
+          "name": "orderLocalServices_day4Employee_employees_employeeID_fk",
+          "tableFrom": "orderLocalServices",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day4Employee"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderLocalServices_day5Employee_employees_employeeID_fk": {
+          "name": "orderLocalServices_day5Employee_employees_employeeID_fk",
+          "tableFrom": "orderLocalServices",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day5Employee"
           ],
           "columnsTo": [
             "employeeID"
@@ -1668,6 +2050,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "serviceVariantID": {
           "name": "serviceVariantID",
           "type": "integer",
@@ -1686,8 +2080,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "employeeID": {
-          "name": "employeeID",
+        "day1Employee": {
+          "name": "day1Employee",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -1698,9 +2092,33 @@
           "primaryKey": false,
           "notNull": false
         },
+        "day2Work": {
+          "name": "day2Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day2Employee": {
+          "name": "day2Employee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "day3": {
           "name": "day3",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3Work": {
+          "name": "day3Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3Employee": {
+          "name": "day3Employee",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -1710,9 +2128,33 @@
           "primaryKey": false,
           "notNull": false
         },
+        "day4Work": {
+          "name": "day4Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day4Employee": {
+          "name": "day4Employee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "day5": {
           "name": "day5",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5Work": {
+          "name": "day5Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5Employee": {
+          "name": "day5Employee",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -1722,9 +2164,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "discount": {
-          "name": "discount",
-          "type": "real",
+        "currency": {
+          "name": "currency",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
@@ -1782,12 +2224,64 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "orderServices_employeeID_employees_employeeID_fk": {
-          "name": "orderServices_employeeID_employees_employeeID_fk",
+        "orderServices_day1Employee_employees_employeeID_fk": {
+          "name": "orderServices_day1Employee_employees_employeeID_fk",
           "tableFrom": "orderServices",
           "tableTo": "employees",
           "columnsFrom": [
+            "day1Employee"
+          ],
+          "columnsTo": [
             "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderServices_day2Employee_employees_employeeID_fk": {
+          "name": "orderServices_day2Employee_employees_employeeID_fk",
+          "tableFrom": "orderServices",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day2Employee"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderServices_day3Employee_employees_employeeID_fk": {
+          "name": "orderServices_day3Employee_employees_employeeID_fk",
+          "tableFrom": "orderServices",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day3Employee"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderServices_day4Employee_employees_employeeID_fk": {
+          "name": "orderServices_day4Employee_employees_employeeID_fk",
+          "tableFrom": "orderServices",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day4Employee"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderServices_day5Employee_employees_employeeID_fk": {
+          "name": "orderServices_day5Employee_employees_employeeID_fk",
+          "tableFrom": "orderServices",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day5Employee"
           ],
           "columnsTo": [
             "employeeID"
@@ -1853,6 +2347,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "pickupTime": {
+          "name": "pickupTime",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
         "vatFree": {
           "name": "vatFree",
           "type": "boolean",
@@ -1868,7 +2368,7 @@
         },
         "currency": {
           "name": "currency",
-          "type": "varchar(5)",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
@@ -1882,15 +2382,13 @@
           "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         }
       },
       "indexes": {},
@@ -2794,31 +3292,31 @@
         },
         "day1": {
           "name": "day1",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day2": {
           "name": "day2",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day3": {
           "name": "day3",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day4": {
           "name": "day4",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day5": {
           "name": "day5",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
@@ -2952,31 +3450,31 @@
         },
         "day1": {
           "name": "day1",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day2": {
           "name": "day2",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day3": {
           "name": "day3",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day4": {
           "name": "day4",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day5": {
           "name": "day5",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
@@ -3740,6 +4238,15 @@
     }
   },
   "enums": {
+    "public.billStatus": {
+      "name": "billStatus",
+      "schema": "public",
+      "values": [
+        "bill",
+        "creditBill",
+        "cashBill"
+      ]
+    },
     "public.orderStatus": {
       "name": "orderStatus",
       "schema": "public",

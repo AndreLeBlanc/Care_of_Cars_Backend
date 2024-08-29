@@ -179,6 +179,7 @@ export const CreateOrderBodyReplySchema = Type.Composite([
 export type CreateOrderBodyReplySchemaType = Static<typeof CreateOrderBodyReplySchema>
 
 export const ListOrdersQueryParamSchema = Type.Object({
+  storeID: storeID,
   search: Type.Optional(Type.String()),
   limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
@@ -189,6 +190,7 @@ export const ListOrdersQueryParamSchema = Type.Object({
 export type ListOrdersQueryParamSchemaType = Static<typeof ListOrdersQueryParamSchema>
 
 export const OrdersPaginatedSchema = Type.Object({
+  message: Message,
   totalOrders: Type.Integer(),
   totalPage: Type.Integer(),
   perPage: Type.Integer(),
@@ -203,6 +205,7 @@ export const OrdersPaginatedSchema = Type.Object({
       submissionTime: SubmissionTimeSchema,
       updatedAt: Type.String({ format: 'date-time' }),
       total: Type.Array(ServiceCostNumberSchema),
+      currency: Type.Array(CurrencySchema),
       orderStatus: OrderStatusSchema,
       billed: BilledSchema,
     }),

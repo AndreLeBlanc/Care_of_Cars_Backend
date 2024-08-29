@@ -22,6 +22,7 @@ import {
   ServiceName,
   StoreID,
   SubmissionTime,
+  SubmissionTimeOrder,
   VatFree,
   WorkDay1,
   WorkDay2,
@@ -120,7 +121,7 @@ export async function orders(fastify: FastifyInstance) {
           storeID: StoreID(req.body.storeID),
           orderNotes: req.body.orderNotes ? OrderNotes(req.body.orderNotes) : undefined,
           bookedBy: req.body.bookedBy ? EmployeeID(req.body.bookedBy) : undefined,
-          submissionTime: SubmissionTime(new Date(req.body.submissionTime)),
+          submissionTime: SubmissionTimeOrder(req.body.submissionTime),
           pickupTime: PickupTime(new Date(req.body.pickupTime)),
           vatFree: VatFree(req.body.vatFree),
           orderStatus: orderStatusValue as OrderStatus,
@@ -330,7 +331,7 @@ export async function orders(fastify: FastifyInstance) {
     },
   )
 
-  fastify.get<{ Params: ListOrdersQueryParamSchemaType }>(
+  fastify.get<{ Querystring: ListOrdersQueryParamSchemaType }>(
     '/list-orders/',
     {
       preHandler: async (request, reply, done) => {
@@ -347,7 +348,7 @@ export async function orders(fastify: FastifyInstance) {
       schema: {
         querystring: ListOrdersQueryParamSchema,
         response: {
-          200: { ...OrdersPaginatedSchema, MessageSchema },
+          200: OrdersPaginatedSchema,
           403: MessageSchema,
         },
       },
@@ -357,12 +358,14 @@ export async function orders(fastify: FastifyInstance) {
         search = '',
         limit = 10,
         page = 1,
+        storeID,
         orderStatusSearch,
         billingStatusSearch,
-      } = req.params
+      } = req.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
+      const store = StoreID(storeID)
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
       const brandedOrderStatusSearch = orderStatusSearch as OrderStatus
       const brandedBillingStatusSearch = billingStatusSearch
@@ -373,6 +376,7 @@ export async function orders(fastify: FastifyInstance) {
         brandedLimit,
         brandedPage,
         offset,
+        store,
         brandedOrderStatusSearch,
         brandedBillingStatusSearch,
       )
@@ -391,8 +395,9 @@ export async function orders(fastify: FastifyInstance) {
             Page(orders.totalPage),
             Page(orders.page),
           )
+
           return reply.status(200).send({
-            message: 'fetched order',
+            message: 'fetched orders',
             ...orders,
             previousUrl: previousUrl,
             nextUrl: nextUrl,

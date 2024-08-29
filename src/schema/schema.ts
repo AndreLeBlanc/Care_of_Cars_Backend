@@ -450,6 +450,8 @@ export type OrderNotes = Brand<string, 'orderNotes'>
 export const OrderNotes = make<OrderNotes>()
 export type SubmissionTime = Brand<Date, 'submissionTime'>
 export const SubmissionTime = make<SubmissionTime>()
+export type SubmissionTimeOrder = Brand<string, 'submissionTimeOrder'>
+export const SubmissionTimeOrder = make<SubmissionTimeOrder>()
 export type PickupTime = Brand<Date, 'pickupTime'>
 export const PickupTime = make<PickupTime>()
 export type VatFree = Brand<boolean, 'vatFree'>
@@ -1504,13 +1506,16 @@ export const orders = pgTable(
     bookedBy: integer('employeeID')
       .$type<EmployeeID>()
       .references(() => employees.employeeID, { onDelete: 'set null' }),
-    submissionTime: timestamp('submissionTime').$type<SubmissionTime>().notNull(),
+    submissionTime: timestamp('submissionTime', { mode: 'string' })
+      .$type<SubmissionTimeOrder>()
+      .notNull(),
     pickupTime: timestamp('pickupTime').$type<PickupTime>().notNull(),
     vatFree: boolean('vatFree').$type<VatFree>().notNull(),
     orderStatus: orderStatuspgEnum('orderStatus').notNull(),
     currency: varchar('currency').notNull(),
     discount: real('discount').$type<Discount>().notNull(),
-    ...dbDates,
+    createdAt: timestamp('createdAt', { mode: 'string' }).notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).notNull(),
   },
   (orders) => {
     return {

@@ -2,8 +2,6 @@ import { db } from '../config/db-connect.js'
 
 import { and, count, eq, ilike, or, sql } from 'drizzle-orm'
 
-//import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.js'
-
 import { Either, errorHandling, left, right } from '../utils/helper.js'
 
 import {
@@ -39,7 +37,7 @@ import {
   ServiceID,
   ServiceName,
   StoreID,
-  SubmissionTime,
+  SubmissionTimeOrder,
   VatFree,
   WorkDay1,
   WorkDay2,
@@ -50,6 +48,7 @@ import {
   drivers,
   orderLocalServices,
   orderServices,
+  orderStatus,
   orders,
   rentCarBookings,
 } from '../schema/schema.js'
@@ -64,9 +63,10 @@ export type OrdersPaginated = {
     driverID: DriverID
     firstName: DriverFirstName
     lastName: DriverLastName
-    submissionTime: SubmissionTime
-    updatedAt: Date
-    total: ServiceCostDinero[]
+    submissionTime: SubmissionTimeOrder
+    updatedAt: string
+    total: ServiceCostNumber[]
+    currency: ServiceCostCurrency[]
     orderStatus: OrderStatus
     billed: Billed
   }[]
@@ -78,7 +78,7 @@ type OrderBase = {
   storeID: StoreID
   orderNotes?: OrderNotes
   bookedBy?: EmployeeID
-  submissionTime: SubmissionTime
+  submissionTime: SubmissionTimeOrder
   pickupTime: PickupTime
   vatFree: VatFree
   discount: Discount
@@ -92,8 +92,8 @@ export type CreateOrder = OrderBase & {
 
 export type Order = OrderBase & {
   orderID: OrderID
-  updatedAt: Date
-  createdAt: Date
+  updatedAt: string
+  createdAt: string
 }
 
 export type CreateOrderServices = {
@@ -170,15 +170,15 @@ type OrderNoBrand = {
   storeID: StoreID
   orderNotes?: OrderNotes | null
   bookedBy?: EmployeeID | null
-  submissionTime: SubmissionTime
+  submissionTime: SubmissionTimeOrder
   pickupTime: PickupTime
   vatFree: VatFree
   orderStatus: OrderStatus
   orderID: OrderID
   discount: Discount
   currency: string
-  updatedAt: Date
-  createdAt: Date
+  updatedAt: string
+  createdAt: string
 }
 
 type OrderLocalServicesNoBrand = {
@@ -357,7 +357,7 @@ export async function createOrder(
         newOrder = (
           await tx
             .update(orders)
-            .set({ ...order, updatedAt: new Date() })
+            .set({ ...order, updatedAt: new Date().toISOString() })
             .where(eq(orders.orderID, order.orderID))
             .returning()
         )[0]
@@ -365,7 +365,11 @@ export async function createOrder(
         newOrder = (
           await tx
             .insert(orders)
-            .values({ ...order, createdAt: new Date(), updatedAt: new Date() })
+            .values({
+              ...order,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            })
             .returning()
         )[0]
       }
@@ -639,19 +643,27 @@ export async function listOrders(
   limit = Limit(10),
   page = Page(1),
   offset = Offset(0),
+  store: StoreID,
   orderStatusSearch?: OrderStatus,
   billingStatusSearch?: IsBilled,
 ): Promise<Either<string, OrdersPaginated>> {
   try {
     return await db.transaction(async (tx) => {
-      let condition = and(
-        or(
-          ilike(orders.submissionTime, '%' + search + '%'),
-          ilike(orders.orderStatus, '%' + search + '%'),
-          ilike(drivers.driverFirstName, '%' + search + '%'),
-          ilike(drivers.driverLastName, '%' + search + '%'),
-        ),
-      )
+      let condition
+      if (Object.values(orderStatus).includes(search as OrderStatus)) {
+        ilike(orders.orderStatus, search)
+      } else {
+        condition = and(
+          eq(orders.storeID, store),
+          or(
+            sql`CAST(${orders.createdAt} AS TEXT) ILIKE ${'%' + search + '%'}`,
+            sql`CAST(${orders.updatedAt} AS TEXT) ILIKE ${'%' + search + '%'}`,
+            sql`CAST(${orders.submissionTime} AS TEXT) ILIKE ${'%' + search + '%'}`,
+            ilike(drivers.driverFirstName, '%' + search + '%'),
+            ilike(drivers.driverLastName, '%' + search + '%'),
+          ),
+        )
+      }
       if (orderStatusSearch != null) {
         condition = or(condition, ilike(orders.orderStatus, '%' + orderStatusSearch + '%'))
       }
@@ -677,6 +689,7 @@ export async function listOrders(
 
       const orderList = await tx
         .select({
+          orderID: orders.orderID,
           driverCarID: orders.driverCarID,
           driverID: orders.driverID,
           firstName: drivers.driverFirstName,
@@ -684,27 +697,104 @@ export async function listOrders(
           submissionTime: orders.submissionTime,
           updatedAt: orders.updatedAt,
           orderStatus: orders.orderStatus,
-          services: sql<OrderRowNoDineroName[]>`json_agg(json_build_object(
-          'currency',${orderServices.currency}
-          'cost',${orderServices.cost}
-          'amount',${orderServices.amount}))`.as('tagname'),
+          services: sql<OrderRowNoDineroName[]>`
+        COALESCE(
+          JSONB_AGG(
+            CASE WHEN ${orderServices.orderID} IS NOT NULL THEN
+              jsonb_build_object(
+             'currency',${orderServices.currency},
+             'cost',${orderServices.cost},
+             'amount',${orderServices.amount}
+            )
+            ELSE NULL END
+          ) FILTER (WHERE ${orderServices.orderID} IS NOT NULL),
+          '[]'::jsonb
+        )
+      `.as('orderServices'),
 
-          localServices: sql<OrderRowNoDineroName[]>`json_agg(json_build_object(
-        'currency',${orderLocalServices.currency}
-        'cost',${orderLocalServices.cost}
-        'amount',${orderLocalServices.amount}))`.as('tagname'),
+          localServices: sql<OrderRowNoDineroName[]>`
+      COALESCE(
+        JSONB_AGG(
+          CASE WHEN ${orderLocalServices.orderID} IS NOT NULL THEN
+            jsonb_build_object(
+           'currency',${orderLocalServices.currency},
+           'cost',${orderLocalServices.cost},
+           'amount',${orderLocalServices.amount}
+          )
+          ELSE NULL END
+        ) FILTER (WHERE ${orderLocalServices.orderID} IS NOT NULL),
+        '[]'::jsonb
+      )
+    `.as('orderLocalServices'),
           billed: sql<boolean>`EXISTS (
-            SELECT 1 FROM ${billOrders}
-            WHERE ${billOrders.orderID} = ${orders.orderID}
-          )`,
+      SELECT 1 FROM ${billOrders}
+      WHERE ${billOrders.orderID} = ${orders.orderID}
+    )`,
         })
         .from(orders)
         .innerJoin(drivers, eq(orders.driverID, drivers.driverID))
         .leftJoin(orderServices, eq(orders.orderID, orderServices.orderID))
         .leftJoin(orderLocalServices, eq(orders.orderID, orderLocalServices.orderID))
         .where(condition)
+        .groupBy(orders.orderID, drivers.driverFirstName, drivers.driverLastName)
         .limit(limit || 10)
         .offset(offset || 0)
+
+      console.log(
+        tx
+          .select({
+            orderID: orders.orderID,
+            driverCarID: orders.driverCarID,
+            driverID: orders.driverID,
+            firstName: drivers.driverFirstName,
+            lastName: drivers.driverLastName,
+            submissionTime: orders.submissionTime,
+            updatedAt: orders.updatedAt,
+            orderStatus: orders.orderStatus,
+            services: sql<OrderRowNoDineroName[]>`
+          COALESCE(
+            JSONB_AGG(
+              CASE WHEN ${orderServices.orderID} IS NOT NULL THEN
+                jsonb_build_object(
+               'currency',${orderServices.currency},
+               'cost',${orderServices.cost},
+               'amount',${orderServices.amount}
+              )
+              ELSE NULL END
+            ) FILTER (WHERE ${orderServices.orderID} IS NOT NULL),
+            '[]'::jsonb
+          )
+        `.as('orderServices'),
+
+            localServices: sql<OrderRowNoDineroName[]>`
+        COALESCE(
+          JSONB_AGG(
+            CASE WHEN ${orderLocalServices.orderID} IS NOT NULL THEN
+              jsonb_build_object(
+             'currency',${orderLocalServices.currency},
+             'cost',${orderLocalServices.cost},
+             'amount',${orderLocalServices.amount}
+            )
+            ELSE NULL END
+          ) FILTER (WHERE ${orderLocalServices.orderID} IS NOT NULL),
+          '[]'::jsonb
+        )
+      `.as('orderLocalServices'),
+            billed: sql<boolean>`EXISTS (
+        SELECT 1 FROM ${billOrders}
+        WHERE ${billOrders.orderID} = ${orders.orderID}
+      )`,
+          })
+          .from(orders)
+          .innerJoin(drivers, eq(orders.driverID, drivers.driverID))
+          .leftJoin(orderServices, eq(orders.orderID, orderServices.orderID))
+          .leftJoin(orderLocalServices, eq(orders.orderID, orderLocalServices.orderID))
+          .where(condition)
+          .groupBy(orders.orderID, drivers.driverFirstName, drivers.driverLastName)
+          .limit(limit || 10)
+          .offset(offset || 0)
+          .toSQL(),
+      )
 
       const [orderCount] = await tx
         .select({ count: count() })
@@ -714,6 +804,12 @@ export async function listOrders(
 
       const totalPage = Page(Math.ceil(orderCount.count / limit))
 
+      const a = await tx.select().from(orderLocalServices)
+      console.log('here; ', a)
+
+      if (a.length == 2) {
+        console.log(orderList[1].localServices)
+      }
       function totalPriceCalc(
         services: OrderRowNoDineroName[],
         localServices: OrderRowNoDineroName[],
@@ -727,7 +823,6 @@ export async function listOrders(
           ),
         )
       }
-
       return orderList
         ? right({
             totalOrders: ResultCount(orderCount.count),
@@ -741,7 +836,12 @@ export async function listOrders(
               lastName: order.lastName,
               submissionTime: order.submissionTime,
               updatedAt: order.updatedAt,
-              total: totalPriceCalc(order.services, order.localServices),
+              total: totalPriceCalc(order.services, order.localServices).map((x) =>
+                ServiceCostNumber(x.getAmount()),
+              ),
+              currency: totalPriceCalc(order.services, order.localServices).map((x) =>
+                ServiceCostCurrency(x.getCurrency()),
+              ),
               orderStatus: order.orderStatus,
               billed: Billed(order.billed),
             })),

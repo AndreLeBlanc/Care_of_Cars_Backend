@@ -32,6 +32,7 @@ import {
   ServiceCategoryID,
   ServiceID,
   SubmissionTime,
+  SubmissionTimeOrder,
   companycustomers,
   drivers,
   localServices,
@@ -483,7 +484,8 @@ export async function getDriversPaginate(
         advanced?.serviceCategory
       ) {
         if (advanced.from) {
-          condition = and(condition, lte(orders.submissionTime, advanced.from))
+          const fromString = advanced.from.toISOString()
+          condition = and(condition, lte(orders.submissionTime, SubmissionTimeOrder(fromString)))
         }
         if (advanced.to) {
           condition = and(condition, gte(orders.pickupTime, advanced.to))

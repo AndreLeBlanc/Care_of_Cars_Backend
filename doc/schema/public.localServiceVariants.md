@@ -11,11 +11,11 @@
 | currency | varchar(5) |  | false |  |  |  |
 | cost | real |  | false |  |  |  |
 | award | real |  | false |  |  |  |
-| day1 | time without time zone |  | true |  |  |  |
-| day2 | time without time zone |  | true |  |  |  |
-| day3 | time without time zone |  | true |  |  |  |
-| day4 | time without time zone |  | true |  |  |  |
-| day5 | time without time zone |  | true |  |  |  |
+| day1 | interval |  | true |  |  |  |
+| day2 | interval |  | true |  |  |  |
+| day3 | interval |  | true |  |  |  |
+| day4 | interval |  | true |  |  |  |
+| day5 | interval |  | true |  |  |  |
 | localServiceID | integer |  | false |  | [public.localServices](public.localServices.md) |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |
