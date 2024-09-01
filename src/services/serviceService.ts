@@ -8,7 +8,6 @@ import {
   ColorForService,
   GlobalQualID,
   LocalQualID,
-  LocalServiceID,
   ServiceCallInterval,
   ServiceCategoryID,
   ServiceCostDinero,
@@ -28,10 +27,6 @@ import {
   ServiceWarrantyCard,
   StoreID,
   colorForService,
-  localServiceGlobalQualifications,
-  localServiceLocalQualifications,
-  localServiceVariants,
-  localServices,
   serviceCategories,
   serviceLocalQualifications,
   serviceQualifications,
@@ -44,7 +39,6 @@ import Dinero, { Currency } from 'dinero.js'
 import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 import { Either, Right, errorHandling, isRight, left, match, right } from '../utils/helper.js'
-import { LocalOrGlobal } from './productService.js'
 
 type ServiceVariantBase = {
   name: ServiceName
@@ -62,22 +56,16 @@ export type ServiceVariant = ServiceVariantBase & {
   serviceVariantID?: ServiceID
 }
 
-export type LocalServiceVariant = ServiceVariantBase & {
-  localServiceID?: LocalServiceID
-  serviceVariantID?: LocalServiceID
-}
-
 export type ServicesPaginated = {
   totalServices: number
-  totalLocalServices: number
   totalPage: number
   perPage: Page
-  localServices: (Omit<LocalService, 'colorForService'> & { colorForService: ColorForService })[]
   services: (Omit<Service, 'colorForService'> & { colorForService: ColorForService })[]
 }
 
 export type ServiceBase = {
   name: ServiceName
+  storeID?: StoreID
   cost: ServiceCostDinero
   award: Award
   serviceCategoryID: ServiceCategoryID
@@ -99,23 +87,8 @@ export type ServiceBase = {
 export type ServiceCreate = ServiceBase & {
   serviceVariants: ServiceVariant[]
 }
-export type LocalServiceCreate = ServiceBase & {
-  storeID: StoreID
-  localServiceVariants: LocalServiceVariant[]
-}
 
 export type Service = ServiceCreate & { serviceID: ServiceID; serviceVariants: ServiceVariant[] }
-export type LocalService = LocalServiceCreate & { localServiceID: LocalServiceID }
-
-export type LocalServiceLocalQual = {
-  localServiceID: LocalServiceID
-  localQualID: LocalQualID
-}
-
-export type LocalServiceGlobalQual = {
-  localServiceID: LocalServiceID
-  globalQualID: GlobalQualID
-}
 
 export type ServiceLocalQual = {
   serviceID: ServiceID
@@ -125,11 +98,6 @@ export type ServiceLocalQual = {
 export type ServiceGlobalQual = {
   serviceID: ServiceID
   globalQualID: GlobalQualID
-}
-
-export type LocalServiceQuals = {
-  localQuals: LocalQualID[]
-  globalQuals: GlobalQualID[]
 }
 
 export type GlobalServiceQuals = {
@@ -155,29 +123,6 @@ export type ServiceOrder = {
   serviceVariants: ServVariantOrderList[]
 }
 
-type LocalServVariantOrderList = {
-  name: ServiceName
-  cost: ServiceCostNumber
-  day1?: ServiceDay1
-  day2?: ServiceDay2
-  day3?: ServiceDay3
-  day4?: ServiceDay4
-  day5?: ServiceDay5
-  serviceVariantID: LocalServiceID
-}
-
-export type LocalServiceOrder = {
-  localServiceID: LocalServiceID
-  name: ServiceName
-  cost: ServiceCostNumber
-  serviceVariants: LocalServVariantOrderList[]
-}
-
-export type OrderServInfo = {
-  services: ServiceOrder[]
-  localServices: LocalServiceOrder[]
-}
-
 export function convertToColorEnum(str: string): ColorForService {
   if (colorForService.includes(str as ColorForService)) {
     return str as ColorForService
@@ -190,7 +135,7 @@ type ServiceUnBranded = {
   cost: number
   award: Award
   currency: string
-  storeID?: StoreID
+  storeID: StoreID | null
   serviceCategoryID: ServiceCategoryID
   includeInAutomaticSms: ServiceIncludeInAutomaticSms
   hidden: ServiceHidden
@@ -205,65 +150,46 @@ type ServiceUnBranded = {
   day3: ServiceDay3 | null
   day4: ServiceDay4 | null
   day5: ServiceDay5 | null
-} & ({ serviceID: ServiceID } | { localServiceID: LocalServiceID; storeID: StoreID })
+  serviceID: ServiceID
+}
 
-function brander(rawService: ServiceUnBranded): Either<string, Service | LocalService> {
-  let id:
-    | { serviceID: ServiceID; serviceVariants: ServiceVariant[] }
-    | {
-        localServiceID: LocalServiceID
-        localServiceVariants: LocalServiceVariant[]
-        storeID: StoreID
-      }
-
-  if ('serviceID' in rawService) {
-    id = { serviceID: rawService.serviceID, serviceVariants: [] }
-  } else {
-    id = {
-      localServiceID: rawService.localServiceID,
-      localServiceVariants: [],
-      storeID: rawService.storeID,
-    }
-  }
-
+function brander(rawService: ServiceUnBranded): Either<string, Service> {
   return rawService
     ? right({
-        ...{
-          name: rawService.name,
-          serviceCategoryID: rawService.serviceCategoryID,
-          cost: ServiceCostDinero(
-            Dinero({
-              amount: rawService.cost,
-              currency: rawService.currency as Dinero.Currency,
-            }),
-          ),
-          award: rawService.award,
-          includeInAutomaticSms: rawService.includeInAutomaticSms,
-          hidden: rawService.hidden,
-          callInterval: rawService.callInterval ?? undefined,
-          colorForService: rawService.colorForService
-            ? convertToColorEnum(rawService.colorForService)
-            : ('None' as ColorForService),
-          warrantyCard: rawService.warrantyCard ?? undefined,
-          itemNumber: rawService.itemNumber ?? undefined,
-          suppliersArticleNumber: rawService.suppliersArticleNumber ?? undefined,
-          externalArticleNumber: rawService.externalArticleNumber ?? undefined,
-          day1: rawService.day1 ?? undefined,
-          day2: rawService.day2 ?? undefined,
-          day3: rawService.day3 ?? undefined,
-          day4: rawService.day4 ?? undefined,
-          day5: rawService.day5 ?? undefined,
-        },
-        ...id,
+        serviceID: rawService.serviceID,
+        serviceCategoryID: rawService.serviceCategoryID,
+        storeID: rawService.storeID ?? undefined,
+        name: rawService.name,
+        cost: ServiceCostDinero(
+          Dinero({
+            amount: rawService.cost,
+            currency: rawService.currency as Dinero.Currency,
+          }),
+        ),
+        award: rawService.award,
+        includeInAutomaticSms: rawService.includeInAutomaticSms,
+        hidden: rawService.hidden,
+        serviceVariants: [],
+        callInterval: rawService.callInterval ?? undefined,
+        colorForService: rawService.colorForService
+          ? convertToColorEnum(rawService.colorForService)
+          : ('None' as ColorForService),
+        warrantyCard: rawService.warrantyCard ?? undefined,
+        itemNumber: rawService.itemNumber ?? undefined,
+        suppliersArticleNumber: rawService.suppliersArticleNumber ?? undefined,
+        externalArticleNumber: rawService.externalArticleNumber ?? undefined,
+        day1: rawService.day1 ?? undefined,
+        day2: rawService.day2 ?? undefined,
+        day3: rawService.day3 ?? undefined,
+        day4: rawService.day4 ?? undefined,
+        day5: rawService.day5 ?? undefined,
       })
     : left("couldn't add service")
 }
 
 export async function createService(
-  service:
-    | (ServiceCreate & { serviceID?: ServiceID })
-    | (LocalServiceCreate & { localServiceID?: LocalServiceID }),
-): Promise<Either<string, Service | LocalService>> {
+  service: ServiceCreate & { serviceID?: ServiceID },
+): Promise<Either<string, Service>> {
   const color: ColorForService = service.colorForService || 'None'
 
   const currency = service.cost.getCurrency()
@@ -291,147 +217,74 @@ export async function createService(
 
   try {
     return await db.transaction(async (tx) => {
-      let insertedService: ServiceUnBranded
-      if ('storeID' in service) {
-        ;[insertedService] = service.localServiceID
-          ? await tx
-              .update(localServices)
-              .set({ ...addToService, storeID: service.storeID })
-              .where(eq(localServices.localServiceID, service.localServiceID))
+      const [insertedService] = service.serviceID
+        ? await tx
+            .update(services)
+            .set({ ...addToService, storeID: service.storeID })
+            .where(eq(services.serviceID, service.serviceID))
+            .returning()
+        : await tx
+            .insert(services)
+            .values({ ...addToService, storeID: service.storeID })
+            .returning()
+
+      const insertedServiceBranded: Either<string, Service> = brander(insertedService)
+
+      const serviceVariantArr = service.serviceVariants.map((serviceVariant) => ({
+        serviceVariantID: serviceVariant.serviceVariantID,
+        serviceID: insertedService.serviceID,
+        name: serviceVariant.name,
+        cost: ServiceCostNumber(serviceVariant.cost.getAmount()),
+        currency: serviceVariant.cost.getCurrency(),
+        award: serviceVariant.award,
+        day1: serviceVariant.day1,
+        day2: serviceVariant.day2,
+        day3: serviceVariant.day3,
+        day4: serviceVariant.day4,
+        day5: serviceVariant.day5,
+        updatedAt: new Date(),
+      }))
+
+      const variants = await Promise.all(
+        serviceVariantArr.map(async (serviceVariant) => {
+          if (serviceVariant.serviceVariantID) {
+            return await tx
+              .update(serviceVariants)
+              .set(serviceVariant)
+              .where(eq(serviceVariants.serviceVariantID, serviceVariant.serviceVariantID))
               .returning()
-          : await tx
-              .insert(localServices)
-              .values({ ...addToService, storeID: service.storeID })
-              .returning()
-      } else {
-        ;[insertedService] = service.serviceID
-          ? await tx
-              .update(services)
-              .set(addToService)
-              .where(eq(services.serviceID, service.serviceID))
-              .returning()
-          : await tx
-              .insert(services)
-              .values({ ...addToService })
-              .returning()
+          } else {
+            return await tx.insert(serviceVariants).values(serviceVariant).returning()
+          }
+        }),
+      )
+
+      let variantsDinero: ServiceVariant[] = []
+      if (variants != null) {
+        variantsDinero = variants.flat().map((vari) => {
+          return {
+            serviceID: vari.serviceID,
+            name: vari.name,
+            cost: ServiceCostDinero(
+              Dinero({
+                amount: vari.cost,
+                currency: vari.currency as Dinero.Currency,
+              }),
+            ),
+            award: vari.award,
+            day1: vari.day1 ?? undefined,
+            day2: vari.day2 ?? undefined,
+            day3: vari.day3 ?? undefined,
+            day4: vari.day4 ?? undefined,
+            day5: vari.day5 ?? undefined,
+          }
+        })
       }
-      const insertedServiceBranded: Either<string, Service | LocalService> =
-        brander(insertedService)
-
-      if ('localServiceID' in insertedService && 'localServiceVariants' in service) {
-        const serviceVariantArr = service.localServiceVariants.map((serviceVariant) => ({
-          serviceVariantID: serviceVariant.serviceVariantID,
-          localServiceID: insertedService.localServiceID,
-          name: serviceVariant.name,
-          cost: ServiceCostNumber(serviceVariant.cost.getAmount()),
-          currency: serviceVariant.cost.getCurrency(),
-          award: serviceVariant.award,
-          day1: serviceVariant.day1,
-          day2: serviceVariant.day2,
-          day3: serviceVariant.day3,
-          day4: serviceVariant.day4,
-          day5: serviceVariant.day5,
-          updatedAt: new Date(),
-        }))
-
-        const variants = await Promise.all(
-          serviceVariantArr.map(async (serviceVariant) => {
-            if (serviceVariant.serviceVariantID) {
-              return await tx
-                .update(localServiceVariants)
-                .set(serviceVariant)
-                .where(eq(localServiceVariants.serviceVariantID, serviceVariant.serviceVariantID))
-                .returning()
-            } else {
-              return await tx.insert(localServiceVariants).values(serviceVariant).returning()
-            }
-          }),
-        )
-
-        let variantsDinero: LocalServiceVariant[] = []
-        if (variants != null) {
-          variantsDinero = variants.flat().map((vari) => {
-            return {
-              localServiceID: vari.localServiceID,
-              name: vari.name,
-              cost: ServiceCostDinero(
-                Dinero({
-                  amount: vari.cost,
-                  currency: vari.currency as Dinero.Currency,
-                }),
-              ),
-              award: vari.award,
-              day1: vari.day1 ?? undefined,
-              day2: vari.day2 ?? undefined,
-              day3: vari.day3 ?? undefined,
-              day4: vari.day4 ?? undefined,
-              day5: vari.day5 ?? undefined,
-            }
-          })
-        }
-        return match(
-          insertedServiceBranded,
-          (brandedService) => right({ ...brandedService, localServiceVariants: variantsDinero }),
-          (err) => left(errorHandling(err)),
-        )
-      } else if ('serviceID' in insertedService && 'serviceVariants' in service) {
-        const serviceVariantArr = service.serviceVariants.map((serviceVariant) => ({
-          serviceVariantID: serviceVariant.serviceVariantID,
-          serviceID: insertedService.serviceID,
-          name: serviceVariant.name,
-          cost: ServiceCostNumber(serviceVariant.cost.getAmount()),
-          currency: serviceVariant.cost.getCurrency(),
-          award: serviceVariant.award,
-          day1: serviceVariant.day1,
-          day2: serviceVariant.day2,
-          day3: serviceVariant.day3,
-          day4: serviceVariant.day4,
-          day5: serviceVariant.day5,
-          updatedAt: new Date(),
-        }))
-
-        const variants = await Promise.all(
-          serviceVariantArr.map(async (serviceVariant) => {
-            if (serviceVariant.serviceVariantID) {
-              return await tx
-                .update(serviceVariants)
-                .set(serviceVariant)
-                .where(eq(serviceVariants.serviceVariantID, serviceVariant.serviceVariantID))
-                .returning()
-            } else {
-              return await tx.insert(serviceVariants).values(serviceVariant).returning()
-            }
-          }),
-        )
-
-        let variantsDinero: ServiceVariant[] = []
-        if (variants != null) {
-          variantsDinero = variants.flat().map((vari) => {
-            return {
-              serviceID: vari.serviceID,
-              name: vari.name,
-              cost: ServiceCostDinero(
-                Dinero({
-                  amount: vari.cost,
-                  currency: vari.currency as Dinero.Currency,
-                }),
-              ),
-              award: vari.award,
-              day1: vari.day1 ?? undefined,
-              day2: vari.day2 ?? undefined,
-              day3: vari.day3 ?? undefined,
-              day4: vari.day4 ?? undefined,
-              day5: vari.day5 ?? undefined,
-            }
-          })
-        }
-        return match(
-          insertedServiceBranded,
-          (brandedService) => right({ ...brandedService, serviceVariants: variantsDinero }),
-          (err) => left(err),
-        )
-      }
-      return left("couldn't create service")
+      return match(
+        insertedServiceBranded,
+        (brandedService) => right({ ...brandedService, serviceVariants: variantsDinero }),
+        (err) => left(err),
+      )
     })
   } catch (e) {
     return left(errorHandling(e))
@@ -448,7 +301,7 @@ export async function getServicesPaginate(
   order: serviceOrderEnum,
   hidden: ServiceHidden = ServiceHidden(true),
 ): Promise<Either<string, ServicesPaginated>> {
-  const condition = and(
+  let condition = and(
     eq(services.hidden, hidden),
     or(
       ilike(services.name, '%' + search + '%'),
@@ -458,15 +311,8 @@ export async function getServicesPaginate(
     ),
   )
 
-  const localCondition = and(
-    and(eq(localServices.storeID, storeID), eq(localServices.hidden, hidden)),
-    or(
-      ilike(localServices.name, '%' + search + '%'),
-      ilike(localServices.itemNumber, '%' + search + '%'),
-      ilike(localServices.suppliersArticleNumber, '%' + search + '%'),
-      ilike(localServices.externalArticleNumber, '%' + search + '%'),
-    ),
-  )
+  condition = storeID ? and(condition, eq(services.storeID, storeID)) : condition
+
   let orderCondition
 
   if (order === serviceOrderEnum.desc) {
@@ -486,25 +332,6 @@ export async function getServicesPaginate(
   } else {
     orderCondition = desc(services.serviceID) // Default to descending order by service ID
   }
-  let orderConditionLocal
-
-  if (order === serviceOrderEnum.desc) {
-    orderConditionLocal =
-      orderBy === listServiceOrderByEnum.name
-        ? desc(services.name)
-        : orderBy === listServiceOrderByEnum.serviceCategoryID
-          ? desc(serviceCategories.serviceCategoryID)
-          : desc(localServices.localServiceID)
-  } else if (order === serviceOrderEnum.asc) {
-    orderConditionLocal =
-      orderBy === listServiceOrderByEnum.name
-        ? asc(localServices.name)
-        : orderBy === listServiceOrderByEnum.serviceCategoryID
-          ? asc(serviceCategories.serviceCategoryID)
-          : asc(localServices.localServiceID)
-  } else {
-    orderConditionLocal = desc(localServices.localServiceID) // Default to descending order by service ID
-  }
 
   try {
     const res = await db.transaction(async (tx) => {
@@ -516,7 +343,7 @@ export async function getServicesPaginate(
         .where(condition)
 
       const servicesList = await tx.query.services.findMany({
-        where: condition,
+        // where: condition,
         limit: limit || 10,
         offset: offset || 0,
         orderBy: orderCondition,
@@ -525,6 +352,7 @@ export async function getServicesPaginate(
           serviceVariants: true,
         },
       })
+
       const [totalServices] = await tx
         .select({
           count: sql`count(*)`.mapWith(Number).as('count'),
@@ -532,25 +360,8 @@ export async function getServicesPaginate(
         .from(services)
         .where(condition)
 
-      const [totalLocalServices] = await tx
-        .select({
-          count: sql`count(*)`.mapWith(Number).as('count'),
-        })
-        .from(services)
-        .where(condition)
-
-      const localServicesList = await tx.query.localServices.findMany({
-        where: localCondition,
-        limit: limit || 10,
-        offset: offset || 0,
-        orderBy: orderConditionLocal,
-        with: {
-          serviceCategories: true,
-        },
-      })
-
       const branded = servicesList.map(brander)
-      const brandedRight: Right<Service | LocalService>[] = branded.filter(isRight)
+      const brandedRight: Right<Service>[] = branded.filter(isRight)
       const serviceListReady: Service[] = brandedRight.reduce<Service[]>((acc, x) => {
         if ('serviceID' in x.right) {
           acc.push(x.right)
@@ -558,26 +369,12 @@ export async function getServicesPaginate(
         return acc
       }, [])
 
-      const brandedLocal = localServicesList.map(brander)
-      const brandedLocalRight: Right<Service | LocalService>[] = brandedLocal.filter(isRight)
-      const localServiceListReady: LocalService[] = brandedLocalRight.reduce<LocalService[]>(
-        (acc, x) => {
-          if ('localServiceID' in x.right) {
-            acc.push(x.right)
-          }
-          return acc
-        },
-        [],
-      )
-
       const totalPage: number = Math.ceil(totalItems.count / limit)
       return right({
         totalServices: totalServices.count,
-        totalLocalServices: totalLocalServices.count,
         totalPage,
         perPage: page,
         services: serviceListReady,
-        localServices: localServiceListReady,
       })
     })
     return res
@@ -588,20 +385,22 @@ export async function getServicesPaginate(
 
 export async function getServicesWithVariants(
   store: StoreID,
-): Promise<Either<string, OrderServInfo>> {
+): Promise<Either<string, ServiceOrder[]>> {
   try {
-    const res = await db.transaction(async (tx) => {
-      const servs = await tx
-        .select({
-          serviceID: services.serviceID,
-          name: services.name,
-          cost: services.cost,
-          day1: services.day1,
-          day2: services.day2,
-          day3: services.day3,
-          day4: services.day4,
-          day5: services.day5,
-          serviceVariants: sql<ServVariantOrderList[]>`COALESCE(json_agg(json_build_object(
+    const condition = store
+      ? and(eq(services.hidden, ServiceHidden(false)), eq(services.storeID, store))
+      : eq(services.hidden, ServiceHidden(false))
+    const servs = await db
+      .select({
+        serviceID: services.serviceID,
+        name: services.name,
+        cost: services.cost,
+        day1: services.day1,
+        day2: services.day2,
+        day3: services.day3,
+        day4: services.day4,
+        day5: services.day5,
+        serviceVariants: sql<ServVariantOrderList[]>`COALESCE(json_agg(json_build_object(
             'name', ${serviceVariants.name},
             'serviceVariantID', ${serviceVariants.serviceVariantID},
             'cost', ${serviceVariants.cost},            
@@ -614,164 +413,64 @@ export async function getServicesWithVariants(
         ) FILTER (WHERE ${serviceVariants.serviceID} IS NOT NULL),
         '[]'::json
       )`,
-        })
-        .from(services)
-        .where(eq(services.hidden, ServiceHidden(false)))
-        .leftJoin(serviceVariants, eq(serviceVariants.serviceID, services.serviceID))
-        .groupBy(services.serviceID, services.name)
-
-      const locals = await tx
-        .select({
-          localServiceID: localServices.localServiceID,
-          name: localServices.name,
-          cost: localServices.cost,
-          day1: localServices.day1,
-          day2: localServices.day2,
-          day3: localServices.day3,
-          day4: localServices.day4,
-          day5: localServices.day5,
-          serviceVariants: sql<LocalServVariantOrderList[]>`COALESCE(json_agg(json_build_object(
-              'name', ${localServiceVariants.name},
-              'serviceVariantID', ${localServiceVariants.serviceVariantID},
-              'cost', ${localServiceVariants.cost},
-              'day1', ${localServiceVariants.day1},
-              'day2', ${localServiceVariants.day2},
-              'day3', ${localServiceVariants.day3},
-              'day4', ${localServiceVariants.day4},
-              'day5', ${localServiceVariants.day5}
-            )
-        ) FILTER (WHERE ${localServiceVariants.localServiceID} IS NOT NULL),
-        '[]'::json
-      )`,
-        })
-        .from(localServices)
-        .where(
-          and(eq(localServices.hidden, ServiceHidden(false)), eq(localServices.storeID, store)),
-        )
-        .leftJoin(
-          localServiceVariants,
-          eq(localServices.localServiceID, localServiceVariants.localServiceID),
-        )
-        .groupBy(localServices.localServiceID, localServices.name)
-
-      return right({
-        services: servs,
-        localServices: locals,
       })
-    })
-    return res
+      .from(services)
+      .where(condition)
+      .leftJoin(serviceVariants, eq(serviceVariants.serviceID, services.serviceID))
+      .groupBy(services.serviceID, services.name)
+
+    return right(servs)
   } catch (e) {
     return left(errorHandling(e))
   }
 }
 
-export async function getServiceById(serviceID: {
-  type: LocalOrGlobal
-  id: ServiceID | LocalServiceID
-}): Promise<Either<string, Service | LocalService>> {
+export async function getServiceById(id: ServiceID): Promise<Either<string, Service>> {
   try {
-    if (serviceID.type === 'Global') {
-      const servicesDetail = await db
-        .select()
-        .from(services)
-        .where(eq(services.serviceID, serviceID.id as ServiceID))
-        .leftJoin(serviceVariants, eq(serviceVariants.serviceID, services.serviceID))
+    const servicesDetail = await db
+      .select()
+      .from(services)
+      .where(eq(services.serviceID, id))
+      .leftJoin(serviceVariants, eq(serviceVariants.serviceID, id))
 
-      const variants = servicesDetail.reduce<ServiceVariant[]>((acc, serviceVariant) => {
-        if (serviceVariant.serviceVariants != null) {
-          acc.push({
-            serviceVariantID: serviceVariant.serviceVariants.serviceVariantID,
-            serviceID: serviceVariant.services.serviceID,
-            name: serviceVariant.serviceVariants.name,
-            cost: ServiceCostDinero(
-              Dinero({
-                amount: serviceVariant.serviceVariants.cost,
-                currency: serviceVariant.serviceVariants.currency as Currency,
-              }),
-            ),
-            award: serviceVariant.serviceVariants.award,
-            day1: serviceVariant.serviceVariants.day1 ?? undefined,
-            day2: serviceVariant.serviceVariants.day2 ?? undefined,
-            day3: serviceVariant.serviceVariants.day3 ?? undefined,
-            day4: serviceVariant.serviceVariants.day4 ?? undefined,
-            day5: serviceVariant.serviceVariants.day5 ?? undefined,
-          })
-        }
-        return acc
-      }, [])
-
-      const branded = brander(servicesDetail[0].services)
-      return match(
-        branded,
-        (brandedService) => right({ ...brandedService, serviceVariants: variants }),
-        (err) => {
-          return left(err)
-        },
-      )
-    } else {
-      const servicesDetail = await db
-        .select()
-        .from(localServices)
-        .where(eq(localServices.localServiceID, serviceID.id as LocalServiceID))
-        .leftJoin(
-          localServiceVariants,
-          eq(localServiceVariants.localServiceID, serviceID.id as LocalServiceID),
-        )
-
-      const variants = servicesDetail.reduce<LocalServiceVariant[]>((acc, serviceVariant) => {
-        if (serviceVariant.localServiceVariants != null) {
-          acc.push({
-            serviceVariantID: serviceVariant.localServiceVariants.serviceVariantID,
-            localServiceID: serviceVariant.localServices.localServiceID,
-            name: serviceVariant.localServiceVariants.name,
-            cost: ServiceCostDinero(
-              Dinero({
-                amount: serviceVariant.localServiceVariants.cost,
-                currency: serviceVariant.localServiceVariants.currency as Currency,
-              }),
-            ),
-            award: serviceVariant.localServiceVariants.award,
-            day1: serviceVariant.localServiceVariants.day1 ?? undefined,
-            day2: serviceVariant.localServiceVariants.day2 ?? undefined,
-            day3: serviceVariant.localServiceVariants.day3 ?? undefined,
-            day4: serviceVariant.localServiceVariants.day4 ?? undefined,
-            day5: serviceVariant.localServiceVariants.day5 ?? undefined,
-          })
-        }
-        return acc
-      }, [])
-      const branded = brander(servicesDetail[0].localServices)
-      return match(
-        branded,
-        (brandedService) =>
-          right({ ...(brandedService as LocalService), serviceVariants: variants }),
-        (err) => {
-          return left(errorHandling(err))
-        },
-      )
-    }
+    const variants = servicesDetail.reduce<ServiceVariant[]>((acc, serviceVariant) => {
+      if (serviceVariant.serviceVariants != null) {
+        acc.push({
+          serviceVariantID: serviceVariant.serviceVariants.serviceVariantID,
+          serviceID: serviceVariant.services.serviceID,
+          name: serviceVariant.serviceVariants.name,
+          cost: ServiceCostDinero(
+            Dinero({
+              amount: serviceVariant.serviceVariants.cost,
+              currency: serviceVariant.serviceVariants.currency as Currency,
+            }),
+          ),
+          award: serviceVariant.serviceVariants.award,
+          day1: serviceVariant.serviceVariants.day1 ?? undefined,
+          day2: serviceVariant.serviceVariants.day2 ?? undefined,
+          day3: serviceVariant.serviceVariants.day3 ?? undefined,
+          day4: serviceVariant.serviceVariants.day4 ?? undefined,
+          day5: serviceVariant.serviceVariants.day5 ?? undefined,
+        })
+      }
+      return acc
+    }, [])
+    const branded = brander(servicesDetail[0].services)
+    return match(
+      branded,
+      (brandedService) => right({ ...brandedService, serviceVariants: variants }),
+      (err) => {
+        return left(errorHandling(err))
+      },
+    )
   } catch (e) {
     return left(errorHandling(e))
   }
 }
 
-export async function deletetServiceById(serviceID: {
-  type: LocalOrGlobal
-  id: ServiceID | LocalServiceID
-}): Promise<Either<string, Service | LocalService>> {
+export async function deletetServiceById(id: ServiceID): Promise<Either<string, Service>> {
   try {
-    let servicesDetail
-    if (serviceID.type === 'Global') {
-      servicesDetail = await db
-        .delete(services)
-        .where(eq(services.serviceID, serviceID.id as ServiceID))
-        .returning()
-    } else {
-      servicesDetail = await db
-        .delete(localServices)
-        .where(eq(localServices.localServiceID, serviceID.id as LocalServiceID))
-        .returning()
-    }
+    const servicesDetail = await db.delete(services).where(eq(services.serviceID, id)).returning()
     return servicesDetail ? brander(servicesDetail[0]) : left("Couldn't find service")
   } catch (e) {
     return left(errorHandling(e))
@@ -810,38 +509,6 @@ export async function setServiceLocalQual(
   }
 }
 
-export async function setLocalServiceQualifications(
-  serviceQual: LocalServiceGlobalQual,
-): Promise<Either<string, LocalServiceGlobalQual>> {
-  try {
-    const [newQualForService] = await db
-      .insert(localServiceGlobalQualifications)
-      .values(serviceQual)
-      .returning()
-    return newQualForService
-      ? right(newQualForService)
-      : left("couldn't assign local qualification to service")
-  } catch (e) {
-    return left(errorHandling(e))
-  }
-}
-
-export async function setLocalServiceLocalQual(
-  serviceQual: LocalServiceLocalQual,
-): Promise<Either<string, LocalServiceLocalQual>> {
-  try {
-    const [newQualForService] = await db
-      .insert(localServiceLocalQualifications)
-      .values(serviceQual)
-      .returning()
-    return newQualForService
-      ? right(newQualForService)
-      : left("couldn't assign local qualification to local service")
-  } catch (e) {
-    return left(errorHandling(e))
-  }
-}
-
 export async function getServiceQualifications(
   serviceID: ServiceID,
 ): Promise<Either<string, GlobalServiceQuals>> {
@@ -859,40 +526,6 @@ export async function getServiceQualifications(
         }
         if (qual.serviceQualifications != null) {
           acc.globalQuals.push(qual.serviceQualifications.globalQualID)
-        }
-        return acc
-      },
-      {
-        localQuals: [] as LocalQualID[],
-        globalQuals: [] as GlobalQualID[],
-      },
-    )
-    return qualsList ? right(qualsList) : left("Couldn't get qualifications ")
-  } catch (e) {
-    return left(errorHandling(e))
-  }
-}
-
-export async function getLocalServiceQualifications(
-  localServiceID: LocalServiceID,
-): Promise<Either<string, LocalServiceQuals>> {
-  try {
-    const newQualForService = await db
-      .select()
-      .from(localServiceGlobalQualifications)
-      .where(and(eq(localServiceGlobalQualifications.localServiceID, localServiceID)))
-      .fullJoin(
-        localServiceLocalQualifications,
-        eq(localServiceLocalQualifications.localServiceID, localServiceID),
-      )
-
-    const qualsList = newQualForService.reduce(
-      (acc, qual) => {
-        if (qual.localServiceLocalQualifications != null) {
-          acc.localQuals.push(qual.localServiceLocalQualifications.localQualID)
-        }
-        if (qual.localServiceGlobalQualifications != null) {
-          acc.globalQuals.push(qual.localServiceGlobalQualifications.globalQualID)
         }
         return acc
       },
@@ -928,43 +561,6 @@ export async function deleteServiceQualifications(
           .where(eq(serviceLocalQualifications.serviceID, serviceID))
           .returning({ localQuals: serviceLocalQualifications.localQualID })
       }
-      if (quals != null && localQuals != null) {
-        return right({
-          localQuals: localQuals.map((x) => x.localQuals),
-          globalQuals: quals.map((x) => x.globalQuals),
-        })
-      } else {
-        return left("couldn't find qualifications ")
-      }
-    })
-    return qualList
-  } catch (e) {
-    return left(errorHandling(e))
-  }
-}
-
-export async function deleteLocalServiceQualifications(
-  localServiceID: LocalServiceID,
-  localQualID?: LocalQualID,
-  globalQualID?: GlobalQualID,
-): Promise<Either<string, LocalServiceQuals>> {
-  try {
-    const qualList = await db.transaction(async (tx) => {
-      let quals: { globalQuals: GlobalQualID }[] = []
-      let localQuals: { localQuals: LocalQualID }[] = []
-      if (globalQualID != null) {
-        quals = await tx
-          .delete(localServiceGlobalQualifications)
-          .where(eq(localServiceGlobalQualifications.localServiceID, localServiceID))
-          .returning({ globalQuals: localServiceGlobalQualifications.globalQualID })
-      }
-      if (localQualID != null) {
-        localQuals = await tx
-          .delete(localServiceLocalQualifications)
-          .where(eq(localServiceLocalQualifications.localServiceID, localServiceID))
-          .returning({ localQuals: localServiceLocalQualifications.localQualID })
-      }
-
       if (quals != null && localQuals != null) {
         return right({
           localQuals: localQuals.map((x) => x.localQuals),

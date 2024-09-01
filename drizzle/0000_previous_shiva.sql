@@ -208,87 +208,7 @@ CREATE TABLE IF NOT EXISTS "localProducts" (
 	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "localServiceGlobalQualifications" (
-	"localServiceID" integer NOT NULL,
-	"globalQualID" integer NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "localServiceLocalQualifications" (
-	"localServiceID" integer NOT NULL,
-	"localQualID" integer NOT NULL,
-	CONSTRAINT "localServiceLocalQualifications_localQualID_localServiceID_pk" PRIMARY KEY("localQualID","localServiceID")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "localServiceVariants" (
-	"serviceVariantID" serial PRIMARY KEY NOT NULL,
-	"name" varchar(256) NOT NULL,
-	"currency" varchar(5) NOT NULL,
-	"cost" real NOT NULL,
-	"award" real NOT NULL,
-	"day1" interval,
-	"day2" interval,
-	"day3" interval,
-	"day4" interval,
-	"day5" interval,
-	"localServiceID" integer NOT NULL,
-	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "localServices" (
-	"localServiceID" serial PRIMARY KEY NOT NULL,
-	"serviceCategoryID" integer NOT NULL,
-	"name" varchar(256) NOT NULL,
-	"storeID" integer NOT NULL,
-	"currency" varchar(5) NOT NULL,
-	"cost" real NOT NULL,
-	"includeInAutomaticSms" boolean NOT NULL,
-	"hidden" boolean NOT NULL,
-	"callInterval" integer,
-	"colorForService" varchar NOT NULL,
-	"warrantyCard" boolean,
-	"itemNumber" varchar(256),
-	"award" real NOT NULL,
-	"suppliersArticleNumber" varchar(256),
-	"externalArticleNumber" varchar(256),
-	"day1" interval,
-	"day2" interval,
-	"day3" interval,
-	"day4" interval,
-	"day5" interval,
-	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "orderLocalServices" (
-	"orderID" integer NOT NULL,
-	"amount" integer NOT NULL,
-	"name" varchar(256) NOT NULL,
-	"localServiceID" integer NOT NULL,
-	"serviceVariantID" integer,
-	"day1" timestamp,
-	"day1Work" interval,
-	"day1Employee" integer,
-	"day2" timestamp,
-	"day2Work" interval,
-	"day2Employee" integer,
-	"day3" timestamp,
-	"day3Work" interval,
-	"day3Employee" integer,
-	"day4" timestamp,
-	"day4Work" interval,
-	"day4Employee" integer,
-	"day5" timestamp,
-	"day5Work" interval,
-	"day5Employee" integer,
-	"cost" real NOT NULL,
-	"currency" varchar NOT NULL,
-	"vatFree" boolean NOT NULL,
-	"orderNotes" varchar,
-	CONSTRAINT "orderLocalServices_orderID_localServiceID_pk" PRIMARY KEY("orderID","localServiceID")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "orderServices" (
+CREATE TABLE IF NOT EXISTS "orderListing" (
 	"orderID" integer NOT NULL,
 	"serviceID" integer NOT NULL,
 	"name" varchar(256) NOT NULL,
@@ -313,7 +233,7 @@ CREATE TABLE IF NOT EXISTS "orderServices" (
 	"currency" varchar NOT NULL,
 	"vatFree" boolean NOT NULL,
 	"orderNotes" varchar,
-	CONSTRAINT "orderServices_orderID_serviceID_pk" PRIMARY KEY("orderID","serviceID")
+	CONSTRAINT "orderListing_orderID_serviceID_pk" PRIMARY KEY("orderID","serviceID")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "orders" (
@@ -329,8 +249,8 @@ CREATE TABLE IF NOT EXISTS "orders" (
 	"orderStatus" "orderStatus" NOT NULL,
 	"currency" varchar NOT NULL,
 	"discount" real NOT NULL,
-	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL
+	"createdAt" timestamp NOT NULL,
+	"updatedAt" timestamp NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "permissions" (
@@ -465,8 +385,9 @@ CREATE TABLE IF NOT EXISTS "serviceVariants" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "services" (
 	"serviceID" serial PRIMARY KEY NOT NULL,
-	"name" varchar(256) NOT NULL,
 	"serviceCategoryID" integer NOT NULL,
+	"name" varchar(256) NOT NULL,
+	"storeID" integer,
 	"currency" varchar(5) NOT NULL,
 	"cost" real NOT NULL,
 	"includeInAutomaticSms" boolean NOT NULL,
@@ -484,9 +405,7 @@ CREATE TABLE IF NOT EXISTS "services" (
 	"day4" interval,
 	"day5" interval,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "services_name_unique" UNIQUE("name"),
-	CONSTRAINT "services_itemNumber_unique" UNIQUE("itemNumber")
+	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "storeopeninghours" (
@@ -711,139 +630,49 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "localServiceGlobalQualifications" ADD CONSTRAINT "localServiceGlobalQualifications_localServiceID_localServices_localServiceID_fk" FOREIGN KEY ("localServiceID") REFERENCES "public"."localServices"("localServiceID") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "orderListing" ADD CONSTRAINT "orderListing_orderID_orders_orderID_fk" FOREIGN KEY ("orderID") REFERENCES "public"."orders"("orderID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "localServiceGlobalQualifications" ADD CONSTRAINT "localServiceGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk" FOREIGN KEY ("globalQualID") REFERENCES "public"."qualificationsGlobal"("globalQualID") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "orderListing" ADD CONSTRAINT "orderListing_serviceID_services_serviceID_fk" FOREIGN KEY ("serviceID") REFERENCES "public"."services"("serviceID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "localServiceLocalQualifications" ADD CONSTRAINT "localServiceLocalQualifications_localServiceID_localServices_localServiceID_fk" FOREIGN KEY ("localServiceID") REFERENCES "public"."localServices"("localServiceID") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "orderListing" ADD CONSTRAINT "orderListing_serviceVariantID_serviceVariants_serviceVariantID_fk" FOREIGN KEY ("serviceVariantID") REFERENCES "public"."serviceVariants"("serviceVariantID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "localServiceLocalQualifications" ADD CONSTRAINT "localServiceLocalQualifications_localQualID_qualificationsLocal_localQualID_fk" FOREIGN KEY ("localQualID") REFERENCES "public"."qualificationsLocal"("localQualID") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "orderListing" ADD CONSTRAINT "orderListing_day1Employee_employees_employeeID_fk" FOREIGN KEY ("day1Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "localServiceVariants" ADD CONSTRAINT "localServiceVariants_localServiceID_localServices_localServiceID_fk" FOREIGN KEY ("localServiceID") REFERENCES "public"."localServices"("localServiceID") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "orderListing" ADD CONSTRAINT "orderListing_day2Employee_employees_employeeID_fk" FOREIGN KEY ("day2Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "localServices" ADD CONSTRAINT "localServices_serviceCategoryID_serviceCategories_serviceCategoryID_fk" FOREIGN KEY ("serviceCategoryID") REFERENCES "public"."serviceCategories"("serviceCategoryID") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "orderListing" ADD CONSTRAINT "orderListing_day3Employee_employees_employeeID_fk" FOREIGN KEY ("day3Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "localServices" ADD CONSTRAINT "localServices_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "public"."stores"("storeID") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "orderListing" ADD CONSTRAINT "orderListing_day4Employee_employees_employeeID_fk" FOREIGN KEY ("day4Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "orderLocalServices" ADD CONSTRAINT "orderLocalServices_orderID_orders_orderID_fk" FOREIGN KEY ("orderID") REFERENCES "public"."orders"("orderID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderLocalServices" ADD CONSTRAINT "orderLocalServices_localServiceID_localServices_localServiceID_fk" FOREIGN KEY ("localServiceID") REFERENCES "public"."localServices"("localServiceID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderLocalServices" ADD CONSTRAINT "orderLocalServices_serviceVariantID_localServiceVariants_serviceVariantID_fk" FOREIGN KEY ("serviceVariantID") REFERENCES "public"."localServiceVariants"("serviceVariantID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderLocalServices" ADD CONSTRAINT "orderLocalServices_day1Employee_employees_employeeID_fk" FOREIGN KEY ("day1Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderLocalServices" ADD CONSTRAINT "orderLocalServices_day2Employee_employees_employeeID_fk" FOREIGN KEY ("day2Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderLocalServices" ADD CONSTRAINT "orderLocalServices_day3Employee_employees_employeeID_fk" FOREIGN KEY ("day3Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderLocalServices" ADD CONSTRAINT "orderLocalServices_day4Employee_employees_employeeID_fk" FOREIGN KEY ("day4Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderLocalServices" ADD CONSTRAINT "orderLocalServices_day5Employee_employees_employeeID_fk" FOREIGN KEY ("day5Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderServices" ADD CONSTRAINT "orderServices_orderID_orders_orderID_fk" FOREIGN KEY ("orderID") REFERENCES "public"."orders"("orderID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderServices" ADD CONSTRAINT "orderServices_serviceID_services_serviceID_fk" FOREIGN KEY ("serviceID") REFERENCES "public"."services"("serviceID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderServices" ADD CONSTRAINT "orderServices_serviceVariantID_serviceVariants_serviceVariantID_fk" FOREIGN KEY ("serviceVariantID") REFERENCES "public"."serviceVariants"("serviceVariantID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderServices" ADD CONSTRAINT "orderServices_day1Employee_employees_employeeID_fk" FOREIGN KEY ("day1Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderServices" ADD CONSTRAINT "orderServices_day2Employee_employees_employeeID_fk" FOREIGN KEY ("day2Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderServices" ADD CONSTRAINT "orderServices_day3Employee_employees_employeeID_fk" FOREIGN KEY ("day3Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderServices" ADD CONSTRAINT "orderServices_day4Employee_employees_employeeID_fk" FOREIGN KEY ("day4Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "orderServices" ADD CONSTRAINT "orderServices_day5Employee_employees_employeeID_fk" FOREIGN KEY ("day5Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
+ ALTER TABLE "orderListing" ADD CONSTRAINT "orderListing_day5Employee_employees_employeeID_fk" FOREIGN KEY ("day5Employee") REFERENCES "public"."employees"("employeeID") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -958,6 +787,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "services" ADD CONSTRAINT "services_serviceCategoryID_serviceCategories_serviceCategoryID_fk" FOREIGN KEY ("serviceCategoryID") REFERENCES "public"."serviceCategories"("serviceCategoryID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "services" ADD CONSTRAINT "services_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "public"."stores"("storeID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

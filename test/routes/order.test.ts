@@ -39,7 +39,6 @@ describe('PUT, GET and Delete orders', async () => {
       payload: { roleName: 'name', description: ' desc' },
     })
     const parsedresponseRoles = JSON.parse(responseRole.body)
-
     const responseStore = await app.inject({
       method: 'POST',
       url: '/stores',
@@ -235,8 +234,8 @@ describe('PUT, GET and Delete orders', async () => {
         name: 'generated automated testing',
         serviceCategoryID: parsedcatResp.serviceCategoryID,
         includeInAutomaticSms: true,
-        localServiceVariants: [],
         serviceVariants: [],
+        localServiceVariants: [],
         hidden: false,
         colorForService: 'Red',
         warrantyCard: true,
@@ -248,12 +247,6 @@ describe('PUT, GET and Delete orders', async () => {
       },
     })
     const parsedcreateLocalServiceResp = JSON.parse(createLocalServiceResp.body)
-
-    console.log('parsedcreateLocalServiceResp')
-    console.log('parsedcreateLocalServiceResp')
-    console.log(parsedcreateLocalServiceResp)
-    console.log('parsedcreateLocalServiceResp')
-    console.log('parsedcreateLocalServiceResp')
 
     deepStrictEqual(parsedcreateLocalServiceResp.day1, '10:10:10')
     deepStrictEqual(parsedcreateLocalServiceResp.hidden, false)
@@ -383,7 +376,6 @@ describe('PUT, GET and Delete orders', async () => {
             name: 'generated automated testing',
             serviceCategoryID: parsedcatResp.serviceCategoryID,
             serviceVariants: [],
-            localServiceVariants: [],
             amount: 2,
             day1: '2024-08-25T08:34:58+0000',
             day1Work: '10:10:10',
@@ -453,7 +445,6 @@ describe('PUT, GET and Delete orders', async () => {
       discount: 150,
       message: 'Service created',
       services: [],
-      localServices: [],
       orderNotes: 'Added a service',
       bookedBy: responseUserEmpParsed.employee.employeeID,
     }
@@ -512,7 +503,6 @@ describe('PUT, GET and Delete orders', async () => {
             name: 'generated automated testing',
             serviceCategoryID: parsedcatResp.serviceCategoryID,
             serviceVariants: [],
-            localServiceVariants: [],
             amount: 2,
             day1: '2024-08-25T08:34:58+0000',
             day1Work: '10:10:10',
@@ -527,7 +517,6 @@ describe('PUT, GET and Delete orders', async () => {
             name: 'generated automated testing SECOND',
             serviceCategoryID: parsedcatResp.serviceCategoryID,
             serviceVariants: [],
-            localServiceVariants: [],
             amount: 2,
             day1: '2024-08-25T08:34:58+0000',
             day1Work: '01:09:10',
@@ -570,7 +559,7 @@ describe('PUT, GET and Delete orders', async () => {
           day1Employee: responseUserEmpParsed.employee.employeeID,
         },
         {
-          serviceID: 3,
+          serviceID: 4,
           name: 'generated automated testing SECOND',
           amount: 2,
           cost: 10,
@@ -583,7 +572,7 @@ describe('PUT, GET and Delete orders', async () => {
           day1Employee: responseUserEmpParsed.employee.employeeID,
         },
       ],
-      localServices: [],
+
       orderNotes: 'Added a service',
       bookedBy: responseUserEmpParsed.employee.employeeID,
     }
@@ -671,7 +660,7 @@ describe('PUT, GET and Delete orders', async () => {
             amount: 1,
             vatFree: false,
             day1: '2024-08-25T08:34:58.000Z',
-            localServiceID: parsedcreateLocalServiceResp.localServiceID,
+            serviceID: parsedcreateLocalServiceResp.serviceID,
             orderNotes: 'first localService',
             day1Work: '01:09:10',
             day1Employee: responseUserEmpParsed.employee.employeeID,
@@ -688,12 +677,12 @@ describe('PUT, GET and Delete orders', async () => {
     deepStrictEqual(parsedputOrderLocalResp.discount, doubleServiceOrder.discount)
     deepStrictEqual(parsedputOrderLocalResp.discount, doubleServiceOrder.discount)
     deepStrictEqual(parsedputOrderLocalResp.driverCarID, doubleServiceOrder.driverCarID)
-    deepStrictEqual(parsedputOrderLocalResp.localServices[0].cost, 1234)
-    deepStrictEqual(parsedputOrderLocalResp.localServices[0].vatFree, false)
-    deepStrictEqual(parsedputOrderLocalResp.localServices[0].day1Work, '01:09:10')
-    deepStrictEqual(parsedputOrderLocalResp.localServices[0].orderNotes, 'first localService')
+    deepStrictEqual(parsedputOrderLocalResp.services[0].cost, 1234)
+    deepStrictEqual(parsedputOrderLocalResp.services[0].vatFree, false)
+    deepStrictEqual(parsedputOrderLocalResp.services[0].day1Work, '01:09:10')
+    deepStrictEqual(parsedputOrderLocalResp.services[0].orderNotes, 'first localService')
     deepStrictEqual(
-      parsedputOrderLocalResp.localServices[0].day1Employee,
+      parsedputOrderLocalResp.services[0].day1Employee,
       responseUserEmpParsed.employee.employeeID,
     )
 
@@ -711,12 +700,12 @@ describe('PUT, GET and Delete orders', async () => {
     deepStrictEqual(parsedgetputOrderLocalResp.discount, doubleServiceOrder.discount)
     deepStrictEqual(parsedgetputOrderLocalResp.discount, doubleServiceOrder.discount)
     deepStrictEqual(parsedgetputOrderLocalResp.driverCarID, doubleServiceOrder.driverCarID)
-    deepStrictEqual(parsedgetputOrderLocalResp.localServices[0].cost, 1234)
-    deepStrictEqual(parsedgetputOrderLocalResp.localServices[0].vatFree, false)
-    deepStrictEqual(parsedgetputOrderLocalResp.localServices[0].day1Work, '01:09:10')
-    deepStrictEqual(parsedgetputOrderLocalResp.localServices[0].orderNotes, 'first localService')
+    deepStrictEqual(parsedgetputOrderLocalResp.services[1].cost, 1234)
+    deepStrictEqual(parsedgetputOrderLocalResp.services[1].vatFree, false)
+    deepStrictEqual(parsedgetputOrderLocalResp.services[1].day1Work, '01:09:10')
+    deepStrictEqual(parsedgetputOrderLocalResp.services[1].orderNotes, 'first localService')
     deepStrictEqual(
-      parsedgetputOrderLocalResp.localServices[0].day1Employee,
+      parsedgetputOrderLocalResp.services.slice(-1)[0].day1Employee,
       responseUserEmpParsed.employee.employeeID,
     )
 
@@ -730,13 +719,13 @@ describe('PUT, GET and Delete orders', async () => {
         storeID: parsedresponseStore.store.storeID,
       },
     })
+
     const parsedlistOrdersResp = JSON.parse(listOrdersResp.body)
 
     deepStrictEqual(parsedlistOrdersResp.totalOrders, 1)
     deepStrictEqual(parsedlistOrdersResp.orders[0].driverCarID, doubleServiceOrder.driverCarID)
     deepStrictEqual(parsedlistOrdersResp.orders[0].orderStatus, 'påbörjad')
     deepStrictEqual(parsedlistOrdersResp.orders[0].firstName, 'Mahan')
-
     const nextOrderResp = await app.inject({
       method: 'PUT',
       url: '/orders',
@@ -782,29 +771,16 @@ describe('PUT, GET and Delete orders', async () => {
             day1Work: '10:10:10',
             day1Employee: responseUserEmpParsed.employee.employeeID,
           },
-          {
-            serviceID: 3,
-            name: 'generated automated testing SECOND',
-            amount: 2,
-            cost: 10,
-            currency: 'SEK',
-            vatFree: true,
-            orderNotes: 'added service',
-            total: 20,
-            day1: '2024-08-25T08:34:58.000Z',
-            day1Work: '01:09:10',
-            day1Employee: responseUserEmpParsed.employee.employeeID,
-          },
         ],
         localServices: [
           {
+            serviceID: parsedcreateLocalServiceResp.serviceID,
             cost: 200,
             currency: 'SEK',
             name: 'generated automated testing',
             amount: 1,
             vatFree: false,
             day1: '2024-08-25T08:34:58.000Z',
-            localServiceID: parsedcreateLocalServiceResp.localServiceID,
             orderNotes: 'second localService',
             day1Work: '01:09:10',
             day1Employee: responseUserEmpParsed.employee.employeeID,
@@ -816,7 +792,7 @@ describe('PUT, GET and Delete orders', async () => {
     })
     const parsednextOrderResp = JSON.parse(nextOrderResp.body)
     deepStrictEqual(parsednextOrderResp.services[0].name, 'generated automated testing')
-    deepStrictEqual(parsednextOrderResp.localServices.length, 1)
+    deepStrictEqual(parsednextOrderResp.services.length, 3)
 
     const listOrdersResp1 = await app.inject({
       method: 'GET',
@@ -829,16 +805,11 @@ describe('PUT, GET and Delete orders', async () => {
       },
     })
     const parsedlistOrdersResp1 = JSON.parse(listOrdersResp1.body)
-    console.log('parsedlistOrdersResp1')
-    console.log(parsedlistOrdersResp1)
-    console.log(parsedlistOrdersResp1.orders[0].total)
-    console.log(parsedlistOrdersResp1.orders[1].total)
-    console.log('parsedlistOrdersResp1')
     deepStrictEqual(parsedlistOrdersResp1.totalOrders, 2)
     deepStrictEqual(parsedlistOrdersResp1.orders[0].driverCarID, doubleServiceOrder.driverCarID)
     deepStrictEqual(parsedlistOrdersResp1.orders[0].orderStatus, 'påbörjad')
     deepStrictEqual(parsedlistOrdersResp1.orders[0].firstName, 'Mahan')
-    deepStrictEqual(parsedlistOrdersResp1.orders[0].total, [3128])
-    deepStrictEqual(parsedlistOrdersResp1.orders[1].total, [3128])
+    deepStrictEqual(parsedlistOrdersResp1.orders[0].total, [2674, 20, 1234])
+    deepStrictEqual(parsedlistOrdersResp1.orders[1].total, [2674, 2674, 200])
   })
 })

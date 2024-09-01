@@ -3,13 +3,7 @@ import { CreateRentCarBookingSchema } from '../rentCar/rentCarSchema.js'
 import { driverCarID } from '../driverCars/driverCarsSchema.js'
 import { storeID } from '../stores/storesSchema.js'
 
-import {
-  LocalServiceIDSchema,
-  LocalServicevariantIDSchema,
-  NameSchema,
-  ServiceIDSchema,
-  ServiceVariantIDSchema,
-} from '../services/serviceSchema.js'
+import { NameSchema, ServiceIDSchema, ServiceVariantIDSchema } from '../services/serviceSchema.js'
 
 import { DriverID, EmployeeID, FirstName, LastName, OrderID } from '../../utils/helper.js'
 
@@ -109,8 +103,8 @@ export const CreateOrderServicesSchema = Type.Object({
 export type CreateOrderServicesSchemaType = Static<typeof CreateOrderServicesSchema>
 
 export const CreateOrderLocalServicesSchema = Type.Object({
-  localServiceID: LocalServiceIDSchema,
-  serviceVariantID: Type.Optional(LocalServicevariantIDSchema),
+  serviceID: ServiceIDSchema,
+  serviceVariantID: Type.Optional(ServiceVariantIDSchema),
   name: NameSchema,
   amount: AmountSchema,
   cost: ServiceCostNumberSchema,
@@ -143,7 +137,7 @@ const DeleteOrderServiceSchema = Type.Object({
 
 const DeleteOrderLocalServiceSchema = Type.Object({
   orderID: OrderID,
-  localServiceID: LocalServiceIDSchema,
+  localServiceID: ServiceIDSchema,
 })
 
 export const CreateOrderBodySchema = Type.Composite([
@@ -166,12 +160,6 @@ export const CreateOrderBodyReplySchema = Type.Composite([
     rentCarBooking: Type.Optional(CreateRentCarBookingSchema),
     services: Type.Array(
       Type.Composite([CreateOrderServicesSchema, Type.Object({ total: ServiceCostNumberSchema })]),
-    ),
-    localServices: Type.Array(
-      Type.Composite([
-        CreateOrderLocalServicesSchema,
-        Type.Object({ total: ServiceCostNumberSchema }),
-      ]),
     ),
   }),
 ])

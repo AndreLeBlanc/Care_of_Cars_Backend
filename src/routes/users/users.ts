@@ -322,7 +322,17 @@ export async function users(fastify: FastifyInstance) {
         async (user: VerifyUser) => {
           const passwordRes = await bcrypt.compare(password, user.userPassword)
           if (passwordRes) {
-            const token = fastify.jwt.sign({ user })
+            const token = fastify.jwt.sign({
+              userID: user.userID,
+              userFirstName: user.userFirstName,
+              userLastName: user.userLastName,
+              userEmail: user.userEmail,
+              isSuperAdmin: user.isSuperAdmin,
+              role: {
+                roleID: user.role.roleID,
+                roleName: user.role.roleName,
+              },
+            })
             const rolePermissions = await getRoleWithPermissions(RoleID(user.role.roleID))
             match(
               rolePermissions,
@@ -373,7 +383,9 @@ export async function users(fastify: FastifyInstance) {
         async (user: LoginEmployee) => {
           const passwordRes = await bcrypt.compare(password, user.password)
           if (passwordRes) {
-            const token = fastify.jwt.sign({ user })
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { password, ...rest } = user
+            const token = fastify.jwt.sign({ rest })
             const rolePermissions = await getRoleWithPermissions(user.user.roleID)
             match(
               rolePermissions,

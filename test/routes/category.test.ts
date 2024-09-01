@@ -64,6 +64,7 @@ describe('category tests', async () => {
   before(async () => {
     await initDrizzle()
     app = await buildApp({ logger: false })
+    await new Promise((f) => setTimeout(f, 1500))
     const response = await app.inject({
       method: 'POST',
       url: '/users/login',
@@ -85,7 +86,6 @@ describe('category tests', async () => {
 
   it('service Category create, delete and get', async () => {
     for (const [i, name] of str.entries()) {
-      console.log('name and i: ', name, ' ', i)
       const response = await app.inject({
         method: 'POST',
         url: '/category/service',
@@ -156,7 +156,6 @@ describe('category tests', async () => {
 
   it('service Category create, delete and get', async () => {
     for (const [i, name] of str.entries()) {
-      console.log('name and i: ', name, ' ', i)
       const response = await app.inject({
         method: 'POST',
         url: '/category/service',
