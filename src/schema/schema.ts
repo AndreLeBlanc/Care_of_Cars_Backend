@@ -244,8 +244,6 @@ export type ProductCost = Brand<number, 'productCost'>
 export const ProductCost = make<ProductCost>()
 export type ProductID = Brand<number, 'productID'>
 export const ProductID = make<ProductID>()
-export type LocalProductID = Brand<number, 'localProductID'>
-export const LocalProductID = make<LocalProductID>()
 export type ProductCostDinero = Brand<Dinero, 'productCostDinero'>
 export const ProductCostDinero = make<ProductCostDinero>()
 export type ProductCostNumber = Brand<number, 'productCostNumber'>
@@ -1139,6 +1137,9 @@ export const productCategories = pgTable('productCategories', {
 
 export const products = pgTable('products', {
   productID: serial('productID').$type<ProductID>().primaryKey(),
+  storeID: integer('storeID')
+    .$type<StoreID>()
+    .references(() => stores.storeID, { onDelete: 'cascade' }),
   productItemNumber: varchar('productItemNumber').$type<ProductItemNumber>().notNull(),
   currency: varchar('currency', { length: 5 }).notNull(),
   cost: real('cost').$type<ProductCostNumber>().notNull(),
@@ -1168,45 +1169,6 @@ export const productCategoryToProductRelations = relations(productCategories, ({
 export const productToCategoryRelations = relations(products, ({ one }) => ({
   productCategories: one(productCategories, {
     fields: [products.productCategoryID],
-    references: [productCategories.productCategoryID],
-  }),
-}))
-
-export const localProducts = pgTable('localProducts', {
-  storeID: integer('storeID')
-    .$type<StoreID>()
-    .references(() => stores.storeID, { onDelete: 'cascade' })
-    .notNull(),
-  localProductID: serial('localProductID').$type<LocalProductID>().primaryKey(),
-  productItemNumber: varchar('productItemNumber').$type<ProductItemNumber>().notNull(),
-  currency: varchar('currency', { length: 5 }).notNull(),
-  cost: real('cost').$type<ProductCostNumber>().notNull(),
-  productCategoryID: integer('productCategoryID')
-    .$type<ProductCategoryID>()
-    .references(() => productCategories.productCategoryID)
-    .notNull(),
-  productDescription: varchar('productDescription', { length: 512 }).$type<ProductDescription>(),
-  productSupplierArticleNumber: varchar(
-    'productSupplierArticleNumber',
-  ).$type<ProductSupplierArticleNumber>(),
-  productExternalArticleNumber: varchar(
-    'productExternalArticleNumber',
-  ).$type<ProductExternalArticleNumber>(),
-  productUpdateRelatedData: boolean('productUpdateRelatedData')
-    .$type<ProductUpdateRelatedData>()
-    .default(ProductUpdateRelatedData(false)),
-  award: real('award').$type<Award>().notNull(),
-  productInventoryBalance: integer('productInventoryBalance').$type<ProductInventoryBalance>(),
-  ...dbDates,
-})
-
-export const LocalProductCategoryToProductRelations = relations(productCategories, ({ many }) => ({
-  productCategories: many(localProducts),
-}))
-
-export const LocalroductToCategoryRelations = relations(localProducts, ({ one }) => ({
-  productCategories: one(productCategories, {
-    fields: [localProducts.productCategoryID],
     references: [productCategories.productCategoryID],
   }),
 }))

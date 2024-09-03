@@ -19,7 +19,6 @@ import {
 
 import {
   LocalOrGlobal,
-  LocalProduct,
   Product,
   ProductBase,
   ProductsPaginate,
@@ -45,7 +44,6 @@ import {
 
 import {
   Award,
-  LocalProductID,
   PermissionTitle,
   ProductCategoryID,
   ProductCostDinero,
@@ -117,7 +115,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
           : undefined,
       }
 
-      const createdProduct: Either<string, Product | LocalProduct> = await addProduct(
+      const createdProduct: Either<string, Product> = await addProduct(
         productDetails,
         type as LocalOrGlobal,
         store,
@@ -172,6 +170,8 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       const {
         award,
         localProductID,
+        type,
+        storeID,
         productID,
         productCategoryID,
         cost,
@@ -203,20 +203,20 @@ export const productsRoute = async (fastify: FastifyInstance) => {
           ? ProductUpdateRelatedData(productUpdateRelatedData)
           : undefined,
       }
-      let editedProduct: Either<string, Product | LocalProduct> = left('missing product ID')
-      console.log('ID', localProductID, productID)
-      if (localProductID != null) {
-        console.log('LLLLLLOOOOOOOOOOC')
-        editedProduct = await editProduct(productDetails, LocalProductID(localProductID))
-      } else if (productID != null) {
-        editedProduct = await editProduct(productDetails, undefined, ProductID(productID))
-      }
 
-      console.log(editedProduct)
+      let editedProduct: Either<string, Product> = left(
+        'global products have productIDs and localProducts have stores',
+      )
+      if (type === 'Global' && productID != undefined) {
+        editedProduct = await editProduct(productDetails, ProductID(productID))
+      }
+      if (type === 'Local' && localProductID != undefined && storeID != undefined) {
+        editedProduct = await editProduct(productDetails, ProductID(localProductID))
+      }
 
       match(
         editedProduct,
-        (newProduct: Product | LocalProduct) => {
+        (newProduct: Product) => {
           const { cost, ...product } = newProduct
           const costNumber = {
             ...product,
@@ -258,13 +258,15 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         },
       },
     },
+
+    // TODO Check store deleting product!
     async (request, reply) => {
       const { id, type } = request.params
-      let deletedProduct: Either<string, ProductID | LocalProductID> = left(' product not found')
+      let deletedProduct: Either<string, ProductID> = left(' product not found')
       if (type === 'Global') {
-        deletedProduct = await deleteProductByID(undefined, ProductID(id))
+        deletedProduct = await deleteProductByID(ProductID(id))
       } else if (type === 'Local') {
-        deletedProduct = await deleteProductByID(LocalProductID(id))
+        deletedProduct = await deleteProductByID(ProductID(id))
       }
       match(
         deletedProduct,
@@ -301,14 +303,14 @@ export const productsRoute = async (fastify: FastifyInstance) => {
     async (request, reply) => {
       const { id, type } = request.params
 
-      let productData: Either<string, Product | LocalProduct> = left('Product not found')
+      let productData: Either<string, Product> = left('Product not found')
       if (type === 'Global') {
-        productData = await getProductById(undefined, ProductID(id))
+        productData = await getProductById(ProductID(id))
       } else if (type === 'Local') {
-        productData = await getProductById(LocalProductID(id))
+        productData = await getProductById(ProductID(id))
       }
 
-      function unDineroGlobal(prod: Product | LocalProduct) {
+      function unDineroGlobal(prod: Product) {
         const { cost, ...prodInfo } = prod
         return { ...prodInfo, cost: cost.getAmount(), currency: cost.getCurrency() }
       }
@@ -371,7 +373,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         (productsPaginated) => {
           const message: ResponseMessage = fastify.responseMessage(
             ModelName('Products'),
-            ResultCount(productsPaginated.products.length + productsPaginated.localProducts.length),
+            ResultCount(productsPaginated.products.length),
           )
           const requestUrl: RequestUrl = RequestUrl(
             request.protocol + '://' + request.hostname + request.url,
@@ -386,10 +388,6 @@ export const productsRoute = async (fastify: FastifyInstance) => {
             Page(productsPaginated.totalPage),
             Page(page),
           )
-          function unDineroLocal(prod: LocalProduct) {
-            const { cost, ...prodInfo } = prod
-            return { ...prodInfo, cost: cost.getAmount(), currency: cost.getCurrency() }
-          }
           function unDineroGlobal(prod: Product) {
             const { cost, ...prodInfo } = prod
             return { ...prodInfo, cost: cost.getAmount(), currency: cost.getCurrency() }
@@ -403,7 +401,6 @@ export const productsRoute = async (fastify: FastifyInstance) => {
             totalPage: productsPaginated.totalPage,
             page: page,
             limit: limit,
-            localProducts: productsPaginated.localProducts.map(unDineroLocal),
             products: productsPaginated.products.map(unDineroGlobal),
           })
         },

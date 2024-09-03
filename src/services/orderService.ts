@@ -1,6 +1,7 @@
 import { db } from '../config/db-connect.js'
 
 import { and, count, eq, ilike, or, sql } from 'drizzle-orm'
+import { jsonAggBuildObject } from 'drizzle-orm/utils'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
 
