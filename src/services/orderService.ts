@@ -1,9 +1,8 @@
 import { db } from '../config/db-connect.js'
 
-import { and, count, eq, ilike, or, sql } from 'drizzle-orm'
-import { jsonAggBuildObject } from 'drizzle-orm/utils'
+import { and, count, eq, getTableColumns, ilike, or, sql } from 'drizzle-orm'
 
-import { Either, errorHandling, left, right } from '../utils/helper.js'
+import { Either, errorHandling, jsonAggBuildObject, left, right } from '../utils/helper.js'
 
 import {
   RentCarBooking,
@@ -29,8 +28,13 @@ import {
   IsBilled,
   OrderID,
   OrderNotes,
+  OrderProductNotes,
   OrderStatus,
   PickupTime,
+  ProductCostCurrency,
+  ProductCostNumber,
+  ProductDescription,
+  ProductID,
   ServiceCostCurrency,
   ServiceCostDinero,
   ServiceCostNumber,
@@ -47,6 +51,7 @@ import {
   billOrders,
   drivers,
   orderListing,
+  orderProducts,
   orderStatus,
   orders,
   rentCarBookings,
@@ -127,10 +132,25 @@ export type OrderServices = CreateOrderServices & {
 }
 
 export type OrderWithServices = Order & { services: OrderServices[] } & {
+  products: CreateOrderProduct[]
+} & {
   rentCarBooking?: RentCarBookingReply
 }
 
 export type DeleteOrderService = { orderID: OrderID; serviceID: ServiceID }
+
+export type DeleteOrderProducts = { orderID: OrderID; productID: ProductID }
+
+export type CreateOrderProduct = {
+  productID: ProductID
+  productDescription: ProductDescription
+  amount: Amount
+  cost: ProductCostNumber
+  currency: ProductCostCurrency
+  orderProductNotes?: OrderProductNotes
+}
+
+export type OrderProduct = CreateOrderProduct & { orderID: OrderID }
 
 type OrderNoBrand = {
   driverCarID: DriverCarID
@@ -176,9 +196,19 @@ type OrderServicesNoBrand = {
   orderID: OrderID
 }
 
+type CreateOrderProductNoBrand = {
+  productID: ProductID
+  productDescription: ProductDescription
+  amount: Amount
+  cost: ProductCostNumber
+  currency: string
+  orderProductNotes: OrderProductNotes | null
+}
+
 function brandOrder(
   newOrder: OrderNoBrand,
   newOrderServices: OrderServicesNoBrand[],
+  newOrderProducts: CreateOrderProductNoBrand[],
   newBooking?: RentCarBookingReplyNoBrand | null,
 ): OrderWithServices {
   const orderBranded: Omit<Order, 'cost'> = {
@@ -230,6 +260,15 @@ function brandOrder(
     }
   })
 
+  const productsBranded: CreateOrderProduct[] = newOrderProducts.map((prod) => ({
+    productID: prod.productID,
+    productDescription: prod.productDescription,
+    amount: prod.amount,
+    cost: prod.cost,
+    currency: ProductCostCurrency(prod.currency as Currency),
+    orderProductNotes: prod.orderProductNotes ?? undefined,
+  }))
+
   const brandedBooking = newBooking
     ? {
         rentCarBookingID: newBooking.rentCarBookingID,
@@ -247,6 +286,7 @@ function brandOrder(
   return {
     ...orderBranded,
     services: serviceBranded,
+    products: productsBranded,
     rentCarBooking: brandedBooking,
   }
 }
@@ -254,7 +294,9 @@ function brandOrder(
 export async function createOrder(
   order: CreateOrder,
   services: CreateOrderServices[],
+  products: CreateOrderProduct[],
   deleteOrderService: DeleteOrderService[],
+  deletedOrderProducts: DeleteOrderProducts[],
   booking?: RentCarBooking,
 ): Promise<Either<string, OrderWithServices>> {
   try {
@@ -287,6 +329,11 @@ export async function createOrder(
           ...service,
         }))
 
+        const productssWithOrderID = products.map((product) => ({
+          orderID: newOrder.orderID,
+          ...product,
+        }))
+
         if (deleteOrderService.length > 0) {
           await tx
             .delete(orderListing)
@@ -296,6 +343,20 @@ export async function createOrder(
                   and(
                     eq(orderListing.orderID, orderID.orderID),
                     eq(orderListing.serviceID, orderID.serviceID),
+                  ),
+                ),
+              ),
+            )
+        }
+        if (deletedOrderProducts.length > 0) {
+          await tx
+            .delete(orderProducts)
+            .where(
+              or(
+                ...deletedOrderProducts.map((orderID) =>
+                  and(
+                    eq(orderProducts.orderID, orderID.orderID),
+                    eq(orderProducts.productID, orderID.productID),
                   ),
                 ),
               ),
@@ -339,6 +400,26 @@ export async function createOrder(
             .returning()
         }
 
+        let newOrderProducts: CreateOrderProductNoBrand[] = []
+
+        if (0 < productssWithOrderID.length) {
+          newOrderProducts = await tx
+            .insert(orderProducts)
+            .values(productssWithOrderID)
+            .onConflictDoUpdate({
+              target: [orderProducts.orderID, orderProducts.productID],
+              set: {
+                productID: sql`"excluded"."productID"`,
+                productDescription: sql`"excluded"."productDescription"`,
+                amount: sql`"excluded"."amount"`,
+                cost: sql`"excluded"."cost"`,
+                currency: sql`"excluded"."currency"`,
+                orderProductNotes: sql`"excluded"."orderNotes"`,
+              },
+            })
+            .returning()
+        }
+
         if (booking != undefined) {
           const [newBooking] = await db
             .insert(rentCarBookings)
@@ -348,10 +429,10 @@ export async function createOrder(
               set: booking,
             })
             .returning()
-          const branded = brandOrder(newOrder, newOrderServices, newBooking)
+          const branded = brandOrder(newOrder, newOrderServices, newOrderProducts, newBooking)
           return right(branded)
         } else {
-          const branded = brandOrder(newOrder, newOrderServices)
+          const branded = brandOrder(newOrder, newOrderServices, newOrderProducts)
           return right(branded)
         }
       } else {
@@ -371,10 +452,15 @@ export async function deleteOrder(order: OrderID): Promise<Either<string, OrderW
         .where(eq(orderListing.orderID, order))
         .returning()
 
+      const deletedOrderProducts = await tx
+        .delete(orderProducts)
+        .where(eq(orderProducts.orderID, order))
+        .returning()
+
       const [deletedOrder] = await tx.delete(orders).where(eq(orders.orderID, order)).returning()
 
       return deletedOrder
-        ? right(brandOrder(deletedOrder, deletedOrderListing))
+        ? right(brandOrder(deletedOrder, deletedOrderListing, deletedOrderProducts))
         : left("Couldn't find order")
     })
   } catch (e) {
@@ -386,47 +472,15 @@ export async function getOrder(order: OrderID): Promise<Either<string, OrderWith
   try {
     const [fetchedOrders] = await db
       .select({
-        order: orders,
-        rentCarBooking: rentCarBookings,
-        orderServices: sql<OrderServicesNoBrand[]>`
-        COALESCE(
-          JSONB_AGG(
-            CASE WHEN ${orderListing.serviceID} IS NOT NULL THEN
-              jsonb_build_object(
-                'orderID', ${orderListing.orderID},
-                'serviceID', ${orderListing.serviceID},
-                'name', ${orderListing.name},
-                'amount', ${orderListing.amount},
-                'serviceVariantID', ${orderListing.serviceVariantID},
-                'day1', ${orderListing.day1},
-                'day1Work', ${orderListing.day1Work},
-                'day1Employee', ${orderListing.day1Employee},
-                'day2', ${orderListing.day2},
-                'day2Work', ${orderListing.day2Work},
-                'day2Employee', ${orderListing.day2Employee},
-                'day3', ${orderListing.day3},
-                'day3Work', ${orderListing.day3Work},
-                'day3Employee', ${orderListing.day3Employee},
-                'day4', ${orderListing.day4},
-                'day4Work', ${orderListing.day4Work},
-                'day4Employee', ${orderListing.day4Employee},
-                'day5', ${orderListing.day5},
-                'day5Work', ${orderListing.day5Work},
-                'day5Employee', ${orderListing.day5Employee},
-                'cost', ${orderListing.cost},
-                'currency', ${orderListing.currency},
-                'vatFree', ${orderListing.vatFree},
-                'orderNotes', ${orderListing.orderNotes}
-              )
-            ELSE NULL END
-          ) FILTER (WHERE ${orderListing.serviceID} IS NOT NULL),
-          '[]'::jsonb
-        )
-      `.as('orderServices'),
+        order: getTableColumns(orders),
+        rentCarBooking: getTableColumns(rentCarBookings),
+        services: jsonAggBuildObject(getTableColumns(orderListing)),
+        products: jsonAggBuildObject(getTableColumns(orderProducts)),
       })
       .from(orders)
       .where(eq(orders.orderID, order))
       .leftJoin(orderListing, eq(orderListing.orderID, orders.orderID))
+      .leftJoin(orderProducts, eq(orderProducts.orderID, orders.orderID))
       .leftJoin(rentCarBookings, eq(rentCarBookings.orderID, orders.orderID))
       .groupBy(orders.orderID, rentCarBookings.rentCarBookingID)
 
@@ -434,7 +488,8 @@ export async function getOrder(order: OrderID): Promise<Either<string, OrderWith
       ? right(
           brandOrder(
             fetchedOrders.order,
-            fetchedOrders.orderServices ? fetchedOrders.orderServices : [],
+            fetchedOrders.services ? fetchedOrders.services : [],
+            fetchedOrders.products ? fetchedOrders.products : [],
             fetchedOrders.rentCarBooking?.bookedBy ? fetchedOrders.rentCarBooking : undefined,
           ),
         )
@@ -503,20 +558,16 @@ export async function listOrders(
           submissionTime: orders.submissionTime,
           updatedAt: orders.updatedAt,
           orderStatus: orders.orderStatus,
-          services: sql<OrderRowNoDineroName[]>`
-        COALESCE(
-          JSONB_AGG(
-            CASE WHEN ${orderListing.orderID} IS NOT NULL THEN
-              jsonb_build_object(
-             'currency',${orderListing.currency},
-             'cost',${orderListing.cost},
-             'amount',${orderListing.amount}
-            )
-            ELSE NULL END
-          ) FILTER (WHERE ${orderListing.orderID} IS NOT NULL),
-          '[]'::jsonb
-        )
-      `.as('orderServices'),
+          services: jsonAggBuildObject({
+            currency: orderListing.currency,
+            cost: orderListing.cost,
+            amount: orderListing.amount,
+          }),
+          products: jsonAggBuildObject({
+            currency: orderProducts.currency,
+            cost: orderProducts.cost,
+            amount: orderProducts.amount,
+          }),
 
           billed: sql<boolean>`EXISTS (
       SELECT 1 FROM ${billOrders}
@@ -526,6 +577,7 @@ export async function listOrders(
         .from(orders)
         .innerJoin(drivers, eq(orders.driverID, drivers.driverID))
         .leftJoin(orderListing, eq(orders.orderID, orderListing.orderID))
+        .leftJoin(orderProducts, eq(orders.orderID, orderProducts.orderID))
         .where(condition)
         .groupBy(orders.orderID, drivers.driverFirstName, drivers.driverLastName)
         .limit(limit || 10)
@@ -539,36 +591,51 @@ export async function listOrders(
 
       const totalPage = Page(Math.ceil(orderCount.count / limit))
 
-      function totalPriceCalc(services: OrderRowNoDineroName[]): ServiceCostDinero[] {
-        return services.map((serv) =>
-          ServiceCostDinero(
-            Dinero({
-              amount: serv.cost,
-              currency: serv.currency as Currency,
-            }).multiply(serv.amount),
+      function totalPriceCalc(
+        products: OrderRowNoDineroName[],
+        services: OrderRowNoDineroName[],
+      ): ServiceCostDinero[] {
+        return [
+          ...products.map((prod) =>
+            ServiceCostDinero(
+              Dinero({
+                amount: prod.cost as ProductCostNumber,
+                currency: prod.currency as Currency,
+              }).multiply(prod.amount),
+            ),
           ),
-        )
+          ...services.map((serv) =>
+            ServiceCostDinero(
+              Dinero({
+                amount: serv.cost as ServiceCostNumber,
+                currency: serv.currency as Currency,
+              }).multiply(serv.amount),
+            ),
+          ),
+        ]
       }
+
       return orderList
         ? right({
             totalOrders: ResultCount(orderCount.count),
             totalPage: totalPage,
             perPage: limit,
             page: page,
-            orders: orderList.map((order) => ({
-              driverCarID: order.driverCarID,
-              driverID: order.driverID,
-              firstName: order.firstName,
-              lastName: order.lastName,
-              submissionTime: order.submissionTime,
-              updatedAt: order.updatedAt,
-              total: totalPriceCalc(order.services).map((x) => ServiceCostNumber(x.getAmount())),
-              currency: totalPriceCalc(order.services).map((x) =>
-                ServiceCostCurrency(x.getCurrency()),
-              ),
-              orderStatus: order.orderStatus,
-              billed: Billed(order.billed),
-            })),
+            orders: orderList.map((order) => {
+              const pricingInfo = totalPriceCalc(order.products, order.services)
+              return {
+                driverCarID: order.driverCarID,
+                driverID: order.driverID,
+                firstName: order.firstName,
+                lastName: order.lastName,
+                submissionTime: order.submissionTime,
+                updatedAt: order.updatedAt,
+                total: pricingInfo.map((x) => ServiceCostNumber(x.getAmount())),
+                currency: pricingInfo.map((x) => ServiceCostCurrency(x.getCurrency())),
+                orderStatus: order.orderStatus,
+                billed: Billed(order.billed),
+              }
+            }),
           })
         : left('no errors found')
     })

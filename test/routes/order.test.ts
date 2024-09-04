@@ -302,14 +302,13 @@ describe('PUT, GET and Delete orders', async () => {
         currency: 'SEK',
         discount: 100,
         services: [],
-        localServices: [],
+        products: [],
         deleteOrderService: [],
-        deleteOrderLocalService: [],
+        deleteOrderProducts: [],
       },
     })
 
     const parsedcreatOrderResp = JSON.parse(creatOrderResp.body)
-
     deepStrictEqual(parsedcreatOrderResp.driverCarID, parsedcreateDriverCarResp.driverCarID)
     deepStrictEqual(parsedcreatOrderResp.storeID, parsedresponseStore.store.storeID)
     deepStrictEqual(parsedcreatOrderResp.orderNotes, 'my notes for first order')
@@ -336,9 +335,9 @@ describe('PUT, GET and Delete orders', async () => {
         currency: 'SEK',
         discount: 150,
         services: [],
-        localServices: [],
+        products: [],
         deleteOrderService: [],
-        deleteOrderLocalService: [],
+        deleteOrderProducts: [],
       },
     })
     const parsedcreatOrderPatchResp = JSON.parse(creatOrderPatchResp.body)
@@ -384,9 +383,9 @@ describe('PUT, GET and Delete orders', async () => {
             orderNotes: 'added service',
           },
         ],
-        localServices: [],
+        products: [],
         deleteOrderService: [],
-        deleteOrderLocalService: [],
+        deleteOrderProducts: [],
       },
     })
 
@@ -422,11 +421,11 @@ describe('PUT, GET and Delete orders', async () => {
         currency: 'SEK',
         discount: 150,
         services: [],
-        localServices: [],
+        products: [],
         deleteOrderService: [
           { orderID: parsedcreatOrderResp.orderID, serviceID: parsedcreateServiceResp.serviceID },
         ],
-        deleteOrderLocalService: [],
+        deleteOrderProducts: [],
       },
     })
 
@@ -444,6 +443,7 @@ describe('PUT, GET and Delete orders', async () => {
       currency: 'SEK',
       discount: 150,
       message: 'Service created',
+      products: [],
       services: [],
       orderNotes: 'Added a service',
       bookedBy: responseUserEmpParsed.employee.employeeID,
@@ -525,9 +525,9 @@ describe('PUT, GET and Delete orders', async () => {
             orderNotes: 'added service',
           },
         ],
-        localServices: [],
+        products: [],
         deleteOrderService: [],
-        deleteOrderLocalService: [],
+        deleteOrderProducts: [],
       },
     })
 
@@ -544,6 +544,7 @@ describe('PUT, GET and Delete orders', async () => {
       currency: 'SEK',
       discount: 150,
       message: 'Service created',
+      products: [],
       services: [
         {
           serviceID: 2,
@@ -621,9 +622,9 @@ describe('PUT, GET and Delete orders', async () => {
         currency: 'SEK',
         discount: 150,
         services: [],
-        localServices: [],
+        products: [],
         deleteOrderService: [],
-        deleteOrderLocalService: [],
+        deleteOrderProducts: [],
       },
     })
     const parsedcreatOrderWrongDates = JSON.parse(creatOrderWrongDates.body)
@@ -651,8 +652,8 @@ describe('PUT, GET and Delete orders', async () => {
         orderStatus: 'påbörjad',
         currency: 'SEK',
         discount: 150,
-        services: [],
-        localServices: [
+        products: [],
+        services: [
           {
             cost: 1234,
             currency: 'SEK',
@@ -667,9 +668,10 @@ describe('PUT, GET and Delete orders', async () => {
           },
         ],
         deleteOrderService: [],
-        deleteOrderLocalService: [],
+        deleteOrderProducts: [],
       },
     })
+
     const parsedputOrderLocalResp = JSON.parse(putOrderLocalResp.body)
 
     deepStrictEqual(parsedputOrderLocalResp.orderID, doubleServiceOrder.orderID)
@@ -685,7 +687,6 @@ describe('PUT, GET and Delete orders', async () => {
       parsedputOrderLocalResp.services[0].day1Employee,
       responseUserEmpParsed.employee.employeeID,
     )
-
     const getputOrderLocalResp = await app.inject({
       method: 'GET',
       url: '/orders/' + parsedputOrderLocalResp.orderID,
@@ -695,6 +696,7 @@ describe('PUT, GET and Delete orders', async () => {
     })
 
     const parsedgetputOrderLocalResp = JSON.parse(getputOrderLocalResp.body)
+
     deepStrictEqual(parsedgetputOrderLocalResp.orderID, doubleServiceOrder.orderID)
     deepStrictEqual(parsedgetputOrderLocalResp.bookedBy, doubleServiceOrder.bookedBy)
     deepStrictEqual(parsedgetputOrderLocalResp.discount, doubleServiceOrder.discount)
@@ -744,6 +746,7 @@ describe('PUT, GET and Delete orders', async () => {
         orderStatus: 'preliminär',
         currency: 'SEK',
         discount: 10,
+        products: [],
         services: [
           {
             serviceID: 2,
@@ -771,8 +774,6 @@ describe('PUT, GET and Delete orders', async () => {
             day1Work: '10:10:10',
             day1Employee: responseUserEmpParsed.employee.employeeID,
           },
-        ],
-        localServices: [
           {
             serviceID: parsedcreateLocalServiceResp.serviceID,
             cost: 200,
@@ -787,7 +788,7 @@ describe('PUT, GET and Delete orders', async () => {
           },
         ],
         deleteOrderService: [],
-        deleteOrderLocalService: [],
+        deleteOrderProducts: [],
       },
     })
     const parsednextOrderResp = JSON.parse(nextOrderResp.body)
@@ -809,7 +810,7 @@ describe('PUT, GET and Delete orders', async () => {
     deepStrictEqual(parsedlistOrdersResp1.orders[0].driverCarID, doubleServiceOrder.driverCarID)
     deepStrictEqual(parsedlistOrdersResp1.orders[0].orderStatus, 'påbörjad')
     deepStrictEqual(parsedlistOrdersResp1.orders[0].firstName, 'Mahan')
-    deepStrictEqual(parsedlistOrdersResp1.orders[0].total, [2674, 20, 1234])
-    deepStrictEqual(parsedlistOrdersResp1.orders[1].total, [2674, 2674, 200])
+    deepStrictEqual(parsedlistOrdersResp1.orders[0].total, [1234, 20, 2674])
+    deepStrictEqual(parsedlistOrdersResp1.orders[1].total, [200, 2674, 2674])
   })
 })

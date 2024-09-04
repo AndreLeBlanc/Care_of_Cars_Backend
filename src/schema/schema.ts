@@ -444,6 +444,8 @@ export type Cost = Brand<number, 'cost'>
 export const Cost = make<Cost>()
 export type OrderNotes = Brand<string, 'orderNotes'>
 export const OrderNotes = make<OrderNotes>()
+export type OrderProductNotes = Brand<string, 'orderProductNotes'>
+export const OrderProductNotes = make<OrderProductNotes>()
 export type SubmissionTime = Brand<Date, 'submissionTime'>
 export const SubmissionTime = make<SubmissionTime>()
 export type SubmissionTimeOrder = Brand<string, 'submissionTimeOrder'>
@@ -1456,6 +1458,45 @@ export const orderListingRelations = relations(orderListing, ({ one }) => ({
   day1Employee: one(employees, {
     fields: [orderListing.day1Employee],
     references: [employees.employeeID],
+  }),
+}))
+
+export const orderProducts = pgTable(
+  'orderProducts',
+  {
+    orderID: integer('orderID')
+      .$type<OrderID>()
+      .references(() => orders.orderID, { onDelete: 'cascade' })
+      .notNull(),
+    productID: integer('productID')
+      .$type<ProductID>()
+      .references(() => products.productID, { onDelete: 'cascade' })
+      .notNull(),
+    productDescription: varchar('productDescription', { length: 256 })
+      .$type<ProductDescription>()
+      .notNull(),
+    amount: integer('amount').$type<Amount>().notNull(),
+    cost: real('cost').$type<ProductCostNumber>().notNull(),
+    currency: varchar('currency').notNull(),
+    orderProductNotes: varchar('orderProductNotes').$type<OrderProductNotes>(),
+  },
+  (orderProduct) => {
+    return {
+      pk: primaryKey({
+        columns: [orderProduct.orderID, orderProduct.productID],
+      }),
+    }
+  },
+)
+
+export const orderProductRelations = relations(orderProducts, ({ one }) => ({
+  orders: one(orders, {
+    fields: [orderProducts.orderID],
+    references: [orders.orderID],
+  }),
+  services: one(products, {
+    fields: [orderProducts.productID],
+    references: [products.productID],
   }),
 }))
 

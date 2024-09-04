@@ -8,6 +8,13 @@
       "when": 1724965415625,
       "tag": "0000_previous_shiva",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1725458741024,
+      "tag": "0001_silky_eddie_brock",
+      "breakpoints": true
     }
   ]
 }

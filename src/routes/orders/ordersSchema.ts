@@ -5,6 +5,13 @@ import { storeID } from '../stores/storesSchema.js'
 
 import { NameSchema, ServiceIDSchema, ServiceVariantIDSchema } from '../services/serviceSchema.js'
 
+import {
+  ProductCostCurrencySchema,
+  ProductCostSchema,
+  ProductDescriptionSchema,
+  ProductIDSchema,
+} from '../product/productSchema.js'
+
 import { DriverID, EmployeeID, FirstName, LastName, OrderID } from '../../utils/helper.js'
 
 const OrderNotesSchema = Type.String()
@@ -54,6 +61,17 @@ export const CreateOrderSchema = Type.Object({
 })
 
 export type CreateOrderSchemaType = Static<typeof CreateOrderSchema>
+
+export const CreateOrderProductSchema = Type.Object({
+  productID: ProductIDSchema,
+  productDescription: ProductDescriptionSchema,
+  amount: AmountSchema,
+  cost: ProductCostSchema,
+  currency: ProductCostCurrencySchema,
+  orderProductNotes: Type.Optional(OrderNotesSchema),
+})
+
+export type CreateOrderProductSchemaType = Static<typeof CreateOrderProductSchema>
 
 export const OrderSchema = Type.Object({
   orderID: OrderID,
@@ -135,19 +153,19 @@ const DeleteOrderServiceSchema = Type.Object({
   serviceID: ServiceIDSchema,
 })
 
-const DeleteOrderLocalServiceSchema = Type.Object({
+const DeleteOrderProductSchema = Type.Object({
   orderID: OrderID,
-  localServiceID: ServiceIDSchema,
+  productID: ProductIDSchema,
 })
 
 export const CreateOrderBodySchema = Type.Composite([
   CreateOrderSchema,
   Type.Object({
     services: Type.Array(CreateOrderServicesSchema),
-    localServices: Type.Array(CreateOrderLocalServicesSchema),
+    products: Type.Array(CreateOrderProductSchema),
     rentCarBooking: Type.Optional(CreateRentCarBookingSchema),
     deleteOrderService: Type.Array(DeleteOrderServiceSchema),
-    deleteOrderLocalService: Type.Array(DeleteOrderLocalServiceSchema),
+    deleteOrderProducts: Type.Array(DeleteOrderProductSchema),
   }),
 ])
 
@@ -160,6 +178,9 @@ export const CreateOrderBodyReplySchema = Type.Composite([
     rentCarBooking: Type.Optional(CreateRentCarBookingSchema),
     services: Type.Array(
       Type.Composite([CreateOrderServicesSchema, Type.Object({ total: ServiceCostNumberSchema })]),
+    ),
+    products: Type.Array(
+      Type.Composite([CreateOrderProductSchema, Type.Object({ total: ServiceCostNumberSchema })]),
     ),
   }),
 ])

@@ -2,16 +2,19 @@ import { Static, Type } from '@sinclair/typebox'
 import { CategoryIDSchema } from '../category/categorySchema.js'
 import { storeID } from '../stores/storesSchema.js'
 
-const ProductIDSchema = Type.Number({ minimum: 0 })
+export const ProductIDSchema = Type.Number({ minimum: 0 })
+export const ProductDescriptionSchema = Type.String()
+export const ProductCostSchema = Type.Number({ minimum: 0 })
+export const ProductCostCurrencySchema = Type.String()
 const LocalProductIDSchema = Type.Number({ minimum: 0 })
 const Message = Type.String()
 
 const ProductBaseSchema = Type.Object({
   storeID: Type.Optional(storeID),
   productItemNumber: Type.String(),
-  cost: Type.Number({ minimum: 0 }),
+  cost: ProductCostSchema,
   productCategoryID: CategoryIDSchema,
-  productDescription: Type.Optional(Type.String()),
+  productDescription: Type.Optional(ProductDescriptionSchema),
   productSupplierArticleNumber: Type.Optional(Type.String()),
   productExternalArticleNumber: Type.Optional(Type.String()),
   productUpdateRelatedData: Type.Optional(Type.Boolean()),
@@ -26,7 +29,7 @@ export const AddProductSchema = Type.Composite([
     type: Type.Union([Type.Literal('Local'), Type.Literal('Global')]),
     localProductID: Type.Optional(Type.Number()),
     productID: Type.Optional(Type.Number()),
-    currency: Type.String(),
+    currency: ProductCostCurrencySchema,
   }),
   ProductBaseSchema,
 ])
@@ -34,7 +37,7 @@ export const AddProductSchema = Type.Composite([
 export const ProductReplySchema = Type.Composite([
   Type.Object({
     message: Message,
-    currency: Type.String(),
+    currency: ProductCostCurrencySchema,
     localProductID: Type.Optional(LocalProductIDSchema),
     productID: Type.Optional(ProductIDSchema),
   }),
@@ -74,7 +77,7 @@ export const ProductsPaginatedSchema = Type.Object({
     Type.Composite([
       Type.Object({
         localProductID: LocalProductIDSchema,
-        currency: Type.String(),
+        currency: ProductCostCurrencySchema,
       }),
       ProductBaseSchema,
     ]),
@@ -83,7 +86,7 @@ export const ProductsPaginatedSchema = Type.Object({
     Type.Composite([
       Type.Object({
         productID: ProductIDSchema,
-        currency: Type.String(),
+        currency: ProductCostCurrencySchema,
       }),
       ProductBaseSchema,
     ]),

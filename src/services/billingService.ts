@@ -21,6 +21,7 @@ import {
   EmployeeID,
   OrderID,
   PaymentDays,
+  ProductCostNumber,
   ServiceCostCurrency,
   ServiceCostDinero,
   ServiceCostNumber,
@@ -72,8 +73,8 @@ type OrderRow = {
 
 export type OrderRowNoDineroName = {
   amount: Amount
-  cost: ServiceCostNumber
-  currency: ServiceCostCurrency
+  cost: ServiceCostNumber | ProductCostNumber
+  currency: string
 }
 
 type OrderRowNoDinero = OrderRowNoDineroName & { name: ServiceName }

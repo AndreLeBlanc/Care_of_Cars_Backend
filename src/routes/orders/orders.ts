@@ -11,9 +11,14 @@ import {
   IsBilled,
   OrderID,
   OrderNotes,
+  OrderProductNotes,
   OrderStatus,
   PermissionTitle,
   PickupTime,
+  ProductCostCurrency,
+  ProductCostNumber,
+  ProductDescription,
+  ProductID,
   RentCarRegistrationNumber,
   ServiceCostCurrency,
   ServiceCostNumber,
@@ -59,7 +64,9 @@ import {
 
 import {
   CreateOrder,
+  CreateOrderProduct,
   CreateOrderServices,
+  DeleteOrderProducts,
   DeleteOrderService,
   OrderWithServices,
   OrdersPaginated,
@@ -154,43 +161,30 @@ export async function orders(fastify: FastifyInstance) {
           orderNotes: OrderNotes(service.orderNotes),
         }))
 
-        const localServices: CreateOrderServices[] = req.body.localServices.map((localService) => ({
-          serviceID: ServiceID(localService.serviceID),
-          serviceVariantID: localService.serviceVariantID
-            ? ServiceID(localService.serviceVariantID)
+        const products: CreateOrderProduct[] = req.body.products.map((product) => ({
+          productID: ProductID(product.productID),
+          productDescription: ProductDescription(product.productDescription),
+          amount: Amount(product.amount),
+          cost: ProductCostNumber(product.cost),
+          currency: ProductCostCurrency(product.currency),
+          orderProductNotes: product.orderProductNotes
+            ? OrderProductNotes(product.orderProductNotes)
             : undefined,
-          name: ServiceName(localService.name),
-          amount: Amount(localService.amount),
-          day1: localService.day1 ? WorkDay1(new Date(localService.day1)) : undefined,
-          day1Work: localService.day1Work ? localService.day1Work : undefined,
-          day1Employee: localService.day1Employee
-            ? EmployeeID(localService.day1Employee)
-            : undefined,
-          day2: localService.day2 ? WorkDay2(new Date(localService.day2)) : undefined,
-          day2Work: localService.day2Work ? localService.day2Work : undefined,
-          day2Employee: localService.day2Employee
-            ? EmployeeID(localService.day2Employee)
-            : undefined,
-          day3: localService.day3 ? WorkDay3(new Date(localService.day3)) : undefined,
-          day3Work: localService.day3Work ? localService.day3Work : undefined,
-          day3Employee: localService.day3Employee
-            ? EmployeeID(localService.day3Employee)
-            : undefined,
-          day4: localService.day4 ? WorkDay4(new Date(localService.day4)) : undefined,
-          day4Work: localService.day4Work ? localService.day4Work : undefined,
-          day4Employee: localService.day4Employee
-            ? EmployeeID(localService.day4Employee)
-            : undefined,
-          day5: localService.day5 ? WorkDay5(new Date(localService.day5)) : undefined,
-          day5Work: localService.day5Work ? localService.day5Work : undefined,
-          day5Employee: localService.day5Employee
-            ? EmployeeID(localService.day5Employee)
-            : undefined,
-          cost: ServiceCostNumber(localService.cost),
-          currency: ServiceCostCurrency(localService.currency as Currency),
-          vatFree: VatFree(localService.vatFree),
-          orderNotes: OrderNotes(localService.orderNotes),
         }))
+
+        const deleteServices: DeleteOrderService[] = req.body.deleteOrderService
+          ? req.body.deleteOrderService.map((serv) => ({
+              orderID: OrderID(serv.orderID),
+              serviceID: ServiceID(serv.serviceID),
+            }))
+          : []
+
+        const deleteProducts: DeleteOrderProducts[] = req.body.deleteOrderProducts
+          ? req.body.deleteOrderProducts.map((prod) => ({
+              orderID: OrderID(prod.orderID),
+              productID: ProductID(prod.productID),
+            }))
+          : []
 
         const newRentCarBooking: RentCarBooking | undefined = req.body.rentCarBooking
           ? {
@@ -207,24 +201,13 @@ export async function orders(fastify: FastifyInstance) {
             }
           : undefined
 
-        const deleteServices: DeleteOrderService[] = req.body.deleteOrderService
-          ? req.body.deleteOrderService.map((serv) => ({
-              orderID: OrderID(serv.orderID),
-              serviceID: ServiceID(serv.serviceID),
-            }))
-          : []
-
-        const deleteLocalServices: DeleteOrderService[] = req.body.deleteOrderLocalService
-          ? req.body.deleteOrderLocalService.map((serv) => ({
-              orderID: OrderID(serv.orderID),
-              serviceID: ServiceID(serv.localServiceID),
-            }))
-          : []
-
         const newOrder: Either<string, OrderWithServices> = await createOrder(
           order,
-          services.concat(localServices),
-          deleteServices.concat(deleteLocalServices),
+          services,
+          products,
+          ////////////////////////TODO!
+          deleteServices,
+          deleteProducts,
           newRentCarBooking,
         )
 
@@ -272,6 +255,7 @@ export async function orders(fastify: FastifyInstance) {
     async function (request, reply) {
       const orderID = OrderID(request.params.orderID)
       const fetchedOrder: Either<string, OrderWithServices> = await getOrder(orderID)
+
       match(
         fetchedOrder,
         (gottenOrder: OrderWithServices) => {
