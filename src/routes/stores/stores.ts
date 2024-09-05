@@ -232,6 +232,8 @@ export async function stores(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const store: StoreCreate = {
+        storeOrgNumber: StoreOrgNumber(request.body.storeOrgNumber),
+        storeName: StoreName(request.body.storeName),
         storeWebSite: request.body.storeWebSite
           ? StoreWebSite(request.body.storeWebSite)
           : undefined,
@@ -239,8 +241,6 @@ export async function stores(fastify: FastifyInstance) {
           ? StoreVatNumber(request.body.storeVatNumber)
           : undefined,
         storeFSkatt: StoreFSkatt(request.body.storeFSkatt),
-        storeName: StoreName(request.body.storeName),
-        storeOrgNumber: StoreOrgNumber(request.body.storeOrgNumber),
         storeStatus: StoreStatus(request.body.storeStatus),
         storeEmail: StoreEmail(request.body.storeEmail),
         storePhone: StorePhone(request.body.storePhone),
@@ -250,6 +250,27 @@ export async function stores(fastify: FastifyInstance) {
         storeCountry: StoreCountry(request.body.storeCountry),
         storeDescription: request.body.storeDescription
           ? StoreDescription(request.body.storeDescription)
+          : undefined,
+        storeContactPerson: request.body.storeContactPerson
+          ? StoreContactPerson(request.body.storeContactPerson)
+          : undefined,
+        storeMaxUsers: request.body.storeMaxUsers
+          ? StoreMaxUsers(request.body.storeMaxUsers)
+          : undefined,
+        storeAllowCarAPI: request.body.storeAllowCarAPI
+          ? StoreAllowCarAPI(request.body.storeAllowCarAPI)
+          : undefined,
+        storeAllowSendSMS: request.body.storeAllowSendSMS
+          ? StoreAllowSendSMS(request.body.storeAllowSendSMS)
+          : undefined,
+        storeSendSMS: request.body.storeSendSMS
+          ? StoreSendSMS(request.body.storeSendSMS)
+          : undefined,
+        storeUsesCheckin: request.body.storeUsesCheckin
+          ? StoreUsesCheckin(request.body.storeUsesCheckin)
+          : undefined,
+        storeUsesPIN: request.body.storeUsesPIN
+          ? StoreUsesPIN(request.body.storeUsesPIN)
           : undefined,
       }
       const createdStore: Either<

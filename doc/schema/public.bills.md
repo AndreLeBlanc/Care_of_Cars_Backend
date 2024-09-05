@@ -11,7 +11,7 @@
 | billingDate | date |  | false |  |  |  |
 | paymentDate | date |  | false |  |  |  |
 | paymentDays | integer |  | false |  |  |  |
-| driverID | integer |  | true |  | [public.drivers](public.drivers.md) |  |
+| driverID | integer |  | false |  | [public.drivers](public.drivers.md) |  |
 | customerOrgNumber | varchar(11) |  | true |  | [public.companycustomers](public.companycustomers.md) |  |
 | driverExternalNumber | varchar(256) |  | true |  |  |  |
 | companyReference | varchar(255) |  | true |  |  |  |
@@ -29,12 +29,13 @@
 | driverKeyNumber | varchar(256) |  | true |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |
+| billStatus | "billStatus" |  | false |  |  |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| bills_customerOrgNumber_companycustomers_customerOrgNumber_fk | FOREIGN KEY | FOREIGN KEY ("customerOrgNumber") REFERENCES companycustomers("customerOrgNumber") ON DELETE CASCADE |
+| bills_customerOrgNumber_companycustomers_customerOrgNumber_fk | FOREIGN KEY | FOREIGN KEY ("customerOrgNumber") REFERENCES companycustomers("customerOrgNumber") |
 | bills_driverID_drivers_driverID_fk | FOREIGN KEY | FOREIGN KEY ("driverID") REFERENCES drivers("driverID") |
 | bills_employeeID_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("employeeID") REFERENCES employees("employeeID") |
 | bills_pkey | PRIMARY KEY | PRIMARY KEY ("orderID") |

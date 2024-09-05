@@ -458,10 +458,7 @@ describe('qualifications tests', async () => {
             roleID: parsedresponseRoles.data.roleID,
           },
         })
-        console.log('JSON.parse(roleToPerm.body)')
-        console.log(JSON.parse(roleToPerm.body))
-        console.log('JSON.parse(roleToPerm.body)')
-        console.log('JSON.parse(roleToPerm.body)')
+        deepStrictEqual(JSON.parse(roleToPerm.body).message, 'Role to Permission created')
       }
     }
 
@@ -544,7 +541,7 @@ describe('qualifications tests', async () => {
 
     const responseUserEmpLoginParsed = JSON.parse(responseUserEmpLogin.body)
 
-    deepStrictEqual(responseUserEmpLoginParsed.lastName, 'lastNamesdfs')
+    deepStrictEqual(responseUserEmpLoginParsed.lastName, 'Mcgonal')
     deepStrictEqual(responseUserEmpLoginParsed.role.roleHasPermission[0].permissionID, perms[0])
     deepStrictEqual(responseUserEmpLoginParsed.role.role.roleID, roles[0])
     deepStrictEqual(responseUserEmpLoginParsed.stores[0].storeID, parsedresponseStore.store.storeID)

@@ -1,9 +1,9 @@
 import { Static, Type } from '@sinclair/typebox'
 
-import { LocalServiceIDSchema, ServiceIDSchema } from '../services/serviceSchema.js'
 import { PickupTimeSchema, SubmissionTimeSchema } from '../orders/ordersSchema.js'
 import { CategoryIDSchema } from '../category/categorySchema.js'
 import { DriverID } from '../../utils/helper.js'
+import { ServiceIDSchema } from '../services/serviceSchema.js'
 const customerOrgNumber = Type.String({ maxLength: 11 })
 const customerCompanyName = Type.String({ maxLength: 255 })
 const companyReference = Type.String({ maxLength: 255 })
@@ -126,7 +126,7 @@ export const SearchSchema = Type.Object({
   from: Type.Optional(SubmissionTimeSchema),
   to: Type.Optional(PickupTimeSchema),
   service: Type.Optional(ServiceIDSchema),
-  localService: Type.Optional(LocalServiceIDSchema),
+  localService: Type.Optional(ServiceIDSchema),
   serviceCategory: Type.Optional(CategoryIDSchema),
 })
 export type SearchSchemaType = Static<typeof SearchSchema>

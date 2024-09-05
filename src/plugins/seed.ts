@@ -6,7 +6,7 @@ import { Either, match } from '../utils/helper.js'
 
 import { Store, StoreCreate, StorePaymentOptions, createStore } from '../services/storeService.js'
 
-import { LocalService, Service, ServiceCreate, createService } from '../services/serviceService.js'
+import { Service, ServiceCreate, createService } from '../services/serviceService.js'
 
 import { CreateServiceCategory, createServiceCategory } from '../services/categoryService.js'
 
@@ -197,7 +197,7 @@ export default fp(async () => {
               serviceVariants: [],
             }
 
-            const service: Either<string, Service | LocalService> = await createService(newService)
+            const service: Either<string, Service> = await createService(newService)
             console.log('created service status: ', service)
           },
           (err: string) => {

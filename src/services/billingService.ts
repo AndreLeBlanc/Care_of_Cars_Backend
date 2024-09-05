@@ -21,14 +21,14 @@ import {
   EmployeeID,
   OrderID,
   PaymentDays,
+  ProductCostNumber,
   ServiceCostCurrency,
   ServiceCostDinero,
   ServiceCostNumber,
   ServiceName,
   billOrders,
   bills,
-  orderLocalServices,
-  orderServices,
+  orderListing,
   orders,
 } from '../schema/schema.js'
 
@@ -73,8 +73,8 @@ type OrderRow = {
 
 export type OrderRowNoDineroName = {
   amount: Amount
-  cost: ServiceCostNumber
-  currency: ServiceCostCurrency
+  cost: ServiceCostNumber | ProductCostNumber
+  currency: string
 }
 
 type OrderRowNoDinero = OrderRowNoDineroName & { name: ServiceName }
@@ -101,21 +101,14 @@ export async function newBill(bill: CreateBill, order: OrderID[]): Promise<Eithe
             { orderID: OrderID; discount: ServiceCostNumber; currency: ServiceCostCurrency }[]
           >`json_agg(json_build_object( 'orderID',${orders.orderID} 'discount', ${orders.discount},
         'currency', ${orders.currency},))`.as('tagname'),
-          services: sql<OrderRowNoDinero[]>`json_agg(json_build_object( 'name',${orderServices.name}
-          'currency',${orderServices.currency}
-          'cost',${orderServices.cost}
-          'amount',${orderServices.amount}))`.as('tagname'),
-          localServices: sql<
-            OrderRowNoDinero[]
-          >`json_agg(json_build_object( 'name',${orderLocalServices.name}
-        'currency',${orderLocalServices.currency}
-        'cost',${orderLocalServices.cost}
-        'amount',${orderLocalServices.amount}))`.as('tagname'),
+          services: sql<OrderRowNoDinero[]>`json_agg(json_build_object( 'name',${orderListing.name}
+          'currency',${orderListing.currency}
+          'cost',${orderListing.cost}
+          'amount',${orderListing.amount}))`.as('tagname'),
         })
         .from(orders)
         .where(or(...order.map((orderID) => eq(orders.orderID, orderID))))
-        .leftJoin(orderServices, eq(orders.orderID, orderServices.orderID))
-        .leftJoin(orderLocalServices, eq(orders.orderID, orderLocalServices.orderID))
+        .leftJoin(orderListing, eq(orders.orderID, orderListing.orderID))
 
       return {
         billID: newBill.billID,
@@ -146,7 +139,7 @@ export async function newBill(bill: CreateBill, order: OrderID[]): Promise<Eithe
         orders: CreatedBillOrders.map((bo) => bo.orderID),
         createdAt: newBill.createdAt,
         updatedAt: newBill.updatedAt,
-        orderRows: orderInfo.services.concat(orderInfo.localServices).map((serv) => ({
+        orderRows: orderInfo.services.map((serv) => ({
           name: serv.name,
           amount: serv.amount,
           cost: ServiceCostDinero(
@@ -177,24 +170,16 @@ export async function getBill(bill: BillID): Promise<Either<string, Bill>> {
         >`json_agg(json_build_object( 'orderID',${orders.orderID} 'discount', ${orders.discount},
         'currency', ${orders.currency},))`.as('tagname'),
 
-        services: sql<OrderRowNoDinero[]>`json_agg(json_build_object( 'name',${orderServices.name}
-          'currency',${orderServices.currency}
-          'cost',${orderServices.cost}
-          'amount',${orderServices.amount}))`.as('tagname'),
-
-        localServices: sql<
-          OrderRowNoDinero[]
-        >`json_agg(json_build_object( 'name',${orderLocalServices.name}
-        'currency',${orderLocalServices.currency}
-        'cost',${orderLocalServices.cost}
-        'amount',${orderLocalServices.amount}))`.as('tagname'),
+        services: sql<OrderRowNoDinero[]>`json_agg(json_build_object( 'name',${orderListing.name}
+          'currency',${orderListing.currency}
+          'cost',${orderListing.cost}
+          'amount',${orderListing.amount}))`.as('tagname'),
       })
       .from(bills)
       .where(eq(bills.billID, bill))
       .innerJoin(billOrders, eq(billOrders.billID, bills.billID))
       .innerJoin(orders, eq(billOrders.orderID, orders.orderID))
-      .leftJoin(orderServices, eq(orders.orderID, orderServices.orderID))
-      .leftJoin(orderLocalServices, eq(orders.orderID, orderLocalServices.orderID))
+      .leftJoin(orderListing, eq(orders.orderID, orderListing.orderID))
 
     return right({
       billID: bill,
@@ -228,7 +213,7 @@ export async function getBill(bill: BillID): Promise<Either<string, Bill>> {
       orders: billedOrders.billOrders.map((bo) => bo.orderID),
       createdAt: billedOrders.bill.createdAt,
       updatedAt: billedOrders.bill.updatedAt,
-      orderRows: billedOrders.services.concat(billedOrders.localServices).map((serv) => ({
+      orderRows: billedOrders.services.map((serv) => ({
         name: serv.name,
         amount: serv.amount,
         cost: ServiceCostDinero(Dinero({ amount: serv.cost, currency: serv.currency as Currency })),

@@ -113,7 +113,7 @@ describe('Employees tests', async () => {
       },
       payload: {
         storeName: 'the second store',
-        storeOrgNumber: '66s6dq5552',
+        storeOrgNumber: '23948y5232',
         storeFSkatt: false,
         storeStatus: true,
         storeEmail: 'mystoffre@store.is',

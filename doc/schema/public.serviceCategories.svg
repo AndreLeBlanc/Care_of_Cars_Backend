@@ -89,19 +89,19 @@
 <text text-anchor="start" x="428.6522" y="-576.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
 <polygon fill="none" stroke="#000000" points="249,-535.5 249,-565.5 548,-565.5 548,-535.5 249,-535.5"/>
 <text text-anchor="start" x="256" y="-546.9" font-family="Arial" font-size="14.00" fill="#000000">day1    </text>
-<text text-anchor="start" x="320.5526" y="-546.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="320.5526" y="-546.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="249,-505.5 249,-535.5 548,-535.5 548,-505.5 249,-505.5"/>
 <text text-anchor="start" x="256" y="-516.9" font-family="Arial" font-size="14.00" fill="#000000">day2    </text>
-<text text-anchor="start" x="320.5526" y="-516.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="320.5526" y="-516.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="249,-475.5 249,-505.5 548,-505.5 548,-475.5 249,-475.5"/>
 <text text-anchor="start" x="256" y="-486.9" font-family="Arial" font-size="14.00" fill="#000000">day3    </text>
-<text text-anchor="start" x="320.5526" y="-486.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="320.5526" y="-486.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="249,-445.5 249,-475.5 548,-475.5 548,-445.5 249,-445.5"/>
 <text text-anchor="start" x="256" y="-456.9" font-family="Arial" font-size="14.00" fill="#000000">day4    </text>
-<text text-anchor="start" x="320.5526" y="-456.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="320.5526" y="-456.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="249,-415.5 249,-445.5 548,-445.5 548,-415.5 249,-415.5"/>
 <text text-anchor="start" x="256" y="-426.9" font-family="Arial" font-size="14.00" fill="#000000">day5    </text>
-<text text-anchor="start" x="320.5526" y="-426.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="320.5526" y="-426.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="249,-385.5 249,-415.5 548,-415.5 548,-385.5 249,-385.5"/>
 <text text-anchor="start" x="256" y="-396.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
 <text text-anchor="start" x="350.1136" y="-396.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
@@ -168,19 +168,19 @@
 <text text-anchor="start" x="831.6522" y="-591.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
 <polygon fill="none" stroke="#000000" points="652,-550.5 652,-580.5 949,-580.5 949,-550.5 652,-550.5"/>
 <text text-anchor="start" x="659" y="-561.9" font-family="Arial" font-size="14.00" fill="#000000">day1    </text>
-<text text-anchor="start" x="723.5526" y="-561.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="723.5526" y="-561.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="652,-520.5 652,-550.5 949,-550.5 949,-520.5 652,-520.5"/>
 <text text-anchor="start" x="659" y="-531.9" font-family="Arial" font-size="14.00" fill="#000000">day2    </text>
-<text text-anchor="start" x="723.5526" y="-531.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="723.5526" y="-531.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="652,-490.5 652,-520.5 949,-520.5 949,-490.5 652,-490.5"/>
 <text text-anchor="start" x="659" y="-501.9" font-family="Arial" font-size="14.00" fill="#000000">day3    </text>
-<text text-anchor="start" x="723.5526" y="-501.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="723.5526" y="-501.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="652,-460.5 652,-490.5 949,-490.5 949,-460.5 652,-460.5"/>
 <text text-anchor="start" x="659" y="-471.9" font-family="Arial" font-size="14.00" fill="#000000">day4    </text>
-<text text-anchor="start" x="723.5526" y="-471.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="723.5526" y="-471.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="652,-430.5 652,-460.5 949,-460.5 949,-430.5 652,-430.5"/>
 <text text-anchor="start" x="659" y="-441.9" font-family="Arial" font-size="14.00" fill="#000000">day5    </text>
-<text text-anchor="start" x="723.5526" y="-441.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="723.5526" y="-441.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="652,-400.5 652,-430.5 949,-430.5 949,-400.5 652,-400.5"/>
 <text text-anchor="start" x="659" y="-411.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
 <text text-anchor="start" x="753.1136" y="-411.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>

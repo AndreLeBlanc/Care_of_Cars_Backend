@@ -27,16 +27,14 @@ import {
   DriverNotesShared,
   DriverPhoneNumber,
   DriverZipCode,
-  LocalServiceID,
   PickupTime,
   ServiceCategoryID,
   ServiceID,
   SubmissionTime,
+  SubmissionTimeOrder,
   companycustomers,
   drivers,
-  localServices,
-  orderLocalServices,
-  orderServices,
+  orderListing,
   orders,
   serviceCategories,
   services,
@@ -436,7 +434,6 @@ export type AdvancedSearch = {
   from?: SubmissionTime
   to?: PickupTime
   service?: ServiceID
-  localService?: LocalServiceID
   serviceCategory?: ServiceCategoryID
 }
 
@@ -475,30 +472,16 @@ export async function getDriversPaginate(
         )
       }
 
-      if (
-        advanced?.from ||
-        advanced?.to ||
-        advanced?.service ||
-        advanced?.localService ||
-        advanced?.serviceCategory
-      ) {
+      if (advanced?.from || advanced?.to || advanced?.service || advanced?.serviceCategory) {
         if (advanced.from) {
-          condition = and(condition, lte(orders.submissionTime, advanced.from))
+          const fromString = advanced.from.toISOString()
+          condition = and(condition, lte(orders.submissionTime, SubmissionTimeOrder(fromString)))
         }
         if (advanced.to) {
           condition = and(condition, gte(orders.pickupTime, advanced.to))
         }
         if (advanced.service) {
-          condition = and(condition, eq(orderServices.serviceID, advanced.service))
-          if (advanced.serviceCategory) {
-            condition = and(
-              condition,
-              eq(localServices.serviceCategoryID, advanced.serviceCategory),
-            )
-          }
-        }
-        if (advanced.localService) {
-          condition = and(condition, eq(orderLocalServices.localServiceID, advanced.localService))
+          condition = and(condition, eq(orderListing.serviceID, advanced.service))
           if (advanced.serviceCategory) {
             condition = and(condition, eq(services.serviceCategoryID, advanced.serviceCategory))
           }
@@ -527,37 +510,23 @@ export async function getDriversPaginate(
         .where(condition)
 
       let driverList = []
-      if (
-        advanced?.from ||
-        advanced?.to ||
-        advanced?.service ||
-        advanced?.localService ||
-        advanced?.serviceCategory
-      ) {
+      if (advanced?.from || advanced?.to || advanced?.service || advanced?.serviceCategory) {
         driverQuery = driverQuery.innerJoin(orders, eq(orders.driverID, drivers.driverID))
         driverCountQuery = driverCountQuery.innerJoin(orders, eq(orders.driverID, drivers.driverID))
 
         if (advanced.service || advanced.serviceCategory) {
           driverQuery = driverQuery.innerJoin(
-            orderServices,
-            eq(orderServices.orderID, orders.orderID),
+            orderListing,
+            eq(orderListing.orderID, orders.orderID),
           )
-        }
-        if (advanced.localService || advanced.serviceCategory) {
-          driverQuery = driverQuery
-            .innerJoin(orderLocalServices, eq(orderLocalServices.orderID, orders.orderID))
-            .innerJoin(
-              localServices,
-              eq(localServices.localServiceID, orderLocalServices.localServiceID),
-            )
         }
         if (advanced.serviceCategory) {
           driverList = await driverQuery
             .innerJoin(
               serviceCategories,
-              eq(serviceCategories.serviceCategoryID, localServices.serviceCategoryID),
+              eq(serviceCategories.serviceCategoryID, services.serviceCategoryID),
             )
-            .innerJoin(services, eq(services.serviceID, orderServices.serviceID))
+            .innerJoin(services, eq(services.serviceID, orderListing.serviceID))
         }
       }
 
@@ -565,8 +534,6 @@ export async function getDriversPaginate(
         .orderBy(desc(drivers.createdAt))
         .limit(limit || 10)
         .offset(offset || 0)
-
-      console.log('liiiist: ', driverList)
 
       const [totalItems] = await driverCountQuery
       return { driverList, totalItems }

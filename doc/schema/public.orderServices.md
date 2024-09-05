@@ -11,22 +11,35 @@
 | serviceVariantID | integer |  | true |  | [public.serviceVariants](public.serviceVariants.md) |  |
 | day1 | timestamp without time zone |  | true |  |  |  |
 | day1Work | interval |  | true |  |  |  |
-| employeeID | integer |  | true |  | [public.employees](public.employees.md) |  |
+| day1Employee | integer |  | true |  | [public.employees](public.employees.md) |  |
 | day2 | timestamp without time zone |  | true |  |  |  |
 | day3 | timestamp without time zone |  | true |  |  |  |
 | day4 | timestamp without time zone |  | true |  |  |  |
 | day5 | timestamp without time zone |  | true |  |  |  |
 | cost | real |  | false |  |  |  |
-| discount | real |  | false |  |  |  |
 | vatFree | boolean |  | false |  |  |  |
 | orderNotes | varchar |  | true |  |  |  |
 | amount | integer |  | false |  |  |  |
+| day2Employee | integer |  | true |  | [public.employees](public.employees.md) |  |
+| day3Employee | integer |  | true |  | [public.employees](public.employees.md) |  |
+| day4Employee | integer |  | true |  | [public.employees](public.employees.md) |  |
+| day5Employee | integer |  | true |  | [public.employees](public.employees.md) |  |
+| name | varchar(256) |  | false |  |  |  |
+| currency | varchar |  | false |  |  |  |
+| day2Work | interval |  | true |  |  |  |
+| day3Work | interval |  | true |  |  |  |
+| day4Work | interval |  | true |  |  |  |
+| day5Work | interval |  | true |  |  |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| orderServices_employeeID_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("employeeID") REFERENCES employees("employeeID") ON DELETE SET NULL |
+| orderServices_day1Employee_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("day1Employee") REFERENCES employees("employeeID") ON DELETE SET NULL |
+| orderServices_day2Employee_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("day2Employee") REFERENCES employees("employeeID") ON DELETE SET NULL |
+| orderServices_day3Employee_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("day3Employee") REFERENCES employees("employeeID") ON DELETE SET NULL |
+| orderServices_day4Employee_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("day4Employee") REFERENCES employees("employeeID") ON DELETE SET NULL |
+| orderServices_day5Employee_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("day5Employee") REFERENCES employees("employeeID") ON DELETE SET NULL |
 | orderServices_orderID_serviceID_pk | PRIMARY KEY | PRIMARY KEY ("orderID", "serviceID") |
 | orderServices_orderID_orders_orderID_fk | FOREIGN KEY | FOREIGN KEY ("orderID") REFERENCES orders("orderID") ON DELETE CASCADE |
 | orderServices_serviceVariantID_serviceVariants_serviceVariantID | FOREIGN KEY | FOREIGN KEY ("serviceVariantID") REFERENCES "serviceVariants"("serviceVariantID") ON DELETE CASCADE |

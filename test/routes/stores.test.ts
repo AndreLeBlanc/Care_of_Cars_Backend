@@ -24,7 +24,6 @@ describe('POST /users/login HTTP', async () => {
         password: 'admin123',
       },
     })
-    console.log('parsed 123: ', response)
     const parsedResponse = JSON.parse(response.body)
     jwt = 'Bearer ' + parsedResponse.token
   })

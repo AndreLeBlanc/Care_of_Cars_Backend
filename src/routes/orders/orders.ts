@@ -9,12 +9,16 @@ import {
   DriverID,
   EmployeeID,
   IsBilled,
-  LocalServiceID,
   OrderID,
   OrderNotes,
+  OrderProductNotes,
   OrderStatus,
   PermissionTitle,
   PickupTime,
+  ProductCostCurrency,
+  ProductCostNumber,
+  ProductDescription,
+  ProductID,
   RentCarRegistrationNumber,
   ServiceCostCurrency,
   ServiceCostNumber,
@@ -22,6 +26,7 @@ import {
   ServiceName,
   StoreID,
   SubmissionTime,
+  SubmissionTimeOrder,
   VatFree,
   WorkDay1,
   WorkDay2,
@@ -59,9 +64,9 @@ import {
 
 import {
   CreateOrder,
-  CreateOrderLocalServices,
+  CreateOrderProduct,
   CreateOrderServices,
-  DeleteOrderLocalService,
+  DeleteOrderProducts,
   DeleteOrderService,
   OrderWithServices,
   OrdersPaginated,
@@ -120,7 +125,7 @@ export async function orders(fastify: FastifyInstance) {
           storeID: StoreID(req.body.storeID),
           orderNotes: req.body.orderNotes ? OrderNotes(req.body.orderNotes) : undefined,
           bookedBy: req.body.bookedBy ? EmployeeID(req.body.bookedBy) : undefined,
-          submissionTime: SubmissionTime(new Date(req.body.submissionTime)),
+          submissionTime: SubmissionTimeOrder(req.body.submissionTime),
           pickupTime: PickupTime(new Date(req.body.pickupTime)),
           vatFree: VatFree(req.body.vatFree),
           orderStatus: orderStatusValue as OrderStatus,
@@ -156,45 +161,30 @@ export async function orders(fastify: FastifyInstance) {
           orderNotes: OrderNotes(service.orderNotes),
         }))
 
-        const localServices: CreateOrderLocalServices[] = req.body.localServices.map(
-          (localService) => ({
-            localServiceID: LocalServiceID(localService.localServiceID),
-            localServiceVariantID: localService.serviceVariantID
-              ? LocalServiceID(localService.serviceVariantID)
-              : undefined,
-            name: ServiceName(localService.name),
-            amount: Amount(localService.amount),
-            day1: localService.day1 ? WorkDay1(new Date(localService.day1)) : undefined,
-            day1Work: localService.day1Work ? localService.day1Work : undefined,
-            day1Employee: localService.day1Employee
-              ? EmployeeID(localService.day1Employee)
-              : undefined,
-            day2: localService.day2 ? WorkDay2(new Date(localService.day2)) : undefined,
-            day2Work: localService.day2Work ? localService.day2Work : undefined,
-            day2Employee: localService.day2Employee
-              ? EmployeeID(localService.day2Employee)
-              : undefined,
-            day3: localService.day3 ? WorkDay3(new Date(localService.day3)) : undefined,
-            day3Work: localService.day3Work ? localService.day3Work : undefined,
-            day3Employee: localService.day3Employee
-              ? EmployeeID(localService.day3Employee)
-              : undefined,
-            day4: localService.day4 ? WorkDay4(new Date(localService.day4)) : undefined,
-            day4Work: localService.day4Work ? localService.day4Work : undefined,
-            day4Employee: localService.day4Employee
-              ? EmployeeID(localService.day4Employee)
-              : undefined,
-            day5: localService.day5 ? WorkDay5(new Date(localService.day5)) : undefined,
-            day5Work: localService.day5Work ? localService.day5Work : undefined,
-            day5Employee: localService.day5Employee
-              ? EmployeeID(localService.day5Employee)
-              : undefined,
-            cost: ServiceCostNumber(localService.cost),
-            currency: ServiceCostCurrency(localService.currency as Currency),
-            vatFree: VatFree(localService.vatFree),
-            orderNotes: OrderNotes(localService.orderNotes),
-          }),
-        )
+        const products: CreateOrderProduct[] = req.body.products.map((product) => ({
+          productID: ProductID(product.productID),
+          productDescription: ProductDescription(product.productDescription),
+          amount: Amount(product.amount),
+          cost: ProductCostNumber(product.cost),
+          currency: ProductCostCurrency(product.currency),
+          orderProductNotes: product.orderProductNotes
+            ? OrderProductNotes(product.orderProductNotes)
+            : undefined,
+        }))
+
+        const deleteServices: DeleteOrderService[] = req.body.deleteOrderService
+          ? req.body.deleteOrderService.map((serv) => ({
+              orderID: OrderID(serv.orderID),
+              serviceID: ServiceID(serv.serviceID),
+            }))
+          : []
+
+        const deleteProducts: DeleteOrderProducts[] = req.body.deleteOrderProducts
+          ? req.body.deleteOrderProducts.map((prod) => ({
+              orderID: OrderID(prod.orderID),
+              productID: ProductID(prod.productID),
+            }))
+          : []
 
         const newRentCarBooking: RentCarBooking | undefined = req.body.rentCarBooking
           ? {
@@ -211,26 +201,13 @@ export async function orders(fastify: FastifyInstance) {
             }
           : undefined
 
-        const deleteServices: DeleteOrderService[] = req.body.deleteOrderService
-          ? req.body.deleteOrderService.map((serv) => ({
-              orderID: OrderID(serv.orderID),
-              serviceID: ServiceID(serv.serviceID),
-            }))
-          : []
-
-        const deleteLocalServices: DeleteOrderLocalService[] = req.body.deleteOrderLocalService
-          ? req.body.deleteOrderLocalService.map((serv) => ({
-              orderID: OrderID(serv.orderID),
-              localServiceID: LocalServiceID(serv.localServiceID),
-            }))
-          : []
-
         const newOrder: Either<string, OrderWithServices> = await createOrder(
           order,
           services,
-          localServices,
+          products,
+          ////////////////////////TODO!
           deleteServices,
-          deleteLocalServices,
+          deleteProducts,
           newRentCarBooking,
         )
 
@@ -278,6 +255,7 @@ export async function orders(fastify: FastifyInstance) {
     async function (request, reply) {
       const orderID = OrderID(request.params.orderID)
       const fetchedOrder: Either<string, OrderWithServices> = await getOrder(orderID)
+
       match(
         fetchedOrder,
         (gottenOrder: OrderWithServices) => {
@@ -330,7 +308,7 @@ export async function orders(fastify: FastifyInstance) {
     },
   )
 
-  fastify.get<{ Params: ListOrdersQueryParamSchemaType }>(
+  fastify.get<{ Querystring: ListOrdersQueryParamSchemaType }>(
     '/list-orders/',
     {
       preHandler: async (request, reply, done) => {
@@ -347,7 +325,7 @@ export async function orders(fastify: FastifyInstance) {
       schema: {
         querystring: ListOrdersQueryParamSchema,
         response: {
-          200: { ...OrdersPaginatedSchema, MessageSchema },
+          200: OrdersPaginatedSchema,
           403: MessageSchema,
         },
       },
@@ -357,12 +335,14 @@ export async function orders(fastify: FastifyInstance) {
         search = '',
         limit = 10,
         page = 1,
+        storeID,
         orderStatusSearch,
         billingStatusSearch,
-      } = req.params
+      } = req.query
       const brandedSearch = Search(search)
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
+      const store = StoreID(storeID)
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
       const brandedOrderStatusSearch = orderStatusSearch as OrderStatus
       const brandedBillingStatusSearch = billingStatusSearch
@@ -373,6 +353,7 @@ export async function orders(fastify: FastifyInstance) {
         brandedLimit,
         brandedPage,
         offset,
+        store,
         brandedOrderStatusSearch,
         brandedBillingStatusSearch,
       )
@@ -391,8 +372,9 @@ export async function orders(fastify: FastifyInstance) {
             Page(orders.totalPage),
             Page(orders.page),
           )
+
           return reply.status(200).send({
-            message: 'fetched order',
+            message: 'fetched orders',
             ...orders,
             previousUrl: previousUrl,
             nextUrl: nextUrl,

@@ -79,7 +79,6 @@ import {
   DriverNotesShared,
   DriverPhoneNumber,
   DriverZipCode,
-  LocalServiceID,
   PermissionTitle,
   PickupTime,
   ServiceCategoryID,
@@ -371,10 +370,11 @@ export const customers = async (fastify: FastifyInstance) => {
           : undefined,
         from: request.body.from ? SubmissionTime(new Date(request.body.from)) : undefined,
         to: request.body.to ? PickupTime(new Date(request.body.to)) : undefined,
-        service: request.body.service ? ServiceID(request.body.service) : undefined,
-        localService: request.body.localService
-          ? LocalServiceID(request.body.localService)
-          : undefined,
+        service: request.body.service
+          ? ServiceID(request.body.service)
+          : request.body.localService
+            ? ServiceID(request.body.localService)
+            : undefined,
         serviceCategory: request.body.serviceCategory
           ? ServiceCategoryID(request.body.serviceCategory)
           : undefined,

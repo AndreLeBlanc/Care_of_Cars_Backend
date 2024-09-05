@@ -1,9 +1,279 @@
 {
-  "id": "bbacc268-c603-45d4-b174-0d40b4c1a684",
-  "prevId": "74be6473-7de2-4582-b89c-ecb4c3c251f1",
+  "id": "ec215692-add9-4b78-a1bb-cc111818f06f",
+  "prevId": "03ef14f9-9d85-4028-a93c-0496be27252f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.billOrders": {
+      "name": "billOrders",
+      "schema": "",
+      "columns": {
+        "billID": {
+          "name": "billID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "orderID": {
+          "name": "orderID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "billOrders_billID_bills_orderID_fk": {
+          "name": "billOrders_billID_bills_orderID_fk",
+          "tableFrom": "billOrders",
+          "tableTo": "bills",
+          "columnsFrom": [
+            "billID"
+          ],
+          "columnsTo": [
+            "orderID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "billOrders_orderID_orders_orderID_fk": {
+          "name": "billOrders_orderID_orders_orderID_fk",
+          "tableFrom": "billOrders",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "orderID"
+          ],
+          "columnsTo": [
+            "orderID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "billOrders_billID_orderID_pk": {
+          "name": "billOrders_billID_orderID_pk",
+          "columns": [
+            "billID",
+            "orderID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.bills": {
+      "name": "bills",
+      "schema": "",
+      "columns": {
+        "orderID": {
+          "name": "orderID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "billStatus": {
+          "name": "billStatus",
+          "type": "billStatus",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "employeeID": {
+          "name": "employeeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "billingDate": {
+          "name": "billingDate",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "paymentDate": {
+          "name": "paymentDate",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "paymentDays": {
+          "name": "paymentDays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverID": {
+          "name": "driverID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "customerOrgNumber": {
+          "name": "customerOrgNumber",
+          "type": "varchar(11)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverExternalNumber": {
+          "name": "driverExternalNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "companyReference": {
+          "name": "companyReference",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverFirstName": {
+          "name": "driverFirstName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverLastName": {
+          "name": "driverLastName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverEmail": {
+          "name": "driverEmail",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverPhoneNumber": {
+          "name": "driverPhoneNumber",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverAddress": {
+          "name": "driverAddress",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverZipCode": {
+          "name": "driverZipCode",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverAddressCity": {
+          "name": "driverAddressCity",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverCountry": {
+          "name": "driverCountry",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "driverHasCard": {
+          "name": "driverHasCard",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "driverCardValidTo": {
+          "name": "driverCardValidTo",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverCardNumber": {
+          "name": "driverCardNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "driverKeyNumber": {
+          "name": "driverKeyNumber",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bills_employeeID_employees_employeeID_fk": {
+          "name": "bills_employeeID_employees_employeeID_fk",
+          "tableFrom": "bills",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "employeeID"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bills_driverID_drivers_driverID_fk": {
+          "name": "bills_driverID_drivers_driverID_fk",
+          "tableFrom": "bills",
+          "tableTo": "drivers",
+          "columnsFrom": [
+            "driverID"
+          ],
+          "columnsTo": [
+            "driverID"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bills_customerOrgNumber_companycustomers_customerOrgNumber_fk": {
+          "name": "bills_customerOrgNumber_companycustomers_customerOrgNumber_fk",
+          "tableFrom": "bills",
+          "tableTo": "companycustomers",
+          "columnsFrom": [
+            "customerOrgNumber"
+          ],
+          "columnsTo": [
+            "customerOrgNumber"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bills_driverEmail_unique": {
+          "name": "bills_driverEmail_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "driverEmail"
+          ]
+        },
+        "bills_driverPhoneNumber_unique": {
+          "name": "bills_driverPhoneNumber_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "driverPhoneNumber"
+          ]
+        }
+      }
+    },
     "public.companycustomers": {
       "name": "companycustomers",
       "schema": "",
@@ -599,6 +869,18 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "checkedIn": {
+          "name": "checkedIn",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checkedOut": {
+          "name": "checkedOut",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -911,18 +1193,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "checkedIn": {
-          "name": "checkedIn",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "checkedOut": {
-          "name": "checkedOut",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
         "employeeActive": {
           "name": "employeeActive",
           "type": "boolean",
@@ -992,668 +1262,8 @@
         }
       }
     },
-    "public.localProducts": {
-      "name": "localProducts",
-      "schema": "",
-      "columns": {
-        "storeID": {
-          "name": "storeID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "localProductID": {
-          "name": "localProductID",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "productItemNumber": {
-          "name": "productItemNumber",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "currency": {
-          "name": "currency",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cost": {
-          "name": "cost",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "productCategoryID": {
-          "name": "productCategoryID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "productDescription": {
-          "name": "productDescription",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "productSupplierArticleNumber": {
-          "name": "productSupplierArticleNumber",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "productExternalArticleNumber": {
-          "name": "productExternalArticleNumber",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "productUpdateRelatedData": {
-          "name": "productUpdateRelatedData",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "award": {
-          "name": "award",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "productInventoryBalance": {
-          "name": "productInventoryBalance",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "localProducts_storeID_stores_storeID_fk": {
-          "name": "localProducts_storeID_stores_storeID_fk",
-          "tableFrom": "localProducts",
-          "tableTo": "stores",
-          "columnsFrom": [
-            "storeID"
-          ],
-          "columnsTo": [
-            "storeID"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "localProducts_productCategoryID_productCategories_productCategoryID_fk": {
-          "name": "localProducts_productCategoryID_productCategories_productCategoryID_fk",
-          "tableFrom": "localProducts",
-          "tableTo": "productCategories",
-          "columnsFrom": [
-            "productCategoryID"
-          ],
-          "columnsTo": [
-            "productCategoryID"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.localServiceGlobalQualifications": {
-      "name": "localServiceGlobalQualifications",
-      "schema": "",
-      "columns": {
-        "localServiceID": {
-          "name": "localServiceID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "globalQualID": {
-          "name": "globalQualID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "localServiceGlobalQualifications_localServiceID_localServices_localServiceID_fk": {
-          "name": "localServiceGlobalQualifications_localServiceID_localServices_localServiceID_fk",
-          "tableFrom": "localServiceGlobalQualifications",
-          "tableTo": "localServices",
-          "columnsFrom": [
-            "localServiceID"
-          ],
-          "columnsTo": [
-            "localServiceID"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "localServiceGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk": {
-          "name": "localServiceGlobalQualifications_globalQualID_qualificationsGlobal_globalQualID_fk",
-          "tableFrom": "localServiceGlobalQualifications",
-          "tableTo": "qualificationsGlobal",
-          "columnsFrom": [
-            "globalQualID"
-          ],
-          "columnsTo": [
-            "globalQualID"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.localServiceLocalQualifications": {
-      "name": "localServiceLocalQualifications",
-      "schema": "",
-      "columns": {
-        "localServiceID": {
-          "name": "localServiceID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "localQualID": {
-          "name": "localQualID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "localServiceLocalQualifications_localServiceID_localServices_localServiceID_fk": {
-          "name": "localServiceLocalQualifications_localServiceID_localServices_localServiceID_fk",
-          "tableFrom": "localServiceLocalQualifications",
-          "tableTo": "localServices",
-          "columnsFrom": [
-            "localServiceID"
-          ],
-          "columnsTo": [
-            "localServiceID"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "localServiceLocalQualifications_localQualID_qualificationsLocal_localQualID_fk": {
-          "name": "localServiceLocalQualifications_localQualID_qualificationsLocal_localQualID_fk",
-          "tableFrom": "localServiceLocalQualifications",
-          "tableTo": "qualificationsLocal",
-          "columnsFrom": [
-            "localQualID"
-          ],
-          "columnsTo": [
-            "localQualID"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "localServiceLocalQualifications_localQualID_localServiceID_pk": {
-          "name": "localServiceLocalQualifications_localQualID_localServiceID_pk",
-          "columns": [
-            "localQualID",
-            "localServiceID"
-          ]
-        }
-      },
-      "uniqueConstraints": {}
-    },
-    "public.localServiceVariants": {
-      "name": "localServiceVariants",
-      "schema": "",
-      "columns": {
-        "serviceVariantID": {
-          "name": "serviceVariantID",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(256)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "currency": {
-          "name": "currency",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cost": {
-          "name": "cost",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "award": {
-          "name": "award",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "day1": {
-          "name": "day1",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day2": {
-          "name": "day2",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day3": {
-          "name": "day3",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day4": {
-          "name": "day4",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day5": {
-          "name": "day5",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "localServiceID": {
-          "name": "localServiceID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "localServiceVariants_localServiceID_localServices_localServiceID_fk": {
-          "name": "localServiceVariants_localServiceID_localServices_localServiceID_fk",
-          "tableFrom": "localServiceVariants",
-          "tableTo": "localServices",
-          "columnsFrom": [
-            "localServiceID"
-          ],
-          "columnsTo": [
-            "localServiceID"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.localServices": {
-      "name": "localServices",
-      "schema": "",
-      "columns": {
-        "localServiceID": {
-          "name": "localServiceID",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "serviceCategoryID": {
-          "name": "serviceCategoryID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(256)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "storeID": {
-          "name": "storeID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "currency": {
-          "name": "currency",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cost": {
-          "name": "cost",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "includeInAutomaticSms": {
-          "name": "includeInAutomaticSms",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "hidden": {
-          "name": "hidden",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "callInterval": {
-          "name": "callInterval",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "colorForService": {
-          "name": "colorForService",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "warrantyCard": {
-          "name": "warrantyCard",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "itemNumber": {
-          "name": "itemNumber",
-          "type": "varchar(256)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "award": {
-          "name": "award",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "suppliersArticleNumber": {
-          "name": "suppliersArticleNumber",
-          "type": "varchar(256)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "externalArticleNumber": {
-          "name": "externalArticleNumber",
-          "type": "varchar(256)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day1": {
-          "name": "day1",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day2": {
-          "name": "day2",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day3": {
-          "name": "day3",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day4": {
-          "name": "day4",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day5": {
-          "name": "day5",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "localServices_serviceCategoryID_serviceCategories_serviceCategoryID_fk": {
-          "name": "localServices_serviceCategoryID_serviceCategories_serviceCategoryID_fk",
-          "tableFrom": "localServices",
-          "tableTo": "serviceCategories",
-          "columnsFrom": [
-            "serviceCategoryID"
-          ],
-          "columnsTo": [
-            "serviceCategoryID"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "localServices_storeID_stores_storeID_fk": {
-          "name": "localServices_storeID_stores_storeID_fk",
-          "tableFrom": "localServices",
-          "tableTo": "stores",
-          "columnsFrom": [
-            "storeID"
-          ],
-          "columnsTo": [
-            "storeID"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.orderLocalServices": {
-      "name": "orderLocalServices",
-      "schema": "",
-      "columns": {
-        "orderID": {
-          "name": "orderID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "localServiceID": {
-          "name": "localServiceID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "serviceVariantID": {
-          "name": "serviceVariantID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day1": {
-          "name": "day1",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day1Work": {
-          "name": "day1Work",
-          "type": "interval",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "employeeID": {
-          "name": "employeeID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day2": {
-          "name": "day2",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day3": {
-          "name": "day3",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day4": {
-          "name": "day4",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "day5": {
-          "name": "day5",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "cost": {
-          "name": "cost",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "discount": {
-          "name": "discount",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "vatFree": {
-          "name": "vatFree",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "orderNotes": {
-          "name": "orderNotes",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "orderLocalServices_orderID_orders_orderID_fk": {
-          "name": "orderLocalServices_orderID_orders_orderID_fk",
-          "tableFrom": "orderLocalServices",
-          "tableTo": "orders",
-          "columnsFrom": [
-            "orderID"
-          ],
-          "columnsTo": [
-            "orderID"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "orderLocalServices_localServiceID_localServices_localServiceID_fk": {
-          "name": "orderLocalServices_localServiceID_localServices_localServiceID_fk",
-          "tableFrom": "orderLocalServices",
-          "tableTo": "localServices",
-          "columnsFrom": [
-            "localServiceID"
-          ],
-          "columnsTo": [
-            "localServiceID"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "orderLocalServices_serviceVariantID_localServiceVariants_serviceVariantID_fk": {
-          "name": "orderLocalServices_serviceVariantID_localServiceVariants_serviceVariantID_fk",
-          "tableFrom": "orderLocalServices",
-          "tableTo": "localServiceVariants",
-          "columnsFrom": [
-            "serviceVariantID"
-          ],
-          "columnsTo": [
-            "serviceVariantID"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "orderLocalServices_employeeID_employees_employeeID_fk": {
-          "name": "orderLocalServices_employeeID_employees_employeeID_fk",
-          "tableFrom": "orderLocalServices",
-          "tableTo": "employees",
-          "columnsFrom": [
-            "employeeID"
-          ],
-          "columnsTo": [
-            "employeeID"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "orderLocalServices_orderID_localServiceID_pk": {
-          "name": "orderLocalServices_orderID_localServiceID_pk",
-          "columns": [
-            "orderID",
-            "localServiceID"
-          ]
-        }
-      },
-      "uniqueConstraints": {}
-    },
-    "public.orderServices": {
-      "name": "orderServices",
+    "public.orderListing": {
+      "name": "orderListing",
       "schema": "",
       "columns": {
         "orderID": {
@@ -1668,6 +1278,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "serviceVariantID": {
           "name": "serviceVariantID",
           "type": "integer",
@@ -1686,8 +1308,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "employeeID": {
-          "name": "employeeID",
+        "day1Employee": {
+          "name": "day1Employee",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -1698,9 +1320,33 @@
           "primaryKey": false,
           "notNull": false
         },
+        "day2Work": {
+          "name": "day2Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day2Employee": {
+          "name": "day2Employee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "day3": {
           "name": "day3",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3Work": {
+          "name": "day3Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day3Employee": {
+          "name": "day3Employee",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -1710,9 +1356,33 @@
           "primaryKey": false,
           "notNull": false
         },
+        "day4Work": {
+          "name": "day4Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day4Employee": {
+          "name": "day4Employee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "day5": {
           "name": "day5",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5Work": {
+          "name": "day5Work",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day5Employee": {
+          "name": "day5Employee",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -1722,9 +1392,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "discount": {
-          "name": "discount",
-          "type": "real",
+        "currency": {
+          "name": "currency",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
@@ -1743,9 +1413,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "orderServices_orderID_orders_orderID_fk": {
-          "name": "orderServices_orderID_orders_orderID_fk",
-          "tableFrom": "orderServices",
+        "orderListing_orderID_orders_orderID_fk": {
+          "name": "orderListing_orderID_orders_orderID_fk",
+          "tableFrom": "orderListing",
           "tableTo": "orders",
           "columnsFrom": [
             "orderID"
@@ -1756,9 +1426,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "orderServices_serviceID_services_serviceID_fk": {
-          "name": "orderServices_serviceID_services_serviceID_fk",
-          "tableFrom": "orderServices",
+        "orderListing_serviceID_services_serviceID_fk": {
+          "name": "orderListing_serviceID_services_serviceID_fk",
+          "tableFrom": "orderListing",
           "tableTo": "services",
           "columnsFrom": [
             "serviceID"
@@ -1769,9 +1439,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "orderServices_serviceVariantID_serviceVariants_serviceVariantID_fk": {
-          "name": "orderServices_serviceVariantID_serviceVariants_serviceVariantID_fk",
-          "tableFrom": "orderServices",
+        "orderListing_serviceVariantID_serviceVariants_serviceVariantID_fk": {
+          "name": "orderListing_serviceVariantID_serviceVariants_serviceVariantID_fk",
+          "tableFrom": "orderListing",
           "tableTo": "serviceVariants",
           "columnsFrom": [
             "serviceVariantID"
@@ -1782,12 +1452,64 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "orderServices_employeeID_employees_employeeID_fk": {
-          "name": "orderServices_employeeID_employees_employeeID_fk",
-          "tableFrom": "orderServices",
+        "orderListing_day1Employee_employees_employeeID_fk": {
+          "name": "orderListing_day1Employee_employees_employeeID_fk",
+          "tableFrom": "orderListing",
           "tableTo": "employees",
           "columnsFrom": [
+            "day1Employee"
+          ],
+          "columnsTo": [
             "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderListing_day2Employee_employees_employeeID_fk": {
+          "name": "orderListing_day2Employee_employees_employeeID_fk",
+          "tableFrom": "orderListing",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day2Employee"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderListing_day3Employee_employees_employeeID_fk": {
+          "name": "orderListing_day3Employee_employees_employeeID_fk",
+          "tableFrom": "orderListing",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day3Employee"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderListing_day4Employee_employees_employeeID_fk": {
+          "name": "orderListing_day4Employee_employees_employeeID_fk",
+          "tableFrom": "orderListing",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day4Employee"
+          ],
+          "columnsTo": [
+            "employeeID"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orderListing_day5Employee_employees_employeeID_fk": {
+          "name": "orderListing_day5Employee_employees_employeeID_fk",
+          "tableFrom": "orderListing",
+          "tableTo": "employees",
+          "columnsFrom": [
+            "day5Employee"
           ],
           "columnsTo": [
             "employeeID"
@@ -1797,11 +1519,98 @@
         }
       },
       "compositePrimaryKeys": {
-        "orderServices_orderID_serviceID_pk": {
-          "name": "orderServices_orderID_serviceID_pk",
+        "orderListing_orderID_serviceID_pk": {
+          "name": "orderListing_orderID_serviceID_pk",
           "columns": [
             "orderID",
             "serviceID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.orderProducts": {
+      "name": "orderProducts",
+      "schema": "",
+      "columns": {
+        "orderID": {
+          "name": "orderID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productID": {
+          "name": "productID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productDescription": {
+          "name": "productDescription",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost": {
+          "name": "cost",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "orderProductNotes": {
+          "name": "orderProductNotes",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "orderProducts_orderID_orders_orderID_fk": {
+          "name": "orderProducts_orderID_orders_orderID_fk",
+          "tableFrom": "orderProducts",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "orderID"
+          ],
+          "columnsTo": [
+            "orderID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "orderProducts_productID_products_productID_fk": {
+          "name": "orderProducts_productID_products_productID_fk",
+          "tableFrom": "orderProducts",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productID"
+          ],
+          "columnsTo": [
+            "productID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "orderProducts_orderID_productID_pk": {
+          "name": "orderProducts_orderID_productID_pk",
+          "columns": [
+            "orderID",
+            "productID"
           ]
         }
       },
@@ -1853,6 +1662,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "pickupTime": {
+          "name": "pickupTime",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
         "vatFree": {
           "name": "vatFree",
           "type": "boolean",
@@ -1868,7 +1683,7 @@
         },
         "currency": {
           "name": "currency",
-          "type": "varchar(5)",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
@@ -1882,15 +1697,13 @@
           "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         }
       },
       "indexes": {},
@@ -2076,6 +1889,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "productItemNumber": {
           "name": "productItemNumber",
           "type": "varchar",
@@ -2154,6 +1973,19 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "products_storeID_stores_storeID_fk": {
+          "name": "products_storeID_stores_storeID_fk",
+          "tableFrom": "products",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "products_productCategoryID_productCategories_productCategoryID_fk": {
           "name": "products_productCategoryID_productCategories_productCategoryID_fk",
           "tableFrom": "products",
@@ -2794,31 +2626,31 @@
         },
         "day1": {
           "name": "day1",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day2": {
           "name": "day2",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day3": {
           "name": "day3",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day4": {
           "name": "day4",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day5": {
           "name": "day5",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
@@ -2872,17 +2704,23 @@
           "primaryKey": true,
           "notNull": true
         },
+        "serviceCategoryID": {
+          "name": "serviceCategoryID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "name": {
           "name": "name",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true
         },
-        "serviceCategoryID": {
-          "name": "serviceCategoryID",
+        "storeID": {
+          "name": "storeID",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "currency": {
           "name": "currency",
@@ -2952,31 +2790,31 @@
         },
         "day1": {
           "name": "day1",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day2": {
           "name": "day2",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day3": {
           "name": "day3",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day4": {
           "name": "day4",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
         "day5": {
           "name": "day5",
-          "type": "time",
+          "type": "interval",
           "primaryKey": false,
           "notNull": false
         },
@@ -3009,25 +2847,23 @@
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
+        },
+        "services_storeID_stores_storeID_fk": {
+          "name": "services_storeID_stores_storeID_fk",
+          "tableFrom": "services",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "services_name_unique": {
-          "name": "services_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        },
-        "services_itemNumber_unique": {
-          "name": "services_itemNumber_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "itemNumber"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.storeopeninghours": {
       "name": "storeopeninghours",
@@ -3740,6 +3576,15 @@
     }
   },
   "enums": {
+    "public.billStatus": {
+      "name": "billStatus",
+      "schema": "public",
+      "values": [
+        "bill",
+        "creditBill",
+        "cashBill"
+      ]
+    },
     "public.orderStatus": {
       "name": "orderStatus",
       "schema": "public",

@@ -360,19 +360,19 @@
 <text text-anchor="start" x="2017.6522" y="-1191.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
 <polygon fill="none" stroke="#000000" points="1838,-1150.5 1838,-1180.5 2137,-1180.5 2137,-1150.5 1838,-1150.5"/>
 <text text-anchor="start" x="1845" y="-1161.9" font-family="Arial" font-size="14.00" fill="#000000">day1    </text>
-<text text-anchor="start" x="1909.5526" y="-1161.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="1909.5526" y="-1161.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="1838,-1120.5 1838,-1150.5 2137,-1150.5 2137,-1120.5 1838,-1120.5"/>
 <text text-anchor="start" x="1845" y="-1131.9" font-family="Arial" font-size="14.00" fill="#000000">day2    </text>
-<text text-anchor="start" x="1909.5526" y="-1131.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="1909.5526" y="-1131.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="1838,-1090.5 1838,-1120.5 2137,-1120.5 2137,-1090.5 1838,-1090.5"/>
 <text text-anchor="start" x="1845" y="-1101.9" font-family="Arial" font-size="14.00" fill="#000000">day3    </text>
-<text text-anchor="start" x="1909.5526" y="-1101.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="1909.5526" y="-1101.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="1838,-1060.5 1838,-1090.5 2137,-1090.5 2137,-1060.5 1838,-1060.5"/>
 <text text-anchor="start" x="1845" y="-1071.9" font-family="Arial" font-size="14.00" fill="#000000">day4    </text>
-<text text-anchor="start" x="1909.5526" y="-1071.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="1909.5526" y="-1071.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="1838,-1030.5 1838,-1060.5 2137,-1060.5 2137,-1030.5 1838,-1030.5"/>
 <text text-anchor="start" x="1845" y="-1041.9" font-family="Arial" font-size="14.00" fill="#000000">day5    </text>
-<text text-anchor="start" x="1909.5526" y="-1041.9" font-family="Arial" font-size="14.00" fill="#666666">[time without time zone]</text>
+<text text-anchor="start" x="1909.5526" y="-1041.9" font-family="Arial" font-size="14.00" fill="#666666">[interval]</text>
 <polygon fill="none" stroke="#000000" points="1838,-1000.5 1838,-1030.5 2137,-1030.5 2137,-1000.5 1838,-1000.5"/>
 <text text-anchor="start" x="1845" y="-1011.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
 <text text-anchor="start" x="1939.1136" y="-1011.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
@@ -390,57 +390,60 @@
 <!-- public.orders -->
 <g id="node7" class="node">
 <title>public.orders</title>
-<polygon fill="#efefef" stroke="transparent" points="2241,-1495.5 2241,-1530.5 2575,-1530.5 2575,-1495.5 2241,-1495.5"/>
-<polygon fill="none" stroke="#000000" points="2241,-1495.5 2241,-1530.5 2575,-1530.5 2575,-1495.5 2241,-1495.5"/>
-<text text-anchor="start" x="2292.7099" y="-1508.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.orders</text>
-<text text-anchor="start" x="2395.7221" y="-1508.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
-<text text-anchor="start" x="2429.9269" y="-1508.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1465.5 2241,-1495.5 2575,-1495.5 2575,-1465.5 2241,-1465.5"/>
-<text text-anchor="start" x="2248" y="-1476.9" font-family="Arial" font-size="14.00" fill="#000000">orderID    </text>
-<text text-anchor="start" x="2328.871" y="-1476.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1435.5 2241,-1465.5 2575,-1465.5 2575,-1435.5 2241,-1435.5"/>
-<text text-anchor="start" x="2248" y="-1446.9" font-family="Arial" font-size="14.00" fill="#000000">driverCarID    </text>
-<text text-anchor="start" x="2353.7448" y="-1446.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1405.5 2241,-1435.5 2575,-1435.5 2575,-1405.5 2241,-1405.5"/>
-<text text-anchor="start" x="2248" y="-1416.9" font-family="Arial" font-size="14.00" fill="#000000">driverID    </text>
-<text text-anchor="start" x="2331.195" y="-1416.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1375.5 2241,-1405.5 2575,-1405.5 2575,-1375.5 2241,-1375.5"/>
-<text text-anchor="start" x="2248" y="-1386.9" font-family="Arial" font-size="14.00" fill="#000000">storeID    </text>
-<text text-anchor="start" x="2327.3184" y="-1386.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1345.5 2241,-1375.5 2575,-1375.5 2575,-1345.5 2241,-1345.5"/>
-<text text-anchor="start" x="2248" y="-1356.9" font-family="Arial" font-size="14.00" fill="#000000">orderNotes    </text>
-<text text-anchor="start" x="2351.4362" y="-1356.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1315.5 2241,-1345.5 2575,-1345.5 2575,-1315.5 2241,-1315.5"/>
-<text text-anchor="start" x="2248" y="-1326.9" font-family="Arial" font-size="14.00" fill="#000000">employeeID    </text>
-<text text-anchor="start" x="2356.8822" y="-1326.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1285.5 2241,-1315.5 2575,-1315.5 2575,-1285.5 2241,-1285.5"/>
-<text text-anchor="start" x="2247.7742" y="-1296.9" font-family="Arial" font-size="14.00" fill="#000000">submissionTime    </text>
-<text text-anchor="start" x="2383.0856" y="-1296.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1255.5 2241,-1285.5 2575,-1285.5 2575,-1255.5 2241,-1255.5"/>
-<text text-anchor="start" x="2248" y="-1266.9" font-family="Arial" font-size="14.00" fill="#000000">vatFree    </text>
-<text text-anchor="start" x="2329.6564" y="-1266.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1225.5 2241,-1255.5 2575,-1255.5 2575,-1225.5 2241,-1225.5"/>
-<text text-anchor="start" x="2248" y="-1236.9" font-family="Arial" font-size="14.00" fill="#000000">orderStatus    </text>
-<text text-anchor="start" x="2354.5568" y="-1236.9" font-family="Arial" font-size="14.00" fill="#666666">[&quot;orderStatus&quot;]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1195.5 2241,-1225.5 2575,-1225.5 2575,-1195.5 2241,-1195.5"/>
-<text text-anchor="start" x="2248" y="-1206.9" font-family="Arial" font-size="14.00" fill="#000000">currency    </text>
-<text text-anchor="start" x="2335.8738" y="-1206.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(5)]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1165.5 2241,-1195.5 2575,-1195.5 2575,-1165.5 2241,-1165.5"/>
-<text text-anchor="start" x="2248" y="-1176.9" font-family="Arial" font-size="14.00" fill="#000000">discount    </text>
-<text text-anchor="start" x="2334.3324" y="-1176.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1135.5 2241,-1165.5 2575,-1165.5 2575,-1135.5 2241,-1135.5"/>
-<text text-anchor="start" x="2248" y="-1146.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
-<text text-anchor="start" x="2342.1136" y="-1146.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-<polygon fill="none" stroke="#000000" points="2241,-1105.5 2241,-1135.5 2575,-1135.5 2575,-1105.5 2241,-1105.5"/>
-<text text-anchor="start" x="2248" y="-1116.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
-<text text-anchor="start" x="2346.0182" y="-1116.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="#efefef" stroke="transparent" points="2241,-1510.5 2241,-1545.5 2575,-1545.5 2575,-1510.5 2241,-1510.5"/>
+<polygon fill="none" stroke="#000000" points="2241,-1510.5 2241,-1545.5 2575,-1545.5 2575,-1510.5 2241,-1510.5"/>
+<text text-anchor="start" x="2292.7099" y="-1523.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.orders</text>
+<text text-anchor="start" x="2395.7221" y="-1523.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
+<text text-anchor="start" x="2429.9269" y="-1523.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1480.5 2241,-1510.5 2575,-1510.5 2575,-1480.5 2241,-1480.5"/>
+<text text-anchor="start" x="2248" y="-1491.9" font-family="Arial" font-size="14.00" fill="#000000">orderID    </text>
+<text text-anchor="start" x="2328.871" y="-1491.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1450.5 2241,-1480.5 2575,-1480.5 2575,-1450.5 2241,-1450.5"/>
+<text text-anchor="start" x="2248" y="-1461.9" font-family="Arial" font-size="14.00" fill="#000000">driverCarID    </text>
+<text text-anchor="start" x="2353.7448" y="-1461.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1420.5 2241,-1450.5 2575,-1450.5 2575,-1420.5 2241,-1420.5"/>
+<text text-anchor="start" x="2248" y="-1431.9" font-family="Arial" font-size="14.00" fill="#000000">driverID    </text>
+<text text-anchor="start" x="2331.195" y="-1431.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1390.5 2241,-1420.5 2575,-1420.5 2575,-1390.5 2241,-1390.5"/>
+<text text-anchor="start" x="2248" y="-1401.9" font-family="Arial" font-size="14.00" fill="#000000">storeID    </text>
+<text text-anchor="start" x="2327.3184" y="-1401.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1360.5 2241,-1390.5 2575,-1390.5 2575,-1360.5 2241,-1360.5"/>
+<text text-anchor="start" x="2248" y="-1371.9" font-family="Arial" font-size="14.00" fill="#000000">orderNotes    </text>
+<text text-anchor="start" x="2351.4362" y="-1371.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1330.5 2241,-1360.5 2575,-1360.5 2575,-1330.5 2241,-1330.5"/>
+<text text-anchor="start" x="2248" y="-1341.9" font-family="Arial" font-size="14.00" fill="#000000">employeeID    </text>
+<text text-anchor="start" x="2356.8822" y="-1341.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1300.5 2241,-1330.5 2575,-1330.5 2575,-1300.5 2241,-1300.5"/>
+<text text-anchor="start" x="2247.7742" y="-1311.9" font-family="Arial" font-size="14.00" fill="#000000">submissionTime    </text>
+<text text-anchor="start" x="2383.0856" y="-1311.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1270.5 2241,-1300.5 2575,-1300.5 2575,-1270.5 2241,-1270.5"/>
+<text text-anchor="start" x="2248" y="-1281.9" font-family="Arial" font-size="14.00" fill="#000000">vatFree    </text>
+<text text-anchor="start" x="2329.6564" y="-1281.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1240.5 2241,-1270.5 2575,-1270.5 2575,-1240.5 2241,-1240.5"/>
+<text text-anchor="start" x="2248" y="-1251.9" font-family="Arial" font-size="14.00" fill="#000000">orderStatus    </text>
+<text text-anchor="start" x="2354.5568" y="-1251.9" font-family="Arial" font-size="14.00" fill="#666666">[&quot;orderStatus&quot;]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1210.5 2241,-1240.5 2575,-1240.5 2575,-1210.5 2241,-1210.5"/>
+<text text-anchor="start" x="2248" y="-1221.9" font-family="Arial" font-size="14.00" fill="#000000">currency    </text>
+<text text-anchor="start" x="2335.8738" y="-1221.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1180.5 2241,-1210.5 2575,-1210.5 2575,-1180.5 2241,-1180.5"/>
+<text text-anchor="start" x="2248" y="-1191.9" font-family="Arial" font-size="14.00" fill="#000000">discount    </text>
+<text text-anchor="start" x="2334.3324" y="-1191.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1150.5 2241,-1180.5 2575,-1180.5 2575,-1150.5 2241,-1150.5"/>
+<text text-anchor="start" x="2248" y="-1161.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
+<text text-anchor="start" x="2342.1136" y="-1161.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1120.5 2241,-1150.5 2575,-1150.5 2575,-1120.5 2241,-1120.5"/>
+<text text-anchor="start" x="2248" y="-1131.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
+<text text-anchor="start" x="2346.0182" y="-1131.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="none" stroke="#000000" points="2241,-1090.5 2241,-1120.5 2575,-1120.5 2575,-1090.5 2241,-1090.5"/>
+<text text-anchor="start" x="2248" y="-1101.9" font-family="Arial" font-size="14.00" fill="#000000">pickupTime    </text>
+<text text-anchor="start" x="2353.7616" y="-1101.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
 </g>
 <!-- public.orders&#45;&gt;public.stores -->
 <g id="edge6" class="edge">
 <title>public.orders:storeID&#45;&gt;public.stores:storeID</title>
-<path fill="none" stroke="#000000" d="M2584.1584,-1385.994C2629.0258,-1338.6509 2608.8629,-933.186 2627,-883 2651.1114,-816.2828 2645.0596,-750.5 2716,-750.5"/>
-<polygon fill="#000000" stroke="#000000" points="2583.9728,-1386.0853 2573.0134,-1386.4622 2579.4864,-1388.2926 2575,-1390.5 2575,-1390.5 2575,-1390.5 2579.4864,-1388.2926 2576.9866,-1394.5378 2583.9728,-1386.0853 2583.9728,-1386.0853"/>
-<text text-anchor="start" x="2581.623" y="-1400.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;storeID&quot;) REFERENCES stores(&quot;storeID&quot;) ON DELETE CASCADE</text>
+<path fill="none" stroke="#000000" d="M2584.1247,-1401.1595C2630.5337,-1353.8535 2608.369,-934.7885 2627,-883 2651.0143,-816.2478 2645.0596,-750.5 2716,-750.5"/>
+<polygon fill="#000000" stroke="#000000" points="2584.0304,-1401.2043 2573.067,-1401.4363 2579.5152,-1403.3522 2575,-1405.5 2575,-1405.5 2575,-1405.5 2579.5152,-1403.3522 2576.933,-1409.5637 2584.0304,-1401.2043 2584.0304,-1401.2043"/>
+<text text-anchor="start" x="2581.623" y="-1415.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;storeID&quot;) REFERENCES stores(&quot;storeID&quot;) ON DELETE CASCADE</text>
 </g>
 <!-- public.qualificationsLocal -->
 <g id="node8" class="node">

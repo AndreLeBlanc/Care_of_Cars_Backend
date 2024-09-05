@@ -3,13 +3,14 @@ import { CreateRentCarBookingSchema } from '../rentCar/rentCarSchema.js'
 import { driverCarID } from '../driverCars/driverCarsSchema.js'
 import { storeID } from '../stores/storesSchema.js'
 
+import { NameSchema, ServiceIDSchema, ServiceVariantIDSchema } from '../services/serviceSchema.js'
+
 import {
-  LocalServiceIDSchema,
-  LocalServicevariantIDSchema,
-  NameSchema,
-  ServiceIDSchema,
-  ServiceVariantIDSchema,
-} from '../services/serviceSchema.js'
+  ProductCostCurrencySchema,
+  ProductCostSchema,
+  ProductDescriptionSchema,
+  ProductIDSchema,
+} from '../product/productSchema.js'
 
 import { DriverID, EmployeeID, FirstName, LastName, OrderID } from '../../utils/helper.js'
 
@@ -61,6 +62,17 @@ export const CreateOrderSchema = Type.Object({
 
 export type CreateOrderSchemaType = Static<typeof CreateOrderSchema>
 
+export const CreateOrderProductSchema = Type.Object({
+  productID: ProductIDSchema,
+  productDescription: ProductDescriptionSchema,
+  amount: AmountSchema,
+  cost: ProductCostSchema,
+  currency: ProductCostCurrencySchema,
+  orderProductNotes: Type.Optional(OrderNotesSchema),
+})
+
+export type CreateOrderProductSchemaType = Static<typeof CreateOrderProductSchema>
+
 export const OrderSchema = Type.Object({
   orderID: OrderID,
   driverCarID: driverCarID,
@@ -109,8 +121,8 @@ export const CreateOrderServicesSchema = Type.Object({
 export type CreateOrderServicesSchemaType = Static<typeof CreateOrderServicesSchema>
 
 export const CreateOrderLocalServicesSchema = Type.Object({
-  localServiceID: LocalServiceIDSchema,
-  serviceVariantID: Type.Optional(LocalServicevariantIDSchema),
+  serviceID: ServiceIDSchema,
+  serviceVariantID: Type.Optional(ServiceVariantIDSchema),
   name: NameSchema,
   amount: AmountSchema,
   cost: ServiceCostNumberSchema,
@@ -141,19 +153,19 @@ const DeleteOrderServiceSchema = Type.Object({
   serviceID: ServiceIDSchema,
 })
 
-const DeleteOrderLocalServiceSchema = Type.Object({
+const DeleteOrderProductSchema = Type.Object({
   orderID: OrderID,
-  localServiceID: LocalServiceIDSchema,
+  productID: ProductIDSchema,
 })
 
 export const CreateOrderBodySchema = Type.Composite([
   CreateOrderSchema,
   Type.Object({
     services: Type.Array(CreateOrderServicesSchema),
-    localServices: Type.Array(CreateOrderLocalServicesSchema),
+    products: Type.Array(CreateOrderProductSchema),
     rentCarBooking: Type.Optional(CreateRentCarBookingSchema),
     deleteOrderService: Type.Array(DeleteOrderServiceSchema),
-    deleteOrderLocalService: Type.Array(DeleteOrderLocalServiceSchema),
+    deleteOrderProducts: Type.Array(DeleteOrderProductSchema),
   }),
 ])
 
@@ -167,11 +179,8 @@ export const CreateOrderBodyReplySchema = Type.Composite([
     services: Type.Array(
       Type.Composite([CreateOrderServicesSchema, Type.Object({ total: ServiceCostNumberSchema })]),
     ),
-    localServices: Type.Array(
-      Type.Composite([
-        CreateOrderLocalServicesSchema,
-        Type.Object({ total: ServiceCostNumberSchema }),
-      ]),
+    products: Type.Array(
+      Type.Composite([CreateOrderProductSchema, Type.Object({ total: ServiceCostNumberSchema })]),
     ),
   }),
 ])
@@ -179,6 +188,7 @@ export const CreateOrderBodyReplySchema = Type.Composite([
 export type CreateOrderBodyReplySchemaType = Static<typeof CreateOrderBodyReplySchema>
 
 export const ListOrdersQueryParamSchema = Type.Object({
+  storeID: storeID,
   search: Type.Optional(Type.String()),
   limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
@@ -189,6 +199,7 @@ export const ListOrdersQueryParamSchema = Type.Object({
 export type ListOrdersQueryParamSchemaType = Static<typeof ListOrdersQueryParamSchema>
 
 export const OrdersPaginatedSchema = Type.Object({
+  message: Message,
   totalOrders: Type.Integer(),
   totalPage: Type.Integer(),
   perPage: Type.Integer(),
@@ -203,6 +214,7 @@ export const OrdersPaginatedSchema = Type.Object({
       submissionTime: SubmissionTimeSchema,
       updatedAt: Type.String({ format: 'date-time' }),
       total: Type.Array(ServiceCostNumberSchema),
+      currency: Type.Array(CurrencySchema),
       orderStatus: OrderStatusSchema,
       billed: BilledSchema,
     }),

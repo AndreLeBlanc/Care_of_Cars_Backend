@@ -1,5 +1,9 @@
+import { AnyColumn, SQL, inArray, is, sql } from 'drizzle-orm'
+import { PgTimestampString, SelectedFields } from 'drizzle-orm/pg-core'
 import { TObject, Type } from '@sinclair/typebox'
 import { TypeCompiler } from '@sinclair/typebox/compiler'
+
+import { type SelectResultFields } from 'drizzle-orm/query-builders/select.types'
 /**
  * return if email is correct, is Valid email
  * */
@@ -19,6 +23,61 @@ export const OrderID = Type.Integer({ minimum: 0 })
 export const userEmail = Type.String()
 export const isSuperAdmin = Type.Boolean()
 
+export function jsonBuildObject<T extends SelectedFields>(shape: T): SQL<SelectResultFields<T>> {
+  const chunks: SQL[] = Object.entries(shape).flatMap(([key, value], index) => {
+    const keyValueChunk = [
+      sql.raw(`'${key}',`),
+      is(value, PgTimestampString) ? sql`timezone('UTC', ${value})` : sql`${value}`,
+    ]
+    return index > 0 ? [sql.raw(','), ...keyValueChunk] : keyValueChunk
+  })
+
+  return sql`coalesce(json_build_object(${sql.join(chunks)}), '{}')`
+}
+
+export function jsonAggBuildObject<T extends SelectedFields, Column extends AnyColumn>(
+  shape: T,
+  options?: { orderBy?: { colName: Column; direction: 'ASC' | 'DESC' } },
+) {
+  return sql<SelectResultFields<T>[]>`coalesce(
+    json_agg(${jsonBuildObject(shape)}
+    ${
+      options?.orderBy
+        ? sql`ORDER BY ${options.orderBy.colName} ${sql.raw(options.orderBy.direction)}`
+        : sql``
+    })
+    FILTER (WHERE ${sql.join(
+      Object.values(shape).map((value) => sql`${value} IS NOT NULL`),
+      sql` OR `,
+    )})
+    ,'${sql`[]`}')`
+}
+
+export function jsonAggBuildObjectOrEmptyArray<T extends SelectedFields, Table>(
+  table: Table,
+  shape: T,
+): SQL<SelectResultFields<T>[]> {
+  return sql`
+    CASE
+      WHEN COUNT(${table}) = 0 THEN '[]'::jsonb
+      ELSE jsonb_agg(${jsonBuildObject(shape)})
+    END
+  `
+}
+
+export function inJsonArray<T extends SQL.Aliased<unknown[]>>(
+  jsonArray: T,
+  key: keyof T['_']['type'][number],
+  values: string[],
+) {
+  const element = sql.raw(`${String(key)}_array_element`)
+
+  return sql`EXISTS (
+		SELECT 1
+		FROM jsonb_array_elements(${jsonArray}) AS ${element}
+		WHERE ${inArray(sql`${element}->>${key}`, values)}
+	  )`
+}
 export interface ValidatorFactoryReturn<T> {
   schema: TObject
   verify: (data: T) => T

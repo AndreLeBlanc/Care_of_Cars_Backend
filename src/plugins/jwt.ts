@@ -40,7 +40,9 @@ export default fp(async (fastify) => {
       permissionName: PermissionTitle,
     ): Promise<boolean> {
       try {
-        console.log(request.user, permissionName)
+        if (permissionName == 'dasfsdfsdfsdfs') {
+          console.log(request.user, permissionName)
+        }
         return true
         //  const hasPermission: Either<string, boolean> = await roleHasPermission(
         //    RoleID(userData.userWithPassword.role.roleID),

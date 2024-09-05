@@ -21,11 +21,11 @@
 | award | real |  | false |  |  |  |
 | suppliersArticleNumber | varchar(256) |  | true |  |  |  |
 | externalArticleNumber | varchar(256) |  | true |  |  |  |
-| day1 | time without time zone |  | true |  |  |  |
-| day2 | time without time zone |  | true |  |  |  |
-| day3 | time without time zone |  | true |  |  |  |
-| day4 | time without time zone |  | true |  |  |  |
-| day5 | time without time zone |  | true |  |  |  |
+| day1 | interval |  | true |  |  |  |
+| day2 | interval |  | true |  |  |  |
+| day3 | interval |  | true |  |  |  |
+| day4 | interval |  | true |  |  |  |
+| day5 | interval |  | true |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |
 

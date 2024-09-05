@@ -5,50 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1723549258935,
-      "tag": "0000_sticky_gamma_corps",
+      "when": 1724965415625,
+      "tag": "0000_previous_shiva",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1723886454022,
-      "tag": "0001_safe_night_thrasher",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1724097705383,
-      "tag": "0002_nasty_patch",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1724141008760,
-      "tag": "0003_spotty_namorita",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1724143445160,
-      "tag": "0004_open_madame_hydra",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1724430659729,
-      "tag": "0005_fuzzy_william_stryker",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1724579806104,
-      "tag": "0006_spooky_squadron_sinister",
+      "when": 1725458741024,
+      "tag": "0001_silky_eddie_brock",
       "breakpoints": true
     }
   ]

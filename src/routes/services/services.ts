@@ -3,13 +3,7 @@ import { FastifyInstance } from 'fastify'
 import {
   ListServiceQueryParamSchema,
   ListServiceQueryParamSchemaType,
-  LocalServiceDeleteQualType,
-  LocalServiceGlobalQualSchema,
-  LocalServiceGlobalQualSchemaType,
-  LocalServiceLocalQualSchema,
   LocalServiceLocalQualSchemaType,
-  LocalServiceQualsSchema,
-  LocalServiceQualsSchemaType,
   MessageSchema,
   MessageSchemaType,
   ServiceCreateSchema,
@@ -29,28 +23,20 @@ import {
 
 import {
   GlobalServiceQuals,
-  LocalService,
-  LocalServiceCreate,
-  LocalServiceGlobalQual,
-  LocalServiceLocalQual,
-  OrderServInfo,
   Service,
   ServiceBase,
   ServiceCreate,
   ServiceGlobalQual,
   ServiceLocalQual,
+  ServiceOrder,
   ServicesPaginated,
   createService,
-  deleteLocalServiceQualifications,
   deleteServiceQualifications,
   deletetServiceById,
-  getLocalServiceQualifications,
   getServiceById,
   getServiceQualifications,
   getServicesPaginate,
   getServicesWithVariants,
-  setLocalServiceLocalQual,
-  setLocalServiceQualifications,
   setServiceLocalQual,
   setServiceQualifications,
 } from '../../services/serviceService.js'
@@ -60,7 +46,6 @@ import {
   ColorForService,
   GlobalQualID,
   LocalQualID,
-  LocalServiceID,
   PermissionTitle,
   ServiceCallInterval,
   ServiceCategoryID,
@@ -123,7 +108,7 @@ export async function services(fastify: FastifyInstance) {
     },
 
     async (request, reply) => {
-      let serviceData: Either<string, Service | LocalService>
+      let serviceData: Either<string, Service>
       const serviceBase: ServiceBase = {
         name: ServiceName(request.body.name),
         cost: ServiceCostDinero(
@@ -157,20 +142,16 @@ export async function services(fastify: FastifyInstance) {
         day5: request.body.day5 ? ServiceDay5(request.body.day5) : undefined,
       }
       if (request.body.storeID != null) {
-        const localService: LocalServiceCreate & { localServiceID?: LocalServiceID } = {
+        const localService: ServiceCreate & { serviceID?: ServiceID } = {
           ...serviceBase,
           storeID: StoreID(request.body.storeID),
-          localServiceID: request.body.localServiceID
-            ? LocalServiceID(request.body.localServiceID)
-            : undefined,
-          localServiceVariants: request.body.localServiceVariants.map((serviceVariant) => {
+          serviceID: request.body.serviceID ? ServiceID(request.body.serviceID) : undefined,
+          serviceVariants: request.body.serviceVariants.map((serviceVariant) => {
             return {
-              localServicevariantID: serviceVariant.localServicevariantID
-                ? LocalServiceID(serviceVariant.localServicevariantID)
+              servicevariantID: serviceVariant.servicevariantID
+                ? ServiceID(serviceVariant.servicevariantID)
                 : undefined,
-              localServiceID: serviceVariant.localServiceID
-                ? LocalServiceID(serviceVariant.localServiceID)
-                : undefined,
+              serviceID: serviceVariant.serviceID ? ServiceID(serviceVariant.serviceID) : undefined,
               name: ServiceName(serviceVariant.name),
               award: Award(serviceVariant.award),
               cost: ServiceCostDinero(
@@ -191,6 +172,7 @@ export async function services(fastify: FastifyInstance) {
       } else {
         const serviceNew: ServiceCreate & { serviceID?: ServiceID } = {
           ...serviceBase,
+          storeID: request.body.storeID ? StoreID(request.body.storeID) : undefined,
           serviceID: request.body.serviceID ? ServiceID(request.body.serviceID) : undefined,
           serviceVariants: request.body.serviceVariants.map((serviceVariant) => {
             return {
@@ -303,22 +285,11 @@ export async function services(fastify: FastifyInstance) {
             }
           })
 
-          const localServicesWithCost = services.localServices.map((serv) => {
-            const { cost, ...service } = serv
-            return {
-              ...service,
-              cost: cost.getAmount(),
-              currency: cost.getCurrency(),
-            }
-          })
-
           return reply.status(200).send({
             message: 'services',
             totalServices: ResultCount(services.services.length),
-            totalLocalServices: ResultCount(services.localServices.length),
             totalPage: Page(services.totalPage),
             perPage: Page(services.perPage),
-            localServices: localServicesWithCost,
             services: servicesWithCost,
             requestUrl: requestUrl,
             nextUrl: nextUrl,
@@ -350,19 +321,12 @@ export async function services(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      let id: ServiceID | LocalServiceID
-      if (request.params.type === 'Global') {
-        id = ServiceID(request.params.serviceID)
-      } else {
-        id = LocalServiceID(request.params.serviceID)
-      }
-      const service: Either<string, Service | LocalService> = await getServiceById({
-        type: request.params.type,
-        id: id,
-      })
+      const service: Either<string, Service> = await getServiceById(
+        ServiceID(request.params.serviceID),
+      )
       match(
         service,
-        (fetchedService: Service | LocalService) => {
+        (fetchedService: Service) => {
           return reply.status(200).send({ ...fetchedService })
         },
         (err) => {
@@ -391,12 +355,12 @@ export async function services(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const service: Either<string, OrderServInfo> = await getServicesWithVariants(
+      const service: Either<string, ServiceOrder[]> = await getServicesWithVariants(
         StoreID(request.params.storeID),
       )
       match(
         service,
-        (fetchedService: OrderServInfo) => {
+        (fetchedService: ServiceOrder[]) => {
           return reply.status(200).send({ ...fetchedService })
         },
         (err) => {
@@ -421,19 +385,12 @@ export async function services(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      let id: ServiceID | LocalServiceID
-      if (request.params.type === 'Global') {
-        id = ServiceID(request.params.serviceID)
-      } else {
-        id = LocalServiceID(request.params.serviceID)
-      }
-      const service: Either<string, Service | LocalService> = await deletetServiceById({
-        type: request.params.type,
-        id: id,
-      })
+      const service: Either<string, Service> = await deletetServiceById(
+        ServiceID(request.params.serviceID),
+      )
       match(
         service,
-        (fetchedService: Service | LocalService) => {
+        (fetchedService: Service) => {
           return reply.status(200).send({ ...fetchedService })
         },
         (err) => {
@@ -443,77 +400,37 @@ export async function services(fastify: FastifyInstance) {
     },
   )
 
+  //TODO check store!!!!
   fastify.post<{
-    Body: LocalServiceGlobalQualSchemaType
-    Reply: (MessageSchemaType & LocalServiceGlobalQualSchemaType) | MessageSchemaType
-  }>(
-    '/LocalServiceGlobalQuals',
-    {
-      preHandler: async (request, reply, done) => {
-        console.log(request.user)
-        //        fastify.authorize(request, reply, PermissionTitle('Set_global_quals_local_service'))
-        done()
-        return reply
-      },
-
-      schema: {
-        body: LocalServiceGlobalQualSchema,
-        response: {
-          200: { ...MessageSchema, ...LocalServiceGlobalQualSchema },
-          504: MessageSchema,
-        },
-      },
-    },
-    async (request, reply) => {
-      const serviceQual = {
-        localServiceID: LocalServiceID(request.body.localServiceID),
-        globalQualID: GlobalQualID(request.body.globalQualID),
-      }
-      const service: Either<string, LocalServiceGlobalQual> =
-        await setLocalServiceQualifications(serviceQual)
-      match(
-        service,
-        (servQual: LocalServiceGlobalQual) => {
-          return reply.status(200).send({ message: 'set quals for service', ...servQual })
-        },
-        (err) => {
-          return reply.status(504).send({ message: err })
-        },
-      )
-    },
-  )
-
-  fastify.post<{
-    Body: LocalServiceLocalQualSchemaType
+    Body: ServiceLocalQualSchemaType
     Reply: (MessageSchemaType & LocalServiceLocalQualSchemaType) | MessageSchemaType
   }>(
     '/LocalServiceLocalQuals',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
-        //        fastify.authorize(request, reply, PermissionTitle('Set_local_quals_local_service'))
+        fastify.authorize(request, reply, PermissionTitle('Set_local_quals_local_service'))
         done()
         return reply
       },
 
       schema: {
-        body: LocalServiceLocalQualSchema,
+        body: ServiceLocalQualSchema,
         response: {
-          201: { ...MessageSchema, ...LocalServiceLocalQualSchema },
+          201: { ...MessageSchema, ...ServiceLocalQualSchema },
           504: MessageSchema,
         },
       },
     },
     async (request, reply) => {
       const serviceQual = {
-        localServiceID: LocalServiceID(request.body.localServiceID),
+        serviceID: ServiceID(request.body.serviceID),
         localQualID: LocalQualID(request.body.localQualID),
       }
-      const service: Either<string, LocalServiceLocalQual> =
-        await setLocalServiceLocalQual(serviceQual)
+      const service: Either<string, ServiceLocalQual> = await setServiceLocalQual(serviceQual)
       match(
         service,
-        (servQual: LocalServiceLocalQual) => {
+        (servQual: ServiceLocalQual) => {
           return reply.status(201).send({ message: 'set quals for service', ...servQual })
         },
         (err) => {
@@ -654,8 +571,8 @@ export async function services(fastify: FastifyInstance) {
   )
 
   fastify.delete<{
-    Body: LocalServiceDeleteQualType
-    Reply: (MessageSchemaType & LocalServiceQualsSchemaType) | MessageSchemaType
+    Body: ServiceDeleteQualType
+    Reply: (MessageSchemaType & ServiceDeleteQualType) | MessageSchemaType
   }>(
     '/localServiceQualifications',
     {
@@ -669,7 +586,7 @@ export async function services(fastify: FastifyInstance) {
       schema: {
         body: getServiceByIDSchema,
         response: {
-          200: { ...MessageSchema, ...LocalServiceQualsSchema },
+          200: { ...MessageSchema, ...ServiceDeleteQual },
           404: MessageSchema,
         },
       },
@@ -681,14 +598,14 @@ export async function services(fastify: FastifyInstance) {
         : undefined
       let service: Either<string, GlobalServiceQuals>
       if (localQual != null) {
-        service = await deleteLocalServiceQualifications(
-          LocalServiceID(request.body.localServiceID),
+        service = await deleteServiceQualifications(
+          ServiceID(request.body.serviceID),
           localQual,
           globalQual,
         )
       } else {
-        service = await deleteLocalServiceQualifications(
-          LocalServiceID(request.body.localServiceID),
+        service = await deleteServiceQualifications(
+          ServiceID(request.body.serviceID),
           undefined,
           globalQual,
         )
@@ -726,16 +643,11 @@ export async function services(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      let service
-      if (request.params.type === 'Global') {
-        service = await getServiceQualifications(ServiceID(request.params.serviceID))
-      } else {
-        service = await getLocalServiceQualifications(LocalServiceID(request.params.serviceID))
-      }
+      const service = await getServiceQualifications(ServiceID(request.params.serviceID))
       match(
         service,
         (fetchedService) => {
-          return reply.status(200).send({ ...fetchedService })
+          return reply.status(200).send({ fetchedService })
         },
         (err) => {
           return reply.status(404).send({ message: err })

@@ -6,10 +6,8 @@ import { LocalQualIDSchema } from '../qulifications/qualificationsSchema.js'
 
 import { GlobalQualID, LocalQualID } from '../../utils/helper.js'
 
-export const LocalServiceIDSchema = Type.Number({ minimum: 0 })
 export const ServiceVariantIDSchema = Type.Number({ minimum: 0 })
 export const ServiceIDSchema = Type.Number({ minimum: 0 })
-export const LocalServicevariantIDSchema = Type.Number({ minimum: 0 })
 export const NameSchema = Type.String()
 const CostSchema = Type.Number()
 const CurrencySchema = Type.String()
@@ -62,8 +60,8 @@ export const ServiceVariantsCreateSchema = Type.Object({
 export type ServiceVariantsSchemaType = Static<typeof ServiceVariantsSchema>
 
 export const LocalServiceVariantsCreateSchema = Type.Object({
-  localServicevariantID: Type.Optional(LocalServicevariantIDSchema),
-  localServiceID: Type.Optional(LocalServiceIDSchema),
+  ServicevariantID: Type.Optional(ServiceVariantIDSchema),
+  servicedID: Type.Optional(ServiceIDSchema),
   name: NameSchema,
   award: AwardSchema,
   cost: CostSchema,
@@ -76,8 +74,8 @@ export const LocalServiceVariantsCreateSchema = Type.Object({
 })
 
 export const LocalServiceVariantsSchema = Type.Object({
-  localServicevariantID: Type.Optional(LocalServicevariantIDSchema),
-  localServiceID: LocalServiceIDSchema,
+  ServicevariantID: Type.Optional(ServiceVariantIDSchema),
+  servicedID: ServiceIDSchema,
   name: NameSchema,
   award: AwardSchema,
   cost: CostSchema,
@@ -94,7 +92,6 @@ export const LocalServiceVariantsSchema = Type.Object({
 export type LocalServiceVariantsSchemaType = Static<typeof LocalServiceVariantsSchema>
 
 export const ServiceNoVariantSchema = Type.Object({
-  localServiceID: Type.Optional(LocalServiceIDSchema),
   serviceID: Type.Optional(ServiceIDSchema),
   storeID: Type.Optional(storeID),
   cost: CostSchema,
@@ -172,12 +169,8 @@ export type getServiceByIDSchemaType = Static<typeof getServiceByIDSchema>
 
 export const ServicesPaginatedSchema = Type.Object({
   totalServices: Type.Number({ minimum: 0 }),
-  totalLocalServices: Type.Number({ minimum: 0 }),
   totalPage: Type.Number({ minimum: 0 }),
   perPage: Type.Number({ minimum: 0 }),
-  localServices: Type.Array(
-    Type.Composite([Type.Object({ colorForService: Type.Any() }), ServiceNoVariantSchema]),
-  ),
   services: Type.Array(
     Type.Composite([Type.Object({ colorForService: Type.Any() }), ServiceNoVariantSchema]),
   ),
@@ -189,14 +182,14 @@ export const ServicesPaginatedSchema = Type.Object({
 export type ServicesPaginatedSchemaType = Static<typeof ServicesPaginatedSchema>
 
 export const LocalServiceLocalQualSchema = Type.Object({
-  localServiceID: LocalServiceIDSchema,
+  serviceID: ServiceIDSchema,
   localQualID: LocalQualID,
 })
 
 export type LocalServiceLocalQualSchemaType = Static<typeof LocalServiceLocalQualSchema>
 
 export const LocalServiceGlobalQualSchema = Type.Object({
-  localServiceID: LocalServiceIDSchema,
+  serviceID: ServiceIDSchema,
   globalQualID: GlobalQualID,
 })
 
@@ -225,7 +218,7 @@ export const ServiceDeleteQual = Type.Object({
 export type ServiceDeleteQualType = Static<typeof ServiceDeleteQual>
 
 export const LocalServiceDeleteQual = Type.Object({
-  localServiceID: LocalServiceIDSchema,
+  servicedID: ServiceIDSchema,
   globalQualID: Type.Optional(GlobalQualID),
   localQualID: Type.Optional(LocalQualID),
 })

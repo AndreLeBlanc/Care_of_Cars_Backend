@@ -15,10 +15,11 @@
 | submissionTime | timestamp without time zone |  | false |  |  |  |
 | vatFree | boolean |  | false |  |  |  |
 | orderStatus | "orderStatus" |  | false |  |  |  |
-| currency | varchar(5) |  | false |  |  |  |
+| currency | varchar |  | false |  |  |  |
 | discount | real |  | false |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |
+| pickupTime | timestamp without time zone |  | false |  |  |  |
 
 ## Constraints
 
