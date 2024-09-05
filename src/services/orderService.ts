@@ -12,8 +12,6 @@ import {
 
 import Dinero, { Currency } from 'dinero.js'
 
-import { OrderRowNoDineroName } from './billingService.js'
-
 import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.js'
 
 import {
@@ -74,6 +72,12 @@ export type OrdersPaginated = {
     orderStatus: OrderStatus
     billed: Billed
   }[]
+}
+
+export type OrderRowNoDineroName = {
+  amount: Amount
+  cost: ServiceCostNumber | ProductCostNumber
+  currency: string
 }
 
 type OrderBase = {
