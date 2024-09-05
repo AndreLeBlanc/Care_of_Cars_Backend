@@ -22,6 +22,7 @@ import {
   OrderID,
   PaymentDays,
   ProductCostNumber,
+  ProductDescription,
   ServiceCostCurrency,
   ServiceCostDinero,
   ServiceCostNumber,
@@ -29,6 +30,7 @@ import {
   billOrders,
   bills,
   orderListing,
+  orderProducts,
   orders,
 } from '../schema/schema.js'
 
@@ -38,7 +40,7 @@ import Dinero, { Currency } from 'dinero.js'
 
 import { eq, or, sql } from 'drizzle-orm'
 
-import { Either, errorHandling, left, right } from '../utils/helper.js'
+import { Either, errorHandling, jsonAggBuildObject, left, right } from '../utils/helper.js'
 
 export type CreateBill = {
   billStatus: BillStatus
@@ -65,19 +67,25 @@ export type CreateBill = {
 }
 
 type OrderRow = {
-  name: ServiceName
+  name: ServiceName | ProductDescription
   amount: Amount
   cost: ServiceCostDinero
   total: ServiceCostDinero
 }
 
-export type OrderRowNoDineroName = {
-  amount: Amount
-  cost: ServiceCostNumber | ProductCostNumber
-  currency: string
-}
-
-type OrderRowNoDinero = OrderRowNoDineroName & { name: ServiceName }
+export type OrderRowNoDineroName =
+  | {
+      amount: Amount
+      cost: ServiceCostNumber
+      currency: string
+      name: ServiceName
+    }
+  | {
+      amount: Amount
+      cost: ProductCostNumber
+      currency: string
+      productDescription: ProductDescription
+    }
 
 export type Bill = CreateBill & {
   billID: BillID
@@ -86,6 +94,22 @@ export type Bill = CreateBill & {
   createdAt: Date
   updatedAt: Date
   orderRows: OrderRow[]
+}
+
+function orderRowPricing(row: OrderRowNoDineroName): OrderRow {
+  const nameOrDescription = 'name' in row ? row.name : row.productDescription
+
+  return {
+    name: nameOrDescription,
+    amount: row.amount,
+    cost: ServiceCostDinero(Dinero({ amount: row.cost, currency: row.currency as Currency })),
+    total: ServiceCostDinero(
+      Dinero({
+        amount: row.cost,
+        currency: row.currency as Currency,
+      }).multiply(row.amount),
+    ),
+  }
 }
 
 export async function newBill(bill: CreateBill, order: OrderID[]): Promise<Either<string, Bill>> {
@@ -101,14 +125,23 @@ export async function newBill(bill: CreateBill, order: OrderID[]): Promise<Eithe
             { orderID: OrderID; discount: ServiceCostNumber; currency: ServiceCostCurrency }[]
           >`json_agg(json_build_object( 'orderID',${orders.orderID} 'discount', ${orders.discount},
         'currency', ${orders.currency},))`.as('tagname'),
-          services: sql<OrderRowNoDinero[]>`json_agg(json_build_object( 'name',${orderListing.name}
-          'currency',${orderListing.currency}
-          'cost',${orderListing.cost}
-          'amount',${orderListing.amount}))`.as('tagname'),
+          products: jsonAggBuildObject({
+            productDescription: orderProducts.productDescription,
+            currency: orderProducts.currency,
+            cost: orderProducts.cost,
+            amount: orderProducts.amount,
+          }),
+          services: jsonAggBuildObject({
+            name: orderListing.name,
+            currency: orderListing.currency,
+            cost: orderListing.cost,
+            amount: orderListing.amount,
+          }),
         })
         .from(orders)
         .where(or(...order.map((orderID) => eq(orders.orderID, orderID))))
         .leftJoin(orderListing, eq(orders.orderID, orderListing.orderID))
+        .leftJoin(orderProducts, eq(orders.orderID, orderProducts.orderID))
 
       return {
         billID: newBill.billID,
@@ -139,19 +172,9 @@ export async function newBill(bill: CreateBill, order: OrderID[]): Promise<Eithe
         orders: CreatedBillOrders.map((bo) => bo.orderID),
         createdAt: newBill.createdAt,
         updatedAt: newBill.updatedAt,
-        orderRows: orderInfo.services.map((serv) => ({
-          name: serv.name,
-          amount: serv.amount,
-          cost: ServiceCostDinero(
-            Dinero({ amount: serv.cost, currency: serv.currency as Currency }),
-          ),
-          total: ServiceCostDinero(
-            Dinero({
-              amount: serv.cost,
-              currency: serv.currency as Currency,
-            }).multiply(serv.amount),
-          ),
-        })),
+        orderRows: orderInfo.services
+          .map(orderRowPricing)
+          .concat(orderInfo.products.map(orderRowPricing)),
       }
     })
     return right(createBill)
@@ -170,10 +193,18 @@ export async function getBill(bill: BillID): Promise<Either<string, Bill>> {
         >`json_agg(json_build_object( 'orderID',${orders.orderID} 'discount', ${orders.discount},
         'currency', ${orders.currency},))`.as('tagname'),
 
-        services: sql<OrderRowNoDinero[]>`json_agg(json_build_object( 'name',${orderListing.name}
-          'currency',${orderListing.currency}
-          'cost',${orderListing.cost}
-          'amount',${orderListing.amount}))`.as('tagname'),
+        products: jsonAggBuildObject({
+          productDescription: orderProducts.productDescription,
+          currency: orderProducts.currency,
+          cost: orderProducts.cost,
+          amount: orderProducts.amount,
+        }),
+        services: jsonAggBuildObject({
+          name: orderListing.name,
+          currency: orderListing.currency,
+          cost: orderListing.cost,
+          amount: orderListing.amount,
+        }),
       })
       .from(bills)
       .where(eq(bills.billID, bill))
@@ -213,17 +244,9 @@ export async function getBill(bill: BillID): Promise<Either<string, Bill>> {
       orders: billedOrders.billOrders.map((bo) => bo.orderID),
       createdAt: billedOrders.bill.createdAt,
       updatedAt: billedOrders.bill.updatedAt,
-      orderRows: billedOrders.services.map((serv) => ({
-        name: serv.name,
-        amount: serv.amount,
-        cost: ServiceCostDinero(Dinero({ amount: serv.cost, currency: serv.currency as Currency })),
-        total: ServiceCostDinero(
-          Dinero({
-            amount: serv.cost,
-            currency: serv.currency as Currency,
-          }).multiply(serv.amount),
-        ),
-      })),
+      orderRows: billedOrders.services
+        .map(orderRowPricing)
+        .concat(billedOrders.products.map(orderRowPricing)),
     })
   } catch (e) {
     return left(errorHandling(e))
