@@ -469,10 +469,18 @@ export const WorkDay5 = make<WorkDay5>()
 
 export type BillID = Brand<number, 'billID'>
 export const BillID = make<BillID>()
+export type BillingDate = Brand<string, 'billingDate'>
+export const BillingDate = make<BillingDate>()
+export type PaymentDate = Brand<string, 'paymentDate'>
+export const PaymentDate = make<PaymentDate>()
 export type IsBilled = Brand<boolean, 'isBilleded'>
 export const IsBilled = make<IsBilled>()
 export type PaymentDays = Brand<number, 'paymentDays'>
 export const PaymentDays = make<PaymentDays>()
+export type BilledAmount = Brand<number, 'billedAmount'>
+export const BilledAmount = make<BilledAmount>()
+export type BillAmount = Brand<Dinero, 'billAmount'>
+export const BillAmount = make<BillAmount>()
 
 export type CheckedInStatus = 'CheckedIn' | 'CheckedOut'
 
@@ -1540,12 +1548,20 @@ export type BillStatus = (typeof billStatus)[number]
 
 export const bills = pgTable('bills', {
   billID: serial('orderID').$type<BillID>().primaryKey(),
+  storeID: integer('storeID')
+    .$type<StoreID>()
+    .references(() => stores.storeID, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
   billStatus: billStatuspgEnum('billStatus').notNull(),
+  billedAmount: real('billedAmount').$type<BilledAmount>().notNull(),
+  currency: varchar('currency').notNull(),
   bookedBy: integer('employeeID')
     .$type<EmployeeID>()
     .references(() => employees.employeeID, { onDelete: 'no action' }),
-  billingDate: date('billingDate').notNull(),
-  paymentDate: date('paymentDate').notNull(),
+  billingDate: date('billingDate').$type<BillingDate>().notNull(),
+  paymentDate: date('paymentDate').$type<PaymentDate>().notNull(),
   paymentDays: integer('paymentDays').$type<PaymentDays>().notNull(),
   driverID: integer('driverID')
     .$type<DriverID>()
@@ -1592,6 +1608,7 @@ export const billsRelations = relations(bills, ({ many, one }) => ({
     fields: [bills.customerOrgNumber],
     references: [companycustomers.customerOrgNumber],
   }),
+  stores: one(stores),
 }))
 
 export const billOrders = pgTable(

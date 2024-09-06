@@ -193,6 +193,8 @@ export const ListOrdersQueryParamSchema = Type.Object({
   limit: Type.Optional(Type.Integer({ minimum: 1, default: 10 })),
   page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
   orderStatusSearch: Type.Optional(OrderStatusSchema),
+  to: Type.Optional(Type.String({ format: 'date-time' })),
+  from: Type.Optional(Type.String({ format: 'date-time' })),
   billingStatusSearch: Type.Optional(Type.Boolean()),
 })
 

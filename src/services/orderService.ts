@@ -1,6 +1,6 @@
 import { db } from '../config/db-connect.js'
 
-import { and, count, eq, getTableColumns, ilike, or, sql } from 'drizzle-orm'
+import { and, count, eq, getTableColumns, gte, ilike, lte, or, sql } from 'drizzle-orm'
 
 import { Either, errorHandling, jsonAggBuildObject, left, right } from '../utils/helper.js'
 
@@ -508,7 +508,9 @@ export async function listOrders(
   limit = Limit(10),
   page = Page(1),
   offset = Offset(0),
-  store: StoreID,
+  store?: StoreID,
+  to?: SubmissionTimeOrder,
+  from?: SubmissionTimeOrder,
   orderStatusSearch?: OrderStatus,
   billingStatusSearch?: IsBilled,
 ): Promise<Either<string, OrdersPaginated>> {
@@ -519,7 +521,6 @@ export async function listOrders(
         ilike(orders.orderStatus, search)
       } else {
         condition = and(
-          eq(orders.storeID, store),
           or(
             sql`CAST(${orders.createdAt} AS TEXT) ILIKE ${'%' + search + '%'}`,
             sql`CAST(${orders.updatedAt} AS TEXT) ILIKE ${'%' + search + '%'}`,
@@ -532,6 +533,10 @@ export async function listOrders(
       if (orderStatusSearch != null) {
         condition = or(condition, ilike(orders.orderStatus, '%' + orderStatusSearch + '%'))
       }
+
+      condition = to ? and(condition, lte(orders.submissionTime, to)) : condition
+      condition = from ? and(condition, gte(orders.submissionTime, from)) : condition
+      condition = store ? and(condition, eq(orders.storeID, store)) : condition
       if (billingStatusSearch != null) {
         if (billingStatusSearch) {
           condition = or(

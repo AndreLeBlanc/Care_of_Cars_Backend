@@ -1,7 +1,10 @@
 import {
   Amount,
+  BillAmount,
   BillID,
   BillStatus,
+  BilledAmount,
+  BillingDate,
   CompanyReference,
   CustomerCardNumber,
   CustomerOrgNumber,
@@ -20,6 +23,7 @@ import {
   DriverZipCode,
   EmployeeID,
   OrderID,
+  PaymentDate,
   PaymentDays,
   ProductCostNumber,
   ProductDescription,
@@ -27,6 +31,7 @@ import {
   ServiceCostDinero,
   ServiceCostNumber,
   ServiceName,
+  StoreID,
   billOrders,
   bills,
   orderListing,
@@ -34,19 +39,24 @@ import {
   orders,
 } from '../schema/schema.js'
 
+import { Limit, Offset, Page, ResultCount, Search } from '../plugins/pagination.js'
+
 import { db } from '../config/db-connect.js'
 
 import Dinero, { Currency } from 'dinero.js'
 
-import { eq, or, sql } from 'drizzle-orm'
+import { and, count, eq, gte, ilike, lte, or, sql } from 'drizzle-orm'
 
 import { Either, errorHandling, jsonAggBuildObject, left, right } from '../utils/helper.js'
 
 export type CreateBill = {
   billStatus: BillStatus
+  storeID: StoreID
+  billedAmount: BilledAmount
+  currency: string
   bookedBy?: EmployeeID
-  billingDate: string
-  paymentDate: string
+  billingDate: BillingDate
+  paymentDate: PaymentDate
   paymentDays: PaymentDays
   driverID: DriverID
   customerOrgNumber?: CustomerOrgNumber
@@ -96,6 +106,24 @@ export type Bill = CreateBill & {
   orderRows: OrderRow[]
 }
 
+type ListedBills = {
+  billID: BillID
+  driverID: DriverID
+  driverFirstName: DriverFirstName
+  driverLastName: DriverLastName
+  billingDate: BillingDate
+  paymentDate: PaymentDate
+  billStatus: BillStatus
+  billed: BillAmount
+}
+
+export type BillsPaginated = {
+  totalBills: ResultCount
+  totalPage: Page
+  perPage: Limit
+  page: Page
+  bills: ListedBills[]
+}
 function orderRowPricing(row: OrderRowNoDineroName): OrderRow {
   const nameOrDescription = 'name' in row ? row.name : row.productDescription
 
@@ -145,6 +173,9 @@ export async function newBill(bill: CreateBill, order: OrderID[]): Promise<Eithe
 
       return {
         billID: newBill.billID,
+        storeID: newBill.storeID,
+        billedAmount: newBill.billedAmount,
+        currency: newBill.currency,
         billStatus: newBill.billStatus,
         bookedBy: newBill.bookedBy ?? undefined,
         billingDate: newBill.billingDate,
@@ -208,12 +239,15 @@ export async function getBill(bill: BillID): Promise<Either<string, Bill>> {
       })
       .from(bills)
       .where(eq(bills.billID, bill))
-      .innerJoin(billOrders, eq(billOrders.billID, bills.billID))
-      .innerJoin(orders, eq(billOrders.orderID, orders.orderID))
+      .leftJoin(billOrders, eq(billOrders.billID, bills.billID))
+      .leftJoin(orders, eq(billOrders.orderID, orders.orderID))
       .leftJoin(orderListing, eq(orders.orderID, orderListing.orderID))
 
     return right({
       billID: bill,
+      storeID: billedOrders.bill.storeID,
+      billedAmount: billedOrders.bill.billedAmount,
+      currency: billedOrders.bill.currency,
       billStatus: billedOrders.bill.billStatus,
       bookedBy: billedOrders.bill.bookedBy ?? undefined,
       billingDate: billedOrders.bill.billingDate,
@@ -247,6 +281,83 @@ export async function getBill(bill: BillID): Promise<Either<string, Bill>> {
       orderRows: billedOrders.services
         .map(orderRowPricing)
         .concat(billedOrders.products.map(orderRowPricing)),
+    })
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function listBill(
+  search: Search,
+  limit = Limit(10),
+  page = Page(1),
+  offset = Offset(0),
+  store?: StoreID,
+  to?: BillingDate,
+  from?: BillingDate,
+  orderStatusSearch?: BillStatus,
+): Promise<Either<string, BillsPaginated>> {
+  let condition
+  if (Object.values(bills.billStatus).includes(search as BillStatus)) {
+    ilike(bills.billStatus, search)
+  } else {
+    condition = and(
+      or(
+        sql`CAST(${bills.billingDate} AS TEXT) ILIKE ${'%' + search + '%'}`,
+        sql`CAST(${bills.paymentDate} AS TEXT) ILIKE ${'%' + search + '%'}`,
+        ilike(bills.driverFirstName, '%' + search + '%'),
+        ilike(bills.driverLastName, '%' + search + '%'),
+      ),
+    )
+  }
+  if (orderStatusSearch != null) {
+    condition = or(condition, ilike(orders.orderStatus, '%' + orderStatusSearch + '%'))
+  }
+
+  condition = to ? and(condition, lte(bills.billingDate, to)) : condition
+  condition = from ? and(condition, gte(bills.billingDate, from)) : condition
+  condition = store ? and(condition, eq(orders.storeID, store)) : condition
+
+  try {
+    return await db.transaction(async (tx) => {
+      const billList = await db
+        .select({
+          billID: bills.billID,
+          driverID: bills.driverID,
+          driverFirstName: bills.driverFirstName,
+          driverLastName: bills.driverLastName,
+          billingDate: bills.billingDate,
+          paymentDate: bills.paymentDate,
+          billStatus: bills.billStatus,
+          billedAmount: bills.billedAmount,
+          currency: bills.currency,
+        })
+        .from(bills)
+        .where(condition)
+        .limit(limit || 10)
+        .offset(offset || 0)
+
+      const [billCount] = await tx.select({ count: count() }).from(bills).where(condition)
+      const totalPage = Page(Math.ceil(billCount.count / limit))
+
+      return right({
+        totalBills: ResultCount(billCount.count),
+        totalPage: totalPage,
+        perPage: limit,
+        page: page,
+        bills: billList.map((bill) => ({
+          billID: bill.billID,
+          driverID: bill.driverID,
+          driverFirstName: bill.driverFirstName,
+          driverLastName: bill.driverLastName,
+          billingDate: bill.billingDate,
+          paymentDate: bill.paymentDate,
+          billStatus: bill.billStatus,
+          billed: BillAmount(
+            Dinero({ amount: bill.billedAmount, currency: bill.currency as Currency }),
+          ),
+        })),
+      })
     })
   } catch (e) {
     return left(errorHandling(e))
