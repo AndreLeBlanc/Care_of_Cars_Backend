@@ -14,7 +14,7 @@ const ProductBaseSchema = Type.Object({
   productItemNumber: Type.String(),
   cost: ProductCostSchema,
   productCategoryID: CategoryIDSchema,
-  productDescription: Type.Optional(ProductDescriptionSchema),
+  productDescription: ProductDescriptionSchema,
   productSupplierArticleNumber: Type.Optional(Type.String()),
   productExternalArticleNumber: Type.Optional(Type.String()),
   productUpdateRelatedData: Type.Optional(Type.Boolean()),
@@ -54,8 +54,8 @@ export const DeleteProductSchema = Type.Object({
   type: Type.Union([Type.Literal('Local'), Type.Literal('Global')]),
 })
 
-export const DeleteLocalProduct = Type.Object({
-  localProductID: LocalProductIDSchema,
+export const GetProductSchema = Type.Object({
+  productID: ProductIDSchema,
 })
 
 export const ListProductsQueryParamSchema = Type.Object({
@@ -73,15 +73,6 @@ export const ProductsPaginatedSchema = Type.Object({
   totalPage: Type.Number({ minimum: 0 }),
   page: Type.Number({ minimum: 0 }),
   limit: Type.Number({ minimum: 0 }),
-  localProducts: Type.Array(
-    Type.Composite([
-      Type.Object({
-        localProductID: LocalProductIDSchema,
-        currency: ProductCostCurrencySchema,
-      }),
-      ProductBaseSchema,
-    ]),
-  ),
   products: Type.Array(
     Type.Composite([
       Type.Object({
@@ -95,6 +86,7 @@ export const ProductsPaginatedSchema = Type.Object({
 
 export type ListProductsQueryParamSchemaType = Static<typeof ListProductsQueryParamSchema>
 export type DeleteProductSchemaType = Static<typeof DeleteProductSchema>
+export type GetProductSchemaType = Static<typeof GetProductSchema>
 export type AddProductSchemaType = Static<typeof AddProductSchema>
 export type ProductReplySchemaType = Static<typeof ProductReplySchema>
 export type ProductReplyMessageSchemaType = Static<typeof ProductReplyMessageSchema>

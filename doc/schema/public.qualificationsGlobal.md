@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| globalQualID | integer | nextval('"qualificationsGlobal_globalQualID_seq"'::regclass) | false | [public.employeeGlobalQualifications](public.employeeGlobalQualifications.md) [public.localServiceGlobalQualifications](public.localServiceGlobalQualifications.md) [public.serviceQualifications](public.serviceQualifications.md) |  |  |
+| globalQualID | integer | nextval('"qualificationsGlobal_globalQualID_seq"'::regclass) | false | [public.employeeGlobalQualifications](public.employeeGlobalQualifications.md) [public.serviceQualifications](public.serviceQualifications.md) |  |  |
 | globalQualName | varchar(64) |  | false |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |

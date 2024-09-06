@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, getTableColumns, ilike, isNull, or, sql } from 'drizzle-orm'
 import { db } from '../config/db-connect.js'
 
 import { listServiceOrderByEnum, serviceOrderEnum } from '../routes/services/serviceSchema.js'
@@ -38,9 +38,20 @@ import Dinero, { Currency } from 'dinero.js'
 
 import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
-import { Either, Right, errorHandling, isRight, left, match, right } from '../utils/helper.js'
+import {
+  Either,
+  Right,
+  errorHandling,
+  isRight,
+  jsonAggBuildObject,
+  left,
+  match,
+  right,
+} from '../utils/helper.js'
 
-type ServiceVariantBase = {
+type ServiceVariant = {
+  serviceID?: ServiceID
+  serviceVariantID?: ServiceID
   name: ServiceName
   award: Award
   cost: ServiceCostDinero
@@ -50,10 +61,18 @@ type ServiceVariantBase = {
   day4?: ServiceDay4
   day5?: ServiceDay5
 }
-
-export type ServiceVariant = ServiceVariantBase & {
+type ServiceVariantUnBranded = {
   serviceID?: ServiceID
   serviceVariantID?: ServiceID
+  name: ServiceName
+  award: Award
+  cost: ServiceCostNumber
+  currency: string
+  day1: ServiceDay1 | null
+  day2: ServiceDay2 | null
+  day3: ServiceDay3 | null
+  day4: ServiceDay4 | null
+  day5: ServiceDay5 | null
 }
 
 export type ServicesPaginated = {
@@ -88,7 +107,17 @@ export type ServiceCreate = ServiceBase & {
   serviceVariants: ServiceVariant[]
 }
 
+type DeletedServiceVariant = {
+  serviceVariantID: ServiceID
+  name: ServiceName
+}
+
 export type Service = ServiceCreate & { serviceID: ServiceID; serviceVariants: ServiceVariant[] }
+export type ServicePatch = ServiceCreate & {
+  serviceID: ServiceID
+  serviceVariants: ServiceVariant[]
+  deletedVariants: DeletedServiceVariant[]
+}
 
 export type ServiceLocalQual = {
   serviceID: ServiceID
@@ -189,7 +218,8 @@ function brander(rawService: ServiceUnBranded): Either<string, Service> {
 
 export async function createService(
   service: ServiceCreate & { serviceID?: ServiceID },
-): Promise<Either<string, Service>> {
+  deleteServiceVariants: ServiceID[],
+): Promise<Either<string, ServicePatch>> {
   const color: ColorForService = service.colorForService || 'None'
 
   const currency = service.cost.getCurrency()
@@ -245,24 +275,47 @@ export async function createService(
         updatedAt: new Date(),
       }))
 
-      const variants = await Promise.all(
-        serviceVariantArr.map(async (serviceVariant) => {
-          if (serviceVariant.serviceVariantID) {
-            return await tx
-              .update(serviceVariants)
-              .set(serviceVariant)
-              .where(eq(serviceVariants.serviceVariantID, serviceVariant.serviceVariantID))
-              .returning()
-          } else {
-            return await tx.insert(serviceVariants).values(serviceVariant).returning()
-          }
-        }),
-      )
+      let variants: ServiceVariantUnBranded[] = []
+      if (0 < serviceVariantArr.length) {
+        variants = await tx
+          .insert(serviceVariants)
+          .values(serviceVariantArr)
+          .onConflictDoUpdate({
+            target: serviceVariants.serviceVariantID,
+            set: {
+              serviceVariantID: sql`"excluded"."serviceVariantID"`,
+              serviceID: sql`"excluded"."serviceID"`,
+              name: sql`"excluded"."name"`,
+              cost: sql`"excluded"."cost"`,
+              currency: sql`"excluded"."currency"`,
+              award: sql`"excluded"."award"`,
+              day1: sql`"excluded"."day1"`,
+              day2: sql`"excluded"."day2"`,
+              day3: sql`"excluded"."day3"`,
+              day4: sql`"excluded"."day4"`,
+              day5: sql`"excluded"."day5"`,
+              updatedAt: sql`"excluded"."updatedAt"`,
+            },
+          })
+          .returning()
+      }
+
+      let deletedVariants: DeletedServiceVariant[] = []
+      if (0 < deleteServiceVariants.length) {
+        deletedVariants = await tx
+          .delete(serviceVariants)
+          .where(sql`${serviceVariants.serviceVariantID} IN ${deleteServiceVariants}`)
+          .returning({
+            serviceVariantID: serviceVariants.serviceVariantID,
+            name: serviceVariants.name,
+          })
+      }
 
       let variantsDinero: ServiceVariant[] = []
       if (variants != null) {
         variantsDinero = variants.flat().map((vari) => {
           return {
+            serviceVariantID: vari.serviceVariantID,
             serviceID: vari.serviceID,
             name: vari.name,
             cost: ServiceCostDinero(
@@ -280,9 +333,11 @@ export async function createService(
           }
         })
       }
+
       return match(
         insertedServiceBranded,
-        (brandedService) => right({ ...brandedService, serviceVariants: variantsDinero }),
+        (brandedService) =>
+          right({ ...brandedService, serviceVariants: variantsDinero, deletedVariants }),
         (err) => left(err),
       )
     })
@@ -311,7 +366,9 @@ export async function getServicesPaginate(
     ),
   )
 
-  condition = storeID ? and(condition, eq(services.storeID, storeID)) : condition
+  condition = storeID
+    ? and(condition, or(isNull(services.storeID), eq(services.storeID, storeID)))
+    : condition
 
   let orderCondition
 
@@ -343,7 +400,7 @@ export async function getServicesPaginate(
         .where(condition)
 
       const servicesList = await tx.query.services.findMany({
-        // where: condition,
+        where: condition,
         limit: limit || 10,
         offset: offset || 0,
         orderBy: orderCondition,
@@ -388,7 +445,10 @@ export async function getServicesWithVariants(
 ): Promise<Either<string, ServiceOrder[]>> {
   try {
     const condition = store
-      ? and(eq(services.hidden, ServiceHidden(false)), eq(services.storeID, store))
+      ? and(
+          eq(services.hidden, ServiceHidden(false)),
+          or(eq(services.storeID, store), isNull(services.storeID)),
+        )
       : eq(services.hidden, ServiceHidden(false))
     const servs = await db
       .select({
@@ -417,7 +477,7 @@ export async function getServicesWithVariants(
       .from(services)
       .where(condition)
       .leftJoin(serviceVariants, eq(serviceVariants.serviceID, services.serviceID))
-      .groupBy(services.serviceID, services.name)
+      .groupBy(services.serviceID)
 
     return right(servs)
   } catch (e) {
@@ -427,35 +487,64 @@ export async function getServicesWithVariants(
 
 export async function getServiceById(id: ServiceID): Promise<Either<string, Service>> {
   try {
-    const servicesDetail = await db
-      .select()
+    const [servicesDetail] = await db
+      .select({
+        serviceID: services.serviceID,
+        serviceCategoryID: services.serviceCategoryID,
+        name: services.name,
+        storeID: services.storeID,
+        currency: services.currency,
+        cost: services.cost,
+        includeInAutomaticSms: services.includeInAutomaticSms,
+        hidden: services.hidden,
+        callInterval: services.callInterval,
+        colorForService: services.colorForService,
+        warrantyCard: services.warrantyCard,
+        itemNumber: services.itemNumber,
+        award: services.award,
+        suppliersArticleNumber: services.suppliersArticleNumber,
+        externalArticleNumber: services.externalArticleNumber,
+        day1: services.day1,
+        day2: services.day2,
+        day3: services.day3,
+        day4: services.day4,
+        day5: services.day5,
+        createdAt: services.createdAt,
+        updatedAt: services.updatedAt,
+        serviceVariants: jsonAggBuildObject(getTableColumns(serviceVariants)),
+      })
       .from(services)
       .where(eq(services.serviceID, id))
       .leftJoin(serviceVariants, eq(serviceVariants.serviceID, id))
+      .groupBy(services.serviceID)
 
-    const variants = servicesDetail.reduce<ServiceVariant[]>((acc, serviceVariant) => {
-      if (serviceVariant.serviceVariants != null) {
-        acc.push({
-          serviceVariantID: serviceVariant.serviceVariants.serviceVariantID,
-          serviceID: serviceVariant.services.serviceID,
-          name: serviceVariant.serviceVariants.name,
-          cost: ServiceCostDinero(
-            Dinero({
-              amount: serviceVariant.serviceVariants.cost,
-              currency: serviceVariant.serviceVariants.currency as Currency,
-            }),
-          ),
-          award: serviceVariant.serviceVariants.award,
-          day1: serviceVariant.serviceVariants.day1 ?? undefined,
-          day2: serviceVariant.serviceVariants.day2 ?? undefined,
-          day3: serviceVariant.serviceVariants.day3 ?? undefined,
-          day4: serviceVariant.serviceVariants.day4 ?? undefined,
-          day5: serviceVariant.serviceVariants.day5 ?? undefined,
-        })
-      }
-      return acc
-    }, [])
-    const branded = brander(servicesDetail[0].services)
+    let variants: ServiceVariant[] = []
+
+    if (servicesDetail.serviceVariants) {
+      variants = servicesDetail.serviceVariants.reduce<ServiceVariant[]>((acc, serviceVariant) => {
+        if (serviceVariants != null) {
+          acc.push({
+            serviceVariantID: serviceVariant.serviceVariantID,
+            serviceID: serviceVariant.serviceID,
+            name: serviceVariant.name,
+            cost: ServiceCostDinero(
+              Dinero({
+                amount: serviceVariant.cost,
+                currency: serviceVariant.currency as Currency,
+              }),
+            ),
+            award: serviceVariant.award,
+            day1: serviceVariant.day1 ?? undefined,
+            day2: serviceVariant.day2 ?? undefined,
+            day3: serviceVariant.day3 ?? undefined,
+            day4: serviceVariant.day4 ?? undefined,
+            day5: serviceVariant.day5 ?? undefined,
+          })
+        }
+        return acc
+      }, [])
+    }
+    const branded = brander(servicesDetail)
     return match(
       branded,
       (brandedService) => right({ ...brandedService, serviceVariants: variants }),

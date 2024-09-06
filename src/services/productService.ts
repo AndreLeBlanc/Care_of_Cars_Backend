@@ -16,7 +16,7 @@ import {
 } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
 
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, desc, eq, ilike, isNull, or, sql } from 'drizzle-orm'
 
 import { Limit, Offset, Page } from '../plugins/pagination.js'
 
@@ -28,7 +28,7 @@ export type ProductBase = {
   productItemNumber: ProductItemNumber
   cost: ProductCostDinero
   productCategoryID: ProductCategoryID
-  productDescription?: ProductDescription
+  productDescription: ProductDescription
   productSupplierArticleNumber?: ProductSupplierArticleNumber
   productExternalArticleNumber?: ProductExternalArticleNumber
   productUpdateRelatedData?: ProductUpdateRelatedData
@@ -54,7 +54,7 @@ type BrandMe = {
   cost: ProductCostNumber
   currency: string
   productCategoryID: ProductCategoryID
-  productDescription: ProductDescription | null
+  productDescription: ProductDescription
   productSupplierArticleNumber: ProductSupplierArticleNumber | null
   productExternalArticleNumber: ProductExternalArticleNumber | null
   productUpdateRelatedData: ProductUpdateRelatedData | null
@@ -75,7 +75,7 @@ function brander(newProduct: BrandMe): Either<string, Product> {
             currency: newProduct.currency as Dinero.Currency,
           }),
         ),
-        productDescription: newProduct.productDescription ?? undefined,
+        productDescription: newProduct.productDescription,
         productExternalArticleNumber: newProduct.productExternalArticleNumber ?? undefined,
         productInventoryBalance: newProduct.productInventoryBalance ?? undefined,
         productSupplierArticleNumber: newProduct.productSupplierArticleNumber ?? undefined,
@@ -138,6 +138,7 @@ export async function editProduct(
       .set(add)
       .where(eq(products.productID, productID))
       .returning()
+
     return brander(editProduct)
   } catch (e) {
     return left(errorHandling(e))
@@ -183,7 +184,9 @@ export async function getProductsPaginated(
         ilike(products.productSupplierArticleNumber, '%' + search + '%'),
       )
 
-      condition = storeID ? and(condition, eq(products.storeID, storeID)) : condition
+      condition = storeID
+        ? and(condition, or(eq(products.storeID, storeID), isNull(products.storeID)))
+        : condition
       // Query for total items count
       const [totalItems] = await tx
         .select({ count: sql`COUNT(*)`.mapWith(Number).as('count') }) //{
@@ -194,6 +197,7 @@ export async function getProductsPaginated(
       const productList = await tx
         .select({
           productID: products.productID,
+          storeID: products.storeID,
           productCategoryID: products.productCategoryID,
           productItemNumber: products.productItemNumber,
           award: products.award,
@@ -219,6 +223,7 @@ export async function getProductsPaginated(
     const productsBrandedList = productList.map((item) => {
       return {
         productID: item.productID,
+        storeID: item.storeID ?? undefined,
         productCategoryID: item.productCategoryID,
         productItemNumber: item.productItemNumber,
         award: item.award,

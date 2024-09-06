@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| serviceVariantID | integer | nextval('"serviceVariants_serviceVariantID_seq"'::regclass) | false | [public.orderServices](public.orderServices.md) |  |  |
+| serviceVariantID | integer | nextval('"serviceVariants_serviceVariantID_seq"'::regclass) | false | [public.orderListing](public.orderListing.md) |  |  |
 | name | varchar(256) |  | false |  |  |  |
 | cost | real |  | false |  |  |  |
 | currency | varchar(5) |  | false |  |  |  |

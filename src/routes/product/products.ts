@@ -7,6 +7,8 @@ import {
   DeleteProductReplySchemaType,
   DeleteProductSchema,
   DeleteProductSchemaType,
+  GetProductSchema,
+  GetProductSchemaType,
   ListProductsQueryParamSchema,
   ListProductsQueryParamSchemaType,
   ProductReplyMessageSchema,
@@ -100,7 +102,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         productItemNumber: ProductItemNumber(productItemNumber),
         award: Award(award),
         cost: ProductCostDinero(Dinero({ amount: cost, currency: currency as Dinero.Currency })),
-        productDescription: productDescription ? ProductDescription(productDescription) : undefined,
+        productDescription: ProductDescription(productDescription),
         productExternalArticleNumber: productExternalArticleNumber
           ? ProductExternalArticleNumber(productExternalArticleNumber)
           : undefined,
@@ -189,7 +191,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         productItemNumber: ProductItemNumber(productItemNumber),
         award: Award(award),
         cost: ProductCostDinero(Dinero({ amount: cost, currency: currency as Dinero.Currency })),
-        productDescription: productDescription ? ProductDescription(productDescription) : undefined,
+        productDescription: ProductDescription(productDescription),
         productExternalArticleNumber: productExternalArticleNumber
           ? ProductExternalArticleNumber(productExternalArticleNumber)
           : undefined,
@@ -281,10 +283,10 @@ export const productsRoute = async (fastify: FastifyInstance) => {
   )
 
   fastify.get<{
-    Params: DeleteProductSchemaType
+    Params: GetProductSchemaType
     Reply: ProductReplySchemaType | ProductReplyMessageSchemaType
   }>(
-    '/:id/:type',
+    '/:productID',
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('get_product_by_id')
@@ -293,7 +295,7 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        params: DeleteProductSchema,
+        params: GetProductSchema,
         response: {
           200: ProductReplySchema,
           404: ProductReplyMessageSchema,
@@ -301,14 +303,10 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const { id, type } = request.params
+      const { productID } = request.params
 
       let productData: Either<string, Product> = left('Product not found')
-      if (type === 'Global') {
-        productData = await getProductById(ProductID(id))
-      } else if (type === 'Local') {
-        productData = await getProductById(ProductID(id))
-      }
+      productData = await getProductById(ProductID(productID))
 
       function unDineroGlobal(prod: Product) {
         const { cost, ...prodInfo } = prod

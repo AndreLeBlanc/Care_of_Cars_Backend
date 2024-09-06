@@ -197,7 +197,7 @@ export default fp(async () => {
               serviceVariants: [],
             }
 
-            const service: Either<string, Service> = await createService(newService)
+            const service: Either<string, Service> = await createService(newService, [])
             console.log('created service status: ', service)
           },
           (err: string) => {

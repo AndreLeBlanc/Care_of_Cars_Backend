@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| serviceCategoryID | integer | nextval('"serviceCategories_serviceCategoryID_seq"'::regclass) | false | [public.localServices](public.localServices.md) [public.services](public.services.md) |  |  |
+| serviceCategoryID | integer | nextval('"serviceCategories_serviceCategoryID_seq"'::regclass) | false | [public.services](public.services.md) |  |  |
 | serviceCategoryName | varchar(256) |  | false |  |  |  |
 | serviceCategoryDescription | varchar |  | true |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |

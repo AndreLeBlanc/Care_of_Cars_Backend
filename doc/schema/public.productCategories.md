@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| productCategoryID | integer | nextval('"productCategories_productCategoryID_seq"'::regclass) | false | [public.localProducts](public.localProducts.md) [public.products](public.products.md) |  |  |
+| productCategoryID | integer | nextval('"productCategories_productCategoryID_seq"'::regclass) | false | [public.products](public.products.md) |  |  |
 | name | varchar(256) |  | false |  |  |  |
 | description | text |  | true |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |

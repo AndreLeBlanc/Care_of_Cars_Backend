@@ -6,9 +6,10 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| serviceID | integer | nextval('"services_serviceID_seq"'::regclass) | false | [public.orderServices](public.orderServices.md) [public.serviceLocalQualifications](public.serviceLocalQualifications.md) [public.serviceQualifications](public.serviceQualifications.md) [public.serviceVariants](public.serviceVariants.md) |  |  |
-| name | varchar(256) |  | false |  |  |  |
+| serviceID | integer | nextval('"services_serviceID_seq"'::regclass) | false | [public.orderListing](public.orderListing.md) [public.serviceLocalQualifications](public.serviceLocalQualifications.md) [public.serviceQualifications](public.serviceQualifications.md) [public.serviceVariants](public.serviceVariants.md) |  |  |
 | serviceCategoryID | integer |  | false |  | [public.serviceCategories](public.serviceCategories.md) |  |
+| name | varchar(256) |  | false |  |  |  |
+| storeID | integer |  | true |  | [public.stores](public.stores.md) |  |
 | currency | varchar(5) |  | false |  |  |  |
 | cost | real |  | false |  |  |  |
 | includeInAutomaticSms | boolean |  | false |  |  |  |
@@ -34,16 +35,13 @@
 | ---- | ---- | ---------- |
 | services_serviceCategoryID_serviceCategories_serviceCategoryID_ | FOREIGN KEY | FOREIGN KEY ("serviceCategoryID") REFERENCES "serviceCategories"("serviceCategoryID") ON DELETE CASCADE |
 | services_pkey | PRIMARY KEY | PRIMARY KEY ("serviceID") |
-| services_name_unique | UNIQUE | UNIQUE (name) |
-| services_itemNumber_unique | UNIQUE | UNIQUE ("itemNumber") |
+| services_storeID_stores_storeID_fk | FOREIGN KEY | FOREIGN KEY ("storeID") REFERENCES stores("storeID") ON DELETE CASCADE |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
 | services_pkey | CREATE UNIQUE INDEX services_pkey ON public.services USING btree ("serviceID") |
-| services_name_unique | CREATE UNIQUE INDEX services_name_unique ON public.services USING btree (name) |
-| services_itemNumber_unique | CREATE UNIQUE INDEX "services_itemNumber_unique" ON public.services USING btree ("itemNumber") |
 
 ## Relations
 

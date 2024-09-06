@@ -109,6 +109,10 @@ export async function services(fastify: FastifyInstance) {
 
     async (request, reply) => {
       let serviceData: Either<string, Service>
+      const deleteServiceVariants = request.body.deleteServiceVariants
+        ? request.body.deleteServiceVariants.map(ServiceID)
+        : []
+
       const serviceBase: ServiceBase = {
         name: ServiceName(request.body.name),
         cost: ServiceCostDinero(
@@ -146,10 +150,10 @@ export async function services(fastify: FastifyInstance) {
           ...serviceBase,
           storeID: StoreID(request.body.storeID),
           serviceID: request.body.serviceID ? ServiceID(request.body.serviceID) : undefined,
-          serviceVariants: request.body.serviceVariants.map((serviceVariant) => {
+          serviceVariants: request.body.localServiceVariants.map((serviceVariant) => {
             return {
-              servicevariantID: serviceVariant.servicevariantID
-                ? ServiceID(serviceVariant.servicevariantID)
+              serviceVariantID: serviceVariant.serviceVariantID
+                ? ServiceID(serviceVariant.serviceVariantID)
                 : undefined,
               serviceID: serviceVariant.serviceID ? ServiceID(serviceVariant.serviceID) : undefined,
               name: ServiceName(serviceVariant.name),
@@ -168,7 +172,8 @@ export async function services(fastify: FastifyInstance) {
             }
           }),
         }
-        serviceData = await createService(localService)
+
+        serviceData = await createService(localService, deleteServiceVariants)
       } else {
         const serviceNew: ServiceCreate & { serviceID?: ServiceID } = {
           ...serviceBase,
@@ -176,7 +181,9 @@ export async function services(fastify: FastifyInstance) {
           serviceID: request.body.serviceID ? ServiceID(request.body.serviceID) : undefined,
           serviceVariants: request.body.serviceVariants.map((serviceVariant) => {
             return {
-              servicevariantID: serviceVariant.servicevariantID ?? undefined,
+              serviceVariantID: serviceVariant.serviceVariantID
+                ? ServiceID(serviceVariant.serviceVariantID)
+                : undefined,
               serviceID: serviceVariant.serviceID ? ServiceID(serviceVariant.serviceID) : undefined,
               name: ServiceName(serviceVariant.name),
               award: Award(serviceVariant.award),
@@ -194,7 +201,7 @@ export async function services(fastify: FastifyInstance) {
             }
           }),
         }
-        serviceData = await createService(serviceNew)
+        serviceData = await createService(serviceNew, deleteServiceVariants)
       }
       match(
         serviceData,
@@ -343,7 +350,6 @@ export async function services(fastify: FastifyInstance) {
     '/order-list/:storeID',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         fastify.authorize(request, reply, PermissionTitle('list_services_order'))
         done()
         return reply
@@ -374,7 +380,6 @@ export async function services(fastify: FastifyInstance) {
     '/:serviceID/:type',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.user)
         //        fastify.authorize(request, reply, PermissionTitle('view_service'))
         done()
         return reply

@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| customerOrgNumber | varchar(11) |  | false | [public.drivers](public.drivers.md) [public.bills](public.bills.md) |  |  |
+| customerOrgNumber | varchar(11) |  | false | [public.bills](public.bills.md) [public.drivers](public.drivers.md) |  |  |
 | customerCompanyName | varchar(255) |  | false |  |  |  |
 | companyAddress | varchar(256) |  | false |  |  |  |
 | companyZipCode | varchar(16) |  | false |  |  |  |

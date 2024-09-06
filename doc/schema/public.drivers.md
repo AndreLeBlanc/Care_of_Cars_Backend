@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| driverID | integer | nextval('"drivers_driverID_seq"'::regclass) | false | [public.driverCars](public.driverCars.md) [public.orders](public.orders.md) [public.bills](public.bills.md) |  |  |
+| driverID | integer | nextval('"drivers_driverID_seq"'::regclass) | false | [public.bills](public.bills.md) [public.driverCars](public.driverCars.md) [public.orders](public.orders.md) |  |  |
 | customerOrgNumber | varchar(11) |  | true |  | [public.companycustomers](public.companycustomers.md) |  |
 | driverExternalNumber | varchar(256) |  | true |  |  |  |
 | companyReference | varchar(255) |  | true |  |  |  |

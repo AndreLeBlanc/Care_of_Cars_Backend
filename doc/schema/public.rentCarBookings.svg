@@ -79,26 +79,26 @@
 <text text-anchor="start" x="168.7742" y="-263.9" font-family="Arial" font-size="14.00" fill="#000000">submissionTime    </text>
 <text text-anchor="start" x="304.0856" y="-263.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
 <polygon fill="none" stroke="#000000" points="162,-222.5 162,-252.5 496,-252.5 496,-222.5 162,-222.5"/>
-<text text-anchor="start" x="169" y="-233.9" font-family="Arial" font-size="14.00" fill="#000000">vatFree    </text>
-<text text-anchor="start" x="250.6564" y="-233.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<text text-anchor="start" x="169" y="-233.9" font-family="Arial" font-size="14.00" fill="#000000">pickupTime    </text>
+<text text-anchor="start" x="274.7616" y="-233.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
 <polygon fill="none" stroke="#000000" points="162,-192.5 162,-222.5 496,-222.5 496,-192.5 162,-192.5"/>
-<text text-anchor="start" x="169" y="-203.9" font-family="Arial" font-size="14.00" fill="#000000">orderStatus    </text>
-<text text-anchor="start" x="275.5568" y="-203.9" font-family="Arial" font-size="14.00" fill="#666666">[&quot;orderStatus&quot;]</text>
+<text text-anchor="start" x="169" y="-203.9" font-family="Arial" font-size="14.00" fill="#000000">vatFree    </text>
+<text text-anchor="start" x="250.6564" y="-203.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
 <polygon fill="none" stroke="#000000" points="162,-162.5 162,-192.5 496,-192.5 496,-162.5 162,-162.5"/>
-<text text-anchor="start" x="169" y="-173.9" font-family="Arial" font-size="14.00" fill="#000000">currency    </text>
-<text text-anchor="start" x="256.8738" y="-173.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<text text-anchor="start" x="169" y="-173.9" font-family="Arial" font-size="14.00" fill="#000000">orderStatus    </text>
+<text text-anchor="start" x="275.5568" y="-173.9" font-family="Arial" font-size="14.00" fill="#666666">[&quot;orderStatus&quot;]</text>
 <polygon fill="none" stroke="#000000" points="162,-132.5 162,-162.5 496,-162.5 496,-132.5 162,-132.5"/>
-<text text-anchor="start" x="169" y="-143.9" font-family="Arial" font-size="14.00" fill="#000000">discount    </text>
-<text text-anchor="start" x="255.3324" y="-143.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
+<text text-anchor="start" x="169" y="-143.9" font-family="Arial" font-size="14.00" fill="#000000">currency    </text>
+<text text-anchor="start" x="256.8738" y="-143.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
 <polygon fill="none" stroke="#000000" points="162,-102.5 162,-132.5 496,-132.5 496,-102.5 162,-102.5"/>
-<text text-anchor="start" x="169" y="-113.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
-<text text-anchor="start" x="263.1136" y="-113.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<text text-anchor="start" x="169" y="-113.9" font-family="Arial" font-size="14.00" fill="#000000">discount    </text>
+<text text-anchor="start" x="255.3324" y="-113.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
 <polygon fill="none" stroke="#000000" points="162,-72.5 162,-102.5 496,-102.5 496,-72.5 162,-72.5"/>
-<text text-anchor="start" x="169" y="-83.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
-<text text-anchor="start" x="267.0182" y="-83.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<text text-anchor="start" x="169" y="-83.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
+<text text-anchor="start" x="263.1136" y="-83.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
 <polygon fill="none" stroke="#000000" points="162,-42.5 162,-72.5 496,-72.5 496,-42.5 162,-42.5"/>
-<text text-anchor="start" x="169" y="-53.9" font-family="Arial" font-size="14.00" fill="#000000">pickupTime    </text>
-<text text-anchor="start" x="274.7616" y="-53.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<text text-anchor="start" x="169" y="-53.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
+<text text-anchor="start" x="267.0182" y="-53.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
 </g>
 <!-- public.rentCarBookings&#45;&gt;public.orders -->
 <g id="edge1" class="edge">

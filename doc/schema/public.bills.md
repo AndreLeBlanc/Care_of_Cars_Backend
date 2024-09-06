@@ -7,6 +7,7 @@
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | orderID | integer | nextval('"bills_orderID_seq"'::regclass) | false | [public.billOrders](public.billOrders.md) |  |  |
+| billStatus | "billStatus" |  | false |  |  |  |
 | employeeID | integer |  | true |  | [public.employees](public.employees.md) |  |
 | billingDate | date |  | false |  |  |  |
 | paymentDate | date |  | false |  |  |  |
@@ -29,18 +30,17 @@
 | driverKeyNumber | varchar(256) |  | true |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |
-| billStatus | "billStatus" |  | false |  |  |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| bills_customerOrgNumber_companycustomers_customerOrgNumber_fk | FOREIGN KEY | FOREIGN KEY ("customerOrgNumber") REFERENCES companycustomers("customerOrgNumber") |
-| bills_driverID_drivers_driverID_fk | FOREIGN KEY | FOREIGN KEY ("driverID") REFERENCES drivers("driverID") |
-| bills_employeeID_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("employeeID") REFERENCES employees("employeeID") |
 | bills_pkey | PRIMARY KEY | PRIMARY KEY ("orderID") |
 | bills_driverEmail_unique | UNIQUE | UNIQUE ("driverEmail") |
 | bills_driverPhoneNumber_unique | UNIQUE | UNIQUE ("driverPhoneNumber") |
+| bills_customerOrgNumber_companycustomers_customerOrgNumber_fk | FOREIGN KEY | FOREIGN KEY ("customerOrgNumber") REFERENCES companycustomers("customerOrgNumber") |
+| bills_driverID_drivers_driverID_fk | FOREIGN KEY | FOREIGN KEY ("driverID") REFERENCES drivers("driverID") |
+| bills_employeeID_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("employeeID") REFERENCES employees("employeeID") |
 
 ## Indexes
 

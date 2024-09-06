@@ -7,7 +7,7 @@
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | storeID | integer |  | false |  | [public.stores](public.stores.md) |  |
-| localQualID | integer | nextval('"qualificationsLocal_localQualID_seq"'::regclass) | false | [public.employeeLocalQualifications](public.employeeLocalQualifications.md) [public.localServiceLocalQualifications](public.localServiceLocalQualifications.md) [public.serviceLocalQualifications](public.serviceLocalQualifications.md) |  |  |
+| localQualID | integer | nextval('"qualificationsLocal_localQualID_seq"'::regclass) | false | [public.employeeLocalQualifications](public.employeeLocalQualifications.md) [public.serviceLocalQualifications](public.serviceLocalQualifications.md) |  |  |
 | localQualName | varchar(64) |  | false |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |

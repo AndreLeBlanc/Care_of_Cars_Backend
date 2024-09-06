@@ -824,7 +824,7 @@ export const services = pgTable('services', {
     .$type<ServiceCategoryID>()
     .references(() => serviceCategories.serviceCategoryID, { onDelete: 'cascade' })
     .notNull(),
-  name: varchar('name', { length: 256 }).$type<ServiceName>().notNull(),
+  name: varchar('name', { length: 256 }).$type<ServiceName>().notNull().unique(),
   storeID: integer('storeID')
     .$type<StoreID>()
     .references(() => stores.storeID, { onDelete: 'cascade' }),
@@ -1149,7 +1149,10 @@ export const products = pgTable('products', {
     .$type<ProductCategoryID>()
     .references(() => productCategories.productCategoryID)
     .notNull(),
-  productDescription: varchar('productDescription', { length: 512 }).$type<ProductDescription>(),
+  productDescription: varchar('productDescription', { length: 512 })
+    .$type<ProductDescription>()
+    .notNull()
+    .unique(),
   productSupplierArticleNumber: varchar(
     'productSupplierArticleNumber',
   ).$type<ProductSupplierArticleNumber>(),

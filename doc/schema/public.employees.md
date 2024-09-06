@@ -7,7 +7,7 @@
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | userID | integer |  | false |  | [public.users](public.users.md) |  |
-| employeeID | integer | nextval('"employees_employeeID_seq"'::regclass) | false | [public.employeeGlobalQualifications](public.employeeGlobalQualifications.md) [public.employeeLocalQualifications](public.employeeLocalQualifications.md) [public.employeeSpecialHours](public.employeeSpecialHours.md) [public.employeeStore](public.employeeStore.md) [public.employeeWorkingHours](public.employeeWorkingHours.md) [public.orderLocalServices](public.orderLocalServices.md) [public.orderServices](public.orderServices.md) [public.orders](public.orders.md) [public.rentCarBookings](public.rentCarBookings.md) [public.bills](public.bills.md) |  |  |
+| employeeID | integer | nextval('"employees_employeeID_seq"'::regclass) | false | [public.bills](public.bills.md) [public.employeeGlobalQualifications](public.employeeGlobalQualifications.md) [public.employeeLocalQualifications](public.employeeLocalQualifications.md) [public.employeeSpecialHours](public.employeeSpecialHours.md) [public.employeeStore](public.employeeStore.md) [public.employeeWorkingHours](public.employeeWorkingHours.md) [public.orderListing](public.orderListing.md) [public.orders](public.orders.md) [public.rentCarBookings](public.rentCarBookings.md) |  |  |
 | shortUserName | varchar(16) |  | false |  |  |  |
 | employmentNumber | varchar(128) |  | false |  |  |  |
 | employeePersonalNumber | varchar(16) |  | false |  |  |  |

@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| productID | integer | nextval('"products_productID_seq"'::regclass) | false |  |  |  |
+| productID | integer | nextval('"products_productID_seq"'::regclass) | false | [public.orderProducts](public.orderProducts.md) |  |  |
 | productItemNumber | varchar |  | false |  |  |  |
 | currency | varchar(5) |  | false |  |  |  |
 | cost | real |  | false |  |  |  |
@@ -19,6 +19,7 @@
 | productInventoryBalance | integer |  | true |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |
+| storeID | integer |  | true |  | [public.stores](public.stores.md) |  |
 
 ## Constraints
 
@@ -26,12 +27,15 @@
 | ---- | ---- | ---------- |
 | products_productCategoryID_productCategories_productCategoryID_ | FOREIGN KEY | FOREIGN KEY ("productCategoryID") REFERENCES "productCategories"("productCategoryID") |
 | products_pkey | PRIMARY KEY | PRIMARY KEY ("productID") |
+| products_storeID_stores_storeID_fk | FOREIGN KEY | FOREIGN KEY ("storeID") REFERENCES stores("storeID") ON DELETE CASCADE |
+| products_productDescription_storeID_unique | UNIQUE | UNIQUE ("productDescription", "storeID") |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
 | products_pkey | CREATE UNIQUE INDEX products_pkey ON public.products USING btree ("productID") |
+| products_productDescription_storeID_unique | CREATE UNIQUE INDEX "products_productDescription_storeID_unique" ON public.products USING btree ("productDescription", "storeID") |
 
 ## Relations
 

@@ -31,7 +31,7 @@ export const MessageSchema = Type.Object({ message: Type.String() })
 export type MessageSchemaType = Static<typeof MessageSchema>
 
 export const ServiceVariantsSchema = Type.Object({
-  servicevariantID: Type.Optional(ServiceVariantIDSchema),
+  serviceVariantID: Type.Optional(ServiceVariantIDSchema),
   name: NameSchema,
   serviceID: ServiceIDSchema,
   award: AwardSchema,
@@ -44,7 +44,7 @@ export const ServiceVariantsSchema = Type.Object({
   day5: Day5Schema,
 })
 export const ServiceVariantsCreateSchema = Type.Object({
-  servicevariantID: Type.Optional(ServiceVariantIDSchema),
+  serviceVariantID: Type.Optional(ServiceVariantIDSchema),
   name: NameSchema,
   serviceID: Type.Optional(ServiceIDSchema),
   award: AwardSchema,
@@ -60,8 +60,8 @@ export const ServiceVariantsCreateSchema = Type.Object({
 export type ServiceVariantsSchemaType = Static<typeof ServiceVariantsSchema>
 
 export const LocalServiceVariantsCreateSchema = Type.Object({
-  ServicevariantID: Type.Optional(ServiceVariantIDSchema),
-  servicedID: Type.Optional(ServiceIDSchema),
+  serviceVariantID: Type.Optional(ServiceVariantIDSchema),
+  serviceID: Type.Optional(ServiceIDSchema),
   name: NameSchema,
   award: AwardSchema,
   cost: CostSchema,
@@ -74,8 +74,8 @@ export const LocalServiceVariantsCreateSchema = Type.Object({
 })
 
 export const LocalServiceVariantsSchema = Type.Object({
-  ServicevariantID: Type.Optional(ServiceVariantIDSchema),
-  servicedID: ServiceIDSchema,
+  serviceVariantID: Type.Optional(ServiceVariantIDSchema),
+  serviceID: ServiceIDSchema,
   name: NameSchema,
   award: AwardSchema,
   cost: CostSchema,
@@ -121,6 +121,12 @@ export const ServiceSchema = Type.Composite([
     colorForService: Type.String(),
     serviceVariants: Type.Array(ServiceVariantsSchema),
     localServiceVariants: Type.Array(LocalServiceVariantsSchema),
+    deleteServiceVariants: Type.Array(
+      Type.Object({
+        serviceVariantID: ServiceVariantIDSchema,
+        name: NameSchema,
+      }),
+    ),
   }),
   ServiceNoVariantSchema,
 ])
@@ -131,6 +137,7 @@ export const ServiceCreateSchema = Type.Composite([
     colorForService: Type.String(),
     serviceVariants: Type.Array(ServiceVariantsCreateSchema),
     localServiceVariants: Type.Array(LocalServiceVariantsCreateSchema),
+    deleteServiceVariants: Type.Optional(Type.Array(ServiceVariantIDSchema)),
   }),
   ServiceNoVariantSchema,
 ])
@@ -218,7 +225,7 @@ export const ServiceDeleteQual = Type.Object({
 export type ServiceDeleteQualType = Static<typeof ServiceDeleteQual>
 
 export const LocalServiceDeleteQual = Type.Object({
-  servicedID: ServiceIDSchema,
+  serviceID: ServiceIDSchema,
   globalQualID: Type.Optional(GlobalQualID),
   localQualID: Type.Optional(LocalQualID),
 })

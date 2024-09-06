@@ -13,9 +13,9 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| billOrders_orderID_orders_orderID_fk | FOREIGN KEY | FOREIGN KEY ("orderID") REFERENCES orders("orderID") ON DELETE CASCADE |
 | billOrders_billID_orderID_pk | PRIMARY KEY | PRIMARY KEY ("billID", "orderID") |
 | billOrders_billID_bills_orderID_fk | FOREIGN KEY | FOREIGN KEY ("billID") REFERENCES bills("orderID") ON DELETE CASCADE |
+| billOrders_orderID_orders_orderID_fk | FOREIGN KEY | FOREIGN KEY ("orderID") REFERENCES orders("orderID") ON DELETE CASCADE |
 
 ## Indexes
 
