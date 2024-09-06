@@ -380,7 +380,7 @@ export async function services(fastify: FastifyInstance) {
     '/:serviceID/:type',
     {
       preHandler: async (request, reply, done) => {
-        //        fastify.authorize(request, reply, PermissionTitle('view_service'))
+        fastify.authorize(request, reply, PermissionTitle('view_service'))
         done()
         return reply
       },
