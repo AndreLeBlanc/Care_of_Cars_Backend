@@ -1014,6 +1014,7 @@ export async function listCheckedinStatus(
       })
       .from(employees)
       .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
+      .innerJoin(users, eq(users.userID, employees.employeeID))
       .where(
         and(eq(employeeStore.storeID, storeID), eq(employees.employeeActive, EmployeeActive(true))),
       )
