@@ -22,6 +22,21 @@ export const LastName = Type.String({ minLength: 3, maxLength: 128 })
 export const OrderID = Type.Integer({ minimum: 0 })
 export const userEmail = Type.String()
 export const isSuperAdmin = Type.Boolean()
+export const customerOrgNumber = Type.String({ maxLength: 11 })
+export const driverExternalNumber = Type.String({ maxLength: 255 })
+export const driverEmail = Type.String({ format: 'email' })
+export const driverPhoneNumber = Type.String({
+  pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
+})
+export const companyReference = Type.String({ maxLength: 255 })
+export const driverAddress = Type.String({ maxLength: 255 })
+export const driverZipCode = Type.String({ maxLength: 16 })
+export const driverAddressCity = Type.String({ maxLength: 255 })
+export const driverCountry = Type.String({ maxLength: 255 })
+export const driverHasCard = Type.Boolean()
+export const driverCardNumber = Type.String({ maxLength: 255 })
+export const driverCardValidTo = Type.String({ format: 'date' })
+export const driverKeyNumber = Type.String({ maxLength: 255 })
 
 export function jsonBuildObject<T extends SelectedFields>(shape: T): SQL<SelectResultFields<T>> {
   const chunks: SQL[] = Object.entries(shape).flatMap(([key, value], index) => {
