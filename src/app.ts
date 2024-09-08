@@ -10,6 +10,7 @@ import fastifySwaggerUI from '@fastify/swagger-ui'
 import jwt from './plugins/jwt.js'
 import pagination from './plugins/pagination.js'
 
+import { billing } from './routes/billing/billing.js'
 import { customers } from './routes/customers/customers.js'
 import { driverCars } from './routes/driverCars/driverCars.js'
 import { employees } from './routes/employees/employees.js'
@@ -99,6 +100,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
 
   app.register(orders, { prefix: '/orders' })
   app.register(permissions, { prefix: '/permissions' })
+  app.register(billing, { prefix: '/billing' })
   app.register(roleToPermissions, { prefix: '/roleToPermissions' })
   app.register(roles, { prefix: '/roles' })
   app.register(serviceCategory, { prefix: '/category' })

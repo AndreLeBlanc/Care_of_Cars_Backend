@@ -11,6 +11,7 @@ import {
   DriverAddress,
   DriverAddressCity,
   DriverCardValidTo,
+  DriverCardValidToString,
   DriverCountry,
   DriverEmail,
   DriverExternalNumber,
@@ -49,7 +50,7 @@ import { and, count, eq, gte, ilike, lte, or, sql } from 'drizzle-orm'
 
 import { Either, errorHandling, jsonAggBuildObject, left, right } from '../utils/helper.js'
 
-export type CreateBill = {
+type BillBase = {
   billStatus: BillStatus
   storeID: StoreID
   billedAmount: BilledAmount
@@ -71,9 +72,12 @@ export type CreateBill = {
   driverAddressCity: DriverAddressCity
   driverCountry: DriverCountry
   driverHasCard?: DriverHasCard
-  driverCardValidTo?: DriverCardValidTo
   driverCardNumber?: CustomerCardNumber
   driverKeyNumber?: DriverKeyNumber
+}
+
+export type CreateBill = BillBase & {
+  driverCardValidTo?: DriverCardValidTo
 }
 
 type OrderRow = {
@@ -97,12 +101,12 @@ export type OrderRowNoDineroName =
       productDescription: ProductDescription
     }
 
-export type Bill = CreateBill & {
+export type Bill = BillBase & {
   billID: BillID
-  discount: Dinero.Dinero[]
   orders: OrderID[]
-  createdAt: Date
-  updatedAt: Date
+  driverCardValidTo?: DriverCardValidToString
+  createdAt: string
+  updatedAt: string
   orderRows: OrderRow[]
 }
 
@@ -194,15 +198,17 @@ export async function newBill(bill: CreateBill, order: OrderID[]): Promise<Eithe
         driverAddressCity: newBill.driverAddressCity,
         driverCountry: newBill.driverCountry,
         driverHasCard: newBill.driverHasCard ?? undefined,
-        driverCardValidTo: newBill.driverCardValidTo ?? undefined,
+        driverCardValidTo: newBill.driverCardValidTo
+          ? DriverCardValidToString(newBill.driverCardValidTo.toISOString())
+          : undefined,
         driverCardNumber: newBill.driverCardNumber ?? undefined,
         driverKeyNumber: newBill.driverKeyNumber ?? undefined,
         discount: orderInfo.billOrders.map((discount) =>
           Dinero({ amount: discount.discount, currency: discount.currency as Currency }),
         ),
         orders: CreatedBillOrders.map((bo) => bo.orderID),
-        createdAt: newBill.createdAt,
-        updatedAt: newBill.updatedAt,
+        createdAt: newBill.createdAt.toISOString(),
+        updatedAt: newBill.updatedAt.toISOString(),
         orderRows: orderInfo.services
           .map(orderRowPricing)
           .concat(orderInfo.products.map(orderRowPricing)),
@@ -266,7 +272,9 @@ export async function getBill(bill: BillID): Promise<Either<string, Bill>> {
       driverAddressCity: billedOrders.bill.driverAddressCity,
       driverCountry: billedOrders.bill.driverCountry,
       driverHasCard: billedOrders.bill.driverHasCard ?? undefined,
-      driverCardValidTo: billedOrders.bill.driverCardValidTo ?? undefined,
+      driverCardValidTo: billedOrders.bill.driverCardValidTo
+        ? DriverCardValidToString(billedOrders.bill.driverCardValidTo.toISOString())
+        : undefined,
       driverCardNumber: billedOrders.bill.driverCardNumber ?? undefined,
       driverKeyNumber: billedOrders.bill.driverKeyNumber ?? undefined,
       discount: billedOrders.billOrders.map((bo) =>
@@ -276,8 +284,8 @@ export async function getBill(bill: BillID): Promise<Either<string, Bill>> {
         }),
       ),
       orders: billedOrders.billOrders.map((bo) => bo.orderID),
-      createdAt: billedOrders.bill.createdAt,
-      updatedAt: billedOrders.bill.updatedAt,
+      createdAt: billedOrders.bill.createdAt.toISOString(),
+      updatedAt: billedOrders.bill.updatedAt.toISOString(),
       orderRows: billedOrders.services
         .map(orderRowPricing)
         .concat(billedOrders.products.map(orderRowPricing)),
@@ -295,7 +303,7 @@ export async function listBill(
   store?: StoreID,
   to?: BillingDate,
   from?: BillingDate,
-  orderStatusSearch?: BillStatus,
+  billStatusSearch?: BillStatus,
 ): Promise<Either<string, BillsPaginated>> {
   let condition
   if (Object.values(bills.billStatus).includes(search as BillStatus)) {
@@ -310,8 +318,8 @@ export async function listBill(
       ),
     )
   }
-  if (orderStatusSearch != null) {
-    condition = or(condition, ilike(orders.orderStatus, '%' + orderStatusSearch + '%'))
+  if (billStatusSearch != null) {
+    condition = or(condition, ilike(orders.orderStatus, '%' + billStatusSearch + '%'))
   }
 
   condition = to ? and(condition, lte(bills.billingDate, to)) : condition

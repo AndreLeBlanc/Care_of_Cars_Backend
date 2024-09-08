@@ -43,6 +43,13 @@
       "when": 1725571505653,
       "tag": "0005_cheerful_silverclaw",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1725813876825,
+      "tag": "0006_breezy_gamma_corps",
+      "breakpoints": true
     }
   ]
 }
