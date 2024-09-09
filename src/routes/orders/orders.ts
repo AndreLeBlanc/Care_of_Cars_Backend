@@ -336,6 +336,8 @@ export async function orders(fastify: FastifyInstance) {
         limit = 10,
         page = 1,
         storeID,
+        to,
+        from,
         orderStatusSearch,
         billingStatusSearch,
       } = req.query
@@ -343,6 +345,8 @@ export async function orders(fastify: FastifyInstance) {
       const brandedLimit = Limit(limit)
       const brandedPage = Page(page)
       const store = StoreID(storeID)
+      const brandedTo = to ? SubmissionTimeOrder(to) : undefined
+      const brandedFrom = from ? SubmissionTimeOrder(from) : undefined
       const offset: Offset = fastify.findOffset(brandedLimit, brandedPage)
       const brandedOrderStatusSearch = orderStatusSearch as OrderStatus
       const brandedBillingStatusSearch = billingStatusSearch
@@ -354,6 +358,8 @@ export async function orders(fastify: FastifyInstance) {
         brandedPage,
         offset,
         store,
+        brandedTo,
+        brandedFrom,
         brandedOrderStatusSearch,
         brandedBillingStatusSearch,
       )

@@ -208,15 +208,17 @@ export type DriverCountry = Brand<string, 'driverCountry'>
 export const DriverCountry = make<DriverCountry>()
 export type DriverHasCard = Brand<boolean, 'driverHasCard'>
 export const DriverHasCard = make<DriverHasCard>()
-export type CustomerCardNumber = Brand<string | null, 'customerCardNumber'>
+export type CustomerCardNumber = Brand<string, 'customerCardNumber'>
 export const CustomerCardNumber = make<CustomerCardNumber>()
-export type DriverCardValidTo = Brand<Date | null, 'driverCardValidTo'>
+export type DriverCardValidTo = Brand<Date, 'driverCardValidTo'>
 export const DriverCardValidTo = make<DriverCardValidTo>()
-export type DriverKeyNumber = Brand<string | null, 'driverKeyNumber'>
+export type DriverCardValidToString = Brand<string, 'driverCardValidToString'>
+export const DriverCardValidToString = make<DriverCardValidToString>()
+export type DriverKeyNumber = Brand<string, 'driverKeyNumber'>
 export const DriverKeyNumber = make<DriverKeyNumber>()
-export type DriverNotesShared = Brand<string | null, 'driverNotesShared'>
+export type DriverNotesShared = Brand<string, 'driverNotesShared'>
 export const DriverNotesShared = make<DriverNotesShared>()
-export type DriverNotes = Brand<string | null, 'driverNotes'>
+export type DriverNotes = Brand<string, 'driverNotes'>
 export const DriverNotes = make<DriverNotes>()
 
 export type PermissionID = Brand<number, 'permissionID'>
@@ -469,10 +471,18 @@ export const WorkDay5 = make<WorkDay5>()
 
 export type BillID = Brand<number, 'billID'>
 export const BillID = make<BillID>()
+export type BillingDate = Brand<string, 'billingDate'>
+export const BillingDate = make<BillingDate>()
+export type PaymentDate = Brand<string, 'paymentDate'>
+export const PaymentDate = make<PaymentDate>()
 export type IsBilled = Brand<boolean, 'isBilleded'>
 export const IsBilled = make<IsBilled>()
 export type PaymentDays = Brand<number, 'paymentDays'>
 export const PaymentDays = make<PaymentDays>()
+export type BilledAmount = Brand<number, 'billedAmount'>
+export const BilledAmount = make<BilledAmount>()
+export type BillAmount = Brand<Dinero, 'billAmount'>
+export const BillAmount = make<BillAmount>()
 
 export type CheckedInStatus = 'CheckedIn' | 'CheckedOut'
 
@@ -1540,12 +1550,20 @@ export type BillStatus = (typeof billStatus)[number]
 
 export const bills = pgTable('bills', {
   billID: serial('orderID').$type<BillID>().primaryKey(),
+  storeID: integer('storeID')
+    .$type<StoreID>()
+    .references(() => stores.storeID, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
   billStatus: billStatuspgEnum('billStatus').notNull(),
+  billedAmount: real('billedAmount').$type<BilledAmount>().notNull(),
+  currency: varchar('currency').notNull(),
   bookedBy: integer('employeeID')
     .$type<EmployeeID>()
     .references(() => employees.employeeID, { onDelete: 'no action' }),
-  billingDate: date('billingDate').notNull(),
-  paymentDate: date('paymentDate').notNull(),
+  billingDate: date('billingDate').$type<BillingDate>().notNull(),
+  paymentDate: date('paymentDate').$type<PaymentDate>().notNull(),
   paymentDays: integer('paymentDays').$type<PaymentDays>().notNull(),
   driverID: integer('driverID')
     .$type<DriverID>()
@@ -1592,6 +1610,7 @@ export const billsRelations = relations(bills, ({ many, one }) => ({
     fields: [bills.customerOrgNumber],
     references: [companycustomers.customerOrgNumber],
   }),
+  stores: one(stores),
 }))
 
 export const billOrders = pgTable(
