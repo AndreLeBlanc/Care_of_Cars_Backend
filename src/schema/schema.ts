@@ -486,6 +486,50 @@ export const BillAmount = make<BillAmount>()
 
 export type CheckedInStatus = 'CheckedIn' | 'CheckedOut'
 
+export type TotalRevenue = Brand<Dinero, 'totalRevenue'>
+export const TotalRevenue = make<TotalRevenue>()
+export type AverageRevenue = Brand<Dinero, 'averageRevenue'>
+export const AverageRevenue = make<AverageRevenue>()
+export type TotalDiscount = Brand<Dinero, 'totalDiscount'>
+export const TotalDiscount = make<TotalDiscount>()
+export type TotalVat = Brand<Dinero, 'totalVat'>
+export const TotalVat = make<TotalVat>()
+
+export type BookingCount = Brand<number, 'bookingCount'>
+export const BookingCount = make<BookingCount>()
+export type BillPaid = Brand<number, 'billPaid'>
+export const BillPaid = make<BillPaid>()
+export type CashPaid = Brand<number, 'cashPaid'>
+export const CashPaid = make<CashPaid>()
+
+export type MonthlyRevenue = Brand<Dinero, 'monthlyRevenue'>
+export const MonthlyRevenue = make<MonthlyRevenue>()
+export type PotentialMonthlyRevenue = Brand<Dinero, 'potentialMonthlyRevenue'>
+export const PotentialMonthlyRevenue = make<PotentialMonthlyRevenue>()
+export type TotalMonthlyRevenue = Brand<Dinero, 'totalMonthlyRevenue'>
+export const TotalMonthlyRevenue = make<TotalMonthlyRevenue>()
+export type TotalMonthlyRevenueLastYear = Brand<Dinero, 'totalMonthlyRevenueLastYear'>
+export const TotalMonthlyRevenueLastYear = make<TotalMonthlyRevenueLastYear>()
+export type AbsoluteDifference = Brand<Dinero, 'absoluteDifference'>
+export const AbsoluteDifference = make<AbsoluteDifference>()
+export type PercentDifference = Brand<Dinero, 'percentDifference'>
+export const PercentDifference = make<PercentDifference>()
+export type ServiceRevenuePerHour = Brand<Dinero, 'serviceRevenuePerHour'>
+export const ServiceRevenuePerHour = make<ServiceRevenuePerHour>()
+export type ServiceExpense = Brand<Dinero, 'serviceExpense'>
+export const ServiceExpense = make<ServiceExpense>()
+export type ServiceProfit = Brand<Dinero, 'serviceProfit'>
+export const ServiceProfit = make<ServiceProfit>()
+export type ServiceSold = Brand<number, 'serviceSold'>
+export const ServiceSold = make<ServiceSold>()
+
+export type ProductExpense = Brand<Dinero, 'productExpense'>
+export const ProductExpense = make<ProductExpense>()
+export type ProductProfit = Brand<Dinero, 'productProfit'>
+export const ProductProfit = make<ProductProfit>()
+export type ProductSold = Brand<number, 'productSold'>
+export const ProductSold = make<ProductSold>()
+
 export const colorForService = [
   'LightBlue',
   'Blue',
@@ -1006,6 +1050,7 @@ export const storesRelations = relations(stores, ({ many }) => ({
   rentcars: many(rentcars),
   storespecialhours: many(storespecialhours),
   storeweeklynotes: many(storeweeklynotes),
+  orders: many(orders),
 }))
 
 export const driverCars = pgTable(
@@ -1402,6 +1447,7 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   orderListing: many(orderListing),
   bills: one(billOrders),
   rentCarBookings: one(rentCarBookings),
+  stores: one(stores),
 }))
 
 export const orderListing = pgTable(

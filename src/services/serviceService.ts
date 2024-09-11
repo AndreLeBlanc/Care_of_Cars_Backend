@@ -460,19 +460,25 @@ export async function getServicesWithVariants(
         day3: services.day3,
         day4: services.day4,
         day5: services.day5,
-        serviceVariants: sql<ServVariantOrderList[]>`COALESCE(json_agg(json_build_object(
-            'name', ${serviceVariants.name},
-            'serviceVariantID', ${serviceVariants.serviceVariantID},
-            'cost', ${serviceVariants.cost},            
-            'day1', ${serviceVariants.day1},            
-            'day2', ${serviceVariants.day2},            
-            'day3', ${serviceVariants.day3},            
-            'day4', ${serviceVariants.day4},            
-            'day5', ${serviceVariants.day5}
-            )
-        ) FILTER (WHERE ${serviceVariants.serviceID} IS NOT NULL),
-        '[]'::json
-      )`,
+        serviceVariants: sql<ServVariantOrderList[]>`
+        COALESCE(
+          jsonb_agg(
+            CASE WHEN ${serviceVariants.serviceID} IS NOT NULL THEN
+              jsonb_build_object(
+                'name', ${serviceVariants.name},
+                'serviceVariantID', ${serviceVariants.serviceVariantID},
+                'cost', ${serviceVariants.cost},
+                'day1', ${serviceVariants.day1},
+                'day2', ${serviceVariants.day2},
+                'day3', ${serviceVariants.day3},
+                'day4', ${serviceVariants.day4},
+                'day5', ${serviceVariants.day5}
+              )
+            ELSE NULL END
+          ) FILTER (WHERE ${serviceVariants.serviceID} IS NOT NULL),
+          '[]'::jsonb
+        )
+      `,
       })
       .from(services)
       .where(condition)

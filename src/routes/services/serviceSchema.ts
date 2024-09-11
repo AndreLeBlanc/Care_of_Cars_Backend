@@ -245,3 +245,28 @@ export const GlobalServiceQualsSchema = Type.Object({
 })
 
 export type GlobalServiceQualsSchemType = Static<typeof GlobalServiceQualsSchema>
+
+export const ServiceOrderVariantSchema = Type.Object({
+  name: NameSchema,
+  cost: CostSchema,
+  day1: Day1Schema,
+  day2: Day2Schema,
+  day3: Day3Schema,
+  day4: Day4Schema,
+  day5: Day5Schema,
+  serviceVariantID: ServiceIDSchema,
+})
+
+export const ServiceOrderSchema = Type.Object({
+  // message: MessageSchema,
+  services: Type.Array(
+    Type.Object({
+      serviceID: ServiceIDSchema,
+      name: NameSchema,
+      cost: CostSchema,
+      serviceVariants: Type.Array(ServiceOrderVariantSchema),
+    }),
+  ),
+})
+
+export type ServiceOrderSchemaType = Static<typeof ServiceOrderSchema>
