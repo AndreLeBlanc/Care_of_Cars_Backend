@@ -12,6 +12,8 @@ import {
   ServiceDeleteQualType,
   ServiceLocalQualSchema,
   ServiceLocalQualSchemaType,
+  ServiceOrderSchema,
+  ServiceOrderSchemaType,
   ServiceSchemaType,
   ServicesPaginatedSchema,
   ServicesPaginatedSchemaType,
@@ -345,7 +347,7 @@ export async function services(fastify: FastifyInstance) {
 
   fastify.get<{
     Params: StoreIDSchemaType
-    // Reply: (ServiceSchemaType & MessageSchemaType) | MessageSchemaType
+    Reply: ServiceOrderSchemaType | MessageSchemaType
   }>(
     '/order-list/:storeID',
     {
@@ -356,18 +358,19 @@ export async function services(fastify: FastifyInstance) {
       },
 
       schema: {
-        //    params: getServiceByIDSchema,
-        //  response: {},
+        params: getServiceByIDSchema,
+        response: { 200: ServiceOrderSchema, 404: MessageSchema },
       },
     },
     async (request, reply) => {
       const service: Either<string, ServiceOrder[]> = await getServicesWithVariants(
         StoreID(request.params.storeID),
       )
+
       match(
         service,
         (fetchedService: ServiceOrder[]) => {
-          return reply.status(200).send({ ...fetchedService })
+          return reply.status(200).send({ message: 'services for order', services: fetchedService })
         },
         (err) => {
           return reply.status(404).send({ message: err })
