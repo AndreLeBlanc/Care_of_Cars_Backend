@@ -6,7 +6,7 @@
 | ---- | ------- | ------- | ---- |
 | [drizzle.__drizzle_migrations](drizzle.__drizzle_migrations.md) | 3 |  | BASE TABLE |
 | [public.billOrders](public.billOrders.md) | 2 |  | BASE TABLE |
-| [public.bills](public.bills.md) | 24 |  | BASE TABLE |
+| [public.bills](public.bills.md) | 27 |  | BASE TABLE |
 | [public.companycustomers](public.companycustomers.md) | 10 |  | BASE TABLE |
 | [public.driverCars](public.driverCars.md) | 11 |  | BASE TABLE |
 | [public.drivers](public.drivers.md) | 23 |  | BASE TABLE |

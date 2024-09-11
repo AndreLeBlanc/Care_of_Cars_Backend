@@ -174,6 +174,13 @@ export const getServiceByIDSchema = Type.Object({
 
 export type getServiceByIDSchemaType = Static<typeof getServiceByIDSchema>
 
+export const getServiceByQualsSchema = Type.Object({
+  serviceID: ServiceIDSchema,
+  store: Type.Optional(storeID),
+})
+
+export type getServiceByQualsSchemaType = Static<typeof getServiceByQualsSchema>
+
 export const ServicesPaginatedSchema = Type.Object({
   totalServices: Type.Number({ minimum: 0 }),
   totalPage: Type.Number({ minimum: 0 }),
@@ -209,17 +216,17 @@ export const ServiceLocalQualSchema = Type.Object({
 
 export type ServiceLocalQualSchemaType = Static<typeof ServiceLocalQualSchema>
 
-export const ServiceGlobalQual = Type.Object({
+export const ServiceGlobalQualSchema = Type.Object({
   serviceID: ServiceIDSchema,
   globalQualID: GlobalQualID,
 })
 
-export type ServiceGlobalQualType = Static<typeof ServiceGlobalQual>
+export type ServiceGlobalQualSchemaType = Static<typeof ServiceGlobalQualSchema>
 
 export const ServiceDeleteQual = Type.Object({
   serviceID: ServiceIDSchema,
-  globalQualID: Type.Optional(GlobalQualID),
-  localQualID: Type.Optional(LocalQualID),
+  globalQualID: Type.Array(GlobalQualID),
+  localQualID: Type.Array(LocalQualID),
 })
 
 export type ServiceDeleteQualType = Static<typeof ServiceDeleteQual>
