@@ -522,6 +522,8 @@ export type ServiceProfit = Brand<Dinero, 'serviceProfit'>
 export const ServiceProfit = make<ServiceProfit>()
 export type ServiceSold = Brand<number, 'serviceSold'>
 export const ServiceSold = make<ServiceSold>()
+export type WorkedHours = Brand<number, 'workedHours'>
+export const WorkedHours = make<WorkedHours>()
 
 export type ProductExpense = Brand<Dinero, 'productExpense'>
 export const ProductExpense = make<ProductExpense>()

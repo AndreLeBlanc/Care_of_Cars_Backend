@@ -1,6 +1,6 @@
 import { db } from '../config/db-connect.js'
 
-import { and, between, eq, sql } from 'drizzle-orm'
+import { and, between, eq, isNull, or, sql } from 'drizzle-orm'
 import Dinero from 'dinero.js'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
@@ -42,11 +42,13 @@ import {
   TotalVat,
   UserFirstName,
   UserLastName,
+  WorkedHours,
   employeeStore,
   employees,
   orderListing,
   orderProducts,
   orders,
+  services,
   users,
 } from '../schema/schema.js'
 
@@ -91,7 +93,7 @@ export type ServiceStats = {
   revenue: ServiceCostNumber
   cost: ServiceExpense
   profit: ServiceProfit
-  workedHours: number
+  workedHours: WorkedHours
   revenuePerHour: ServiceRevenuePerHour
 }
 
@@ -133,47 +135,60 @@ export async function serviceStats(
 ): Promise<Either<string, ServiceStats[]>> {
   try {
     let condition
-    condition = between(orders.submissionTime, from, to)
+    let orderCond = and(
+      between(orders.submissionTime, from, to),
+      eq(orderListing.orderID, orders.orderID),
+    )
+
     if (store) {
-      condition = and(condition, eq(orders.storeID, store))
+      condition = or(eq(services.storeID, store), isNull(services.storeID))
+      orderCond = and(orderCond, eq(orders.storeID, store))
     }
     if (filterOrderStatus) {
       condition = and(condition, eq(orders.orderStatus, filterOrderStatus))
     }
     const stats = await db
       .select({
-        serviceID: orderListing.serviceID,
-        name: orderListing.name,
-        total: sql<number>`cast(sum(${orderListing.cost} * ${orderListing.amount}) as float)`,
-        amount: sql<number>`sum(${orderListing.amount})`,
-        workDay1: sql<number>`sum(${orderListing.day1Work})`,
-        workDay2: sql<number>`sum(${orderListing.day2Work})`,
-        workDay3: sql<number>`sum(${orderListing.day3Work})`,
-        workDay4: sql<number>`sum(${orderListing.day4Work})`,
-        workDay5: sql<number>`sum(${orderListing.day5Work})`,
+        serviceID: services.serviceID,
+        name: services.name,
+        total: sql<number>`COALESCE(cast(sum(CASE WHEN ${orders.submissionTime} BETWEEN ${from} AND ${to} THEN ${orderListing.cost} * ${orderListing.amount} ELSE 0 END) as float), 0)`,
+        amount: sql<number>`COALESCE(sum(CASE WHEN ${orders.submissionTime} BETWEEN ${from} AND ${to} THEN ${orderListing.amount} ELSE 0 END), 0)`,
+        workedHours: sql<string>`COALESCE(sum(CASE WHEN ${orders.submissionTime} BETWEEN ${from} AND ${to} THEN
+          COALESCE(${orderListing.day1Work}, INTERVAL '0') +
+          COALESCE(${orderListing.day2Work}, INTERVAL '0') +
+          COALESCE(${orderListing.day3Work}, INTERVAL '0') +
+          COALESCE(${orderListing.day4Work}, INTERVAL '0') +
+          COALESCE(${orderListing.day5Work}, INTERVAL '0')
+        ELSE INTERVAL '0' END), INTERVAL '0')`,
       })
-      .from(orderListing)
-      .innerJoin(orders, eq(orderListing.orderID, orders.orderID))
+      .from(services)
+      .leftJoin(orderListing, and(eq(orderListing.serviceID, services.serviceID)))
+      .leftJoin(orders, orderCond)
       .where(condition)
-      .groupBy(orderListing.serviceID, orderListing.name)
+      .groupBy(services.serviceID)
 
     const statsCompiled = stats.map((serv) => {
-      const hoursWorked =
-        serv.workDay1 + serv.workDay2 + serv.workDay3 + serv.workDay4 + serv.workDay5
       const cost = ServiceExpense(Dinero({ amount: 0, currency: 'SEK' }))
+      const workHourSplit = serv.workedHours.split(':')
+      const workHoursNum = WorkedHours(Number(workHourSplit[0]) + Number(workHourSplit[1]) / 60)
+
+      const revenueNotNull = ServiceCostNumber(serv.total ? serv.total : 0)
       return {
         serviceID: serv.serviceID,
         name: serv.name,
-        amount: ServiceSold(serv.amount),
-        revenue: ServiceCostNumber(serv.total),
+        amount: ServiceSold(serv.amount ? serv.amount : 0),
+        revenue: revenueNotNull,
         cost: ServiceExpense(cost),
-        profit: ServiceProfit(Dinero({ amount: serv.total, currency: 'SEK' }).subtract(cost)),
-        workedHours: hoursWorked,
+        profit: ServiceProfit(Dinero({ amount: revenueNotNull, currency: 'SEK' }).subtract(cost)),
+        workedHours: WorkedHours(Math.round(workHoursNum * 2) / 2),
         revenuePerHour: ServiceRevenuePerHour(
-          Dinero({ amount: serv.total, currency: 'SEK' }).divide(hoursWorked),
+          Dinero({ amount: revenueNotNull * 100, currency: 'SEK' }).divide(
+            Math.max(100, Math.round(workHoursNum * 100)),
+          ),
         ),
       }
     })
+
     return right(statsCompiled)
   } catch (e) {
     return left(errorHandling(e))

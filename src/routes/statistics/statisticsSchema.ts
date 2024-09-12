@@ -1,6 +1,7 @@
 import { EmployeeCheckedInSchema, EmployeeCheckedOutSchema } from '../employees/employeesSchema.js'
 import { EmployeeID, FirstName, LastName } from '../../utils/helper.js'
 import { NameSchema, ServiceIDSchema } from '../services/serviceSchema.js'
+import { OrderStatusSchema, SubmissionTimeSchema } from '../orders/ordersSchema.js'
 import {
   ProductCostSchema,
   ProductDescriptionSchema,
@@ -10,11 +11,17 @@ import { Static, Type } from '@sinclair/typebox'
 import { storeID } from '../stores/storesSchema.js'
 
 const MessageSchema = Type.String()
+
 const ProductExpenseSchema = Type.Number()
 const RevenuePerHourSchema = Type.Number()
 const AmountSoldSchema = Type.Number()
 const ProductProfitSchema = Type.Number()
-const WorkedHoursSchema = Type.String({ format: 'time' })
+const WorkedHoursSchema = Type.Number()
+
+export const MessageReplySchema = Type.Object({
+  message: MessageSchema,
+})
+export type MessageReplySchemaType = Static<typeof MessageReplySchema>
 
 export const CheckedInStatSchema = Type.Object({
   message: MessageSchema,
@@ -48,6 +55,15 @@ export const ProductStatSchema = Type.Object({
 })
 
 export type ProductStatSchemaType = Static<typeof ProductStatSchema>
+
+export const GetServiceStatsSchema = Type.Object({
+  from: SubmissionTimeSchema,
+  to: SubmissionTimeSchema,
+  store: Type.Optional(storeID),
+  filterOrderStatus: Type.Optional(OrderStatusSchema),
+})
+
+export type GetServiceStatsSchemaType = Static<typeof GetServiceStatsSchema>
 
 export const ServiceStatSchema = Type.Object({
   message: MessageSchema,
