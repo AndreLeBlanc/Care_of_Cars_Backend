@@ -25,6 +25,7 @@ import {
   ProductExpense,
   ProductID,
   ProductProfit,
+  ProductSold,
   ServiceCostNumber,
   ServiceExpense,
   ServiceID,
@@ -97,6 +98,7 @@ export type ServiceStats = {
 export type ProductStats = {
   productID: ProductID
   productDescription: ProductDescription
+  amount: ProductSold
   revenue: ProductCostNumber
   cost: ProductExpense
   profit: ProductProfit
@@ -209,6 +211,7 @@ export async function productStats(
         revenue: ProductCostNumber(prod.total),
         cost: ProductExpense(cost),
         profit: ProductProfit(Dinero({ amount: prod.total, currency: 'SEK' }).subtract(cost)),
+        amount: ProductSold(prod.amount),
       }
     })
     return right(statsCompiled)
