@@ -65,6 +65,14 @@ export const GetServiceStatsSchema = Type.Object({
 
 export type GetServiceStatsSchemaType = Static<typeof GetServiceStatsSchema>
 
+export const GetProductStatsSchema = Type.Object({
+  from: SubmissionTimeSchema,
+  to: SubmissionTimeSchema,
+  store: Type.Optional(storeID),
+})
+
+export type GetProductStatSchemaType = Static<typeof GetProductStatsSchema>
+
 export const ServiceStatSchema = Type.Object({
   message: MessageSchema,
   store: Type.Optional(storeID),

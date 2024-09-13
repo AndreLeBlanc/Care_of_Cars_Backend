@@ -48,6 +48,7 @@ import {
   orderListing,
   orderProducts,
   orders,
+  products,
   services,
   users,
 } from '../schema/schema.js'
@@ -202,21 +203,27 @@ export async function productStats(
 ): Promise<Either<string, ProductStats[]>> {
   try {
     let condition
-    condition = between(orders.submissionTime, from, to)
+    let orderCond = and(
+      between(orders.submissionTime, from, to),
+      eq(orderProducts.orderID, orders.orderID),
+    )
+
     if (store) {
-      condition = and(condition, eq(orders.storeID, store))
+      condition = or(eq(products.storeID, store), isNull(products.storeID))
+      orderCond = and(orderCond, eq(orders.storeID, store))
     }
     const stats = await db
       .select({
-        productID: orderProducts.productID,
-        productDescription: orderProducts.productDescription,
-        total: sql<number>`cast(sum(${orderProducts.cost} * ${orderProducts.amount}) as float)`,
-        amount: sql<number>`sum(${orderListing.amount})`,
+        productID: products.productID,
+        productDescription: products.productDescription,
+        total: sql<number>`COALESCE(cast(sum(CASE WHEN ${orders.submissionTime} BETWEEN ${from} AND ${to} THEN ${orderProducts.cost} * ${orderProducts.amount} ELSE 0 END) as float), 0)`,
+        amount: sql<number>`COALESCE(sum(CASE WHEN ${orders.submissionTime} BETWEEN ${from} AND ${to} THEN ${orderProducts.amount} ELSE 0 END), 0)`,
       })
-      .from(orderProducts)
-      .innerJoin(orders, eq(orderProducts.orderID, orders.orderID))
+      .from(products)
+      .leftJoin(orderProducts, and(eq(orderProducts.productID, products.productID)))
+      .leftJoin(orders, orderCond)
       .where(condition)
-      .groupBy(orderProducts.productID, orderProducts.productDescription)
+      .groupBy(products.productID)
 
     const statsCompiled = stats.map((prod) => {
       const cost = ProductExpense(Dinero({ amount: 0, currency: 'SEK' }))

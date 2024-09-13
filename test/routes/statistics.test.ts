@@ -283,6 +283,95 @@ describe('PUT, GET and Delete orders', async () => {
     deepStrictEqual(parsedcreateServiceResp2.cost, 10)
     deepStrictEqual(parsedcreateServiceResp2.warrantyCard, false)
 
+    const prodCatResp = await app.inject({
+      method: 'POST',
+      url: '/category/product',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        productCategoryName: 'my prod cat stat',
+        productCategoryDescription: 'used for testing prod stats',
+      },
+    })
+
+    const parsedprodCatResp = JSON.parse(prodCatResp.body)
+    deepStrictEqual(parsedprodCatResp.productCategoryName, 'my prod cat stat')
+
+    const createProductsResp = await app.inject({
+      method: 'POST',
+      url: '/product',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        cost: 10,
+        currency: 'SEK',
+        productDescription: 'generated automated testing product',
+        productCategoryID: parsedprodCatResp.productCategoryID,
+        productItemNumber: 123,
+        award: 1,
+        type: 'Global',
+      },
+    })
+
+    const parsedCreateProductsResp = JSON.parse(createProductsResp.body)
+    deepStrictEqual(parsedCreateProductsResp.cost, 10)
+    deepStrictEqual(
+      parsedCreateProductsResp.productDescription,
+      'generated automated testing product',
+    )
+
+    const createProductsResp2 = await app.inject({
+      method: 'POST',
+      url: '/product',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        cost: 30,
+        currency: 'SEK',
+        productDescription: 'generated automated testing product 2',
+        productCategoryID: parsedprodCatResp.productCategoryID,
+        productItemNumber: 1234,
+        award: 1,
+        type: 'Global',
+      },
+    })
+
+    const parsedcreateProductsResp2 = JSON.parse(createProductsResp2.body)
+    deepStrictEqual(parsedcreateProductsResp2.cost, 30)
+    deepStrictEqual(
+      parsedcreateProductsResp2.productDescription,
+      'generated automated testing product 2',
+    )
+
+    const createLocalProductsResp = await app.inject({
+      method: 'POST',
+      url: '/product',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        cost: 90,
+        currency: 'SEK',
+        storeID: parsedresponseStore.store.storeID,
+        productDescription: 'generated automated testing local product',
+        productCategoryID: parsedprodCatResp.productCategoryID,
+        productItemNumber: 1234,
+        award: 1,
+        type: 'Local',
+      },
+    })
+
+    const parsedcreateLocalProductsResp = JSON.parse(createLocalProductsResp.body)
+
+    deepStrictEqual(parsedcreateLocalProductsResp.cost, 90)
+    deepStrictEqual(
+      parsedcreateLocalProductsResp.productDescription,
+      'generated automated testing local product',
+    )
+
     const creatOrderAddServResp = await app.inject({
       method: 'PUT',
       url: '/orders',
@@ -814,8 +903,6 @@ describe('PUT, GET and Delete orders', async () => {
       ],
     }
 
-    console.log('parse me', parsedservStatLocalResp)
-
     deepStrictEqual(parsedservStatLocalResp, expectedLocalServStat)
 
     const servStatLocalStoreResp = await app.inject({
@@ -831,19 +918,6 @@ describe('PUT, GET and Delete orders', async () => {
       },
     })
     const parsedservStatLocalStoreResp = JSON.parse(servStatLocalStoreResp.body)
-    console.log('parse me locally', parsedservStatLocalStoreResp)
-    console.log(
-      'parse me locally',
-      expectedLocalServStat.stats.sort((a, b) => {
-        if (a['serviceID'] > b['serviceID']) {
-          return -1
-        } else if (a['serviceID'] < b['serviceID']) {
-          return 1
-        } else {
-          return 0
-        }
-      }),
-    )
 
     deepStrictEqual(
       parsedservStatLocalStoreResp.stats,
@@ -909,5 +983,133 @@ describe('PUT, GET and Delete orders', async () => {
     }
 
     deepStrictEqual(parsedservStatLocalWrongStoreResp, expectedLocalServStat2000)
+
+    const AddingProdResp = await app.inject({
+      method: 'PUT',
+      url: '/orders',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        orderID: parsedthirdOrderAddServResp.orderID,
+        driverCarID: parsedcreateDriverCarResp.driverCarID,
+        driverID: parsedCreateCompanyDriverResp.data.driver.driverID,
+        storeID: parsedresponseStore.store.storeID,
+        orderNotes: 'Added a service',
+        bookedBy: responseUserEmpParsed.employee.employeeID,
+        submissionTime: '2022-11-30T11:21:44.000-08:00',
+        pickupTime: '2022-11-30T11:22:44.000-08:00',
+        vatFree: true,
+        orderStatus: 'avslutad',
+        currency: 'SEK',
+        discount: 150,
+        services: [],
+        products: [
+          {
+            productID: parsedCreateProductsResp.productID,
+            productDescription: parsedCreateProductsResp.productDescription,
+            amount: 2,
+            cost: 100,
+            currency: 'SEK',
+            orderProductNotes: 'testing for stats!',
+          },
+        ],
+        deleteOrderService: [],
+        deleteOrderProducts: [],
+      },
+    })
+
+    const parsedAddingProdResp = JSON.parse(AddingProdResp.body)
+
+    console.log('adding prod to order', parsedAddingProdResp)
+    deepStrictEqual(AddingProdResp.statusCode, 201)
+
+    deepStrictEqual(parsedAddingProdResp.products[0].productID, parsedCreateProductsResp.productID)
+
+    const prodStatResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/products',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2021-10-30T11:21:44.000-08:00',
+        to: '2025-11-30T11:21:44.000-08:00',
+      },
+    })
+    const parsedprodStatResp = JSON.parse(prodStatResp.body)
+    const prodStats = {
+      message: 'product statstics',
+      stats: [
+        {
+          productID: 2,
+          productDescription: 'generated automated testing product 2',
+          amount: 0,
+          revenue: 0,
+          cost: 0,
+          profit: 0,
+        },
+        {
+          productID: 3,
+          productDescription: 'generated automated testing local product',
+          amount: 0,
+          revenue: 0,
+          cost: 0,
+          profit: 0,
+        },
+        {
+          productID: 1,
+          productDescription: 'generated automated testing product',
+          amount: 2,
+          revenue: 200,
+          cost: 0,
+          profit: 200,
+        },
+      ],
+    }
+
+    deepStrictEqual(parsedprodStatResp, prodStats)
+    const prodStatTimeResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/products',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2025-10-30T11:21:44.000-08:00',
+        to: '2025-11-30T11:21:44.000-08:00',
+      },
+    })
+    const parsedprodStatTimeResp = JSON.parse(prodStatTimeResp.body)
+    const prodStatsTime = {
+      message: 'product statstics',
+      stats: [
+        {
+          productID: 2,
+          productDescription: 'generated automated testing product 2',
+          amount: 0,
+          revenue: 0,
+          cost: 0,
+          profit: 0,
+        },
+        {
+          productID: 3,
+          productDescription: 'generated automated testing local product',
+          amount: 0,
+          revenue: 0,
+          cost: 0,
+          profit: 0,
+        },
+        {
+          productID: 1,
+          productDescription: 'generated automated testing product',
+          amount: 0,
+          revenue: 0,
+          cost: 0,
+          profit: 0,
+        },
+      ],
+    }
+    deepStrictEqual(parsedprodStatTimeResp, prodStatsTime)
   })
 })
