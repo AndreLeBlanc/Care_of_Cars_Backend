@@ -43,6 +43,7 @@ import {
   UserFirstName,
   UserLastName,
   WorkedHours,
+  employeeCheckin,
   employeeStore,
   employees,
   orderListing,
@@ -250,7 +251,7 @@ export async function checkinStats(
 ): Promise<Either<string, CheckinStats[]>> {
   try {
     let condition
-    condition = sql`${employeeStore.employeeCheckedIn} IS NOT NULL AND ${employeeStore.employeeCheckedIn} BETWEEN ${from} AND ${to}`
+    condition = sql`${employeeCheckin.employeeCheckedIn} IS NOT NULL AND ${employeeCheckin.employeeCheckedIn} BETWEEN ${from} AND ${to}`
     if (store) {
       condition = and(condition, eq(employeeStore.storeID, store))
     }
@@ -260,14 +261,15 @@ export async function checkinStats(
     const stats = await db
       .select({
         employeeID: employeeStore.employeeID,
-        employeeCheckedIn: employeeStore.employeeCheckedIn,
-        employeeCheckedOut: employeeStore.employeeCheckedOut,
+        employeeCheckedIn: employeeCheckin.employeeCheckedIn,
+        employeeCheckedOut: employeeCheckin.employeeCheckedOut,
         firstName: users.firstName,
         lastName: users.lastName,
       })
       .from(employeeStore)
       .innerJoin(employees, eq(employees.employeeID, employeeStore.employeeID))
       .innerJoin(users, eq(employees.userID, users.userID))
+      .leftJoin(employeeCheckin, eq(employeeStore.employeeStoreID, employeeCheckin.employeeStoreID))
       .where(condition)
 
     return right(

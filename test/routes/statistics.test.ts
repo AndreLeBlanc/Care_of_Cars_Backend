@@ -6,7 +6,7 @@ import { deepStrictEqual } from 'assert'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
 let jwt = ''
-describe('PUT, GET and Delete orders', async () => {
+describe('testing statistics route', async () => {
   let app: FastifyInstance
 
   before(async () => {
@@ -29,7 +29,7 @@ describe('PUT, GET and Delete orders', async () => {
     await app.close()
   })
 
-  it('PUT order', async () => {
+  it('employee checkin stats', async () => {
     const responseRole = await app.inject({
       method: 'POST',
       url: '/roles',
@@ -200,7 +200,7 @@ describe('PUT, GET and Delete orders', async () => {
       payload: {
         cost: 1337,
         currency: 'SEK',
-        name: 'generated automated testing of stats',
+        name: 'generated automated testing for stats of stats',
         serviceCategoryID: parsedcatResp.serviceCategoryID,
         includeInAutomaticSms: true,
         serviceVariants: [],
@@ -231,7 +231,7 @@ describe('PUT, GET and Delete orders', async () => {
         storeID: parsedresponseStore.store.storeID,
         cost: 1447,
         currency: 'SEK',
-        name: 'generated automated testing of stats 2',
+        name: 'generated automated testing for stats of stats 2',
         serviceCategoryID: parsedcatResp.serviceCategoryID,
         includeInAutomaticSms: true,
         serviceVariants: [],
@@ -261,7 +261,7 @@ describe('PUT, GET and Delete orders', async () => {
       payload: {
         cost: 10,
         currency: 'SEK',
-        name: 'generated automated testing SECOND stats test',
+        name: 'generated automated testing for stats SECOND stats test',
         serviceCategoryID: parsedcatResp.serviceCategoryID,
         includeInAutomaticSms: true,
         serviceVariants: [],
@@ -307,7 +307,7 @@ describe('PUT, GET and Delete orders', async () => {
       payload: {
         cost: 10,
         currency: 'SEK',
-        productDescription: 'generated automated testing product',
+        productDescription: 'generated automated testing for stats product',
         productCategoryID: parsedprodCatResp.productCategoryID,
         productItemNumber: 123,
         award: 1,
@@ -319,7 +319,7 @@ describe('PUT, GET and Delete orders', async () => {
     deepStrictEqual(parsedCreateProductsResp.cost, 10)
     deepStrictEqual(
       parsedCreateProductsResp.productDescription,
-      'generated automated testing product',
+      'generated automated testing for stats product',
     )
 
     const createProductsResp2 = await app.inject({
@@ -331,7 +331,7 @@ describe('PUT, GET and Delete orders', async () => {
       payload: {
         cost: 30,
         currency: 'SEK',
-        productDescription: 'generated automated testing product 2',
+        productDescription: 'generated automated testing for stats product 2',
         productCategoryID: parsedprodCatResp.productCategoryID,
         productItemNumber: 1234,
         award: 1,
@@ -343,7 +343,7 @@ describe('PUT, GET and Delete orders', async () => {
     deepStrictEqual(parsedcreateProductsResp2.cost, 30)
     deepStrictEqual(
       parsedcreateProductsResp2.productDescription,
-      'generated automated testing product 2',
+      'generated automated testing for stats product 2',
     )
 
     const createLocalProductsResp = await app.inject({
@@ -356,7 +356,7 @@ describe('PUT, GET and Delete orders', async () => {
         cost: 90,
         currency: 'SEK',
         storeID: parsedresponseStore.store.storeID,
-        productDescription: 'generated automated testing local product',
+        productDescription: 'generated automated testing for stats local product',
         productCategoryID: parsedprodCatResp.productCategoryID,
         productItemNumber: 1234,
         award: 1,
@@ -369,7 +369,7 @@ describe('PUT, GET and Delete orders', async () => {
     deepStrictEqual(parsedcreateLocalProductsResp.cost, 90)
     deepStrictEqual(
       parsedcreateLocalProductsResp.productDescription,
-      'generated automated testing local product',
+      'generated automated testing for stats local product',
     )
 
     const creatOrderAddServResp = await app.inject({
@@ -395,7 +395,7 @@ describe('PUT, GET and Delete orders', async () => {
             serviceID: parsedcreateServiceResp.serviceID,
             cost: 1337,
             currency: 'SEK',
-            name: 'generated automated testing',
+            name: 'generated automated testing for stats',
             serviceCategoryID: parsedcatResp.serviceCategoryID,
             serviceVariants: [],
             amount: 2,
@@ -442,7 +442,7 @@ describe('PUT, GET and Delete orders', async () => {
       stats: [
         {
           serviceID: 4,
-          name: 'generated automated testing SECOND stats test',
+          name: 'generated automated testing for stats SECOND stats test',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -452,7 +452,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 3,
-          name: 'generated automated testing of stats 2',
+          name: 'generated automated testing for stats of stats 2',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -472,7 +472,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 2,
-          name: 'generated automated testing of stats',
+          name: 'generated automated testing for stats of stats',
           amount: 2,
           revenue: 2674,
           cost: 0,
@@ -504,7 +504,7 @@ describe('PUT, GET and Delete orders', async () => {
       stats: [
         {
           serviceID: 4,
-          name: 'generated automated testing SECOND stats test',
+          name: 'generated automated testing for stats SECOND stats test',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -514,7 +514,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 3,
-          name: 'generated automated testing of stats 2',
+          name: 'generated automated testing for stats of stats 2',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -534,7 +534,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 2,
-          name: 'generated automated testing of stats',
+          name: 'generated automated testing for stats of stats',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -570,7 +570,7 @@ describe('PUT, GET and Delete orders', async () => {
             serviceID: parsedcreateServiceResp.serviceID,
             cost: 1337,
             currency: 'SEK',
-            name: 'generated automated testing',
+            name: 'generated automated testing for stats',
             serviceCategoryID: parsedcatResp.serviceCategoryID,
             serviceVariants: [],
             amount: 3,
@@ -606,7 +606,7 @@ describe('PUT, GET and Delete orders', async () => {
       stats: [
         {
           serviceID: 4,
-          name: 'generated automated testing SECOND stats test',
+          name: 'generated automated testing for stats SECOND stats test',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -616,7 +616,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 3,
-          name: 'generated automated testing of stats 2',
+          name: 'generated automated testing for stats of stats 2',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -636,7 +636,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 2,
-          name: 'generated automated testing of stats',
+          name: 'generated automated testing for stats of stats',
           amount: 5,
           revenue: 6685,
           cost: 0,
@@ -672,7 +672,7 @@ describe('PUT, GET and Delete orders', async () => {
             serviceID: parsedcreateServiceResp.serviceID,
             cost: 1337,
             currency: 'SEK',
-            name: 'generated automated testing',
+            name: 'generated automated testing for stats',
             serviceCategoryID: parsedcatResp.serviceCategoryID,
             serviceVariants: [],
             amount: 3,
@@ -709,7 +709,7 @@ describe('PUT, GET and Delete orders', async () => {
       stats: [
         {
           serviceID: 4,
-          name: 'generated automated testing SECOND stats test',
+          name: 'generated automated testing for stats SECOND stats test',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -719,7 +719,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 3,
-          name: 'generated automated testing of stats 2',
+          name: 'generated automated testing for stats of stats 2',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -739,7 +739,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 2,
-          name: 'generated automated testing of stats',
+          name: 'generated automated testing for stats of stats',
           amount: 8,
           revenue: 10696,
           cost: 0,
@@ -824,7 +824,7 @@ describe('PUT, GET and Delete orders', async () => {
             serviceID: parsedcreateLocalServiceResp.serviceID,
             cost: 1337,
             currency: 'SEK',
-            name: 'generated automated testing of stats 2',
+            name: 'generated automated testing for stats of stats 2',
             serviceCategoryID: parsedcatResp.serviceCategoryID,
             serviceVariants: [],
             amount: 3,
@@ -862,7 +862,7 @@ describe('PUT, GET and Delete orders', async () => {
       stats: [
         {
           serviceID: 4,
-          name: 'generated automated testing SECOND stats test',
+          name: 'generated automated testing for stats SECOND stats test',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -872,7 +872,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 3,
-          name: 'generated automated testing of stats 2',
+          name: 'generated automated testing for stats of stats 2',
           amount: 3,
           revenue: 4011,
           cost: 0,
@@ -892,7 +892,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 2,
-          name: 'generated automated testing of stats',
+          name: 'generated automated testing for stats of stats',
           amount: 5,
           revenue: 6685,
           cost: 0,
@@ -960,7 +960,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 2,
-          name: 'generated automated testing of stats',
+          name: 'generated automated testing for stats of stats',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -970,7 +970,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 4,
-          name: 'generated automated testing SECOND stats test',
+          name: 'generated automated testing for stats SECOND stats test',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -1021,7 +1021,6 @@ describe('PUT, GET and Delete orders', async () => {
 
     const parsedAddingProdResp = JSON.parse(AddingProdResp.body)
 
-    console.log('adding prod to order', parsedAddingProdResp)
     deepStrictEqual(AddingProdResp.statusCode, 201)
 
     deepStrictEqual(parsedAddingProdResp.products[0].productID, parsedCreateProductsResp.productID)
@@ -1043,7 +1042,7 @@ describe('PUT, GET and Delete orders', async () => {
       stats: [
         {
           productID: 2,
-          productDescription: 'generated automated testing product 2',
+          productDescription: 'generated automated testing for stats product 2',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -1051,7 +1050,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           productID: 3,
-          productDescription: 'generated automated testing local product',
+          productDescription: 'generated automated testing for stats local product',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -1059,7 +1058,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           productID: 1,
-          productDescription: 'generated automated testing product',
+          productDescription: 'generated automated testing for stats product',
           amount: 2,
           revenue: 200,
           cost: 0,
@@ -1086,7 +1085,7 @@ describe('PUT, GET and Delete orders', async () => {
       stats: [
         {
           productID: 2,
-          productDescription: 'generated automated testing product 2',
+          productDescription: 'generated automated testing for stats product 2',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -1094,7 +1093,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           productID: 3,
-          productDescription: 'generated automated testing local product',
+          productDescription: 'generated automated testing for stats local product',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -1102,7 +1101,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           productID: 1,
-          productDescription: 'generated automated testing product',
+          productDescription: 'generated automated testing for stats product',
           amount: 0,
           revenue: 0,
           cost: 0,
@@ -1111,5 +1110,169 @@ describe('PUT, GET and Delete orders', async () => {
       ],
     }
     deepStrictEqual(parsedprodStatTimeResp, prodStatsTime)
+
+    const empStatTimeResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/checkins',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2021-10-30T11:21:44.000-08:00',
+        to: '2025-11-30T11:21:44.000-08:00',
+      },
+    })
+    const parsedempStatTimeResp = JSON.parse(empStatTimeResp.body)
+    deepStrictEqual(parsedempStatTimeResp, { message: 'checkin statstics', stats: [] })
+
+    const empCheckinResp = await app.inject({
+      method: 'POST',
+      url: '/employees/checkin',
+      headers: {
+        Authorization: jwt,
+      },
+      body: {
+        employeeID: responseUserEmpParsed.employee.employeeID,
+        storeID: parsedresponseStore.store.storeID,
+        employeeCheckedOut: 'CheckedIn',
+      },
+    })
+
+    const parsedempCheckinResp = JSON.parse(empCheckinResp.body)
+    deepStrictEqual(parsedempCheckinResp.employeeID, responseUserEmpParsed.employee.employeeID)
+
+    const empCheckoutResp = await app.inject({
+      method: 'POST',
+      url: '/employees/checkin',
+      headers: {
+        Authorization: jwt,
+      },
+      body: {
+        employeeID: responseUserEmpParsed.employee.employeeID,
+        storeID: parsedresponseStore.store.storeID,
+        employeeCheckedOut: 'CheckedOut',
+      },
+    })
+
+    const parsedempCheckoutResp = JSON.parse(empCheckoutResp.body)
+    deepStrictEqual(parsedempCheckoutResp.employeeID, responseUserEmpParsed.employee.employeeID)
+
+    const empCheckin2Resp = await app.inject({
+      method: 'POST',
+      url: '/employees/checkin',
+      headers: {
+        Authorization: jwt,
+      },
+      body: {
+        employeeID: responseUserEmpParsed.employee.employeeID,
+        storeID: parsedresponseStore.store.storeID,
+        employeeCheckedOut: 'CheckedIn',
+      },
+    })
+
+    const parsedempCheckin2Resp = JSON.parse(empCheckin2Resp.body)
+    deepStrictEqual(parsedempCheckin2Resp.employeeID, responseUserEmpParsed.employee.employeeID)
+
+    const empCheckout2Resp = await app.inject({
+      method: 'POST',
+      url: '/employees/checkin',
+      headers: {
+        Authorization: jwt,
+      },
+      body: {
+        employeeID: responseUserEmpParsed.employee.employeeID,
+        storeID: parsedresponseStore.store.storeID,
+        employeeCheckedOut: 'CheckedOut',
+      },
+    })
+
+    const parsedempCheckout2Resp = JSON.parse(empCheckout2Resp.body)
+    deepStrictEqual(parsedempCheckout2Resp.employeeID, responseUserEmpParsed.employee.employeeID)
+
+    const empStatWrongTimeResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/checkins',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2021-10-30T11:21:44.000-08:00',
+        to: '2021-11-30T11:21:44.000-08:00',
+      },
+    })
+    const parsedempStatWrongTimeResp = JSON.parse(empStatWrongTimeResp.body)
+    deepStrictEqual(parsedempStatWrongTimeResp, { message: 'checkin statstics', stats: [] })
+
+    const empStatWrongStoreResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/checkins',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2021-10-30T11:21:44.000-08:00',
+        to: '2041-11-30T11:21:44.000-08:00',
+        store: '1',
+      },
+    })
+    const parsedempStatWrongStoreResp = JSON.parse(empStatWrongStoreResp.body)
+    deepStrictEqual(parsedempStatWrongStoreResp, {
+      message: 'checkin statstics',
+      stats: [],
+      store: 1,
+    })
+
+    const empStatWrongEmpResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/checkins',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2021-10-30T11:21:44.000-08:00',
+        to: '2041-11-30T11:21:44.000-08:00',
+        store: '1',
+        employeeID: '1',
+      },
+    })
+    const parsedempStatWrongEmpResp = JSON.parse(empStatWrongEmpResp.body)
+    deepStrictEqual(parsedempStatWrongEmpResp, {
+      message: 'checkin statstics',
+      stats: [],
+      store: 1,
+    })
+
+    const empStatEmpResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/checkins',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2021-10-30T11:21:44.000-08:00',
+        to: '2041-11-30T11:21:44.000-08:00',
+        employeeID: responseUserEmpParsed.employee.employeeID,
+      },
+    })
+    const parsedempStatEmpResp = JSON.parse(empStatEmpResp.body)
+    deepStrictEqual(parsedempStatEmpResp.stats[0].firstName, 'BonkaWok')
+    deepStrictEqual(parsedempStatEmpResp.stats[0].employeeID, 1)
+
+    const empStatEmpWithStoreResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/checkins',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2021-10-30T11:21:44.000-08:00',
+        to: '2041-11-30T11:21:44.000-08:00',
+        employeeID: responseUserEmpParsed.employee.employeeID,
+        storeID: parsedresponseStore.store.storeID,
+      },
+    })
+    const parsedempStatEmpWithStoreResp = JSON.parse(empStatEmpWithStoreResp.body)
+    deepStrictEqual(parsedempStatEmpWithStoreResp.stats[0].firstName, 'BonkaWok')
+    deepStrictEqual(parsedempStatEmpWithStoreResp.stats[0].employeeID, 1)
   })
 })

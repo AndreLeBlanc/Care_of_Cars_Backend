@@ -333,6 +333,10 @@ export const RoleDescription = make<RoleDescription>()
 
 export type EmployeeID = Brand<number, 'employeeID'>
 export const EmployeeID = make<EmployeeID>()
+export type EmployeeStoreID = Brand<number, 'employeeStoreID'>
+export const EmployeeStoreID = make<EmployeeStoreID>()
+export type EmployeeCheckinID = Brand<number, 'employeeCheckinID'>
+export const EmployeeCheckinID = make<EmployeeCheckinID>()
 export type EmployeeSpceialHoursID = Brand<number, 'employeeSpecialHoursID'>
 export const EmployeeSpceialHoursID = make<EmployeeSpceialHoursID>()
 export type ShortUserName = Brand<string, 'ShortUserName'>
@@ -674,34 +678,49 @@ export const employeeWorkingHoursRelations = relations(employeeWorkingHours, ({ 
   }),
 }))
 
-export const employeeStore = pgTable(
-  'employeeStore',
+export const employeeStore = pgTable('employeeStore', {
+  employeeStoreID: serial('employeeStoreID').$type<EmployeeStoreID>().primaryKey(),
+  storeID: integer('storeID')
+    .$type<StoreID>()
+    .references(() => stores.storeID, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
+  employeeID: integer('employeeID')
+    .$type<EmployeeID>()
+    .references(() => employees.employeeID, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
+})
+
+export const employeeStoreRelations = relations(employeeStore, ({ one, many }) => ({
+  employees: one(employees),
+  stores: one(stores),
+  employeeCheckin: many(employeeCheckin),
+}))
+
+export const employeeCheckin = pgTable(
+  'employeeCheckin',
   {
-    storeID: integer('storeID')
-      .$type<StoreID>()
-      .references(() => stores.storeID, {
+    employeeCheckinID: serial('employeeCheckinID').$type<EmployeeCheckinID>().primaryKey(),
+    employeeStoreID: integer('employeeStoreID')
+      .$type<EmployeeStoreID>()
+      .references(() => employeeStore.employeeStoreID, {
         onDelete: 'cascade',
-      })
-      .notNull(),
-    employeeID: integer('employeeID')
-      .$type<EmployeeID>()
-      .references(() => employees.employeeID, {
-        onDelete: 'cascade',
-      })
-      .notNull(),
-    employeeCheckedIn: timestamp('checkedIn'),
-    employeeCheckedOut: timestamp('checkedOut'),
+      }),
+    employeeCheckedIn: timestamp('employeeCheckedIn'),
+    employeeCheckedOut: timestamp('employeeCheckedOut'),
   },
-  (employeeStore) => {
+  (employeeCheckin) => {
     return {
-      pk: primaryKey({ columns: [employeeStore.storeID, employeeStore.employeeID] }),
+      index: index('checkinIndex').on(employeeCheckin.employeeCheckedIn),
     }
   },
 )
 
-export const employeeStoreRelations = relations(employeeStore, ({ one }) => ({
-  employees: one(employees),
-  stores: one(stores),
+export const employeeCheckinRelations = relations(employeeCheckin, ({ one }) => ({
+  employeeStore: one(employeeStore),
 }))
 
 export const employeeSpecialHours = pgTable(

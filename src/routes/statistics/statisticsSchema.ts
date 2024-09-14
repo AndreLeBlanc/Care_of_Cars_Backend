@@ -23,6 +23,15 @@ export const MessageReplySchema = Type.Object({
 })
 export type MessageReplySchemaType = Static<typeof MessageReplySchema>
 
+export const GetCheckinStatsSchema = Type.Object({
+  from: SubmissionTimeSchema,
+  to: SubmissionTimeSchema,
+  store: Type.Optional(storeID),
+  employeeID: Type.Optional(EmployeeID),
+})
+
+export type GetCheckinStatsSchemaType = Static<typeof GetCheckinStatsSchema>
+
 export const CheckedInStatSchema = Type.Object({
   message: MessageSchema,
   store: Type.Optional(storeID),
@@ -56,6 +65,14 @@ export const ProductStatSchema = Type.Object({
 
 export type ProductStatSchemaType = Static<typeof ProductStatSchema>
 
+export const GetProductStatsSchema = Type.Object({
+  from: SubmissionTimeSchema,
+  to: SubmissionTimeSchema,
+  store: Type.Optional(storeID),
+})
+
+export type GetProductStatSchemaType = Static<typeof GetProductStatsSchema>
+
 export const GetServiceStatsSchema = Type.Object({
   from: SubmissionTimeSchema,
   to: SubmissionTimeSchema,
@@ -64,14 +81,6 @@ export const GetServiceStatsSchema = Type.Object({
 })
 
 export type GetServiceStatsSchemaType = Static<typeof GetServiceStatsSchema>
-
-export const GetProductStatsSchema = Type.Object({
-  from: SubmissionTimeSchema,
-  to: SubmissionTimeSchema,
-  store: Type.Optional(storeID),
-})
-
-export type GetProductStatSchemaType = Static<typeof GetProductStatsSchema>
 
 export const ServiceStatSchema = Type.Object({
   message: MessageSchema,

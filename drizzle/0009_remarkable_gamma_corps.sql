@@ -1,0 +1,1 @@
+ALTER TABLE "employeeCheckin" ADD COLUMN "employeeCheckinID" serial PRIMARY KEY NOT NULL;

@@ -1,10 +1,21 @@
 import { FastifyInstance } from 'fastify'
 
-import { OrderStatus, PermissionTitle, StoreID, SubmissionTimeOrder } from '../../schema/schema.js'
+import {
+  EmployeeCheckIn,
+  EmployeeID,
+  OrderStatus,
+  PermissionTitle,
+  StoreID,
+  SubmissionTimeOrder,
+} from '../../schema/schema.js'
 
 import { Either, isOrderStatus, match } from '../../utils/helper.js'
 
 import {
+  CheckedInStatSchema,
+  CheckedInStatSchemaType,
+  GetCheckinStatsSchema,
+  GetCheckinStatsSchemaType,
   GetProductStatSchemaType,
   GetServiceStatsSchema,
   GetServiceStatsSchemaType,
@@ -17,9 +28,10 @@ import {
 } from './statisticsSchema.js'
 
 import {
-  //CheckinStats,
+  CheckinStats,
   ProductStats,
   ServiceStats,
+  checkinStats,
   productStats,
   serviceStats,
 } from '../../services/statisticService.js'
@@ -138,4 +150,58 @@ export async function statistics(fastify: FastifyInstance) {
       )
     },
   )
+
+  fastify.get<{
+    Querystring: GetCheckinStatsSchemaType
+    Reply: CheckedInStatSchemaType | MessageReplySchemaType
+  }>(
+    '/checkins',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_checkin_stats')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply.status(403).send({
+            message: `Permission denied, user doesn't have permission ${permissionName}`,
+          })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: GetCheckinStatsSchema,
+        response: {
+          200: CheckedInStatSchema,
+          403: MessageReplySchema,
+        },
+      },
+    },
+    async function (request, reply) {
+      const from = EmployeeCheckIn(request.query.from)
+      const to = EmployeeCheckIn(request.query.to)
+      const store = request.query.store ? StoreID(request.query.store) : undefined
+      const employeeID = request.query.employeeID ? EmployeeID(request.query.employeeID) : undefined
+
+      const prodStatistics: Either<string, CheckinStats[]> = await checkinStats(
+        from,
+        to,
+        store,
+        employeeID,
+      )
+
+      match(
+        prodStatistics,
+        (stats: CheckinStats[]) => {
+          return reply.status(200).send({ message: 'checkin statstics', store, stats: stats })
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
+    },
+  )
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+//////// for worktime statistics see getEmployeeSpecialWorkingHoursByDates ///////
+//////////////////////////////////////////////////////////////////////////////////

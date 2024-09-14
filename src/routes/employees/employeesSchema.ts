@@ -52,8 +52,8 @@ export const EmployeeSpceialHoursIDSchema = Type.Object({
 export type EmployeeSpceialHoursIDSchemaType = Static<typeof EmployeeSpceialHoursIDSchema>
 
 export const EmployeeSpceialHourByDateSchema = Type.Object({
-  employeeID: EmployeeID,
-  storeID: storeID,
+  employeeID: Type.Optional(EmployeeID),
+  storeID: Type.Optional(storeID),
   begin: Type.String({ format: 'date' }),
   end: Type.String({ format: 'date' }),
 })
