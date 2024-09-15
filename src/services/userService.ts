@@ -344,8 +344,22 @@ export async function verifyEmployee(email: UserEmail): Promise<Either<string, L
           employeeHourlyRateCurrency: employees.employeeHourlyRateCurrency,
           employeeActive: employees.employeeActive,
           employeeComment: employees.employeeComment,
-          employeeCheckedIn: employeeStore.employeeCheckedIn,
-          employeeCheckedOut: employeeStore.employeeCheckedOut,
+          employeeCheckedIn: sql<Date | null>`(
+            SELECT "employeeCheckin"."employeeCheckedIn"
+            FROM "employeeCheckin"
+            JOIN "employeeStore" ON "employeeCheckin"."employeeStoreID" = "employeeStore"."employeeStoreID"
+            WHERE "employeeStore"."employeeID" = "employees"."employeeID"
+            ORDER BY "employeeCheckin"."employeeCheckedIn" DESC
+            LIMIT 1
+        ) as "employeeCheckedIn"`,
+          employeeCheckedOut: sql<Date | null>` (
+            SELECT "employeeCheckin"."employeeCheckedOut"
+            FROM "employeeCheckin"
+            JOIN "employeeStore" ON "employeeCheckin"."employeeStoreID" = "employeeStore"."employeeStoreID"
+            WHERE "employeeStore"."employeeID" = "employees"."employeeID"
+            ORDER BY "employeeCheckin"."employeeCheckedIn" DESC
+            LIMIT 1
+        )`.as('employeeCheckedOut'),
           stores: sql<
             StoreIDName[]
           >`json_agg(json_build_object('storeID', ${stores.storeID}, 'storeName', ${stores.storeName}))`.as(
@@ -359,13 +373,7 @@ export async function verifyEmployee(email: UserEmail): Promise<Either<string, L
       .leftJoin(employees, eq(users.userID, employees.userID))
       .leftJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
       .leftJoin(stores, eq(stores.storeID, employeeStore.storeID))
-      .groupBy(
-        users.userID,
-        roles.roleID,
-        employees.employeeID,
-        employeeStore.employeeCheckedIn,
-        employeeStore.employeeCheckedOut,
-      )
+      .groupBy(users.userID, roles.roleID, employees.employeeID)
 
     return verifiedUser
       ? right({

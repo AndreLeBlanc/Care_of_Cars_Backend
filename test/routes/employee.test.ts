@@ -182,7 +182,6 @@ describe('Employees tests', async () => {
       },
     })
     const checkInFirstParsed = JSON.parse(checkInFirst.body)
-
     deepStrictEqual(checkInFirstParsed.employeeID, responseUserEmpParsed.employee.employeeID)
 
     const checkoutFirst = await app.inject({
@@ -211,8 +210,8 @@ describe('Employees tests', async () => {
         employeeCheckedOut: 'CheckedOut',
       },
     })
+
     const checkoutAgainParsed = JSON.parse(checkoutAgain.body)
-    console.log(checkoutAgainParsed)
     deepStrictEqual(checkoutAgainParsed.message, 'Already checked out')
 
     const checkInAgain = await app.inject({
@@ -228,7 +227,6 @@ describe('Employees tests', async () => {
       },
     })
     const checkInAgainParsed = JSON.parse(checkInAgain.body)
-
     deepStrictEqual(checkInAgainParsed.employeeID, responseUserEmpParsed.employee.employeeID)
     const checkInThrice = await app.inject({
       method: 'POST',
@@ -243,7 +241,6 @@ describe('Employees tests', async () => {
       },
     })
     const checkInThriceParsed = JSON.parse(checkInThrice.body)
-
     deepStrictEqual(checkInThriceParsed.message, 'Already checked in')
   })
 
@@ -506,7 +503,6 @@ describe('Employees tests', async () => {
         storeID: [parsedresponseStore2.store.storeID],
       },
     })
-
     const parsedemployeePatchResponse = JSON.parse(employeePatchResponse.body)
 
     deepStrictEqual(employeePatchResponse.statusCode, 201)

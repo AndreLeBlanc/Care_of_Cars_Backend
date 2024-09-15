@@ -200,7 +200,7 @@ describe('PUT, GET and Delete orders', async () => {
       payload: {
         cost: 1337,
         currency: 'SEK',
-        name: 'generated automated testing',
+        name: 'generated automated testing for orders',
         serviceCategoryID: parsedcatResp.serviceCategoryID,
         includeInAutomaticSms: true,
         serviceVariants: [],
@@ -231,7 +231,7 @@ describe('PUT, GET and Delete orders', async () => {
         storeID: parsedresponseStore.store.storeID,
         cost: 1447,
         currency: 'SEK',
-        name: 'generated automated testing',
+        name: 'Oink',
         serviceCategoryID: parsedcatResp.serviceCategoryID,
         includeInAutomaticSms: true,
         serviceVariants: [],
@@ -261,7 +261,7 @@ describe('PUT, GET and Delete orders', async () => {
       payload: {
         cost: 10,
         currency: 'SEK',
-        name: 'generated automated testing SECOND',
+        name: 'generated automated testing for orders SECOND',
         serviceCategoryID: parsedcatResp.serviceCategoryID,
         includeInAutomaticSms: true,
         serviceVariants: [],
@@ -372,7 +372,7 @@ describe('PUT, GET and Delete orders', async () => {
             serviceID: parsedcreateServiceResp.serviceID,
             cost: 1337,
             currency: 'SEK',
-            name: 'generated automated testing',
+            name: 'generated automated testing for orders',
             serviceCategoryID: parsedcatResp.serviceCategoryID,
             serviceVariants: [],
             amount: 2,
@@ -500,7 +500,7 @@ describe('PUT, GET and Delete orders', async () => {
             serviceID: parsedcreateServiceResp.serviceID,
             cost: 1337,
             currency: 'SEK',
-            name: 'generated automated testing',
+            name: 'generated automated testing for orders',
             serviceCategoryID: parsedcatResp.serviceCategoryID,
             serviceVariants: [],
             amount: 2,
@@ -514,7 +514,7 @@ describe('PUT, GET and Delete orders', async () => {
             serviceID: parsedcreateServiceResp2.serviceID,
             cost: 10,
             currency: 'SEK',
-            name: 'generated automated testing SECOND',
+            name: 'generated automated testing for orders SECOND',
             serviceCategoryID: parsedcatResp.serviceCategoryID,
             serviceVariants: [],
             amount: 2,
@@ -548,7 +548,7 @@ describe('PUT, GET and Delete orders', async () => {
       services: [
         {
           serviceID: 2,
-          name: 'generated automated testing',
+          name: 'generated automated testing for orders',
           amount: 2,
           cost: 1337,
           currency: 'SEK',
@@ -561,7 +561,7 @@ describe('PUT, GET and Delete orders', async () => {
         },
         {
           serviceID: 4,
-          name: 'generated automated testing SECOND',
+          name: 'generated automated testing for orders SECOND',
           amount: 2,
           cost: 10,
           currency: 'SEK',
@@ -657,7 +657,7 @@ describe('PUT, GET and Delete orders', async () => {
           {
             cost: 1234,
             currency: 'SEK',
-            name: 'generated automated testing',
+            name: 'generated automated testing for orders',
             amount: 1,
             vatFree: false,
             day1: '2024-08-25T08:34:58.000Z',
@@ -750,7 +750,7 @@ describe('PUT, GET and Delete orders', async () => {
         services: [
           {
             serviceID: 2,
-            name: 'generated automated testing',
+            name: 'generated automated testing for orders',
             amount: 2,
             cost: 1337,
             currency: 'SEK',
@@ -763,7 +763,7 @@ describe('PUT, GET and Delete orders', async () => {
           },
           {
             serviceID: 1,
-            name: 'generated automated testing',
+            name: 'generated automated testing for orders',
             amount: 2,
             cost: 1337,
             currency: 'SEK',
@@ -778,7 +778,7 @@ describe('PUT, GET and Delete orders', async () => {
             serviceID: parsedcreateLocalServiceResp.serviceID,
             cost: 200,
             currency: 'SEK',
-            name: 'generated automated testing',
+            name: 'generated automated testing for orders',
             amount: 1,
             vatFree: false,
             day1: '2024-08-25T08:34:58.000Z',
@@ -792,7 +792,7 @@ describe('PUT, GET and Delete orders', async () => {
       },
     })
     const parsednextOrderResp = JSON.parse(nextOrderResp.body)
-    deepStrictEqual(parsednextOrderResp.services[0].name, 'generated automated testing')
+    deepStrictEqual(parsednextOrderResp.services[0].name, 'generated automated testing for orders')
     deepStrictEqual(parsednextOrderResp.services.length, 3)
 
     const listOrdersResp1 = await app.inject({
