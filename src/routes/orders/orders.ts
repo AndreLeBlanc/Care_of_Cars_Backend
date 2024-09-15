@@ -33,7 +33,6 @@ import {
   WorkDay3,
   WorkDay4,
   WorkDay5,
-  orderStatus,
 } from '../../schema/schema.js'
 
 import {
@@ -46,7 +45,7 @@ import {
   Search,
 } from '../../plugins/pagination.js'
 
-import { Either, match } from '../../utils/helper.js'
+import { Either, isOrderStatus, match } from '../../utils/helper.js'
 
 import {
   CreateOrderBodyReplySchema,
@@ -108,9 +107,7 @@ export async function orders(fastify: FastifyInstance) {
           .status(400)
           .send({ message: 'upphämtningstiden måste vara senare än inlämningstiden' })
       }
-      function isOrderStatus(status: string): status is OrderStatus {
-        return orderStatus.includes(status as OrderStatus)
-      }
+
       const orderStatusFromBody = req.body.orderStatus
 
       const orderStatusValue: OrderStatus | undefined = isOrderStatus(orderStatusFromBody)

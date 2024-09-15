@@ -1,9 +1,10 @@
 import { AnyColumn, SQL, inArray, is, sql } from 'drizzle-orm'
+import { OrderStatus, orderStatus } from '../schema/schema.js'
 import { PgTimestampString, SelectedFields } from 'drizzle-orm/pg-core'
 import { TObject, Type } from '@sinclair/typebox'
+import { type SelectResultFields } from 'drizzle-orm/query-builders/select.types'
 import { TypeCompiler } from '@sinclair/typebox/compiler'
 
-import { type SelectResultFields } from 'drizzle-orm/query-builders/select.types'
 /**
  * return if email is correct, is Valid email
  * */
@@ -37,6 +38,10 @@ export const driverHasCard = Type.Boolean()
 export const driverCardNumber = Type.String({ maxLength: 255 })
 export const driverCardValidTo = Type.String({ format: 'date' })
 export const driverKeyNumber = Type.String({ maxLength: 255 })
+
+export function isOrderStatus(status: string): status is OrderStatus {
+  return orderStatus.includes(status as OrderStatus)
+}
 
 export function jsonBuildObject<T extends SelectedFields>(shape: T): SQL<SelectResultFields<T>> {
   const chunks: SQL[] = Object.entries(shape).flatMap(([key, value], index) => {

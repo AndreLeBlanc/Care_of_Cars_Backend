@@ -25,6 +25,7 @@ import { root } from './routes/root.js'
 import seedSuperAdmin from './plugins/seed.js'
 import { serviceCategory } from './routes/category/category.js'
 import { services } from './routes/services/services.js'
+import { statistics } from './routes/statistics/statistics.js'
 import { stores } from './routes/stores/stores.js'
 import { users } from './routes/users/users.js'
 
@@ -107,6 +108,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
   app.register(stores, { prefix: 'stores' })
   app.register(services, { prefix: 'services' })
   app.register(users, { prefix: '/users' })
+  app.register(statistics, { prefix: '/statistics' })
   app.register(employees, { prefix: '/employees' })
   app.register(root, { prefix: '/' })
   app.register(customers, { prefix: '/customer' })

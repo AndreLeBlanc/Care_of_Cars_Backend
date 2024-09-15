@@ -469,6 +469,12 @@ describe('POST /users/login HTTP', async () => {
 
     const responseUserEmp2LoginParsed = JSON.parse(responseUserEmp2Login.body)
 
+    console.log('responseUserEmp2LoginParsed')
+    console.log('responseUserEmp2LoginParsed')
+    console.log(responseUserEmp2LoginParsed)
+    console.log('responseUserEmp2LoginParsed')
+    console.log('responseUserEmp2LoginParsed')
+
     deepStrictEqual(responseUserEmp2LoginParsed.lastName, 'lastsadNamesdfs')
     deepStrictEqual(responseUserEmp2LoginParsed.role.roleHasPermission[0].permissionID, perms[0])
     deepStrictEqual(responseUserEmp2LoginParsed.role.roleHasPermission[1].permissionID, perms[1])

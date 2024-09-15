@@ -15,7 +15,7 @@ import {
 import { DriverID, EmployeeID, FirstName, LastName, OrderID } from '../../utils/helper.js'
 
 const OrderNotesSchema = Type.String()
-const OrderStatusSchema = Type.String()
+export const OrderStatusSchema = Type.String()
 export const PickupTimeSchema = Type.String({ format: 'date-time' })
 const ServiceCostNumberSchema = Type.Number()
 const ServiceDay1Schema = Type.String({ format: 'date-time' })
