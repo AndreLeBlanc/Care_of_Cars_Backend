@@ -1,6 +1,7 @@
 import { db } from '../config/db-connect.js'
 
-import { and, between, eq, isNull, or, sql } from 'drizzle-orm'
+import { and, between, eq, gte, isNull, or, sql } from 'drizzle-orm'
+
 import Dinero from 'dinero.js'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
@@ -11,11 +12,15 @@ import {
   AbsoluteDifference,
   AverageRevenue,
   BillPaid,
+  BilledCount,
+  BillingDate,
   BookingCount,
   CashPaid,
+  CustomersCount,
   EmployeeCheckIn,
   EmployeeCheckOut,
   EmployeeID,
+  EmployeesCount,
   MonthlyRevenue,
   OrderStatus,
   PercentDifference,
@@ -33,6 +38,8 @@ import {
   ServiceProfit,
   ServiceRevenuePerHour,
   ServiceSold,
+  ServicesCount,
+  StatisticsDate,
   StoreID,
   SubmissionTimeOrder,
   TotalDiscount,
@@ -43,6 +50,7 @@ import {
   UserFirstName,
   UserLastName,
   WorkedHours,
+  bills,
   employeeCheckin,
   employeeStore,
   employees,
@@ -114,6 +122,14 @@ export type CheckinStats = {
   lastName: UserLastName
   employeeCheckedIn?: EmployeeCheckIn
   employeeCheckedOut?: EmployeeCheckOut
+}
+
+export type Dashboard = {
+  employees: EmployeesCount
+  services: ServicesCount
+  customers: CustomersCount
+  billed: BilledCount
+  storeID?: StoreID
 }
 
 //export function salesStats(store?: StoreID): Promise<Either<string, SalesStats>> {
@@ -288,4 +304,67 @@ export async function checkinStats(
   } catch (e) {
     return left(errorHandling(e))
   }
+}
+
+export async function dashboard(
+  storeID?: StoreID,
+  from?: StatisticsDate,
+): Promise<Either<string, Dashboard>> {
+  let empCond
+  let serviceCond
+  let customerCond
+  let billsCond
+  if (storeID) {
+    empCond = eq(employeeStore.storeID, storeID)
+    serviceCond = or(eq(services.storeID, storeID), isNull(services.storeID))
+    customerCond = eq(orders.storeID, storeID)
+    billsCond = eq(bills.storeID, storeID)
+  }
+
+  if (from) {
+    customerCond = and(
+      customerCond,
+      gte(orders.submissionTime, SubmissionTimeOrder(from.toISOString())),
+    )
+    billsCond = and(billsCond, gte(bills.billingDate, BillingDate(from.toISOString())))
+  }
+  const employeeWithStore = db
+    .select({ employees: sql<number>`count(${employeeStore.employeeID})`.as('employees') })
+    .from(employeeStore)
+    .where(empCond)
+    .as('employeeWithStore')
+
+  const servicesWithStore = db
+    .select({ services: sql<number>`count(${services.serviceID})`.as('services') })
+    .from(services)
+    .where(serviceCond)
+    .as('servicesWithStore')
+
+  const customer = db
+    .select({ customers: sql<number>`count(distinct ${orders.driverID})`.as('customers') })
+    .from(orders)
+    .where(customerCond)
+    .as('customer')
+
+  const billed = db
+    .select({ billed: sql<number>`sum(${bills.billedAmount})`.as('billed') })
+    .from(bills)
+    .where(billsCond)
+    .as('billedQ')
+
+  const [dash] = await db
+    .select()
+    .from(employeeWithStore)
+    .innerJoin(servicesWithStore, sql`1=1`)
+    .innerJoin(customer, sql`1=1`)
+    .innerJoin(billed, sql`1=1`)
+  return dash
+    ? right({
+        employees: EmployeesCount(dash.employeeWithStore.employees),
+        services: ServicesCount(dash.servicesWithStore.services),
+        customers: CustomersCount(dash.customer.customers),
+        billed: BilledCount(dash.billedQ.billed),
+        storeID: storeID,
+      })
+    : left('could not create statistics')
 }

@@ -36,12 +36,14 @@
 | services_serviceCategoryID_serviceCategories_serviceCategoryID_ | FOREIGN KEY | FOREIGN KEY ("serviceCategoryID") REFERENCES "serviceCategories"("serviceCategoryID") ON DELETE CASCADE |
 | services_pkey | PRIMARY KEY | PRIMARY KEY ("serviceID") |
 | services_storeID_stores_storeID_fk | FOREIGN KEY | FOREIGN KEY ("storeID") REFERENCES stores("storeID") ON DELETE CASCADE |
+| services_name_unique | UNIQUE | UNIQUE (name) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
 | services_pkey | CREATE UNIQUE INDEX services_pkey ON public.services USING btree ("serviceID") |
+| services_name_unique | CREATE UNIQUE INDEX services_name_unique ON public.services USING btree (name) |
 
 ## Relations
 

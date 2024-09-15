@@ -1274,5 +1274,83 @@ describe('testing statistics route', async () => {
     const parsedempStatEmpWithStoreResp = JSON.parse(empStatEmpWithStoreResp.body)
     deepStrictEqual(parsedempStatEmpWithStoreResp.stats[0].firstName, 'BonkaWok')
     deepStrictEqual(parsedempStatEmpWithStoreResp.stats[0].employeeID, 1)
+
+    const dashboradResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/dashboard',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {},
+    })
+
+    const parseddashboradResp = JSON.parse(dashboradResp.body)
+    deepStrictEqual(parseddashboradResp, {
+      message: 'dashboard statistics',
+      employees: 1,
+      services: 4,
+      customers: 1,
+      billed: 0,
+    })
+
+    const dashboradWrongDateResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/dashboard',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2026-10-30T11:21:44.000-08:00',
+      },
+    })
+    const parseddashboradWrongDateResp = JSON.parse(dashboradWrongDateResp.body)
+    deepStrictEqual(parseddashboradWrongDateResp, {
+      message: 'dashboard statistics',
+      employees: 1,
+      services: 4,
+      customers: 0,
+      billed: 0,
+    })
+
+    const dashboardStoreResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/dashboard',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2021-10-30T11:21:44.000-08:00',
+        storeID: parsedresponseStore.store.storeID,
+      },
+    })
+    const parseddashboardStoreResp = JSON.parse(dashboardStoreResp.body)
+
+    deepStrictEqual(parseddashboardStoreResp, {
+      message: 'dashboard statistics',
+      employees: 1,
+      services: 4,
+      storeID: parsedresponseStore.store.storeID,
+      customers: 1,
+      billed: 0,
+    })
+    const dashboradWrongStoreResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/dashboard',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        storeID: '3245',
+      },
+    })
+    const parseddashboradWrongStoreResp = JSON.parse(dashboradWrongStoreResp.body)
+    deepStrictEqual(parseddashboradWrongStoreResp, {
+      message: 'dashboard statistics',
+      employees: 0,
+      services: 3,
+      storeID: 3245,
+      customers: 0,
+      billed: 0,
+    })
   })
 })

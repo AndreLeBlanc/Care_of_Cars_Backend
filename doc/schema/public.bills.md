@@ -30,6 +30,9 @@
 | driverKeyNumber | varchar(256) |  | true |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |
+| storeID | integer |  | false |  | [public.stores](public.stores.md) |  |
+| billedAmount | real |  | false |  |  |  |
+| currency | varchar |  | false |  |  |  |
 
 ## Constraints
 
@@ -41,6 +44,7 @@
 | bills_customerOrgNumber_companycustomers_customerOrgNumber_fk | FOREIGN KEY | FOREIGN KEY ("customerOrgNumber") REFERENCES companycustomers("customerOrgNumber") |
 | bills_driverID_drivers_driverID_fk | FOREIGN KEY | FOREIGN KEY ("driverID") REFERENCES drivers("driverID") |
 | bills_employeeID_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("employeeID") REFERENCES employees("employeeID") |
+| bills_storeID_stores_storeID_fk | FOREIGN KEY | FOREIGN KEY ("storeID") REFERENCES stores("storeID") ON DELETE CASCADE |
 
 ## Indexes
 

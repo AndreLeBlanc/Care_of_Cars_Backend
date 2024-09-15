@@ -5,6 +5,7 @@ import {
   EmployeeID,
   OrderStatus,
   PermissionTitle,
+  StatisticsDate,
   StoreID,
   SubmissionTimeOrder,
 } from '../../schema/schema.js'
@@ -14,8 +15,12 @@ import { Either, isOrderStatus, match } from '../../utils/helper.js'
 import {
   CheckedInStatSchema,
   CheckedInStatSchemaType,
+  DashboardSchema,
+  DashboardSchemaType,
   GetCheckinStatsSchema,
   GetCheckinStatsSchemaType,
+  GetDashboardSchema,
+  GetDashboardSchemaType,
   GetProductStatSchemaType,
   GetServiceStatsSchema,
   GetServiceStatsSchemaType,
@@ -29,9 +34,11 @@ import {
 
 import {
   CheckinStats,
+  Dashboard,
   ProductStats,
   ServiceStats,
   checkinStats,
+  dashboard,
   productStats,
   serviceStats,
 } from '../../services/statisticService.js'
@@ -193,6 +200,48 @@ export async function statistics(fastify: FastifyInstance) {
         prodStatistics,
         (stats: CheckinStats[]) => {
           return reply.status(200).send({ message: 'checkin statstics', store, stats: stats })
+        },
+        (err) => {
+          return reply.status(403).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.get<{
+    Querystring: GetDashboardSchemaType
+    Reply: DashboardSchemaType | MessageReplySchemaType
+  }>(
+    '/dashboard',
+    {
+      preHandler: async (request, reply, done) => {
+        const permissionName: PermissionTitle = PermissionTitle('get_dashboard')
+        const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
+        if (!authorizeStatus) {
+          return reply.status(403).send({
+            message: `Permission denied, user doesn't have permission ${permissionName}`,
+          })
+        }
+        done()
+        return reply
+      },
+      schema: {
+        querystring: GetDashboardSchema,
+        response: {
+          200: DashboardSchema,
+          403: MessageReplySchema,
+        },
+      },
+    },
+    async function (request, reply) {
+      const from = request.query.from ? StatisticsDate(new Date(request.query.from)) : undefined
+      const store = request.query.storeID ? StoreID(request.query.storeID) : undefined
+
+      const dashboardStats: Either<string, Dashboard> = await dashboard(store, from)
+      match(
+        dashboardStats,
+        (stats: Dashboard) => {
+          return reply.status(200).send({ message: 'dashboard statistics', ...stats })
         },
         (err) => {
           return reply.status(403).send({ message: err })

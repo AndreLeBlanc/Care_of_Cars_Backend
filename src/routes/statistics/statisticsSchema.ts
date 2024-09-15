@@ -17,6 +17,11 @@ const RevenuePerHourSchema = Type.Number()
 const AmountSoldSchema = Type.Number()
 const ProductProfitSchema = Type.Number()
 const WorkedHoursSchema = Type.Number()
+const StatisticsDateSchema = Type.String({ format: 'date-time' })
+const EmployeesCountSchema = Type.Number()
+const ServicesCountSchema = Type.Number()
+const CustomersCountSchema = Type.Number()
+const BilledCountSchema = Type.Number()
 
 export const MessageReplySchema = Type.Object({
   message: MessageSchema,
@@ -100,3 +105,21 @@ export const ServiceStatSchema = Type.Object({
 })
 
 export type ServiceStatSchemaType = Static<typeof ServiceStatSchema>
+
+export const GetDashboardSchema = Type.Object({
+  from: Type.Optional(StatisticsDateSchema),
+  storeID: Type.Optional(storeID),
+})
+
+export type GetDashboardSchemaType = Static<typeof GetDashboardSchema>
+
+export const DashboardSchema = Type.Object({
+  message: MessageSchema,
+  storeID: Type.Optional(storeID),
+  employees: EmployeesCountSchema,
+  services: ServicesCountSchema,
+  customers: CustomersCountSchema,
+  billed: BilledCountSchema,
+})
+
+export type DashboardSchemaType = Static<typeof DashboardSchema>

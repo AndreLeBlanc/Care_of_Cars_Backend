@@ -6,14 +6,14 @@
 | ---- | ------- | ------- | ---- |
 | [drizzle.__drizzle_migrations](drizzle.__drizzle_migrations.md) | 3 |  | BASE TABLE |
 | [public.billOrders](public.billOrders.md) | 2 |  | BASE TABLE |
-| [public.bills](public.bills.md) | 24 |  | BASE TABLE |
+| [public.bills](public.bills.md) | 27 |  | BASE TABLE |
 | [public.companycustomers](public.companycustomers.md) | 10 |  | BASE TABLE |
 | [public.driverCars](public.driverCars.md) | 11 |  | BASE TABLE |
 | [public.drivers](public.drivers.md) | 23 |  | BASE TABLE |
 | [public.employeeGlobalQualifications](public.employeeGlobalQualifications.md) | 2 |  | BASE TABLE |
 | [public.employeeLocalQualifications](public.employeeLocalQualifications.md) | 2 |  | BASE TABLE |
 | [public.employeeSpecialHours](public.employeeSpecialHours.md) | 7 |  | BASE TABLE |
-| [public.employeeStore](public.employeeStore.md) | 4 |  | BASE TABLE |
+| [public.employeeStore](public.employeeStore.md) | 5 |  | BASE TABLE |
 | [public.employeeWorkingHours](public.employeeWorkingHours.md) | 25 |  | BASE TABLE |
 | [public.employees](public.employees.md) | 13 |  | BASE TABLE |
 | [public.orderListing](public.orderListing.md) | 24 |  | BASE TABLE |
@@ -40,6 +40,7 @@
 | [public.userBelongsToStore](public.userBelongsToStore.md) | 2 |  | BASE TABLE |
 | [public.users](public.users.md) | 9 |  | BASE TABLE |
 | [public.orderProducts](public.orderProducts.md) | 7 |  | BASE TABLE |
+| [public.employeeCheckin](public.employeeCheckin.md) | 4 |  | BASE TABLE |
 
 ## Relations
 

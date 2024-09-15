@@ -536,6 +536,17 @@ export const ProductProfit = make<ProductProfit>()
 export type ProductSold = Brand<number, 'productSold'>
 export const ProductSold = make<ProductSold>()
 
+export type StatisticsDate = Brand<Date, 'statisticsDate'>
+export const StatisticsDate = make<StatisticsDate>()
+export type EmployeesCount = Brand<number, 'employeesCount'>
+export const EmployeesCount = make<EmployeesCount>()
+export type ServicesCount = Brand<number, 'servicesCount'>
+export const ServicesCount = make<ServicesCount>()
+export type CustomersCount = Brand<number, 'customersCount'>
+export const CustomersCount = make<CustomersCount>()
+export type BilledCount = Brand<number, 'billedCount'>
+export const BilledCount = make<BilledCount>()
+
 export const colorForService = [
   'LightBlue',
   'Blue',
@@ -692,6 +703,7 @@ export const employeeStore = pgTable('employeeStore', {
       onDelete: 'cascade',
     })
     .notNull(),
+  ...dbDates,
 })
 
 export const employeeStoreRelations = relations(employeeStore, ({ one, many }) => ({
@@ -1466,7 +1478,8 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
     references: [drivers.driverID],
   }),
   orderListing: many(orderListing),
-  bills: one(billOrders),
+  bills: many(billOrders),
+  billOrders: many(billOrders),
   rentCarBookings: one(rentCarBookings),
   stores: one(stores),
 }))
@@ -1702,6 +1715,6 @@ export const billOrders = pgTable(
 )
 
 export const billOrdersRelations = relations(billOrders, ({ one }) => ({
-  orders: one(orders),
   bills: one(bills),
+  orders: one(orders),
 }))
