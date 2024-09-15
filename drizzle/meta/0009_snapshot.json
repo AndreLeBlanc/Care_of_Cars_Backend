@@ -1,6 +1,6 @@
 {
-  "id": "56de86c3-05b7-494e-82e6-f6b7d2829643",
-  "prevId": "09292825-1c0b-4e69-b1da-0dd2b17ebc9b",
+  "id": "e20ff7bb-ccef-4262-9204-93a18532887b",
+  "prevId": "58b25960-2525-4af1-97f0-57d658303ca3",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -679,20 +679,26 @@
       "name": "employeeCheckin",
       "schema": "",
       "columns": {
+        "employeeCheckinID": {
+          "name": "employeeCheckinID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "employeeStoreID": {
           "name": "employeeStoreID",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "checkedIn": {
-          "name": "checkedIn",
+        "employeeCheckedIn": {
+          "name": "employeeCheckedIn",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
-        "checkedOut": {
-          "name": "checkedOut",
+        "employeeCheckedOut": {
+          "name": "employeeCheckedOut",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
@@ -931,6 +937,12 @@
       "name": "employeeStore",
       "schema": "",
       "columns": {
+        "employeeStoreID": {
+          "name": "employeeStoreID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "storeID": {
           "name": "storeID",
           "type": "integer",
@@ -942,18 +954,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
-        },
-        "checkedIn": {
-          "name": "checkedIn",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "checkedOut": {
-          "name": "checkedOut",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -985,15 +985,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "employeeStore_storeID_employeeID_pk": {
-          "name": "employeeStore_storeID_employeeID_pk",
-          "columns": [
-            "storeID",
-            "employeeID"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "public.employeeWorkingHours": {
@@ -2668,15 +2660,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "serviceQualifications_globalQualID_serviceID_pk": {
-          "name": "serviceQualifications_globalQualID_serviceID_pk",
-          "columns": [
-            "globalQualID",
-            "serviceID"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "public.serviceVariants": {

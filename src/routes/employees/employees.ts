@@ -720,12 +720,12 @@ export const employees = async (fastify: FastifyInstance) => {
       },
     },
     async function (request, reply) {
-      const employeeID = EmployeeID(request.query.employeeID)
-      const storeID = StoreID(request.query.storeID)
+      const employeeID = request.query.employeeID ? EmployeeID(request.query.employeeID) : undefined
+      const storeID = request.query.storeID ? StoreID(request.query.storeID) : undefined
       const begin = WorkTime(new Date(request.query.begin))
       const end = WorkTime(new Date(request.query.end))
       const hours: Either<string, { specialHours: SpecialWorkingHours[] }> =
-        await getEmployeeSpecialWorkingHoursByDates(storeID, employeeID, begin, end)
+        await getEmployeeSpecialWorkingHoursByDates(begin, end, storeID, employeeID)
       match(
         hours,
         (specialHours: { specialHours: SpecialWorkingHours[] }) => {

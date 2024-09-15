@@ -154,7 +154,7 @@ export type CreateOrderProduct = {
   orderProductNotes?: OrderProductNotes
 }
 
-export type OrderProduct = CreateOrderProduct & { orderID: OrderID }
+export type OrderProduct = CreateOrderProduct & { orderID: OrderID; total: ProductCostNumber }
 
 type OrderNoBrand = {
   driverCarID: DriverCarID
@@ -269,6 +269,7 @@ function brandOrder(
     productDescription: prod.productDescription,
     amount: prod.amount,
     cost: prod.cost,
+    total: prod.cost * prod.amount,
     currency: ProductCostCurrency(prod.currency as Currency),
     orderProductNotes: prod.orderProductNotes ?? undefined,
   }))
@@ -418,7 +419,7 @@ export async function createOrder(
                 amount: sql`"excluded"."amount"`,
                 cost: sql`"excluded"."cost"`,
                 currency: sql`"excluded"."currency"`,
-                orderProductNotes: sql`"excluded"."orderNotes"`,
+                orderProductNotes: sql`"excluded"."orderProductNotes"`,
               },
             })
             .returning()
