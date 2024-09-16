@@ -82,7 +82,7 @@ import {
 import Dinero from 'dinero.js'
 
 import { Either, match } from '../../utils/helper.js'
-import { StoreIDSchemaType } from '../stores/storesSchema.js'
+import { StoreIDSchema, StoreIDSchemaType } from '../stores/storesSchema.js'
 
 export async function services(fastify: FastifyInstance) {
   fastify.put<{
@@ -358,7 +358,7 @@ export async function services(fastify: FastifyInstance) {
       },
 
       schema: {
-        params: getServiceByIDSchema,
+        params: StoreIDSchema,
         response: { 200: ServiceOrderSchema, 404: MessageSchema },
       },
     },

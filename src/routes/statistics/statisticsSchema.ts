@@ -22,6 +22,18 @@ const EmployeesCountSchema = Type.Number()
 const ServicesCountSchema = Type.Number()
 const CustomersCountSchema = Type.Number()
 const BilledCountSchema = Type.Number()
+const MonthlyRevenue = Type.Number()
+const PotentialMonthlyRevenue = Type.Number()
+const TotalMonthlyRevenue = Type.Number()
+const TotalMonthlyRevenueLastYear = Type.Number()
+const AbsoluteDifference = Type.Number()
+const PercentDifference = Type.Number()
+const TotalRevenueSchema = Type.Number()
+const BookingCountSchema = Type.Number()
+const AverageRevenueSchema = Type.Number()
+const CashPaidSchema = Type.Number()
+const BillPaidSchema = Type.Number()
+const TotalDiscountSchema = Type.Number()
 
 export const MessageReplySchema = Type.Object({
   message: MessageSchema,
@@ -123,3 +135,47 @@ export const DashboardSchema = Type.Object({
 })
 
 export type DashboardSchemaType = Static<typeof DashboardSchema>
+
+export const GetRevenueSchema = Type.Object({
+  from: StatisticsDateSchema,
+  storeID: Type.Optional(storeID),
+})
+
+export type GetRevenueSchemaType = Static<typeof GetRevenueSchema>
+
+const MonthStatsSchema = Type.Object({
+  monthlyRevenue: MonthlyRevenue,
+  potentialMonthlyRevenue: PotentialMonthlyRevenue,
+  totalMonthlyRevenue: TotalMonthlyRevenue,
+  totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear,
+  absoluteDifference: AbsoluteDifference,
+  percentDifference: PercentDifference,
+})
+
+const YearStatsSchema = Type.Object({
+  jan: MonthStatsSchema,
+  feb: MonthStatsSchema,
+  mar: MonthStatsSchema,
+  apr: MonthStatsSchema,
+  may: MonthStatsSchema,
+  jun: MonthStatsSchema,
+  jul: MonthStatsSchema,
+  aug: MonthStatsSchema,
+  sep: MonthStatsSchema,
+  oct: MonthStatsSchema,
+  nov: MonthStatsSchema,
+  dec: MonthStatsSchema,
+})
+
+export const SalesStatsSchema = Type.Object({
+  message: MessageSchema,
+  totalRevenue: TotalRevenueSchema,
+  totalBookings: BookingCountSchema,
+  averageRevenuePerBooking: AverageRevenueSchema,
+  cashPaid: CashPaidSchema,
+  billPaid: BillPaidSchema,
+  totalDiscounts: TotalDiscountSchema,
+  year: YearStatsSchema,
+})
+
+export type SalesStatsSchemaType = Static<typeof SalesStatsSchema>
