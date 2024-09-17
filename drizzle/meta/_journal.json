@@ -5,64 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1724965415625,
-      "tag": "0000_previous_shiva",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1725458741024,
-      "tag": "0001_silky_eddie_brock",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1725566189688,
-      "tag": "0002_third_marvel_zombies",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1725567830550,
-      "tag": "0003_typical_dorian_gray",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1725571266508,
-      "tag": "0004_spicy_white_queen",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1725571505653,
-      "tag": "0005_cheerful_silverclaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1725813876825,
-      "tag": "0006_breezy_gamma_corps",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1726076684478,
-      "tag": "0007_simple_scarlet_witch",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1726413012899,
-      "tag": "0010_familiar_nitro",
+      "when": 1726563823271,
+      "tag": "0000_mysterious_doctor_faustus",
       "breakpoints": true
     }
   ]

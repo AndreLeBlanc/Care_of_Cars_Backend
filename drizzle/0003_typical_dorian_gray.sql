@@ -1,2 +1,0 @@
-ALTER TABLE "products" DROP CONSTRAINT "products_productDescription_productID_unique";--> statement-breakpoint
-ALTER TABLE "products" ADD CONSTRAINT "products_productDescription_storeID_unique" UNIQUE("productDescription","storeID");

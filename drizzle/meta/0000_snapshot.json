@@ -1,5 +1,5 @@
 {
-  "id": "03ef14f9-9d85-4028-a93c-0496be27252f",
+  "id": "8570239a-62e9-433a-9e98-3e6681ca0b99",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -71,10 +71,28 @@
           "primaryKey": true,
           "notNull": true
         },
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "billStatus": {
           "name": "billStatus",
           "type": "billStatus",
           "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "billedAmount": {
+          "name": "billedAmount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
@@ -216,6 +234,19 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "bills_storeID_stores_storeID_fk": {
+          "name": "bills_storeID_stores_storeID_fk",
+          "tableFrom": "bills",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "bills_employeeID_employees_employeeID_fk": {
           "name": "bills_employeeID_employees_employeeID_fk",
           "tableFrom": "bills",
@@ -644,6 +675,70 @@
         }
       }
     },
+    "public.employeeCheckin": {
+      "name": "employeeCheckin",
+      "schema": "",
+      "columns": {
+        "employeeCheckinID": {
+          "name": "employeeCheckinID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "employeeStoreID": {
+          "name": "employeeStoreID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employeeCheckedIn": {
+          "name": "employeeCheckedIn",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employeeCheckedOut": {
+          "name": "employeeCheckedOut",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "checkinIndex": {
+          "name": "checkinIndex",
+          "columns": [
+            {
+              "expression": "employeeCheckedIn",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "employeeCheckin_employeeStoreID_employeeStore_employeeStoreID_fk": {
+          "name": "employeeCheckin_employeeStoreID_employeeStore_employeeStoreID_fk",
+          "tableFrom": "employeeCheckin",
+          "tableTo": "employeeStore",
+          "columnsFrom": [
+            "employeeStoreID"
+          ],
+          "columnsTo": [
+            "employeeStoreID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.employeeGlobalQualifications": {
       "name": "employeeGlobalQualifications",
       "schema": "",
@@ -858,6 +953,12 @@
       "name": "employeeStore",
       "schema": "",
       "columns": {
+        "employeeStoreID": {
+          "name": "employeeStoreID",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "storeID": {
           "name": "storeID",
           "type": "integer",
@@ -870,17 +971,19 @@
           "primaryKey": false,
           "notNull": true
         },
-        "checkedIn": {
-          "name": "checkedIn",
+        "createdAt": {
+          "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "now()"
         },
-        "checkedOut": {
-          "name": "checkedOut",
+        "updatedAt": {
+          "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -912,15 +1015,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "employeeStore_storeID_employeeID_pk": {
-          "name": "employeeStore_storeID_employeeID_pk",
-          "columns": [
-            "storeID",
-            "employeeID"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "public.employeeWorkingHours": {
@@ -1262,130 +1357,6 @@
         }
       }
     },
-    "public.localProducts": {
-      "name": "localProducts",
-      "schema": "",
-      "columns": {
-        "storeID": {
-          "name": "storeID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "localProductID": {
-          "name": "localProductID",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "productItemNumber": {
-          "name": "productItemNumber",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "currency": {
-          "name": "currency",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cost": {
-          "name": "cost",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "productCategoryID": {
-          "name": "productCategoryID",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "productDescription": {
-          "name": "productDescription",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "productSupplierArticleNumber": {
-          "name": "productSupplierArticleNumber",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "productExternalArticleNumber": {
-          "name": "productExternalArticleNumber",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "productUpdateRelatedData": {
-          "name": "productUpdateRelatedData",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "award": {
-          "name": "award",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "productInventoryBalance": {
-          "name": "productInventoryBalance",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "localProducts_storeID_stores_storeID_fk": {
-          "name": "localProducts_storeID_stores_storeID_fk",
-          "tableFrom": "localProducts",
-          "tableTo": "stores",
-          "columnsFrom": [
-            "storeID"
-          ],
-          "columnsTo": [
-            "storeID"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "localProducts_productCategoryID_productCategories_productCategoryID_fk": {
-          "name": "localProducts_productCategoryID_productCategories_productCategoryID_fk",
-          "tableFrom": "localProducts",
-          "tableTo": "productCategories",
-          "columnsFrom": [
-            "productCategoryID"
-          ],
-          "columnsTo": [
-            "productCategoryID"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.orderListing": {
       "name": "orderListing",
       "schema": "",
@@ -1648,6 +1619,93 @@
           "columns": [
             "orderID",
             "serviceID"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.orderProducts": {
+      "name": "orderProducts",
+      "schema": "",
+      "columns": {
+        "orderID": {
+          "name": "orderID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productID": {
+          "name": "productID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productDescription": {
+          "name": "productDescription",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost": {
+          "name": "cost",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "orderProductNotes": {
+          "name": "orderProductNotes",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "orderProducts_orderID_orders_orderID_fk": {
+          "name": "orderProducts_orderID_orders_orderID_fk",
+          "tableFrom": "orderProducts",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "orderID"
+          ],
+          "columnsTo": [
+            "orderID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "orderProducts_productID_products_productID_fk": {
+          "name": "orderProducts_productID_products_productID_fk",
+          "tableFrom": "orderProducts",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productID"
+          ],
+          "columnsTo": [
+            "productID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "orderProducts_orderID_productID_pk": {
+          "name": "orderProducts_orderID_productID_pk",
+          "columns": [
+            "orderID",
+            "productID"
           ]
         }
       },
@@ -1926,6 +1984,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "storeID": {
+          "name": "storeID",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "productItemNumber": {
           "name": "productItemNumber",
           "type": "varchar",
@@ -1954,7 +2018,7 @@
           "name": "productDescription",
           "type": "varchar(512)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "productSupplierArticleNumber": {
           "name": "productSupplierArticleNumber",
@@ -2004,6 +2068,19 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "products_storeID_stores_storeID_fk": {
+          "name": "products_storeID_stores_storeID_fk",
+          "tableFrom": "products",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "storeID"
+          ],
+          "columnsTo": [
+            "storeID"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "products_productCategoryID_productCategories_productCategoryID_fk": {
           "name": "products_productCategoryID_productCategories_productCategoryID_fk",
           "tableFrom": "products",
@@ -2019,7 +2096,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "products_productDescription_unique": {
+          "name": "products_productDescription_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "productDescription"
+          ]
+        }
+      }
     },
     "public.qualificationsGlobal": {
       "name": "qualificationsGlobal",
@@ -2605,7 +2690,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "serviceQualifications_globalQualID_serviceID_pk": {
+          "name": "serviceQualifications_globalQualID_serviceID_pk",
+          "columns": [
+            "globalQualID",
+            "serviceID"
+          ]
+        }
+      },
       "uniqueConstraints": {}
     },
     "public.serviceVariants": {
@@ -2881,7 +2974,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "services_name_unique": {
+          "name": "services_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      }
     },
     "public.storeopeninghours": {
       "name": "storeopeninghours",

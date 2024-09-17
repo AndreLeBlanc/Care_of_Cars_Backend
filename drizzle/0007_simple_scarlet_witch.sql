@@ -1,1 +1,0 @@
-ALTER TABLE "serviceQualifications" ADD CONSTRAINT "serviceQualifications_globalQualID_serviceID_pk" PRIMARY KEY("globalQualID","serviceID");

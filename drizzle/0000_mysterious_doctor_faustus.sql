@@ -24,7 +24,10 @@ CREATE TABLE IF NOT EXISTS "billOrders" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "bills" (
 	"orderID" serial PRIMARY KEY NOT NULL,
+	"storeID" integer NOT NULL,
 	"billStatus" "billStatus" NOT NULL,
+	"billedAmount" real NOT NULL,
+	"currency" varchar NOT NULL,
 	"employeeID" integer,
 	"billingDate" date NOT NULL,
 	"paymentDate" date NOT NULL,
@@ -109,6 +112,13 @@ CREATE TABLE IF NOT EXISTS "drivers" (
 	CONSTRAINT "drivers_driverPhoneNumber_unique" UNIQUE("driverPhoneNumber")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "employeeCheckin" (
+	"employeeCheckinID" serial PRIMARY KEY NOT NULL,
+	"employeeStoreID" integer,
+	"employeeCheckedIn" timestamp,
+	"employeeCheckedOut" timestamp
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "employeeGlobalQualifications" (
 	"employeeID" integer NOT NULL,
 	"globalQualID" integer NOT NULL,
@@ -134,11 +144,11 @@ CREATE TABLE IF NOT EXISTS "employeeSpecialHours" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "employeeStore" (
+	"employeeStoreID" serial PRIMARY KEY NOT NULL,
 	"storeID" integer NOT NULL,
 	"employeeID" integer NOT NULL,
-	"checkedIn" timestamp,
-	"checkedOut" timestamp,
-	CONSTRAINT "employeeStore_storeID_employeeID_pk" PRIMARY KEY("storeID","employeeID")
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "employeeWorkingHours" (
@@ -191,23 +201,6 @@ CREATE TABLE IF NOT EXISTS "employees" (
 	CONSTRAINT "employees_signature_unique" UNIQUE("signature")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "localProducts" (
-	"storeID" integer NOT NULL,
-	"localProductID" serial PRIMARY KEY NOT NULL,
-	"productItemNumber" varchar NOT NULL,
-	"currency" varchar(5) NOT NULL,
-	"cost" real NOT NULL,
-	"productCategoryID" integer NOT NULL,
-	"productDescription" varchar(512),
-	"productSupplierArticleNumber" varchar,
-	"productExternalArticleNumber" varchar,
-	"productUpdateRelatedData" boolean DEFAULT false,
-	"award" real NOT NULL,
-	"productInventoryBalance" integer,
-	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "orderListing" (
 	"orderID" integer NOT NULL,
 	"serviceID" integer NOT NULL,
@@ -234,6 +227,17 @@ CREATE TABLE IF NOT EXISTS "orderListing" (
 	"vatFree" boolean NOT NULL,
 	"orderNotes" varchar,
 	CONSTRAINT "orderListing_orderID_serviceID_pk" PRIMARY KEY("orderID","serviceID")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "orderProducts" (
+	"orderID" integer NOT NULL,
+	"productID" integer NOT NULL,
+	"productDescription" varchar(256) NOT NULL,
+	"amount" integer NOT NULL,
+	"cost" real NOT NULL,
+	"currency" varchar NOT NULL,
+	"orderProductNotes" varchar,
+	CONSTRAINT "orderProducts_orderID_productID_pk" PRIMARY KEY("orderID","productID")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "orders" (
@@ -273,18 +277,20 @@ CREATE TABLE IF NOT EXISTS "productCategories" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "products" (
 	"productID" serial PRIMARY KEY NOT NULL,
+	"storeID" integer,
 	"productItemNumber" varchar NOT NULL,
 	"currency" varchar(5) NOT NULL,
 	"cost" real NOT NULL,
 	"productCategoryID" integer NOT NULL,
-	"productDescription" varchar(512),
+	"productDescription" varchar(512) NOT NULL,
 	"productSupplierArticleNumber" varchar,
 	"productExternalArticleNumber" varchar,
 	"productUpdateRelatedData" boolean DEFAULT false,
 	"award" real NOT NULL,
 	"productInventoryBalance" integer,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "products_productDescription_unique" UNIQUE("productDescription")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "qualificationsGlobal" (
@@ -364,7 +370,8 @@ CREATE TABLE IF NOT EXISTS "serviceLocalQualifications" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "serviceQualifications" (
 	"serviceID" integer NOT NULL,
-	"globalQualID" integer NOT NULL
+	"globalQualID" integer NOT NULL,
+	CONSTRAINT "serviceQualifications_globalQualID_serviceID_pk" PRIMARY KEY("globalQualID","serviceID")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "serviceVariants" (
@@ -405,7 +412,8 @@ CREATE TABLE IF NOT EXISTS "services" (
 	"day4" interval,
 	"day5" interval,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "services_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "storeopeninghours" (
@@ -522,6 +530,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "bills" ADD CONSTRAINT "bills_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "public"."stores"("storeID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "bills" ADD CONSTRAINT "bills_employeeID_employees_employeeID_fk" FOREIGN KEY ("employeeID") REFERENCES "public"."employees"("employeeID") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -547,6 +561,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "drivers" ADD CONSTRAINT "drivers_customerOrgNumber_companycustomers_customerOrgNumber_fk" FOREIGN KEY ("customerOrgNumber") REFERENCES "public"."companycustomers"("customerOrgNumber") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "employeeCheckin" ADD CONSTRAINT "employeeCheckin_employeeStoreID_employeeStore_employeeStoreID_fk" FOREIGN KEY ("employeeStoreID") REFERENCES "public"."employeeStore"("employeeStoreID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -618,18 +638,6 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "localProducts" ADD CONSTRAINT "localProducts_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "public"."stores"("storeID") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "localProducts" ADD CONSTRAINT "localProducts_productCategoryID_productCategories_productCategoryID_fk" FOREIGN KEY ("productCategoryID") REFERENCES "public"."productCategories"("productCategoryID") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  ALTER TABLE "orderListing" ADD CONSTRAINT "orderListing_orderID_orders_orderID_fk" FOREIGN KEY ("orderID") REFERENCES "public"."orders"("orderID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -678,6 +686,18 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "orderProducts" ADD CONSTRAINT "orderProducts_orderID_orders_orderID_fk" FOREIGN KEY ("orderID") REFERENCES "public"."orders"("orderID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "orderProducts" ADD CONSTRAINT "orderProducts_productID_products_productID_fk" FOREIGN KEY ("productID") REFERENCES "public"."products"("productID") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "orders" ADD CONSTRAINT "orders_driverCarID_driverCars_driverCarID_fk" FOREIGN KEY ("driverCarID") REFERENCES "public"."driverCars"("driverCarID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -703,6 +723,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "orders" ADD CONSTRAINT "driver_must_have_car" FOREIGN KEY ("driverID","driverCarID") REFERENCES "public"."driverCars"("driverID","driverCarID") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "products" ADD CONSTRAINT "products_storeID_stores_storeID_fk" FOREIGN KEY ("storeID") REFERENCES "public"."stores"("storeID") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -839,5 +865,6 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "checkinIndex" ON "employeeCheckin" USING btree ("employeeCheckedIn");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "storeid_idx" ON "storespecialhours" USING btree ("storeID");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "day_idx" ON "storespecialhours" USING btree ("day");

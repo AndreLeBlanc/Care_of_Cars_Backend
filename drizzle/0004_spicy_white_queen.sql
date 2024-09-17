@@ -1,1 +1,0 @@
-ALTER TABLE "services" ADD CONSTRAINT "services_serviceID_storeID_unique" UNIQUE("serviceID","storeID");
