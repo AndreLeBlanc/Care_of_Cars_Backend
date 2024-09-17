@@ -1256,8 +1256,8 @@ export async function getEmployee(employeeID: EmployeeID): Promise<Either<string
       .from(employees)
       .where(and(eq(employees.employeeID, employeeID)))
       .innerJoin(users, eq(users.userID, employees.userID))
-      .leftJoin(stores, eq(stores.storeID, employeeStore.storeID))
       .leftJoin(employeeStore, eq(employeeStore.employeeID, employeeID))
+      .leftJoin(stores, eq(stores.storeID, employeeStore.storeID))
       .groupBy(users.userID, employees.employeeID)
 
     return verifiedUser
