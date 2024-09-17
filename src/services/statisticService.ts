@@ -1,6 +1,7 @@
 import { db } from '../config/db-connect.js'
 
-import { and, between, eq, isNull, or, sql } from 'drizzle-orm'
+import { and, between, eq, gte, isNull, or, sql } from 'drizzle-orm'
+
 import Dinero from 'dinero.js'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
@@ -11,11 +12,15 @@ import {
   AbsoluteDifference,
   AverageRevenue,
   BillPaid,
+  BilledCount,
+  BillingDate,
   BookingCount,
   CashPaid,
+  CustomersCount,
   EmployeeCheckIn,
   EmployeeCheckOut,
   EmployeeID,
+  EmployeesCount,
   MonthlyRevenue,
   OrderStatus,
   PercentDifference,
@@ -33,16 +38,19 @@ import {
   ServiceProfit,
   ServiceRevenuePerHour,
   ServiceSold,
+  ServicesCount,
+  StatisticsDate,
   StoreID,
   SubmissionTimeOrder,
   TotalDiscount,
   TotalMonthlyRevenue,
   TotalMonthlyRevenueLastYear,
   TotalRevenue,
-  TotalVat,
   UserFirstName,
   UserLastName,
   WorkedHours,
+  billOrders,
+  bills,
   employeeCheckin,
   employeeStore,
   employees,
@@ -61,7 +69,6 @@ export type SalesStats = {
   cashPaid: CashPaid
   billPaid: BillPaid
   totalDiscounts: TotalDiscount
-  totalVat: TotalVat
   year: YearStats
 }
 
@@ -79,6 +86,7 @@ type YearStats = {
   feb: MonthStats
   mar: MonthStats
   apr: MonthStats
+  may: MonthStats
   jun: MonthStats
   jul: MonthStats
   aug: MonthStats
@@ -116,18 +124,339 @@ export type CheckinStats = {
   employeeCheckedOut?: EmployeeCheckOut
 }
 
-//export function salesStats(store?: StoreID): Promise<Either<string, SalesStats>> {
-//  try {
-//    const stats = db
-//      .select({
-//        totalRevenueService: sql`sum(${orderListing.cost})`,
-//        totalVat: sql`sum(${orderListing.})`
-//      })
-//      .from(orderListing)
-//  } catch (e) {
-//    return left(errorHandling(e))
-//  }
-//}
+export type Dashboard = {
+  employees: EmployeesCount
+  services: ServicesCount
+  customers: CustomersCount
+  billed: BilledCount
+  storeID?: StoreID
+}
+
+function calculateMonthStats(input: {
+  lastYear: { month: SubmissionTimeOrder; revenue: number }[]
+  thisYear: {
+    month: SubmissionTimeOrder
+    revenue: number
+    discount: number
+    preliminary: number
+    bookings: number
+  }[]
+}): YearStats {
+  const months = [
+    'jan',
+    'feb',
+    'mar',
+    'apr',
+    'may',
+    'jun',
+    'jul',
+    'aug',
+    'sep',
+    'oct',
+    'nov',
+    'dec',
+  ]
+
+  // Helper function to calculate percentage difference
+  const calculatePercentDifference = (current: number, last: number): number => {
+    if (last === 0) return 0
+    return ((current - last) / last) * 100
+  }
+
+  // Create a map for quick lookup
+  const lastYearMap = new Map(
+    input.lastYear.map((item) => [new Date(item.month).getMonth(), item.revenue]),
+  )
+  const thisYearMap = new Map(input.thisYear.map((item) => [new Date(item.month).getMonth(), item]))
+
+  // Initialize YearStats with empty MonthStats for each month
+  const yearStats: YearStats = {
+    jan: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    feb: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    mar: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    apr: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    may: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    jun: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    jul: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    aug: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    sep: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    oct: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    nov: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+    dec: {
+      monthlyRevenue: MonthlyRevenue(0),
+      potentialMonthlyRevenue: PotentialMonthlyRevenue(0),
+      totalMonthlyRevenue: TotalMonthlyRevenue(0),
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(0),
+      absoluteDifference: AbsoluteDifference(0),
+      percentDifference: PercentDifference(0),
+    },
+  }
+
+  months.forEach((monthName, index) => {
+    const thisYearData = thisYearMap.get(index)
+    const lastYearRevenue = lastYearMap.get(index) || 0
+
+    // Set default values when data is missing for a month
+    const monthlyRevenue = MonthlyRevenue(thisYearData ? thisYearData.revenue : 0)
+    const potentialMonthlyRevenue = PotentialMonthlyRevenue(
+      thisYearData ? thisYearData.preliminary : 0,
+    )
+    const totalMonthlyRevenue = TotalMonthlyRevenue(
+      thisYearData ? monthlyRevenue + (thisYearData.discount || 0) : 0,
+    )
+    const absoluteDifference = AbsoluteDifference(monthlyRevenue - lastYearRevenue)
+    const percentDifference = PercentDifference(
+      calculatePercentDifference(monthlyRevenue, lastYearRevenue),
+    )
+
+    // Assign MonthStats for each month
+    yearStats[monthName as keyof YearStats] = {
+      monthlyRevenue,
+      potentialMonthlyRevenue,
+      totalMonthlyRevenue,
+      totalMonthlyRevenueLastYear: TotalMonthlyRevenueLastYear(lastYearRevenue),
+      absoluteDifference,
+      percentDifference,
+    }
+  })
+
+  return yearStats
+}
+export async function salesStats(
+  submissionTime: StatisticsDate,
+  store?: StoreID,
+): Promise<Either<string, SalesStats>> {
+  submissionTime.setMonth(0)
+  submissionTime.setHours(0, 0, 0, 0)
+  submissionTime.setDate(1)
+  const newYearString = submissionTime.toISOString()
+  submissionTime.setFullYear(submissionTime.getFullYear() - 1)
+  let cond
+  cond = gte(orders.submissionTime, SubmissionTimeOrder(submissionTime.toISOString()))
+  if (store) {
+    cond = and(cond, eq(orders.storeID, store))
+  }
+  try {
+    const servs = db
+      .select({
+        month: sql<SubmissionTimeOrder>`DATE_TRUNC('month', ${orders.submissionTime})`.as(
+          'order_month',
+        ),
+        revenue:
+          sql<number>`COALESCE(SUM(CASE WHEN ${orders.orderStatus} = 'avslutad' THEN CAST(${orderListing.cost} * ${orderListing.amount} AS FLOAT) ELSE 0 END), 0)`.as(
+            'revenue',
+          ),
+        discounts:
+          sql<number>`COALESCE(SUM(CASE WHEN ${orders.orderStatus} = 'avslutad' THEN ${orders.discount}  ELSE 0 END), 0)`.as(
+            'discounts',
+          ),
+        preliminary:
+          sql<number>`COALESCE(SUM(CASE WHEN ${orders.orderStatus} != 'avslutad' THEN CAST(${orderListing.cost} * ${orderListing.amount} AS FLOAT) ELSE 0 END), 0)`.as(
+            'preliminary',
+          ),
+        bookings: sql<number>`COUNT(DISTINCT ${orders.orderID})`.as('bookings'),
+      })
+      .from(orders)
+      .innerJoin(orderListing, eq(orderListing.orderID, orders.orderID))
+      .where(cond)
+      .groupBy(sql`DATE_TRUNC('month', ${orders.submissionTime})`)
+      .orderBy(sql`DATE_TRUNC('month', ${orders.submissionTime})`)
+      .as('servs')
+
+    const prods = db
+      .select({
+        month: sql<SubmissionTimeOrder>`DATE_TRUNC('month', ${orders.submissionTime})`.as(
+          'order_months',
+        ),
+        revenue:
+          sql<number>`COALESCE(SUM(CASE WHEN ${orders.orderStatus} = 'avslutad' THEN CAST(${orderProducts.cost} * ${orderProducts.amount} AS FLOAT) ELSE 0 END), 0)`.as(
+            'revenues',
+          ),
+        preliminary:
+          sql<number>`COALESCE(SUM(CASE WHEN ${orders.orderStatus} != 'avslutad' THEN CAST(${orderProducts.cost} * ${orderProducts.amount} AS FLOAT) ELSE 0 END), 0)`.as(
+            'preliminarys',
+          ),
+      })
+      .from(orders)
+      .innerJoin(orderProducts, eq(orderProducts.orderID, orders.orderID))
+      .where(cond)
+      .groupBy(sql`DATE_TRUNC('month', ${orders.submissionTime})`)
+      .orderBy(sql`DATE_TRUNC('month', ${orders.submissionTime})`)
+      .as('prods')
+
+    const stats = await db.transaction(async (tx) => {
+      const revStats = await tx.select().from(servs).fullJoin(prods, eq(prods.month, servs.month))
+
+      const [billedStat] = await tx
+        .select({
+          billed:
+            sql<number>`COUNT(DISTINCT CASE WHEN ${bills.billStatus} = 'bill' THEN ${orders.orderID} END)`.as(
+              'billed_bookings',
+            ),
+          cash: sql<number>`COUNT(DISTINCT CASE WHEN ${bills.billStatus} = 'cashBill' THEN ${orders.orderID} END)`.as(
+            'cash_bookings',
+          ),
+        })
+        .from(orders)
+        .innerJoin(billOrders, eq(billOrders.orderID, orders.orderID))
+        .innerJoin(bills, eq(billOrders.billID, bills.billID))
+        .groupBy(orders.orderID)
+
+      return { revStats: revStats, billedStat: billedStat }
+    })
+    const compiledMonths = stats.revStats.reduce<{
+      lastYear: { month: SubmissionTimeOrder; revenue: number }[]
+      thisYear: {
+        month: SubmissionTimeOrder
+        revenue: number
+        discount: number
+        preliminary: number
+        bookings: number
+      }[]
+      totalRevenue: number
+      totalBookings: number
+      totalDiscounts: number
+    }>(
+      (acc, month) => {
+        let currMonth = undefined
+        if (month.prods?.month != null) {
+          currMonth = month.prods.month
+        } else if (month.servs?.month != null) {
+          currMonth = month.servs.month
+        }
+        if (currMonth === undefined) {
+          return acc
+        }
+        const revServ = month.servs ? month.servs.revenue : 0
+        const revProd = month.prods ? month.prods.revenue : 0
+        const discount = month.servs ? month.servs.discounts : 0
+
+        if (currMonth.substring(0, 10) < newYearString.substring(0, 10)) {
+          acc.lastYear.push({ month: currMonth, revenue: revServ + revProd - discount })
+        } else {
+          const preliminary = month.servs ? month.servs.preliminary : 0
+          const bookings = month.servs ? month.servs.bookings : 0
+
+          acc.thisYear.push({
+            month: currMonth,
+            revenue: revServ + revProd,
+            discount: discount,
+            preliminary: preliminary,
+            bookings: bookings,
+          })
+          acc.totalRevenue = acc.totalRevenue + revServ + revProd
+          acc.totalBookings = acc.totalBookings + bookings
+          acc.totalDiscounts = acc.totalDiscounts + discount
+        }
+
+        return acc
+      },
+      {
+        lastYear: [],
+        thisYear: [],
+        totalRevenue: 0,
+        totalBookings: 0,
+        totalDiscounts: 0,
+      },
+    )
+
+    const year = calculateMonthStats({
+      lastYear: compiledMonths.lastYear,
+      thisYear: compiledMonths.thisYear,
+    })
+
+    return right({
+      totalRevenue: TotalRevenue(compiledMonths.totalRevenue),
+      totalBookings: BookingCount(compiledMonths.totalBookings),
+      averageRevenuePerBooking: AverageRevenue(
+        compiledMonths.totalRevenue / compiledMonths.totalBookings,
+      ),
+      cashPaid: CashPaid(stats.billedStat && stats.billedStat.cash ? stats.billedStat.cash : 0),
+      billPaid: BillPaid(stats.billedStat && stats.billedStat.billed ? stats.billedStat.billed : 0),
+      totalDiscounts: TotalDiscount(compiledMonths.totalDiscounts),
+      year: year,
+    })
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
 
 export async function serviceStats(
   from: SubmissionTimeOrder,
@@ -288,4 +617,67 @@ export async function checkinStats(
   } catch (e) {
     return left(errorHandling(e))
   }
+}
+
+export async function dashboard(
+  storeID?: StoreID,
+  from?: StatisticsDate,
+): Promise<Either<string, Dashboard>> {
+  let empCond
+  let serviceCond
+  let customerCond
+  let billsCond
+  if (storeID) {
+    empCond = eq(employeeStore.storeID, storeID)
+    serviceCond = or(eq(services.storeID, storeID), isNull(services.storeID))
+    customerCond = eq(orders.storeID, storeID)
+    billsCond = eq(bills.storeID, storeID)
+  }
+
+  if (from) {
+    customerCond = and(
+      customerCond,
+      gte(orders.submissionTime, SubmissionTimeOrder(from.toISOString())),
+    )
+    billsCond = and(billsCond, gte(bills.billingDate, BillingDate(from.toISOString())))
+  }
+  const employeeWithStore = db
+    .select({ employees: sql<number>`count(${employeeStore.employeeID})`.as('employees') })
+    .from(employeeStore)
+    .where(empCond)
+    .as('employeeWithStore')
+
+  const servicesWithStore = db
+    .select({ services: sql<number>`count(${services.serviceID})`.as('services') })
+    .from(services)
+    .where(serviceCond)
+    .as('servicesWithStore')
+
+  const customer = db
+    .select({ customers: sql<number>`count(distinct ${orders.driverID})`.as('customers') })
+    .from(orders)
+    .where(customerCond)
+    .as('customer')
+
+  const billed = db
+    .select({ billed: sql<number>`sum(${bills.billedAmount})`.as('billed') })
+    .from(bills)
+    .where(billsCond)
+    .as('billedQ')
+
+  const [dash] = await db
+    .select()
+    .from(employeeWithStore)
+    .innerJoin(servicesWithStore, sql`1=1`)
+    .innerJoin(customer, sql`1=1`)
+    .innerJoin(billed, sql`1=1`)
+  return dash
+    ? right({
+        employees: EmployeesCount(dash.employeeWithStore.employees),
+        services: ServicesCount(dash.servicesWithStore.services),
+        customers: CustomersCount(dash.customer.customers),
+        billed: BilledCount(dash.billedQ.billed),
+        storeID: storeID,
+      })
+    : left('could not create statistics')
 }

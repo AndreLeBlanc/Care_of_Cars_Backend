@@ -420,7 +420,7 @@ export const qualificationsRoute = async (fastify: FastifyInstance) => {
         return reply
       },
       schema: {
-        params: GlobalQualIDSchema,
+        params: EmployeeIDSchema,
         response: {
           200: EmployeesQualsSchema,
           404: { message: QualificationMessage },
