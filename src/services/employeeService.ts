@@ -1386,14 +1386,14 @@ export async function getEmployeesPaginate(
           employeeComment: employees.employeeComment,
           employeeActive: employees.employeeActive,
           employeeCheckedIn: sql<Date>`(
-            SELECT employeeCheckedIn
+            SELECT ${employeeCheckin.employeeCheckedIn}
             FROM ${employeeCheckin}
             WHERE ${employeeCheckin.employeeStoreID} = ${employeeStore.employeeStoreID}
             ORDER BY ${employeeCheckin.employeeCheckedIn} DESC
             LIMIT 1
           )`.as('employeeCheckedIn'),
           employeeCheckedOut: sql<Date>`(
-            SELECT employeeCheckedOut
+            SELECT ${employeeCheckin.employeeCheckedOut}
             FROM ${employeeCheckin}
             WHERE ${employeeCheckin.employeeStoreID} = ${employeeStore.employeeStoreID}
             ORDER BY ${employeeCheckin.employeeCheckedIn} DESC
