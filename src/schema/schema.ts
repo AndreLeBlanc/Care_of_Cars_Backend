@@ -490,11 +490,11 @@ export const BillAmount = make<BillAmount>()
 
 export type CheckedInStatus = 'CheckedIn' | 'CheckedOut'
 
-export type TotalRevenue = Brand<Dinero, 'totalRevenue'>
+export type TotalRevenue = Brand<number, 'totalRevenue'>
 export const TotalRevenue = make<TotalRevenue>()
-export type AverageRevenue = Brand<Dinero, 'averageRevenue'>
+export type AverageRevenue = Brand<number, 'averageRevenue'>
 export const AverageRevenue = make<AverageRevenue>()
-export type TotalDiscount = Brand<Dinero, 'totalDiscount'>
+export type TotalDiscount = Brand<number, 'totalDiscount'>
 export const TotalDiscount = make<TotalDiscount>()
 export type TotalVat = Brand<Dinero, 'totalVat'>
 export const TotalVat = make<TotalVat>()
@@ -506,17 +506,17 @@ export const BillPaid = make<BillPaid>()
 export type CashPaid = Brand<number, 'cashPaid'>
 export const CashPaid = make<CashPaid>()
 
-export type MonthlyRevenue = Brand<Dinero, 'monthlyRevenue'>
+export type MonthlyRevenue = Brand<number, 'monthlyRevenue'>
 export const MonthlyRevenue = make<MonthlyRevenue>()
-export type PotentialMonthlyRevenue = Brand<Dinero, 'potentialMonthlyRevenue'>
+export type PotentialMonthlyRevenue = Brand<number, 'potentialMonthlyRevenue'>
 export const PotentialMonthlyRevenue = make<PotentialMonthlyRevenue>()
-export type TotalMonthlyRevenue = Brand<Dinero, 'totalMonthlyRevenue'>
+export type TotalMonthlyRevenue = Brand<number, 'totalMonthlyRevenue'>
 export const TotalMonthlyRevenue = make<TotalMonthlyRevenue>()
-export type TotalMonthlyRevenueLastYear = Brand<Dinero, 'totalMonthlyRevenueLastYear'>
+export type TotalMonthlyRevenueLastYear = Brand<number, 'totalMonthlyRevenueLastYear'>
 export const TotalMonthlyRevenueLastYear = make<TotalMonthlyRevenueLastYear>()
-export type AbsoluteDifference = Brand<Dinero, 'absoluteDifference'>
+export type AbsoluteDifference = Brand<number, 'absoluteDifference'>
 export const AbsoluteDifference = make<AbsoluteDifference>()
-export type PercentDifference = Brand<Dinero, 'percentDifference'>
+export type PercentDifference = Brand<number, 'percentDifference'>
 export const PercentDifference = make<PercentDifference>()
 export type ServiceRevenuePerHour = Brand<Dinero, 'serviceRevenuePerHour'>
 export const ServiceRevenuePerHour = make<ServiceRevenuePerHour>()
@@ -535,6 +535,17 @@ export type ProductProfit = Brand<Dinero, 'productProfit'>
 export const ProductProfit = make<ProductProfit>()
 export type ProductSold = Brand<number, 'productSold'>
 export const ProductSold = make<ProductSold>()
+
+export type StatisticsDate = Brand<Date, 'statisticsDate'>
+export const StatisticsDate = make<StatisticsDate>()
+export type EmployeesCount = Brand<number, 'employeesCount'>
+export const EmployeesCount = make<EmployeesCount>()
+export type ServicesCount = Brand<number, 'servicesCount'>
+export const ServicesCount = make<ServicesCount>()
+export type CustomersCount = Brand<number, 'customersCount'>
+export const CustomersCount = make<CustomersCount>()
+export type BilledCount = Brand<number, 'billedCount'>
+export const BilledCount = make<BilledCount>()
 
 export const colorForService = [
   'LightBlue',
@@ -692,6 +703,7 @@ export const employeeStore = pgTable('employeeStore', {
       onDelete: 'cascade',
     })
     .notNull(),
+  ...dbDates,
 })
 
 export const employeeStoreRelations = relations(employeeStore, ({ one, many }) => ({
@@ -1476,7 +1488,8 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
     references: [drivers.driverID],
   }),
   orderListing: many(orderListing),
-  bills: one(billOrders),
+  bills: many(billOrders),
+  billOrders: many(billOrders),
   rentCarBookings: one(rentCarBookings),
   stores: one(stores),
 }))
@@ -1712,6 +1725,6 @@ export const billOrders = pgTable(
 )
 
 export const billOrdersRelations = relations(billOrders, ({ one }) => ({
-  orders: one(orders),
   bills: one(bills),
+  orders: one(orders),
 }))

@@ -1274,5 +1274,287 @@ describe('testing statistics route', async () => {
     const parsedempStatEmpWithStoreResp = JSON.parse(empStatEmpWithStoreResp.body)
     deepStrictEqual(parsedempStatEmpWithStoreResp.stats[0].firstName, 'BonkaWok')
     deepStrictEqual(parsedempStatEmpWithStoreResp.stats[0].employeeID, 1)
+
+    const dashboradResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/dashboard',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {},
+    })
+
+    const parseddashboradResp = JSON.parse(dashboradResp.body)
+    deepStrictEqual(parseddashboradResp, {
+      message: 'dashboard statistics',
+      employees: 1,
+      services: 4,
+      customers: 1,
+      billed: 0,
+    })
+
+    const dashboradWrongDateResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/dashboard',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2026-10-30T11:21:44.000-08:00',
+      },
+    })
+    const parseddashboradWrongDateResp = JSON.parse(dashboradWrongDateResp.body)
+    deepStrictEqual(parseddashboradWrongDateResp, {
+      message: 'dashboard statistics',
+      employees: 1,
+      services: 4,
+      customers: 0,
+      billed: 0,
+    })
+
+    const dashboardStoreResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/dashboard',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2021-10-30T11:21:44.000-08:00',
+        storeID: parsedresponseStore.store.storeID,
+      },
+    })
+    const parseddashboardStoreResp = JSON.parse(dashboardStoreResp.body)
+
+    deepStrictEqual(parseddashboardStoreResp, {
+      message: 'dashboard statistics',
+      employees: 1,
+      services: 4,
+      storeID: parsedresponseStore.store.storeID,
+      customers: 1,
+      billed: 0,
+    })
+    const dashboradWrongStoreResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/dashboard',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        storeID: '3245',
+      },
+    })
+    const parseddashboradWrongStoreResp = JSON.parse(dashboradWrongStoreResp.body)
+    deepStrictEqual(parseddashboradWrongStoreResp, {
+      message: 'dashboard statistics',
+      employees: 0,
+      services: 3,
+      storeID: 3245,
+      customers: 0,
+      billed: 0,
+    })
+
+    const creatOrderDateResp = await app.inject({
+      method: 'PUT',
+      url: '/orders',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        driverCarID: parsedcreateDriverCarResp.driverCarID,
+        driverID: parsedCreateCompanyDriverResp.data.driver.driverID,
+        storeID: parsedresponseStore.store.storeID,
+        orderNotes: 'Added a service',
+        bookedBy: responseUserEmpParsed.employee.employeeID,
+        submissionTime: '2023-01-29T11:21:44.000-08:00',
+        pickupTime: '2023-01-30T11:22:44.000-08:00',
+        vatFree: true,
+        orderStatus: 'avslutad',
+        currency: 'SEK',
+        discount: 150,
+        services: [
+          {
+            serviceID: parsedcreateServiceResp.serviceID,
+            cost: 1337,
+            currency: 'SEK',
+            name: 'generated automated testing for stats',
+            serviceCategoryID: parsedcatResp.serviceCategoryID,
+            serviceVariants: [],
+            amount: 2,
+            day1: '2024-08-25T08:34:58+0000',
+            day1Work: '10:10:10',
+            day1Employee: responseUserEmpParsed.employee.employeeID,
+            vatFree: true,
+            orderNotes: 'added service',
+          },
+        ],
+        products: [],
+        deleteOrderService: [],
+        deleteOrderProducts: [],
+      },
+    })
+
+    deepStrictEqual(creatOrderDateResp.statusCode, 201)
+
+    const creatOrderPaborjadResp = await app.inject({
+      method: 'PUT',
+      url: '/orders',
+      headers: {
+        Authorization: jwt,
+      },
+      payload: {
+        driverCarID: parsedcreateDriverCarResp.driverCarID,
+        driverID: parsedCreateCompanyDriverResp.data.driver.driverID,
+        storeID: parsedresponseStore.store.storeID,
+        orderNotes: 'Added a service',
+        bookedBy: responseUserEmpParsed.employee.employeeID,
+        submissionTime: '2023-01-29T11:21:44.000-08:00',
+        pickupTime: '2023-01-30T11:22:44.000-08:00',
+        vatFree: true,
+        orderStatus: 'påbörjad',
+        currency: 'SEK',
+        discount: 150,
+        services: [
+          {
+            serviceID: parsedcreateServiceResp.serviceID,
+            cost: 1337,
+            currency: 'SEK',
+            name: 'generated automated testing for stats',
+            serviceCategoryID: parsedcatResp.serviceCategoryID,
+            serviceVariants: [],
+            amount: 2,
+            day1: '2024-08-25T08:34:58+0000',
+            day1Work: '10:10:10',
+            day1Employee: responseUserEmpParsed.employee.employeeID,
+            vatFree: true,
+            orderNotes: 'added service',
+          },
+        ],
+        products: [],
+        deleteOrderService: [],
+        deleteOrderProducts: [],
+      },
+    })
+
+    deepStrictEqual(creatOrderPaborjadResp.statusCode, 201)
+
+    const revenueResp = await app.inject({
+      method: 'GET',
+      url: '/statistics/revenue',
+      headers: {
+        Authorization: jwt,
+      },
+      query: {
+        from: '2023-08-25T08:34:58+0000',
+        storeID: parsedresponseStore.store.storeID,
+      },
+    })
+    const parsedrevenueResp = JSON.parse(revenueResp.body)
+    deepStrictEqual(parsedrevenueResp, {
+      message: 'revenue statistics',
+      totalRevenue: 2674,
+      totalBookings: 2,
+      averageRevenuePerBooking: 1337,
+      cashPaid: 0,
+      billPaid: 0,
+      totalDiscounts: 150,
+      year: {
+        jan: {
+          monthlyRevenue: 2674,
+          potentialMonthlyRevenue: 2674,
+          totalMonthlyRevenue: 2824,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 2674,
+          percentDifference: 0,
+        },
+        feb: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 0,
+          percentDifference: 0,
+        },
+        mar: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 0,
+          percentDifference: 0,
+        },
+        apr: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 0,
+          percentDifference: 0,
+        },
+        may: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 0,
+          percentDifference: 0,
+        },
+        jun: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 0,
+          percentDifference: 0,
+        },
+        jul: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 0,
+          percentDifference: 0,
+        },
+        aug: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 0,
+          percentDifference: 0,
+        },
+        sep: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 0,
+          percentDifference: 0,
+        },
+        oct: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 0,
+          percentDifference: 0,
+        },
+        nov: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 10446,
+          absoluteDifference: -10446,
+          percentDifference: -100,
+        },
+        dec: {
+          monthlyRevenue: 0,
+          potentialMonthlyRevenue: 0,
+          totalMonthlyRevenue: 0,
+          totalMonthlyRevenueLastYear: 0,
+          absoluteDifference: 0,
+          percentDifference: 0,
+        },
+      },
+    })
   })
 })

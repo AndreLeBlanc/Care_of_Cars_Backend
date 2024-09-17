@@ -13,7 +13,7 @@
 | [public.employeeGlobalQualifications](public.employeeGlobalQualifications.md) | 2 |  | BASE TABLE |
 | [public.employeeLocalQualifications](public.employeeLocalQualifications.md) | 2 |  | BASE TABLE |
 | [public.employeeSpecialHours](public.employeeSpecialHours.md) | 7 |  | BASE TABLE |
-| [public.employeeStore](public.employeeStore.md) | 4 |  | BASE TABLE |
+| [public.employeeStore](public.employeeStore.md) | 5 |  | BASE TABLE |
 | [public.employeeWorkingHours](public.employeeWorkingHours.md) | 25 |  | BASE TABLE |
 | [public.employees](public.employees.md) | 13 |  | BASE TABLE |
 | [public.orderListing](public.orderListing.md) | 24 |  | BASE TABLE |
@@ -40,6 +40,7 @@
 | [public.userBelongsToStore](public.userBelongsToStore.md) | 2 |  | BASE TABLE |
 | [public.users](public.users.md) | 9 |  | BASE TABLE |
 | [public.orderProducts](public.orderProducts.md) | 7 |  | BASE TABLE |
+| [public.employeeCheckin](public.employeeCheckin.md) | 4 |  | BASE TABLE |
 
 ## Relations
 
