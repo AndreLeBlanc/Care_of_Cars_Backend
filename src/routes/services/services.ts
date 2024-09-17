@@ -3,6 +3,7 @@ import { FastifyInstance } from 'fastify'
 import {
   ListServiceQueryParamSchema,
   ListServiceQueryParamSchemaType,
+  LocalServiceGlobalQualSchemaType,
   LocalServiceLocalQualSchemaType,
   MessageSchema,
   MessageSchemaType,
@@ -10,6 +11,8 @@ import {
   ServiceCreateSchemaType,
   ServiceDeleteQual,
   ServiceDeleteQualType,
+  ServiceGlobalQualSchema,
+  ServiceGlobalQualSchemaType,
   ServiceLocalQualSchema,
   ServiceLocalQualSchemaType,
   ServiceOrderSchema,
@@ -19,18 +22,21 @@ import {
   ServicesPaginatedSchemaType,
   getServiceByIDSchema,
   getServiceByIDSchemaType,
+  getServiceByQualsSchema,
+  getServiceByQualsSchemaType,
   listServiceOrderByEnum,
   serviceOrderEnum,
 } from './serviceSchema.js'
 
 import {
-  GlobalServiceQuals,
+  DeletedServiceQuals,
   Service,
   ServiceBase,
   ServiceCreate,
   ServiceGlobalQual,
   ServiceLocalQual,
   ServiceOrder,
+  ServiceQuals,
   ServicesPaginated,
   createService,
   deleteServiceQualifications,
@@ -448,9 +454,49 @@ export async function services(fastify: FastifyInstance) {
     },
   )
 
+  //TODO check store!!!!
   fastify.post<{
-    Body: ServiceLocalQualSchemaType
-    Reply: (MessageSchemaType & ServiceLocalQualSchemaType) | MessageSchemaType
+    Body: LocalServiceGlobalQualSchemaType
+    Reply: (MessageSchemaType & ServiceGlobalQualSchemaType) | MessageSchemaType
+  }>(
+    '/LocalServiceGlobalQuals',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        fastify.authorize(request, reply, PermissionTitle('Set_local_quals_global_service'))
+        done()
+        return reply
+      },
+
+      schema: {
+        body: ServiceGlobalQualSchema,
+        response: {
+          201: { ...MessageSchema, ...ServiceGlobalQualSchema },
+          504: MessageSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const serviceQual = {
+        serviceID: ServiceID(request.body.serviceID),
+        globalQualID: GlobalQualID(request.body.globalQualID),
+      }
+      const service: Either<string, ServiceGlobalQual> = await setServiceQualifications(serviceQual)
+      match(
+        service,
+        (servQual: ServiceGlobalQual) => {
+          return reply.status(201).send({ message: 'set quals for service', ...servQual })
+        },
+        (err) => {
+          return reply.status(504).send({ message: err })
+        },
+      )
+    },
+  )
+
+  fastify.post<{
+    Body: ServiceGlobalQualSchemaType
+    Reply: (MessageSchemaType & ServiceGlobalQualSchemaType) | MessageSchemaType
   }>(
     '/serviceGlobalQuals',
     {
@@ -462,9 +508,9 @@ export async function services(fastify: FastifyInstance) {
       },
 
       schema: {
-        body: ServiceLocalQualSchema,
+        body: ServiceGlobalQualSchema,
         response: {
-          201: { ...MessageSchema, ...ServiceLocalQualSchema },
+          201: { ...MessageSchema, ...ServiceGlobalQualSchema },
           504: MessageSchema,
         },
       },
@@ -472,7 +518,7 @@ export async function services(fastify: FastifyInstance) {
     async (request, reply) => {
       const serviceQual = {
         serviceID: ServiceID(request.body.serviceID),
-        globalQualID: GlobalQualID(request.body.localQualID),
+        globalQualID: GlobalQualID(request.body.globalQualID),
       }
       const service: Either<string, ServiceGlobalQual> = await setServiceQualifications(serviceQual)
       match(
@@ -533,14 +579,13 @@ export async function services(fastify: FastifyInstance) {
     '/serviceQualifications',
     {
       preHandler: async (request, reply, done) => {
-        console.log(request.body)
-        //        fastify.authorize(request, reply, PermissionTitle('delete_service_quals'))
+        fastify.authorize(request, reply, PermissionTitle('delete_service_quals'))
         done()
         return reply
       },
 
       schema: {
-        params: getServiceByIDSchema,
+        body: ServiceDeleteQual,
         response: {
           200: { ...MessageSchema, ...ServiceDeleteQual },
           404: MessageSchema,
@@ -548,82 +593,22 @@ export async function services(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const localQual = request.body.localQualID ? LocalQualID(request.body.localQualID) : undefined
-      const globalQual = request.body.globalQualID
-        ? GlobalQualID(request.body.globalQualID)
-        : undefined
-      let service: Either<string, GlobalServiceQuals>
-      if (localQual != null) {
-        service = await deleteServiceQualifications(
-          ServiceID(request.body.serviceID),
-          localQual,
-          globalQual,
-        )
-      } else {
-        service = await deleteServiceQualifications(
-          ServiceID(request.body.serviceID),
-          undefined,
-          globalQual,
-        )
-      }
-      match(
-        service,
-        (deletedServiceQuals: GlobalServiceQuals) => {
-          return reply.status(200).send({ message: 'deleted quals ', ...deletedServiceQuals })
-        },
-        (err) => {
-          return reply.status(404).send({ message: err })
-        },
+      const localQual = request.body.localQualID.map((q) => LocalQualID(q))
+      const globalQual = request.body.globalQualID.map((q) => GlobalQualID(q))
+      const service: Either<string, DeletedServiceQuals> = await deleteServiceQualifications(
+        ServiceID(request.body.serviceID),
+        globalQual,
+        localQual,
       )
-    },
-  )
 
-  fastify.delete<{
-    Body: ServiceDeleteQualType
-    Reply: (MessageSchemaType & ServiceDeleteQualType) | MessageSchemaType
-  }>(
-    '/localServiceQualifications',
-    {
-      preHandler: async (request, reply, done) => {
-        console.log(request.body)
-        //        fastify.authorize(request, reply, PermissionTitle('delete_local_service_quals'))
-        done()
-        return reply
-      },
-
-      schema: {
-        body: getServiceByIDSchema,
-        response: {
-          200: { ...MessageSchema, ...ServiceDeleteQual },
-          404: MessageSchema,
-        },
-      },
-    },
-    async (request, reply) => {
-      const localQual = request.body.localQualID ? LocalQualID(request.body.localQualID) : undefined
-      const globalQual = request.body.globalQualID
-        ? GlobalQualID(request.body.globalQualID)
-        : undefined
-      let service: Either<string, GlobalServiceQuals>
-      if (localQual != null) {
-        service = await deleteServiceQualifications(
-          ServiceID(request.body.serviceID),
-          localQual,
-          globalQual,
-        )
-      } else {
-        service = await deleteServiceQualifications(
-          ServiceID(request.body.serviceID),
-          undefined,
-          globalQual,
-        )
-      }
       match(
         service,
-        (deletedServiceQuals: GlobalServiceQuals) => {
-          return reply
-            .status(200)
-            .send({ message: 'deleted quals from service', ...deletedServiceQuals })
+        (deletedServiceQuals: DeletedServiceQuals) => {
+          return reply.status(200).send({
+            message: 'deleted quals ',
+            serviceID: request.body.serviceID,
+            ...deletedServiceQuals,
+          })
         },
         (err) => {
           return reply.status(404).send({ message: err })
@@ -633,10 +618,10 @@ export async function services(fastify: FastifyInstance) {
   )
 
   fastify.get<{
-    Params: getServiceByIDSchemaType
+    Params: getServiceByQualsSchemaType
     // Reply: (ServiceSchemaType & MessageSchemaType) | MessageSchemaType
   }>(
-    '/serviceQualifications/:serviceID/:type',
+    '/serviceQualifications/:serviceID/:store',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
@@ -646,12 +631,14 @@ export async function services(fastify: FastifyInstance) {
       },
 
       schema: {
-        params: getServiceByIDSchema,
+        params: getServiceByQualsSchema,
         response: {},
       },
     },
     async (request, reply) => {
-      const service = await getServiceQualifications(ServiceID(request.params.serviceID))
+      const service: Either<string, ServiceQuals> = await getServiceQualifications(
+        ServiceID(request.params.serviceID),
+      )
       match(
         service,
         (fetchedService) => {

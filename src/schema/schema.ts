@@ -894,16 +894,26 @@ export const serviceLocalQualifications = pgTable(
   },
 )
 
-export const serviceQualifications = pgTable('serviceQualifications', {
-  serviceID: integer('serviceID')
-    .$type<ServiceID>()
-    .references(() => services.serviceID)
-    .notNull(),
-  globalQualID: integer('globalQualID')
-    .$type<GlobalQualID>()
-    .references(() => qualificationsGlobal.globalQualID)
-    .notNull(),
-})
+export const serviceQualifications = pgTable(
+  'serviceQualifications',
+  {
+    serviceID: integer('serviceID')
+      .$type<ServiceID>()
+      .references(() => services.serviceID)
+      .notNull(),
+    globalQualID: integer('globalQualID')
+      .$type<GlobalQualID>()
+      .references(() => qualificationsGlobal.globalQualID)
+      .notNull(),
+  },
+  (serviceGlobalQualifications) => {
+    return {
+      pk: primaryKey({
+        columns: [serviceGlobalQualifications.globalQualID, serviceGlobalQualifications.serviceID],
+      }),
+    }
+  },
+)
 
 export const services = pgTable('services', {
   serviceID: serial('serviceID').$type<ServiceID>().primaryKey(),
