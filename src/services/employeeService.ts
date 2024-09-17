@@ -1453,3 +1453,40 @@ export async function getEmployeesPaginate(
     return left(errorHandling(e))
   }
 }
+
+//export async function getEmployeesQuals(
+//  storeID: StoreID,
+//): Promise<Either<string, EmployeePaginated>> {
+//  try {
+//    const employeesList = await db
+//      .select({
+//        userID: users.userID,
+//        firstName: users.firstName,
+//        lastName: users.lastName,
+//        employeeID: employees.employeeID,
+//        globalQualID: qualificationsGlobal.globalQualID,
+//        globalQualName: qualificationsGlobal.globalQualName,
+//      })
+//      .from(employeeStore)
+//      .where(eq(employeeStore.storeID, storeID))
+//      .innerJoin(employees, eq(employees.employeeID, employeeStore.employeeID))
+//      .innerJoin(users, eq(users.userID, employees.userID))
+//      .leftJoin(
+//        employeeGlobalQualifications,
+//        eq(employeeGlobalQualifications.employeeID, employees.employeeID),
+//      )
+//      .innerJoin(
+//        qualificationsGlobal,
+//        eq(qualificationsGlobal.globalQualID, employeeGlobalQualifications.globalQualID),
+//      )
+//
+//    return right({
+//      totalEmployees: ResultCount(totalEmployees.count),
+//      totalPage: Page(totalPage),
+//      perPage: Limit(page),
+//      employees: listedEmployeeWithNull,
+//    })
+//  } catch (e) {
+//    return left(errorHandling(e))
+//  }
+//}
