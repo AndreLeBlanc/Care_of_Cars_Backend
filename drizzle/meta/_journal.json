@@ -8,6 +8,20 @@
       "when": 1726566290172,
       "tag": "0000_sturdy_spitfire",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1726601736716,
+      "tag": "0001_needy_the_hunter",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1726602918931,
+      "tag": "0002_brainy_quicksilver",
+      "breakpoints": true
     }
   ]
 }

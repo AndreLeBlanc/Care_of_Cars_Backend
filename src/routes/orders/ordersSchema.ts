@@ -1,5 +1,8 @@
+import {
+  CreateRentCarBookingSchema,
+  CreateRentCarOrderBookingSchema,
+} from '../rentCar/rentCarSchema.js'
 import { Static, Type } from '@sinclair/typebox'
-import { CreateRentCarBookingSchema } from '../rentCar/rentCarSchema.js'
 import { driverCarID } from '../driverCars/driverCarsSchema.js'
 import { storeID } from '../stores/storesSchema.js'
 
@@ -163,7 +166,7 @@ export const CreateOrderBodySchema = Type.Composite([
   Type.Object({
     services: Type.Array(CreateOrderServicesSchema),
     products: Type.Array(CreateOrderProductSchema),
-    rentCarBooking: Type.Optional(CreateRentCarBookingSchema),
+    rentCarBooking: Type.Optional(CreateRentCarOrderBookingSchema),
     deleteOrderService: Type.Array(DeleteOrderServiceSchema),
     deleteOrderProducts: Type.Array(DeleteOrderProductSchema),
   }),

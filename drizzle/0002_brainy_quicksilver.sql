@@ -1,0 +1,1 @@
+ALTER TABLE "rentCarBookings" ADD CONSTRAINT "unique_rentCarBookings" UNIQUE("rentCarBookingID","orderID");

@@ -62,6 +62,17 @@ export type RentCarsPaginate = {
 
 export type RentCarBooking = {
   rentCarBookingID?: RentCarBookingID
+  orderID: OrderID
+  rentCarRegistrationNumber: RentCarRegistrationNumber
+  bookingStart: BookingStart
+  bookingEnd: BookingEnd
+  bookedBy?: EmployeeID
+  bookingStatus: OrderStatus
+  submissionTime: SubmissionTime
+}
+
+export type PutRentCarBooking = {
+  rentCarBookingID?: RentCarBookingID
   orderID?: OrderID
   rentCarRegistrationNumber: RentCarRegistrationNumber
   bookingStart: BookingStart
@@ -78,7 +89,7 @@ export type RentCarBookingReply = RentCarBooking & {
 
 export type RentCarBookingReplyNoBrand = {
   rentCarBookingID?: RentCarBookingID
-  orderID?: OrderID | null
+  orderID: OrderID
   rentCarRegistrationNumber: RentCarRegistrationNumber
   bookingStart: BookingStart
   bookingEnd: BookingEnd

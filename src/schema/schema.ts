@@ -1605,25 +1605,37 @@ export const orderProductRelations = relations(orderProducts, ({ one }) => ({
 
 export const bookingStatuspgEnum = pgEnum('orderStatus', bookingStatus)
 
-export const rentCarBookings = pgTable('rentCarBookings', {
-  rentCarBookingID: serial('rentCarBookingID').$type<RentCarBookingID>().primaryKey(),
-  orderID: integer('orderID')
-    .$type<OrderID>()
-    .references(() => orders.orderID, { onDelete: 'cascade' })
-    .unique(),
-  rentCarRegistrationNumber: varchar('rentCarRegistrationNumber')
-    .$type<RentCarRegistrationNumber>()
-    .references(() => rentcars.rentCarRegistrationNumber, { onDelete: 'cascade' })
-    .notNull(),
-  bookingStart: date('bookingStart').$type<BookingStart>().notNull(),
-  bookingEnd: date('bookingEnd').$type<BookingEnd>().notNull(),
-  bookedBy: integer('employeeID')
-    .$type<EmployeeID>()
-    .references(() => employees.employeeID, { onDelete: 'set null' }),
-  bookingStatus: orderStatuspgEnum('bookingStatus').notNull(),
-  submissionTime: timestamp('submissionTime').$type<SubmissionTime>().notNull(),
-  ...dbDates,
-})
+export const rentCarBookings = pgTable(
+  'rentCarBookings',
+  {
+    rentCarBookingID: serial('rentCarBookingID').$type<RentCarBookingID>().primaryKey(),
+    orderID: integer('orderID')
+      .$type<OrderID>()
+      .references(() => orders.orderID, { onDelete: 'cascade' })
+      .unique()
+      .notNull(),
+    rentCarRegistrationNumber: varchar('rentCarRegistrationNumber')
+      .$type<RentCarRegistrationNumber>()
+      .references(() => rentcars.rentCarRegistrationNumber, { onDelete: 'cascade' })
+      .notNull(),
+    bookingStart: date('bookingStart').$type<BookingStart>().notNull(),
+    bookingEnd: date('bookingEnd').$type<BookingEnd>().notNull(),
+    bookedBy: integer('employeeID')
+      .$type<EmployeeID>()
+      .references(() => employees.employeeID, { onDelete: 'set null' }),
+    bookingStatus: orderStatuspgEnum('bookingStatus').notNull(),
+    submissionTime: timestamp('submissionTime').$type<SubmissionTime>().notNull(),
+    ...dbDates,
+  },
+  (rentCarBookings) => {
+    return {
+      unq: unique('unique_rentCarBookings').on(
+        rentCarBookings.rentCarBookingID,
+        rentCarBookings.orderID,
+      ),
+    }
+  },
+)
 
 export const rentCarBookingsRelations = relations(rentCarBookings, ({ one }) => ({
   rentcars: one(rentcars),

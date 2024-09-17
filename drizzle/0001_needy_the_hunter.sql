@@ -1,0 +1,1 @@
+ALTER TABLE "rentCarBookings" ALTER COLUMN "orderID" SET NOT NULL;
