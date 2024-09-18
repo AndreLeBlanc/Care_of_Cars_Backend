@@ -51,9 +51,20 @@ export const GetRentCarQueryParamsSchema = Type.Object({
 
 export type GetRentCarQueryParamsSchemaType = Static<typeof GetRentCarQueryParamsSchema>
 
-export const CreateRentCarBookingSchema = Type.Object({
+export const CreateRentCarOrderBookingSchema = Type.Object({
   rentCarBookingID: Type.Optional(RentCarBookingID),
   orderID: Type.Optional(OrderID),
+  rentCarRegistrationNumber: RentCarRegistrationNumber,
+  bookingStart: BookingStart,
+  bookingEnd: BookingEnd,
+  bookedBy: BookedBy,
+  bookingStatus: BookingStatus,
+  submissionTime: SubmissionTime,
+})
+
+export const CreateRentCarBookingSchema = Type.Object({
+  rentCarBookingID: Type.Optional(RentCarBookingID),
+  orderID: OrderID,
   rentCarRegistrationNumber: RentCarRegistrationNumber,
   bookingStart: BookingStart,
   bookingEnd: BookingEnd,

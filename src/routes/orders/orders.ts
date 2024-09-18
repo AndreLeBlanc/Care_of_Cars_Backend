@@ -75,7 +75,7 @@ import {
   listOrders,
 } from '../../services/orderService.js'
 import { Currency } from 'dinero.js'
-import { RentCarBooking } from '../../services/rentCarService.js'
+import { PutRentCarBooking } from '../../services/rentCarService.js'
 
 export async function orders(fastify: FastifyInstance) {
   fastify.put<{
@@ -183,7 +183,7 @@ export async function orders(fastify: FastifyInstance) {
             }))
           : []
 
-        const newRentCarBooking: RentCarBooking | undefined = req.body.rentCarBooking
+        const newRentCarBooking: PutRentCarBooking | undefined = req.body.rentCarBooking
           ? {
               rentCarRegistrationNumber: RentCarRegistrationNumber(
                 req.body.rentCarBooking.rentCarRegistrationNumber,
@@ -197,6 +197,8 @@ export async function orders(fastify: FastifyInstance) {
               submissionTime: SubmissionTime(new Date(req.body.rentCarBooking.submissionTime)),
             }
           : undefined
+
+        console.log(services)
 
         const newOrder: Either<string, OrderWithServices> = await createOrder(
           order,

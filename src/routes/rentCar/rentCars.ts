@@ -341,7 +341,7 @@ export const rentCar = async (fastify: FastifyInstance) => {
         rentCarBookingID: request.body.rentCarBookingID
           ? RentCarBookingID(request.body.rentCarBookingID)
           : undefined,
-        orderID: request.body.orderID ? OrderID(request.body.orderID) : undefined,
+        orderID: OrderID(request.body.orderID),
         rentCarRegistrationNumber: RentCarRegistrationNumber(
           request.body.rentCarRegistrationNumber,
         ),

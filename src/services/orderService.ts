@@ -5,7 +5,7 @@ import { and, count, eq, getTableColumns, gte, ilike, lte, or, sql } from 'drizz
 import { Either, errorHandling, jsonAggBuildObject, left, right } from '../utils/helper.js'
 
 import {
-  RentCarBooking,
+  PutRentCarBooking,
   RentCarBookingReply,
   RentCarBookingReplyNoBrand,
 } from './rentCarService.js'
@@ -277,7 +277,7 @@ function brandOrder(
   const brandedBooking = newBooking
     ? {
         rentCarBookingID: newBooking.rentCarBookingID,
-        orderID: newBooking.orderID ?? undefined,
+        orderID: newBooking.orderID,
         rentCarRegistrationNumber: newBooking.rentCarRegistrationNumber,
         bookingStart: newBooking.bookingStart,
         bookingEnd: newBooking.bookingEnd,
@@ -302,7 +302,7 @@ export async function createOrder(
   products: CreateOrderProduct[],
   deleteOrderService: DeleteOrderService[],
   deletedOrderProducts: DeleteOrderProducts[],
-  booking?: RentCarBooking,
+  booking?: PutRentCarBooking,
 ): Promise<Either<string, OrderWithServices>> {
   try {
     return await db.transaction(async (tx) => {
@@ -426,14 +426,15 @@ export async function createOrder(
         }
 
         if (booking != undefined) {
-          const [newBooking] = await db
+          const [newBooking] = await tx
             .insert(rentCarBookings)
-            .values(booking)
+            .values({ orderID: newOrder.orderID, ...booking })
             .onConflictDoUpdate({
               target: [rentCarBookings.rentCarBookingID, rentCarBookings.orderID],
               set: booking,
             })
             .returning()
+
           const branded = brandOrder(newOrder, newOrderServices, newOrderProducts, newBooking)
           return right(branded)
         } else {

@@ -1025,6 +1025,7 @@ export async function listCheckedinStatus(
       .from(employees)
       .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
       .innerJoin(users, eq(users.userID, employees.userID))
+      .leftJoin(employeeCheckin, eq(employeeCheckin.employeeStoreID, employeeStore.employeeStoreID))
       .where(
         and(eq(employeeStore.storeID, storeID), eq(employees.employeeActive, EmployeeActive(true))),
       )
@@ -1405,6 +1406,10 @@ export async function getEmployeesPaginate(
         .from(employees)
         .innerJoin(employeeStore, eq(employeeStore.employeeID, employees.employeeID))
         .innerJoin(users, eq(users.userID, employees.userID))
+        .leftJoin(
+          employeeCheckin,
+          eq(employeeCheckin.employeeStoreID, employeeStore.employeeStoreID),
+        )
         .where(condition)
         .limit(limit || 10)
         .offset(offset || 0)
