@@ -155,7 +155,7 @@ export async function orders(fastify: FastifyInstance) {
           cost: ServiceCostNumber(service.cost),
           currency: ServiceCostCurrency(service.currency as Currency),
           vatFree: VatFree(service.vatFree),
-          orderNotes: OrderNotes(service.orderNotes),
+          orderNotes: service.orderNotes ? OrderNotes(service.orderNotes) : undefined,
         }))
 
         const products: CreateOrderProduct[] = req.body.products.map((product) => ({
