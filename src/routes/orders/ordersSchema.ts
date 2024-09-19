@@ -118,7 +118,7 @@ export const CreateOrderServicesSchema = Type.Object({
   cost: ServiceCostNumberSchema,
   currency: CurrencySchema,
   vatFree: VatFreeSchema,
-  orderNotes: OrderNotesSchema,
+  orderNotes: Type.Optional(OrderNotesSchema),
 })
 
 export type CreateOrderServicesSchemaType = Static<typeof CreateOrderServicesSchema>
@@ -131,7 +131,7 @@ export const CreateOrderLocalServicesSchema = Type.Object({
   cost: ServiceCostNumberSchema,
   currency: CurrencySchema,
   vatFree: VatFreeSchema,
-  orderNotes: OrderNotesSchema,
+  orderNotes: Type.Optional(OrderNotesSchema),
   day1: Type.Optional(ServiceDay1Schema),
   day1Work: Type.Optional(ServiceDay1WorkSchema),
   day1Employee: Type.Optional(EmployeeID),

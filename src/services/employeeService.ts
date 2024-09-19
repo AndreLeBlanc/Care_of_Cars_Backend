@@ -876,7 +876,7 @@ export async function listWorkingEmployees(
           )
 
         fetchedWorkingHours = (
-          await db
+          await tx
             .select()
             .from(employeeWorkingHours)
             .innerJoin(
@@ -1495,3 +1495,140 @@ export async function getEmployeesPaginate(
 //    return left(errorHandling(e))
 //  }
 //}
+
+export type EmpAvail = {
+  employeeID: EmployeeID
+  scheduledHours: number
+  //  specialHours: string
+  totalHours: number
+  storeID?: StoreID
+}
+
+export async function listWorkingEmployees2(
+  storeID: StoreID,
+  startDay: WorkTime,
+): Promise<Either<string, EmpAvail[]>> {
+  const startOfWeek = new Date(startDay)
+  startOfWeek.setDate(startDay.getDate() - startDay.getDay())
+  const endOfWeek = new Date(startOfWeek)
+  endOfWeek.setDate(startOfWeek.getDate() + 6)
+
+  const dateSeriesSubquery = db
+    .select({
+      date: sql`"date"`.as('date'),
+    })
+    .from(
+      sql`
+    SELECT generate_series(
+      ${startOfWeek.toISOString()}::date,
+      ${endOfWeek.toISOString()}::date,
+      '1 day'::interval
+    ) AS date`,
+    )
+    .as('date_series_query')
+
+  const regularHours = db
+    .select({
+      employeeID: employees.employeeID,
+      storeID: employeeWorkingHours.storeID,
+      dayOfWeek: sql<string>`to_char(${dateSeriesSubquery.date}, 'day')`.as('dayOfWeek'),
+      date: dateSeriesSubquery.date,
+      regularHours: sql<string>`
+        CASE to_char(${dateSeriesSubquery.date}, 'day')
+          WHEN 'sunday   ' THEN ${employeeWorkingHours.sundayStop} - ${employeeWorkingHours.sundayStart} - ${employeeWorkingHours.sundayBreak}
+          WHEN 'monday   ' THEN ${employeeWorkingHours.mondayStop} - ${employeeWorkingHours.mondayStart} - ${employeeWorkingHours.mondayBreak}
+          WHEN 'tuesday  ' THEN ${employeeWorkingHours.tuesdayStop} - ${employeeWorkingHours.tuesdayStart} - ${employeeWorkingHours.tuesdayBreak}
+          WHEN 'wednesday' THEN ${employeeWorkingHours.wednesdayStop} - ${employeeWorkingHours.wednesdayStart} - ${employeeWorkingHours.wednesdayBreak}
+          WHEN 'thursday ' THEN ${employeeWorkingHours.thursdayStop} - ${employeeWorkingHours.thursdayStart} - ${employeeWorkingHours.thursdayBreak}
+          WHEN 'friday   ' THEN ${employeeWorkingHours.fridayStop} - ${employeeWorkingHours.fridayStart} - ${employeeWorkingHours.fridayBreak}
+          WHEN 'saturday ' THEN ${employeeWorkingHours.saturdayStop} - ${employeeWorkingHours.saturdayStart} - ${employeeWorkingHours.saturdayBreak}
+          ELSE INTERVAL '0 hours'
+        END
+      `.as('regularHours'),
+    })
+    .from(employees)
+    .innerJoin(dateSeriesSubquery, sql`true`)
+    .leftJoin(
+      employeeWorkingHours,
+      and(
+        eq(employees.employeeID, employeeWorkingHours.employeeID),
+        eq(employeeWorkingHours.storeID, storeID),
+      ),
+    )
+    .as('regularHours')
+
+  //const specialHours = db
+  //  .select({
+  //    employeeID: employeeSpecialHours.employeeID,
+  //    storeID: employeeSpecialHours.storeID,
+  //    date: sql<Date>`date(${employeeSpecialHours.start})`.as('date'),
+  //    specialHours: sql<string>`
+  //      CASE
+  //        WHEN ${employeeSpecialHours.absence} THEN
+  //          -LEAST(
+  //            ${employeeSpecialHours.end}::date - ${employeeSpecialHours.start}::date + INTERVAL '1 day',
+  //            INTERVAL '24 hours'
+  //          )
+  //        ELSE
+  //          LEAST(
+  //            ${employeeSpecialHours.end}::date - ${employeeSpecialHours.start}::date + INTERVAL '1 day',
+  //            INTERVAL '24 hours'
+  //          )
+  //      END
+  //    `.as('specialHours'),
+  //  })
+  //  .from(employeeSpecialHours)
+  //  .where(
+  //    and(
+  //      sql`date(${employeeSpecialHours.start}) >= ${startOfWeek.toISOString()}::date`,
+  //      sql`date(${employeeSpecialHours.start}) <= ${endOfWeek.toISOString()}::date`,
+  //    ),
+  //  )
+  //  .as('specialHours')
+  //
+  const result = await db
+    .select({
+      employeeID: regularHours.employeeID,
+      storeID: regularHours.storeID,
+      date: regularHours.date,
+      dayOfWeek: regularHours.dayOfWeek,
+      regularHours: regularHours.regularHours,
+      // specialHours: specialHours.specialHours,
+      totalHours: sql<string>`
+        COALESCE(${regularHours.regularHours}, INTERVAL '0 hours') )
+      `.as('totalHours'),
+      regularHoursNumeric: sql<number>`
+        EXTRACT(EPOCH FROM COALESCE(${regularHours.regularHours}, INTERVAL '0 hours')) / 3600
+      `.as('regularHoursNumeric'),
+      //scheduledHours: sql<number>`
+      //  EXTRACT(EPOCH FROM COALESCE(${specialHours.specialHours}, INTERVAL '0 hours')) / 3600
+      //`.as('specialHoursNumeric'),
+      totalHoursNumeric: sql<number>`
+        EXTRACT(EPOCH FROM (
+          COALESCE(${regularHours.regularHours}, INTERVAL '0 hours') 
+        )) / 3600
+      `.as('totalHoursNumeric'),
+    })
+    .from(regularHours)
+    //    .leftJoin(
+    //      specialHours,
+    //      and(
+    //        eq(regularHours.employeeID, specialHours.employeeID),
+    //        eq(regularHours.storeID, specialHours.storeID),
+    //        eq(regularHours.date, specialHours.date),
+    //      ),
+    //  )
+    .orderBy(regularHours.employeeID, regularHours.date)
+
+  return result
+    ? right(
+        result.map((res) => ({
+          storeID: res.storeID ? res.storeID : undefined,
+          employeeID: res.employeeID,
+          scheduledHours: res.regularHoursNumeric,
+          //          specialHours: res.specialHours,
+          totalHours: res.totalHoursNumeric,
+        })),
+      )
+    : left('could not find working hours')
+}
