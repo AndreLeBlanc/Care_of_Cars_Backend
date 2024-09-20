@@ -12,6 +12,7 @@ import {
   ProductSupplierArticleNumber,
   ProductUpdateRelatedData,
   StoreID,
+  productInventory,
   products,
 } from '../schema/schema.js'
 import { db } from '../config/db-connect.js'
@@ -37,7 +38,21 @@ export type ProductBase = {
   storeID?: StoreID
 }
 
-export type Product = ProductBase & { productID: ProductID } & DbDateType
+type InventoryBase = {
+  productInventoryBalance: ProductInventoryBalance
+  storeID: StoreID
+}
+
+export type InventoryPatch = InventoryBase & {
+  productID: ProductID
+}
+
+export type InventoryFetched = InventoryPatch & DbDateType
+
+export type Product = ProductBase & {
+  productID: ProductID
+  productInventoryBalance?: ProductInventoryBalance
+} & DbDateType
 
 export type ProductsPaginate = {
   totalItems: number
@@ -106,21 +121,27 @@ export async function addProduct(
   product: ProductBase,
   type: LocalOrGlobal,
   storeID?: StoreID,
+  inventory?: InventoryBase,
 ): Promise<Either<string, Product>> {
   const add = addValue(product)
   try {
-    if (type === 'Global' && storeID === undefined) {
-      const [newProduct] = await db.insert(products).values(add).returning()
-      return brander(newProduct)
-    } else if (type === 'Local' && storeID != null) {
-      const [newProduct] = await db
-        .insert(products)
-        .values({ ...add, storeID: storeID })
-        .returning()
-      return brander(newProduct)
-    } else {
+    if ((type === 'Global' && storeID) || (type === 'Local' && !storeID)) {
       return left('Local products must have a store, global products can not have a store')
+    } else if (type === 'Local' && storeID != undefined) {
+      product = { storeID: storeID, ...product }
     }
+    const addedProd = await db.transaction(async (tx) => {
+      const [newProduct] = await tx.insert(products).values(add).returning()
+      let inv = { productInventoryBalance: ProductInventoryBalance(0) }
+      if (inventory) {
+        ;[inv] = await tx
+          .insert(productInventory)
+          .values(inventory)
+          .returning({ productInventoryBalance: productInventory.productInventoryBalance })
+      }
+      return brander({ productInventoryBalance: inv.productInventoryBalance, ...newProduct })
+    })
+    return addedProd
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -139,7 +160,26 @@ export async function editProduct(
       .where(eq(products.productID, productID))
       .returning()
 
-    return brander(editProduct)
+    return brander({ productInventoryBalance: null, ...editProduct })
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+//edit product
+export async function upsertInventory(
+  inventory: InventoryPatch,
+): Promise<Either<string, InventoryFetched>> {
+  try {
+    const [editInventory] = await db
+      .insert(productInventory)
+      .values(inventory)
+      .onConflictDoUpdate({
+        target: [productInventory.storeID, productInventory.productID],
+        set: { ...inventory, updatedAt: new Date() },
+      })
+      .returning()
+    return editInventory ? right(editInventory) : left('could not update inventory')
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -159,10 +199,30 @@ export async function deleteProductByID(productID: ProductID): Promise<Either<st
 }
 
 //Get product by Id,
-export async function getProductById(productID: ProductID): Promise<Either<string, Product>> {
+export async function getProductById(
+  productID: ProductID,
+  storeID: StoreID,
+): Promise<Either<string, Product>> {
   try {
-    const [productData] = await db.select().from(products).where(eq(products.productID, productID))
-    return productData ? brander(productData) : left('Product Not Found')
+    const [productData] = await db
+      .select()
+      .from(products)
+      .where(eq(products.productID, productID))
+      .leftJoin(
+        productInventory,
+        and(
+          eq(productInventory.storeID, storeID),
+          eq(productInventory.productID, products.productID),
+        ),
+      )
+    return productData
+      ? brander({
+          productInventoryBalance: productData.productInventory
+            ? productData.productInventory.productInventoryBalance
+            : null,
+          ...productData.products,
+        })
+      : left('Product Not Found')
   } catch (e) {
     return left(errorHandling(e))
   }
@@ -205,13 +265,20 @@ export async function getProductsPaginated(
           currency: products.currency,
           productDescription: products.productDescription,
           productExternalArticleNumber: products.productExternalArticleNumber,
-          productInventoryBalance: products.productInventoryBalance,
+          productInventoryBalance: productInventory.productInventoryBalance,
           productSupplierArticleNumber: products.productSupplierArticleNumber,
           productUpdateRelatedData: products.productUpdateRelatedData,
           createdAt: products.createdAt,
           updatedAt: products.updatedAt,
         })
         .from(products)
+        .leftJoin(
+          productInventory,
+          and(
+            eq(productInventory.storeID, storeID),
+            eq(productInventory.productID, products.productID),
+          ),
+        )
         .where(condition)
         .orderBy(desc(products.createdAt))
         .limit(limit || 10)

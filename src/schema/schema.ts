@@ -1094,6 +1094,8 @@ export const storesRelations = relations(stores, ({ many }) => ({
   storespecialhours: many(storespecialhours),
   storeweeklynotes: many(storeweeklynotes),
   orders: many(orders),
+  products: many(products),
+  productInventory: many(productInventory),
 }))
 
 export const driverCars = pgTable(
@@ -1235,6 +1237,10 @@ export const productCategories = pgTable('productCategories', {
   ...dbDates,
 })
 
+export const productCategoryToProductRelations = relations(productCategories, ({ many }) => ({
+  products: many(products),
+}))
+
 export const products = pgTable('products', {
   productID: serial('productID').$type<ProductID>().primaryKey(),
   storeID: integer('storeID')
@@ -1261,19 +1267,44 @@ export const products = pgTable('products', {
     .$type<ProductUpdateRelatedData>()
     .default(ProductUpdateRelatedData(false)),
   award: real('award').$type<Award>().notNull(),
-  productInventoryBalance: integer('productInventoryBalance').$type<ProductInventoryBalance>(),
   ...dbDates,
 })
 
-export const productCategoryToProductRelations = relations(productCategories, ({ many }) => ({
-  products: many(products),
-}))
-
-export const productToCategoryRelations = relations(products, ({ one }) => ({
+export const productRelations = relations(products, ({ one, many }) => ({
   productCategories: one(productCategories, {
     fields: [products.productCategoryID],
     references: [productCategories.productCategoryID],
   }),
+  productInventory: many(productInventory),
+  stores: one(stores),
+}))
+
+export const productInventory = pgTable(
+  'productInventory',
+  {
+    productID: serial('productID')
+      .$type<ProductID>()
+      .notNull()
+      .references(() => products.productID, { onDelete: 'cascade' }),
+    storeID: integer('storeID')
+      .$type<StoreID>()
+      .references(() => stores.storeID, { onDelete: 'cascade' })
+      .notNull(),
+    productInventoryBalance: integer('productInventoryBalance')
+      .$type<ProductInventoryBalance>()
+      .notNull(),
+    ...dbDates,
+  },
+  (productInventory) => {
+    return {
+      pk: primaryKey({ columns: [productInventory.productID, productInventory.storeID] }),
+    }
+  },
+)
+
+export const productInventoryRelations = relations(products, ({ one }) => ({
+  stores: one(stores),
+  products: one(products),
 }))
 
 export const storeweeklynotes = pgTable(

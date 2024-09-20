@@ -22,6 +22,13 @@
       "when": 1726602918931,
       "tag": "0002_brainy_quicksilver",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1726824736400,
+      "tag": "0003_odd_gamma_corps",
+      "breakpoints": true
     }
   ]
 }
