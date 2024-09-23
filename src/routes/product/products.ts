@@ -7,8 +7,14 @@ import {
   DeleteProductReplySchemaType,
   DeleteProductSchema,
   DeleteProductSchemaType,
+  EditProductSchema,
+  EditProductSchemaType,
   GetProductSchema,
   GetProductSchemaType,
+  InventoryPatchReplySchema,
+  InventoryPatchReplySchemaType,
+  InventoryPatchSchema,
+  InventoryPatchSchemaType,
   ListProductsQueryParamSchema,
   ListProductsQueryParamSchemaType,
   ProductReplyMessageSchema,
@@ -20,6 +26,8 @@ import {
 } from './productSchema.js'
 
 import {
+  InventoryFetched,
+  InventoryPatch,
   LocalOrGlobal,
   Product,
   ProductBase,
@@ -29,6 +37,7 @@ import {
   editProduct,
   getProductById,
   getProductsPaginated,
+  upsertInventory,
 } from '../../services/productService.js'
 
 import {
@@ -148,20 +157,20 @@ export const productsRoute = async (fastify: FastifyInstance) => {
 
   //Edit product
   fastify.patch<{
-    Body: AddProductSchemaType
+    Body: EditProductSchemaType
     Reply: ProductReplySchemaType | ProductReplyMessageSchemaType
   }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
         console.log(request.user)
-        //const permissionName: PermissionTitle = PermissionTitle('update_product')
-        // fastify.authorize(request, reply, permissionName)
+        const permissionName: PermissionTitle = PermissionTitle('update_product')
+        fastify.authorize(request, reply, permissionName)
         done()
         return reply
       },
       schema: {
-        body: AddProductSchema,
+        body: EditProductSchema,
         response: {
           200: ProductReplySchema,
           404: ProductReplyMessageSchema,
@@ -178,7 +187,6 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         productCategoryID,
         cost,
         currency,
-        productInventoryBalance,
         productItemNumber,
         productDescription,
         productExternalArticleNumber,
@@ -194,9 +202,6 @@ export const productsRoute = async (fastify: FastifyInstance) => {
         productDescription: ProductDescription(productDescription),
         productExternalArticleNumber: productExternalArticleNumber
           ? ProductExternalArticleNumber(productExternalArticleNumber)
-          : undefined,
-        productInventoryBalance: productInventoryBalance
-          ? ProductInventoryBalance(productInventoryBalance)
           : undefined,
         productSupplierArticleNumber: productSupplierArticleNumber
           ? ProductSupplierArticleNumber(productSupplierArticleNumber)
@@ -228,6 +233,55 @@ export const productsRoute = async (fastify: FastifyInstance) => {
           return reply.status(200).send({
             message: 'Product edited successfully',
             ...costNumber,
+          })
+        },
+        (err) => {
+          return reply.status(404).send({
+            message: err,
+          })
+        },
+      )
+    },
+  )
+
+  //Edit product
+  fastify.patch<{
+    Body: InventoryPatchSchemaType
+    Reply: InventoryPatchReplySchemaType | ProductReplyMessageSchemaType
+  }>(
+    '/inventory',
+    {
+      preHandler: async (request, reply, done) => {
+        console.log(request.user)
+        const permissionName: PermissionTitle = PermissionTitle('update_product_inventory')
+        fastify.authorize(request, reply, permissionName)
+        done()
+        return reply
+      },
+      schema: {
+        body: InventoryPatchSchema,
+        response: {
+          200: InventoryPatchReplySchema,
+          404: ProductReplyMessageSchema,
+        },
+      },
+    },
+    async (req, reply) => {
+      const inventoryDetails: InventoryPatch = {
+        storeID: StoreID(req.body.storeID),
+        productID: ProductID(req.body.productID),
+        productInventoryBalance: ProductInventoryBalance(req.body.productInventoryBalance),
+      }
+
+      const editedInventory: Either<string, InventoryFetched> =
+        await upsertInventory(inventoryDetails)
+
+      match(
+        editedInventory,
+        (newInventory: InventoryFetched) => {
+          return reply.status(200).send({
+            message: 'Product inventory updated successfully',
+            ...newInventory,
           })
         },
         (err) => {
@@ -303,10 +357,10 @@ export const productsRoute = async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const { productID } = request.params
+      const { productID, storeID } = request.params
 
       let productData: Either<string, Product> = left('Product not found')
-      productData = await getProductById(ProductID(productID))
+      productData = await getProductById(ProductID(productID), StoreID(storeID))
 
       function unDineroGlobal(prod: Product) {
         const { cost, ...prodInfo } = prod
