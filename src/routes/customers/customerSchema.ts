@@ -1,9 +1,18 @@
 import { Static, Type } from '@sinclair/typebox'
 
 import {
+  DriverBodySchema,
   DriverID,
+  companyAddress,
+  companyAddressCity,
+  companyCountry,
+  companyEmail,
+  companyPhone,
   companyReference,
+  companyZipCode,
+  customerCompanyName,
   customerOrgNumber,
+  driverAcceptsMarketing,
   driverAddress,
   driverAddressCity,
   driverCardNumber,
@@ -11,30 +20,20 @@ import {
   driverCountry,
   driverEmail,
   driverExternalNumber,
+  driverFirstName,
+  driverGDPRAccept,
   driverHasCard,
+  driverISWarrantyDriver,
   driverKeyNumber,
+  driverLastName,
+  driverNotes,
+  driverNotesShared,
   driverPhoneNumber,
   driverZipCode,
 } from '../../utils/helper.js'
 import { PickupTimeSchema, SubmissionTimeSchema } from '../orders/ordersSchema.js'
 import { CategoryIDSchema } from '../category/categorySchema.js'
 import { ServiceIDSchema } from '../services/serviceSchema.js'
-const customerCompanyName = Type.String({ maxLength: 255 })
-const companyEmail = Type.String({ format: 'email' })
-const companyPhone = Type.String({
-  pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
-})
-const companyAddress = Type.String({ maxLength: 255 })
-const companyZipCode = Type.String({ maxLength: 16 })
-const companyAddressCity = Type.String({ maxLength: 255 })
-const companyCountry = Type.String({ maxLength: 255 })
-const driverGDPRAccept = Type.Boolean()
-const driverISWarrantyDriver = Type.Boolean()
-const driverAcceptsMarketing = Type.Boolean()
-const driverFirstName = Type.String({ maxLength: 128 })
-const driverLastName = Type.String({ maxLength: 128 })
-const driverNotesShared = Type.String()
-const driverNotes = Type.String()
 
 export const AddCustomerBodySchema = Type.Object({
   customerOrgNumber: customerOrgNumber,
@@ -83,28 +82,6 @@ export const GetCompanyByOrgNumberSchema = Type.Object({
 
 export const GetDriverByIDSchema = Type.Object({
   driverID: DriverID,
-})
-
-export const DriverBodySchema = Type.Object({
-  customerOrgNumber: Type.Optional(customerOrgNumber),
-  driverExternalNumber: Type.Optional(driverExternalNumber),
-  driverGDPRAccept: driverGDPRAccept,
-  driverISWarrantyDriver: driverISWarrantyDriver,
-  driverAcceptsMarketing: driverAcceptsMarketing,
-  driverFirstName: driverFirstName,
-  driverLastName: driverLastName,
-  driverEmail: driverEmail,
-  driverPhoneNumber: driverPhoneNumber,
-  driverAddress: driverAddress,
-  driverZipCode: driverZipCode,
-  driverAddressCity: driverAddressCity,
-  driverCountry: driverCountry,
-  driverHasCard: driverHasCard,
-  driverCardNumber: Type.Optional(driverCardNumber),
-  driverCardValidTo: Type.Optional(driverCardValidTo),
-  driverKeyNumber: Type.Optional(driverKeyNumber),
-  driverNotesShared: Type.Optional(driverNotesShared),
-  driverNotes: driverNotes,
 })
 
 export const PatchDriverBodySchema = Type.Composite([
