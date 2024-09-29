@@ -6,17 +6,17 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
+| employeeCheckinID | integer | nextval('"employeeCheckin_employeeCheckinID_seq"'::regclass) | false |  |  |  |
 | employeeStoreID | integer |  | true |  | [public.employeeStore](public.employeeStore.md) |  |
 | employeeCheckedIn | timestamp without time zone |  | true |  |  |  |
 | employeeCheckedOut | timestamp without time zone |  | true |  |  |  |
-| employeeCheckinID | integer | nextval('"employeeCheckin_employeeCheckinID_seq"'::regclass) | false |  |  |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| employeeCheckin_employeeStoreID_employeeStore_employeeStoreID_f | FOREIGN KEY | FOREIGN KEY ("employeeStoreID") REFERENCES "employeeStore"("employeeStoreID") ON DELETE CASCADE |
 | employeeCheckin_pkey | PRIMARY KEY | PRIMARY KEY ("employeeCheckinID") |
+| employeeCheckin_employeeStoreID_employeeStore_employeeStoreID_f | FOREIGN KEY | FOREIGN KEY ("employeeStoreID") REFERENCES "employeeStore"("employeeStoreID") ON DELETE CASCADE |
 
 ## Indexes
 

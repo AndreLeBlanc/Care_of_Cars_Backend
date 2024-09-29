@@ -12,389 +12,389 @@
 <!-- public.bills -->
 <g id="node1" class="node">
 <title>public.bills</title>
-<polygon fill="#efefef" stroke="transparent" points="673.5,-1732.5 673.5,-1767.5 939.5,-1767.5 939.5,-1732.5 673.5,-1732.5"/>
-<polygon fill="none" stroke="#000000" points="673.5,-1732.5 673.5,-1767.5 939.5,-1767.5 939.5,-1732.5 673.5,-1732.5"/>
-<text text-anchor="start" x="701.217" y="-1745.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.bills</text>
-<text text-anchor="start" x="784.215" y="-1745.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
-<text text-anchor="start" x="818.4198" y="-1745.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1702.5 673.5,-1732.5 939.5,-1732.5 939.5,-1702.5 673.5,-1702.5"/>
-<text text-anchor="start" x="680.5" y="-1713.9" font-family="Arial" font-size="14.00" fill="#000000">orderID </text>
-<text text-anchor="start" x="731.0568" y="-1713.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1672.5 673.5,-1702.5 939.5,-1702.5 939.5,-1672.5 673.5,-1672.5"/>
-<text text-anchor="start" x="680.5" y="-1683.9" font-family="Arial" font-size="14.00" fill="#000000">billStatus </text>
-<text text-anchor="start" x="741.176" y="-1683.9" font-family="Arial" font-size="14.00" fill="#666666">[&quot;billStatus&quot;]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1642.5 673.5,-1672.5 939.5,-1672.5 939.5,-1642.5 673.5,-1642.5"/>
-<text text-anchor="start" x="680.5" y="-1653.9" font-family="Arial" font-size="14.00" fill="#000000">employeeID </text>
-<text text-anchor="start" x="759.068" y="-1653.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1612.5 673.5,-1642.5 939.5,-1642.5 939.5,-1612.5 673.5,-1612.5"/>
-<text text-anchor="start" x="680.5" y="-1623.9" font-family="Arial" font-size="14.00" fill="#000000">billingDate </text>
-<text text-anchor="start" x="749.7272" y="-1623.9" font-family="Arial" font-size="14.00" fill="#666666">[date]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1582.5 673.5,-1612.5 939.5,-1612.5 939.5,-1582.5 673.5,-1582.5"/>
-<text text-anchor="start" x="680.5" y="-1593.9" font-family="Arial" font-size="14.00" fill="#000000">paymentDate </text>
-<text text-anchor="start" x="767.6346" y="-1593.9" font-family="Arial" font-size="14.00" fill="#666666">[date]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1552.5 673.5,-1582.5 939.5,-1582.5 939.5,-1552.5 673.5,-1552.5"/>
-<text text-anchor="start" x="680.5" y="-1563.9" font-family="Arial" font-size="14.00" fill="#000000">paymentDays </text>
-<text text-anchor="start" x="769.9614" y="-1563.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1522.5 673.5,-1552.5 939.5,-1552.5 939.5,-1522.5 673.5,-1522.5"/>
-<text text-anchor="start" x="680.5" y="-1533.9" font-family="Arial" font-size="14.00" fill="#000000">driverID </text>
-<text text-anchor="start" x="733.3808" y="-1533.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1492.5 673.5,-1522.5 939.5,-1522.5 939.5,-1492.5 673.5,-1492.5"/>
-<text text-anchor="start" x="680.5" y="-1503.9" font-family="Arial" font-size="14.00" fill="#000000">customerOrgNumber </text>
-<text text-anchor="start" x="815.0596" y="-1503.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(11)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1462.5 673.5,-1492.5 939.5,-1492.5 939.5,-1462.5 673.5,-1462.5"/>
-<text text-anchor="start" x="680.5" y="-1473.9" font-family="Arial" font-size="14.00" fill="#000000">driverExternalNumber </text>
-<text text-anchor="start" x="820.5014" y="-1473.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1432.5 673.5,-1462.5 939.5,-1462.5 939.5,-1432.5 673.5,-1432.5"/>
-<text text-anchor="start" x="680.5" y="-1443.9" font-family="Arial" font-size="14.00" fill="#000000">companyReference </text>
-<text text-anchor="start" x="805.7524" y="-1443.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(255)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1402.5 673.5,-1432.5 939.5,-1432.5 939.5,-1402.5 673.5,-1402.5"/>
-<text text-anchor="start" x="680.5" y="-1413.9" font-family="Arial" font-size="14.00" fill="#000000">driverFirstName </text>
-<text text-anchor="start" x="783.9264" y="-1413.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1372.5 673.5,-1402.5 939.5,-1402.5 939.5,-1372.5 673.5,-1372.5"/>
-<text text-anchor="start" x="680.5" y="-1383.9" font-family="Arial" font-size="14.00" fill="#000000">driverLastName </text>
-<text text-anchor="start" x="783.1718" y="-1383.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1342.5 673.5,-1372.5 939.5,-1372.5 939.5,-1342.5 673.5,-1342.5"/>
-<text text-anchor="start" x="680.5" y="-1353.9" font-family="Arial" font-size="14.00" fill="#000000">driverEmail </text>
-<text text-anchor="start" x="754.3766" y="-1353.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1312.5 673.5,-1342.5 939.5,-1342.5 939.5,-1312.5 673.5,-1312.5"/>
-<text text-anchor="start" x="680.5" y="-1323.9" font-family="Arial" font-size="14.00" fill="#000000">driverPhoneNumber </text>
-<text text-anchor="start" x="809.6262" y="-1323.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(32)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1282.5 673.5,-1312.5 939.5,-1312.5 939.5,-1282.5 673.5,-1282.5"/>
-<text text-anchor="start" x="680.5" y="-1293.9" font-family="Arial" font-size="14.00" fill="#000000">driverAddress </text>
-<text text-anchor="start" x="770.7286" y="-1293.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1252.5 673.5,-1282.5 939.5,-1282.5 939.5,-1252.5 673.5,-1252.5"/>
-<text text-anchor="start" x="680.5" y="-1263.9" font-family="Arial" font-size="14.00" fill="#000000">driverZipCode </text>
-<text text-anchor="start" x="772.2798" y="-1263.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1222.5 673.5,-1252.5 939.5,-1252.5 939.5,-1222.5 673.5,-1222.5"/>
-<text text-anchor="start" x="680.5" y="-1233.9" font-family="Arial" font-size="14.00" fill="#000000">driverAddressCity </text>
-<text text-anchor="start" x="794.8324" y="-1233.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1192.5 673.5,-1222.5 939.5,-1222.5 939.5,-1192.5 673.5,-1192.5"/>
-<text text-anchor="start" x="680.5" y="-1203.9" font-family="Arial" font-size="14.00" fill="#000000">driverCountry </text>
-<text text-anchor="start" x="768.3892" y="-1203.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1162.5 673.5,-1192.5 939.5,-1192.5 939.5,-1162.5 673.5,-1162.5"/>
-<text text-anchor="start" x="680.5" y="-1173.9" font-family="Arial" font-size="14.00" fill="#000000">driverHasCard </text>
-<text text-anchor="start" x="774.6052" y="-1173.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1132.5 673.5,-1162.5 939.5,-1162.5 939.5,-1132.5 673.5,-1132.5"/>
-<text text-anchor="start" x="680.5" y="-1143.9" font-family="Arial" font-size="14.00" fill="#000000">driverCardValidTo </text>
-<text text-anchor="start" x="797.1662" y="-1143.9" font-family="Arial" font-size="14.00" fill="#666666">[date]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1102.5 673.5,-1132.5 939.5,-1132.5 939.5,-1102.5 673.5,-1102.5"/>
-<text text-anchor="start" x="680.5" y="-1113.9" font-family="Arial" font-size="14.00" fill="#000000">driverCardNumber </text>
-<text text-anchor="start" x="799.4916" y="-1113.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1072.5 673.5,-1102.5 939.5,-1102.5 939.5,-1072.5 673.5,-1072.5"/>
-<text text-anchor="start" x="680.5" y="-1083.9" font-family="Arial" font-size="14.00" fill="#000000">driverKeyNumber </text>
-<text text-anchor="start" x="793.2784" y="-1083.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1042.5 673.5,-1072.5 939.5,-1072.5 939.5,-1042.5 673.5,-1042.5"/>
-<text text-anchor="start" x="680.5" y="-1053.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt </text>
-<text text-anchor="start" x="744.2994" y="-1053.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-1012.5 673.5,-1042.5 939.5,-1042.5 939.5,-1012.5 673.5,-1012.5"/>
-<text text-anchor="start" x="680.0779" y="-1023.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt </text>
-<text text-anchor="start" x="747.7819" y="-1023.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-982.5 673.5,-1012.5 939.5,-1012.5 939.5,-982.5 673.5,-982.5"/>
-<text text-anchor="start" x="680.5" y="-993.9" font-family="Arial" font-size="14.00" fill="#000000">storeID </text>
-<text text-anchor="start" x="729.5042" y="-993.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-952.5 673.5,-982.5 939.5,-982.5 939.5,-952.5 673.5,-952.5"/>
-<text text-anchor="start" x="680.5" y="-963.9" font-family="Arial" font-size="14.00" fill="#000000">billedAmount </text>
-<text text-anchor="start" x="765.2938" y="-963.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
-<polygon fill="none" stroke="#000000" points="673.5,-922.5 673.5,-952.5 939.5,-952.5 939.5,-922.5 673.5,-922.5"/>
-<text text-anchor="start" x="680.5" y="-933.9" font-family="Arial" font-size="14.00" fill="#000000">currency </text>
-<text text-anchor="start" x="738.0596" y="-933.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" stroke-width="3" points="672,-921.5 672,-1769.5 941,-1769.5 941,-921.5 672,-921.5"/>
-</g>
-<!-- public.employees -->
-<g id="node3" class="node">
-<title>public.employees</title>
-<polygon fill="#efefef" stroke="transparent" points="43.5,-597.5 43.5,-632.5 340.5,-632.5 340.5,-597.5 43.5,-597.5"/>
-<polygon fill="none" stroke="#000000" points="43.5,-597.5 43.5,-632.5 340.5,-632.5 340.5,-597.5 43.5,-597.5"/>
-<text text-anchor="start" x="58.7027" y="-610.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.employees</text>
-<text text-anchor="start" x="197.7293" y="-610.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
-<text text-anchor="start" x="231.9341" y="-610.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-567.5 43.5,-597.5 340.5,-597.5 340.5,-567.5 43.5,-567.5"/>
-<text text-anchor="start" x="50.5" y="-578.9" font-family="Arial" font-size="14.00" fill="#000000">userID    </text>
-<text text-anchor="start" x="125.9278" y="-578.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-537.5 43.5,-567.5 340.5,-567.5 340.5,-537.5 43.5,-537.5"/>
-<text text-anchor="start" x="50.5" y="-548.9" font-family="Arial" font-size="14.00" fill="#000000">employeeID    </text>
-<text text-anchor="start" x="159.3822" y="-548.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-507.5 43.5,-537.5 340.5,-537.5 340.5,-507.5 43.5,-507.5"/>
-<text text-anchor="start" x="50.5" y="-518.9" font-family="Arial" font-size="14.00" fill="#000000">shortUserName    </text>
-<text text-anchor="start" x="182.7034" y="-518.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-477.5 43.5,-507.5 340.5,-507.5 340.5,-477.5 43.5,-477.5"/>
-<text text-anchor="start" x="50.5" y="-488.9" font-family="Arial" font-size="14.00" fill="#000000">employmentNumber    </text>
-<text text-anchor="start" x="210.7118" y="-488.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-447.5 43.5,-477.5 340.5,-477.5 340.5,-447.5 43.5,-447.5"/>
-<text text-anchor="start" x="50.5" y="-458.9" font-family="Arial" font-size="14.00" fill="#000000">employeePersonalNumber    </text>
-<text text-anchor="start" x="250.3948" y="-458.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-417.5 43.5,-447.5 340.5,-447.5 340.5,-417.5 43.5,-417.5"/>
-<text text-anchor="start" x="50.5" y="-428.9" font-family="Arial" font-size="14.00" fill="#000000">signature    </text>
-<text text-anchor="start" x="142.2756" y="-428.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(4)]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-387.5 43.5,-417.5 340.5,-417.5 340.5,-387.5 43.5,-387.5"/>
-<text text-anchor="start" x="50.5" y="-398.9" font-family="Arial" font-size="14.00" fill="#000000">employeeHourlyRate    </text>
-<text text-anchor="start" x="215.3864" y="-398.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-357.5 43.5,-387.5 340.5,-387.5 340.5,-357.5 43.5,-357.5"/>
-<text text-anchor="start" x="50.5" y="-368.9" font-family="Arial" font-size="14.00" fill="#000000">employeeHourlyRateCurrency    </text>
-<text text-anchor="start" x="272.162" y="-368.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-327.5 43.5,-357.5 340.5,-357.5 340.5,-327.5 43.5,-327.5"/>
-<text text-anchor="start" x="50.5" y="-338.9" font-family="Arial" font-size="14.00" fill="#000000">employeePin    </text>
-<text text-anchor="start" x="165.6108" y="-338.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(4)]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-297.5 43.5,-327.5 340.5,-327.5 340.5,-297.5 43.5,-297.5"/>
-<text text-anchor="start" x="50.5" y="-308.9" font-family="Arial" font-size="14.00" fill="#000000">employeeComment    </text>
-<text text-anchor="start" x="206.0512" y="-308.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-267.5 43.5,-297.5 340.5,-297.5 340.5,-267.5 43.5,-267.5"/>
-<text text-anchor="start" x="50.5" y="-278.9" font-family="Arial" font-size="14.00" fill="#000000">employeeActive    </text>
-<text text-anchor="start" x="183.5014" y="-278.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-237.5 43.5,-267.5 340.5,-267.5 340.5,-237.5 43.5,-237.5"/>
-<text text-anchor="start" x="50.5" y="-248.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
-<text text-anchor="start" x="144.6136" y="-248.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-<polygon fill="none" stroke="#000000" points="43.5,-207.5 43.5,-237.5 340.5,-237.5 340.5,-207.5 43.5,-207.5"/>
-<text text-anchor="start" x="50.4208" y="-218.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
-<text text-anchor="start" x="148.439" y="-218.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-</g>
-<!-- public.bills&#45;&gt;public.employees -->
-<g id="edge2" class="edge">
-<title>public.bills:employeeID&#45;&gt;public.employees:employeeID</title>
-<path fill="none" stroke="#000000" d="M663.2377,-1657.3915C293.1357,-1649.4687 487.0112,-1209.271 391.5,-841 375.1557,-777.9798 405.6051,-552.5 340.5,-552.5"/>
-<polygon fill="#000000" stroke="#000000" points="663.5006,-1657.3942 673.4524,-1661.9997 668.5003,-1657.4471 673.5,-1657.5 673.5,-1657.5 673.5,-1657.5 668.5003,-1657.4471 673.5476,-1653.0003 663.5006,-1657.3942 663.5006,-1657.3942"/>
-<text text-anchor="start" x="339.7285" y="-1667.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;employeeID&quot;) REFERENCES employees(&quot;employeeID&quot;)</text>
-</g>
-<!-- public.drivers -->
-<g id="node4" class="node">
-<title>public.drivers</title>
-<polygon fill="#efefef" stroke="transparent" points="444.5,-747.5 444.5,-782.5 741.5,-782.5 741.5,-747.5 444.5,-747.5"/>
-<polygon fill="none" stroke="#000000" points="444.5,-747.5 444.5,-782.5 741.5,-782.5 741.5,-747.5 444.5,-747.5"/>
-<text text-anchor="start" x="476.2159" y="-760.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.drivers</text>
-<text text-anchor="start" x="582.2161" y="-760.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
-<text text-anchor="start" x="616.4209" y="-760.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-717.5 444.5,-747.5 741.5,-747.5 741.5,-717.5 444.5,-717.5"/>
-<text text-anchor="start" x="451.5" y="-728.9" font-family="Arial" font-size="14.00" fill="#000000">driverID    </text>
-<text text-anchor="start" x="534.695" y="-728.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-687.5 444.5,-717.5 741.5,-717.5 741.5,-687.5 444.5,-687.5"/>
-<text text-anchor="start" x="451.5" y="-698.9" font-family="Arial" font-size="14.00" fill="#000000">customerOrgNumber    </text>
-<text text-anchor="start" x="616.3738" y="-698.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(11)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-657.5 444.5,-687.5 741.5,-687.5 741.5,-657.5 444.5,-657.5"/>
-<text text-anchor="start" x="451.5" y="-668.9" font-family="Arial" font-size="14.00" fill="#000000">driverExternalNumber    </text>
-<text text-anchor="start" x="621.8156" y="-668.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-627.5 444.5,-657.5 741.5,-657.5 741.5,-627.5 444.5,-627.5"/>
-<text text-anchor="start" x="451.5" y="-638.9" font-family="Arial" font-size="14.00" fill="#000000">companyReference    </text>
-<text text-anchor="start" x="607.0666" y="-638.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(255)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-597.5 444.5,-627.5 741.5,-627.5 741.5,-597.5 444.5,-597.5"/>
-<text text-anchor="start" x="451.5" y="-608.9" font-family="Arial" font-size="14.00" fill="#000000">driverGDPRAccept    </text>
-<text text-anchor="start" x="603.9306" y="-608.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-567.5 444.5,-597.5 741.5,-597.5 741.5,-567.5 444.5,-567.5"/>
-<text text-anchor="start" x="451.5" y="-578.9" font-family="Arial" font-size="14.00" fill="#000000">driverISWarrantyDriver    </text>
-<text text-anchor="start" x="628.0162" y="-578.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-537.5 444.5,-567.5 741.5,-567.5 741.5,-537.5 444.5,-537.5"/>
-<text text-anchor="start" x="451.5" y="-548.9" font-family="Arial" font-size="14.00" fill="#000000">driverAcceptsMarketing    </text>
-<text text-anchor="start" x="631.939" y="-548.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-507.5 444.5,-537.5 741.5,-537.5 741.5,-507.5 444.5,-507.5"/>
-<text text-anchor="start" x="451.5" y="-518.9" font-family="Arial" font-size="14.00" fill="#000000">driverFirstName    </text>
-<text text-anchor="start" x="585.2406" y="-518.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-477.5 444.5,-507.5 741.5,-507.5 741.5,-477.5 444.5,-477.5"/>
-<text text-anchor="start" x="451.5" y="-488.9" font-family="Arial" font-size="14.00" fill="#000000">driverLastName    </text>
-<text text-anchor="start" x="584.486" y="-488.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-447.5 444.5,-477.5 741.5,-477.5 741.5,-447.5 444.5,-447.5"/>
-<text text-anchor="start" x="451.5" y="-458.9" font-family="Arial" font-size="14.00" fill="#000000">driverEmail    </text>
-<text text-anchor="start" x="555.6908" y="-458.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-417.5 444.5,-447.5 741.5,-447.5 741.5,-417.5 444.5,-417.5"/>
-<text text-anchor="start" x="451.5" y="-428.9" font-family="Arial" font-size="14.00" fill="#000000">driverPhoneNumber    </text>
-<text text-anchor="start" x="610.9404" y="-428.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(32)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-387.5 444.5,-417.5 741.5,-417.5 741.5,-387.5 444.5,-387.5"/>
-<text text-anchor="start" x="451.5" y="-398.9" font-family="Arial" font-size="14.00" fill="#000000">driverAddress    </text>
-<text text-anchor="start" x="572.0428" y="-398.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-357.5 444.5,-387.5 741.5,-387.5 741.5,-357.5 444.5,-357.5"/>
-<text text-anchor="start" x="451.5" y="-368.9" font-family="Arial" font-size="14.00" fill="#000000">driverZipCode    </text>
-<text text-anchor="start" x="573.594" y="-368.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-327.5 444.5,-357.5 741.5,-357.5 741.5,-327.5 444.5,-327.5"/>
-<text text-anchor="start" x="451.5" y="-338.9" font-family="Arial" font-size="14.00" fill="#000000">driverAddressCity    </text>
-<text text-anchor="start" x="596.1466" y="-338.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-297.5 444.5,-327.5 741.5,-327.5 741.5,-297.5 444.5,-297.5"/>
-<text text-anchor="start" x="451.5" y="-308.9" font-family="Arial" font-size="14.00" fill="#000000">driverCountry    </text>
-<text text-anchor="start" x="569.7034" y="-308.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-267.5 444.5,-297.5 741.5,-297.5 741.5,-267.5 444.5,-267.5"/>
-<text text-anchor="start" x="451.5" y="-278.9" font-family="Arial" font-size="14.00" fill="#000000">driverHasCard    </text>
-<text text-anchor="start" x="575.9194" y="-278.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-237.5 444.5,-267.5 741.5,-267.5 741.5,-237.5 444.5,-237.5"/>
-<text text-anchor="start" x="451.5" y="-248.9" font-family="Arial" font-size="14.00" fill="#000000">driverCardValidTo    </text>
-<text text-anchor="start" x="598.4804" y="-248.9" font-family="Arial" font-size="14.00" fill="#666666">[date]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-207.5 444.5,-237.5 741.5,-237.5 741.5,-207.5 444.5,-207.5"/>
-<text text-anchor="start" x="451.5" y="-218.9" font-family="Arial" font-size="14.00" fill="#000000">driverCardNumber    </text>
-<text text-anchor="start" x="600.8058" y="-218.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-177.5 444.5,-207.5 741.5,-207.5 741.5,-177.5 444.5,-177.5"/>
-<text text-anchor="start" x="451.5" y="-188.9" font-family="Arial" font-size="14.00" fill="#000000">driverKeyNumber    </text>
-<text text-anchor="start" x="594.5926" y="-188.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-147.5 444.5,-177.5 741.5,-177.5 741.5,-147.5 444.5,-147.5"/>
-<text text-anchor="start" x="451.5" y="-158.9" font-family="Arial" font-size="14.00" fill="#000000">driverNotesShared    </text>
-<text text-anchor="start" x="602.3878" y="-158.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-117.5 444.5,-147.5 741.5,-147.5 741.5,-117.5 444.5,-117.5"/>
-<text text-anchor="start" x="451.5" y="-128.9" font-family="Arial" font-size="14.00" fill="#000000">driverNotes    </text>
-<text text-anchor="start" x="557.2602" y="-128.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-87.5 444.5,-117.5 741.5,-117.5 741.5,-87.5 444.5,-87.5"/>
-<text text-anchor="start" x="451.5" y="-98.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
-<text text-anchor="start" x="545.6136" y="-98.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-<polygon fill="none" stroke="#000000" points="444.5,-57.5 444.5,-87.5 741.5,-87.5 741.5,-57.5 444.5,-57.5"/>
-<text text-anchor="start" x="451.4208" y="-68.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
-<text text-anchor="start" x="549.439" y="-68.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-</g>
-<!-- public.bills&#45;&gt;public.drivers -->
-<g id="edge3" class="edge">
-<title>public.bills:driverID&#45;&gt;public.drivers:driverID</title>
-<path fill="none" stroke="#000000" d="M663.3667,-1537.3369C383.7435,-1528.192 543.7564,-1136.4871 673.5,-877 690.3947,-843.2105 724.6053,-859.7895 741.5,-826 760.0842,-788.8316 783.0556,-732.5 741.5,-732.5"/>
-<polygon fill="#000000" stroke="#000000" points="663.5013,-1537.339 673.4275,-1541.9994 668.5006,-1537.4195 673.5,-1537.5 673.5,-1537.5 673.5,-1537.5 668.5006,-1537.4195 673.5725,-1533.0006 663.5013,-1537.339 663.5013,-1537.339"/>
-<text text-anchor="start" x="394.2505" y="-1547.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;driverID&quot;) REFERENCES drivers(&quot;driverID&quot;)</text>
-</g>
-<!-- public.companycustomers -->
-<g id="node5" class="node">
-<title>public.companycustomers</title>
-<polygon fill="#efefef" stroke="transparent" points="845.5,-552.5 845.5,-587.5 1194.5,-587.5 1194.5,-552.5 845.5,-552.5"/>
-<polygon fill="none" stroke="#000000" points="845.5,-552.5 845.5,-587.5 1194.5,-587.5 1194.5,-552.5 845.5,-552.5"/>
-<text text-anchor="start" x="852.2003" y="-565.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.companycustomers</text>
-<text text-anchor="start" x="1060.2317" y="-565.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
-<text text-anchor="start" x="1094.4365" y="-565.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
-<polygon fill="none" stroke="#000000" points="845.5,-522.5 845.5,-552.5 1194.5,-552.5 1194.5,-522.5 845.5,-522.5"/>
-<text text-anchor="start" x="852.5" y="-533.9" font-family="Arial" font-size="14.00" fill="#000000">customerOrgNumber    </text>
-<text text-anchor="start" x="1017.3738" y="-533.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(11)]</text>
-<polygon fill="none" stroke="#000000" points="845.5,-492.5 845.5,-522.5 1194.5,-522.5 1194.5,-492.5 845.5,-492.5"/>
-<text text-anchor="start" x="852.5" y="-503.9" font-family="Arial" font-size="14.00" fill="#000000">customerCompanyName    </text>
-<text text-anchor="start" x="1041.4944" y="-503.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(255)]</text>
-<polygon fill="none" stroke="#000000" points="845.5,-462.5 845.5,-492.5 1194.5,-492.5 1194.5,-462.5 845.5,-462.5"/>
-<text text-anchor="start" x="852.5" y="-473.9" font-family="Arial" font-size="14.00" fill="#000000">companyAddress    </text>
-<text text-anchor="start" x="994.8408" y="-473.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="845.5,-432.5 845.5,-462.5 1194.5,-462.5 1194.5,-432.5 845.5,-432.5"/>
-<text text-anchor="start" x="852.5" y="-443.9" font-family="Arial" font-size="14.00" fill="#000000">companyZipCode    </text>
-<text text-anchor="start" x="996.392" y="-443.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
-<polygon fill="none" stroke="#000000" points="845.5,-402.5 845.5,-432.5 1194.5,-432.5 1194.5,-402.5 845.5,-402.5"/>
-<text text-anchor="start" x="852.5" y="-413.9" font-family="Arial" font-size="14.00" fill="#000000">companyEmail    </text>
-<text text-anchor="start" x="978.4888" y="-413.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="845.5,-372.5 845.5,-402.5 1194.5,-402.5 1194.5,-372.5 845.5,-372.5"/>
-<text text-anchor="start" x="852.5" y="-383.9" font-family="Arial" font-size="14.00" fill="#000000">companyPhone    </text>
-<text text-anchor="start" x="983.9628" y="-383.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
-<polygon fill="none" stroke="#000000" points="845.5,-342.5 845.5,-372.5 1194.5,-372.5 1194.5,-342.5 845.5,-342.5"/>
-<text text-anchor="start" x="852.5" y="-353.9" font-family="Arial" font-size="14.00" fill="#000000">companyAddressCity    </text>
-<text text-anchor="start" x="1018.9446" y="-353.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="845.5,-312.5 845.5,-342.5 1194.5,-342.5 1194.5,-312.5 845.5,-312.5"/>
-<text text-anchor="start" x="852.5" y="-323.9" font-family="Arial" font-size="14.00" fill="#000000">companyCountry    </text>
-<text text-anchor="start" x="992.5014" y="-323.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
-<polygon fill="none" stroke="#000000" points="845.5,-282.5 845.5,-312.5 1194.5,-312.5 1194.5,-282.5 845.5,-282.5"/>
-<text text-anchor="start" x="852.5" y="-293.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
-<text text-anchor="start" x="946.6136" y="-293.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-<polygon fill="none" stroke="#000000" points="845.5,-252.5 845.5,-282.5 1194.5,-282.5 1194.5,-252.5 845.5,-252.5"/>
-<text text-anchor="start" x="852.5" y="-263.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
-<text text-anchor="start" x="950.5182" y="-263.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-</g>
-<!-- public.bills&#45;&gt;public.companycustomers -->
-<g id="edge4" class="edge">
-<title>public.bills:customerOrgNumber&#45;&gt;public.companycustomers:customerOrgNumber</title>
-<path fill="none" stroke="#000000" d="M949.5355,-1507.3421C1214.1491,-1498.8465 989.7354,-1149.2049 939.5,-877 925.2928,-800.0171 767.2171,-537.5 845.5,-537.5"/>
-<polygon fill="#000000" stroke="#000000" points="949.4988,-1507.3426 939.4292,-1503.0006 944.4994,-1507.4213 939.5,-1507.5 939.5,-1507.5 939.5,-1507.5 944.4994,-1507.4213 939.5708,-1511.9994 949.4988,-1507.3426 949.4988,-1507.3426"/>
-<text text-anchor="start" x="946.5665" y="-1517.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;customerOrgNumber&quot;) REFERENCES companycustomers(&quot;customerOrgNumber&quot;)</text>
+<polygon fill="#efefef" stroke="transparent" points="660.5,-1732.5 660.5,-1767.5 926.5,-1767.5 926.5,-1732.5 660.5,-1732.5"/>
+<polygon fill="none" stroke="#000000" points="660.5,-1732.5 660.5,-1767.5 926.5,-1767.5 926.5,-1732.5 660.5,-1732.5"/>
+<text text-anchor="start" x="688.217" y="-1745.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.bills</text>
+<text text-anchor="start" x="771.215" y="-1745.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
+<text text-anchor="start" x="805.4198" y="-1745.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1702.5 660.5,-1732.5 926.5,-1732.5 926.5,-1702.5 660.5,-1702.5"/>
+<text text-anchor="start" x="667.5" y="-1713.9" font-family="Arial" font-size="14.00" fill="#000000">orderID </text>
+<text text-anchor="start" x="718.0568" y="-1713.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1672.5 660.5,-1702.5 926.5,-1702.5 926.5,-1672.5 660.5,-1672.5"/>
+<text text-anchor="start" x="667.5" y="-1683.9" font-family="Arial" font-size="14.00" fill="#000000">storeID </text>
+<text text-anchor="start" x="716.5042" y="-1683.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1642.5 660.5,-1672.5 926.5,-1672.5 926.5,-1642.5 660.5,-1642.5"/>
+<text text-anchor="start" x="667.5" y="-1653.9" font-family="Arial" font-size="14.00" fill="#000000">billStatus </text>
+<text text-anchor="start" x="728.176" y="-1653.9" font-family="Arial" font-size="14.00" fill="#666666">[&quot;billStatus&quot;]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1612.5 660.5,-1642.5 926.5,-1642.5 926.5,-1612.5 660.5,-1612.5"/>
+<text text-anchor="start" x="667.5" y="-1623.9" font-family="Arial" font-size="14.00" fill="#000000">billedAmount </text>
+<text text-anchor="start" x="752.2938" y="-1623.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1582.5 660.5,-1612.5 926.5,-1612.5 926.5,-1582.5 660.5,-1582.5"/>
+<text text-anchor="start" x="667.5" y="-1593.9" font-family="Arial" font-size="14.00" fill="#000000">currency </text>
+<text text-anchor="start" x="725.0596" y="-1593.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1552.5 660.5,-1582.5 926.5,-1582.5 926.5,-1552.5 660.5,-1552.5"/>
+<text text-anchor="start" x="667.5" y="-1563.9" font-family="Arial" font-size="14.00" fill="#000000">employeeID </text>
+<text text-anchor="start" x="746.068" y="-1563.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1522.5 660.5,-1552.5 926.5,-1552.5 926.5,-1522.5 660.5,-1522.5"/>
+<text text-anchor="start" x="667.5" y="-1533.9" font-family="Arial" font-size="14.00" fill="#000000">billingDate </text>
+<text text-anchor="start" x="736.7272" y="-1533.9" font-family="Arial" font-size="14.00" fill="#666666">[date]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1492.5 660.5,-1522.5 926.5,-1522.5 926.5,-1492.5 660.5,-1492.5"/>
+<text text-anchor="start" x="667.5" y="-1503.9" font-family="Arial" font-size="14.00" fill="#000000">paymentDate </text>
+<text text-anchor="start" x="754.6346" y="-1503.9" font-family="Arial" font-size="14.00" fill="#666666">[date]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1462.5 660.5,-1492.5 926.5,-1492.5 926.5,-1462.5 660.5,-1462.5"/>
+<text text-anchor="start" x="667.5" y="-1473.9" font-family="Arial" font-size="14.00" fill="#000000">paymentDays </text>
+<text text-anchor="start" x="756.9614" y="-1473.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1432.5 660.5,-1462.5 926.5,-1462.5 926.5,-1432.5 660.5,-1432.5"/>
+<text text-anchor="start" x="667.5" y="-1443.9" font-family="Arial" font-size="14.00" fill="#000000">driverID </text>
+<text text-anchor="start" x="720.3808" y="-1443.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1402.5 660.5,-1432.5 926.5,-1432.5 926.5,-1402.5 660.5,-1402.5"/>
+<text text-anchor="start" x="667.5" y="-1413.9" font-family="Arial" font-size="14.00" fill="#000000">customerOrgNumber </text>
+<text text-anchor="start" x="802.0596" y="-1413.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(11)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1372.5 660.5,-1402.5 926.5,-1402.5 926.5,-1372.5 660.5,-1372.5"/>
+<text text-anchor="start" x="667.5" y="-1383.9" font-family="Arial" font-size="14.00" fill="#000000">driverExternalNumber </text>
+<text text-anchor="start" x="807.5014" y="-1383.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1342.5 660.5,-1372.5 926.5,-1372.5 926.5,-1342.5 660.5,-1342.5"/>
+<text text-anchor="start" x="667.5" y="-1353.9" font-family="Arial" font-size="14.00" fill="#000000">companyReference </text>
+<text text-anchor="start" x="792.7524" y="-1353.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(255)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1312.5 660.5,-1342.5 926.5,-1342.5 926.5,-1312.5 660.5,-1312.5"/>
+<text text-anchor="start" x="667.5" y="-1323.9" font-family="Arial" font-size="14.00" fill="#000000">driverFirstName </text>
+<text text-anchor="start" x="770.9264" y="-1323.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1282.5 660.5,-1312.5 926.5,-1312.5 926.5,-1282.5 660.5,-1282.5"/>
+<text text-anchor="start" x="667.5" y="-1293.9" font-family="Arial" font-size="14.00" fill="#000000">driverLastName </text>
+<text text-anchor="start" x="770.1718" y="-1293.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1252.5 660.5,-1282.5 926.5,-1282.5 926.5,-1252.5 660.5,-1252.5"/>
+<text text-anchor="start" x="667.5" y="-1263.9" font-family="Arial" font-size="14.00" fill="#000000">driverEmail </text>
+<text text-anchor="start" x="741.3766" y="-1263.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1222.5 660.5,-1252.5 926.5,-1252.5 926.5,-1222.5 660.5,-1222.5"/>
+<text text-anchor="start" x="667.5" y="-1233.9" font-family="Arial" font-size="14.00" fill="#000000">driverPhoneNumber </text>
+<text text-anchor="start" x="796.6262" y="-1233.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(32)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1192.5 660.5,-1222.5 926.5,-1222.5 926.5,-1192.5 660.5,-1192.5"/>
+<text text-anchor="start" x="667.5" y="-1203.9" font-family="Arial" font-size="14.00" fill="#000000">driverAddress </text>
+<text text-anchor="start" x="757.7286" y="-1203.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1162.5 660.5,-1192.5 926.5,-1192.5 926.5,-1162.5 660.5,-1162.5"/>
+<text text-anchor="start" x="667.5" y="-1173.9" font-family="Arial" font-size="14.00" fill="#000000">driverZipCode </text>
+<text text-anchor="start" x="759.2798" y="-1173.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1132.5 660.5,-1162.5 926.5,-1162.5 926.5,-1132.5 660.5,-1132.5"/>
+<text text-anchor="start" x="667.5" y="-1143.9" font-family="Arial" font-size="14.00" fill="#000000">driverAddressCity </text>
+<text text-anchor="start" x="781.8324" y="-1143.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1102.5 660.5,-1132.5 926.5,-1132.5 926.5,-1102.5 660.5,-1102.5"/>
+<text text-anchor="start" x="667.5" y="-1113.9" font-family="Arial" font-size="14.00" fill="#000000">driverCountry </text>
+<text text-anchor="start" x="755.3892" y="-1113.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1072.5 660.5,-1102.5 926.5,-1102.5 926.5,-1072.5 660.5,-1072.5"/>
+<text text-anchor="start" x="667.5" y="-1083.9" font-family="Arial" font-size="14.00" fill="#000000">driverHasCard </text>
+<text text-anchor="start" x="761.6052" y="-1083.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1042.5 660.5,-1072.5 926.5,-1072.5 926.5,-1042.5 660.5,-1042.5"/>
+<text text-anchor="start" x="667.5" y="-1053.9" font-family="Arial" font-size="14.00" fill="#000000">driverCardValidTo </text>
+<text text-anchor="start" x="784.1662" y="-1053.9" font-family="Arial" font-size="14.00" fill="#666666">[date]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-1012.5 660.5,-1042.5 926.5,-1042.5 926.5,-1012.5 660.5,-1012.5"/>
+<text text-anchor="start" x="667.5" y="-1023.9" font-family="Arial" font-size="14.00" fill="#000000">driverCardNumber </text>
+<text text-anchor="start" x="786.4916" y="-1023.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-982.5 660.5,-1012.5 926.5,-1012.5 926.5,-982.5 660.5,-982.5"/>
+<text text-anchor="start" x="667.5" y="-993.9" font-family="Arial" font-size="14.00" fill="#000000">driverKeyNumber </text>
+<text text-anchor="start" x="780.2784" y="-993.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-952.5 660.5,-982.5 926.5,-982.5 926.5,-952.5 660.5,-952.5"/>
+<text text-anchor="start" x="667.5" y="-963.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt </text>
+<text text-anchor="start" x="731.2994" y="-963.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="none" stroke="#000000" points="660.5,-922.5 660.5,-952.5 926.5,-952.5 926.5,-922.5 660.5,-922.5"/>
+<text text-anchor="start" x="667.0779" y="-933.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt </text>
+<text text-anchor="start" x="734.7819" y="-933.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="none" stroke="#000000" stroke-width="3" points="659,-921.5 659,-1769.5 928,-1769.5 928,-921.5 659,-921.5"/>
 </g>
 <!-- public.stores -->
-<g id="node6" class="node">
+<g id="node3" class="node">
 <title>public.stores</title>
-<polygon fill="#efefef" stroke="transparent" points="1298.5,-762.5 1298.5,-797.5 1595.5,-797.5 1595.5,-762.5 1298.5,-762.5"/>
-<polygon fill="none" stroke="#000000" points="1298.5,-762.5 1298.5,-797.5 1595.5,-797.5 1595.5,-762.5 1298.5,-762.5"/>
-<text text-anchor="start" x="1332.708" y="-775.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.stores</text>
-<text text-anchor="start" x="1433.724" y="-775.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
-<text text-anchor="start" x="1467.9288" y="-775.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-732.5 1298.5,-762.5 1595.5,-762.5 1595.5,-732.5 1298.5,-732.5"/>
-<text text-anchor="start" x="1305.5" y="-743.9" font-family="Arial" font-size="14.00" fill="#000000">storeID    </text>
-<text text-anchor="start" x="1384.8184" y="-743.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-702.5 1298.5,-732.5 1595.5,-732.5 1595.5,-702.5 1298.5,-702.5"/>
-<text text-anchor="start" x="1305.5" y="-713.9" font-family="Arial" font-size="14.00" fill="#000000">storeOrgNumber    </text>
-<text text-anchor="start" x="1443.9306" y="-713.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(11)]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-672.5 1298.5,-702.5 1595.5,-702.5 1595.5,-672.5 1298.5,-672.5"/>
-<text text-anchor="start" x="1305.5" y="-683.9" font-family="Arial" font-size="14.00" fill="#000000">storeName    </text>
-<text text-anchor="start" x="1408.1536" y="-683.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-642.5 1298.5,-672.5 1595.5,-672.5 1595.5,-642.5 1298.5,-642.5"/>
-<text text-anchor="start" x="1305.5" y="-653.9" font-family="Arial" font-size="14.00" fill="#000000">storeWebSite    </text>
-<text text-anchor="start" x="1423.7174" y="-653.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-612.5 1298.5,-642.5 1595.5,-642.5 1595.5,-612.5 1298.5,-612.5"/>
-<text text-anchor="start" x="1305.5" y="-623.9" font-family="Arial" font-size="14.00" fill="#000000">storeVatNumber    </text>
-<text text-anchor="start" x="1441.6066" y="-623.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(32)]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-582.5 1298.5,-612.5 1595.5,-612.5 1595.5,-582.5 1298.5,-582.5"/>
-<text text-anchor="start" x="1305.5" y="-593.9" font-family="Arial" font-size="14.00" fill="#000000">storeFSkatt    </text>
-<text text-anchor="start" x="1411.2742" y="-593.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-552.5 1298.5,-582.5 1595.5,-582.5 1595.5,-552.5 1298.5,-552.5"/>
-<text text-anchor="start" x="1305.5" y="-563.9" font-family="Arial" font-size="14.00" fill="#000000">storeStatus    </text>
-<text text-anchor="start" x="1410.5042" y="-563.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-522.5 1298.5,-552.5 1595.5,-552.5 1595.5,-522.5 1298.5,-522.5"/>
-<text text-anchor="start" x="1305.5" y="-533.9" font-family="Arial" font-size="14.00" fill="#000000">storeEmail    </text>
-<text text-anchor="start" x="1405.8142" y="-533.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-492.5 1298.5,-522.5 1595.5,-522.5 1595.5,-492.5 1298.5,-492.5"/>
-<text text-anchor="start" x="1305.5" y="-503.9" font-family="Arial" font-size="14.00" fill="#000000">storePhone    </text>
-<text text-anchor="start" x="1411.2882" y="-503.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-462.5 1298.5,-492.5 1595.5,-492.5 1595.5,-462.5 1298.5,-462.5"/>
-<text text-anchor="start" x="1305.5" y="-473.9" font-family="Arial" font-size="14.00" fill="#000000">storeAddress    </text>
-<text text-anchor="start" x="1422.1662" y="-473.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-432.5 1298.5,-462.5 1595.5,-462.5 1595.5,-432.5 1298.5,-432.5"/>
-<text text-anchor="start" x="1305.5" y="-443.9" font-family="Arial" font-size="14.00" fill="#000000">storeZipCode    </text>
-<text text-anchor="start" x="1423.7174" y="-443.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-402.5 1298.5,-432.5 1595.5,-432.5 1595.5,-402.5 1298.5,-402.5"/>
-<text text-anchor="start" x="1305.5" y="-413.9" font-family="Arial" font-size="14.00" fill="#000000">storeCity    </text>
-<text text-anchor="start" x="1394.925" y="-413.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-372.5 1298.5,-402.5 1595.5,-402.5 1595.5,-372.5 1298.5,-372.5"/>
-<text text-anchor="start" x="1305.5" y="-383.9" font-family="Arial" font-size="14.00" fill="#000000">storeCountry    </text>
-<text text-anchor="start" x="1419.8268" y="-383.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-342.5 1298.5,-372.5 1595.5,-372.5 1595.5,-342.5 1298.5,-342.5"/>
-<text text-anchor="start" x="1305.5" y="-353.9" font-family="Arial" font-size="14.00" fill="#000000">storeDescription    </text>
-<text text-anchor="start" x="1440.8226" y="-353.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-312.5 1298.5,-342.5 1595.5,-342.5 1595.5,-312.5 1298.5,-312.5"/>
-<text text-anchor="start" x="1305.5" y="-323.9" font-family="Arial" font-size="14.00" fill="#000000">storeContactPerson    </text>
-<text text-anchor="start" x="1463.4018" y="-323.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(64)]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-282.5 1298.5,-312.5 1595.5,-312.5 1595.5,-282.5 1298.5,-282.5"/>
-<text text-anchor="start" x="1305.5" y="-293.9" font-family="Arial" font-size="14.00" fill="#000000">storeMaxUsers    </text>
-<text text-anchor="start" x="1433.8142" y="-293.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-252.5 1298.5,-282.5 1595.5,-282.5 1595.5,-252.5 1298.5,-252.5"/>
-<text text-anchor="start" x="1305.5" y="-263.9" font-family="Arial" font-size="14.00" fill="#000000">currency    </text>
-<text text-anchor="start" x="1393.3738" y="-263.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-222.5 1298.5,-252.5 1595.5,-252.5 1595.5,-222.5 1298.5,-222.5"/>
-<text text-anchor="start" x="1305.5" y="-233.9" font-family="Arial" font-size="14.00" fill="#000000">storeAllowCarAPI    </text>
-<text text-anchor="start" x="1449.3738" y="-233.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-192.5 1298.5,-222.5 1595.5,-222.5 1595.5,-192.5 1298.5,-192.5"/>
-<text text-anchor="start" x="1305.5" y="-203.9" font-family="Arial" font-size="14.00" fill="#000000">storeAllowSendSMS    </text>
-<text text-anchor="start" x="1467.2784" y="-203.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-162.5 1298.5,-192.5 1595.5,-192.5 1595.5,-162.5 1298.5,-162.5"/>
-<text text-anchor="start" x="1305.5" y="-173.9" font-family="Arial" font-size="14.00" fill="#000000">storeSendSMS    </text>
-<text text-anchor="start" x="1433.8394" y="-173.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-132.5 1298.5,-162.5 1595.5,-162.5 1595.5,-132.5 1298.5,-132.5"/>
-<text text-anchor="start" x="1305.5" y="-143.9" font-family="Arial" font-size="14.00" fill="#000000">storeUsesCheckin    </text>
-<text text-anchor="start" x="1453.2714" y="-143.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-102.5 1298.5,-132.5 1595.5,-132.5 1595.5,-102.5 1298.5,-102.5"/>
-<text text-anchor="start" x="1305.5" y="-113.9" font-family="Arial" font-size="14.00" fill="#000000">storeUsesPIN    </text>
-<text text-anchor="start" x="1426.0442" y="-113.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-72.5 1298.5,-102.5 1595.5,-102.5 1595.5,-72.5 1298.5,-72.5"/>
-<text text-anchor="start" x="1305.5" y="-83.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
-<text text-anchor="start" x="1399.6136" y="-83.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
-<polygon fill="none" stroke="#000000" points="1298.5,-42.5 1298.5,-72.5 1595.5,-72.5 1595.5,-42.5 1298.5,-42.5"/>
-<text text-anchor="start" x="1305.4208" y="-53.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
-<text text-anchor="start" x="1403.439" y="-53.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="#efefef" stroke="transparent" points="43.5,-762.5 43.5,-797.5 340.5,-797.5 340.5,-762.5 43.5,-762.5"/>
+<polygon fill="none" stroke="#000000" points="43.5,-762.5 43.5,-797.5 340.5,-797.5 340.5,-762.5 43.5,-762.5"/>
+<text text-anchor="start" x="77.708" y="-775.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.stores</text>
+<text text-anchor="start" x="178.724" y="-775.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
+<text text-anchor="start" x="212.9288" y="-775.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-732.5 43.5,-762.5 340.5,-762.5 340.5,-732.5 43.5,-732.5"/>
+<text text-anchor="start" x="50.5" y="-743.9" font-family="Arial" font-size="14.00" fill="#000000">storeID    </text>
+<text text-anchor="start" x="129.8184" y="-743.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-702.5 43.5,-732.5 340.5,-732.5 340.5,-702.5 43.5,-702.5"/>
+<text text-anchor="start" x="50.5" y="-713.9" font-family="Arial" font-size="14.00" fill="#000000">storeOrgNumber    </text>
+<text text-anchor="start" x="188.9306" y="-713.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(11)]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-672.5 43.5,-702.5 340.5,-702.5 340.5,-672.5 43.5,-672.5"/>
+<text text-anchor="start" x="50.5" y="-683.9" font-family="Arial" font-size="14.00" fill="#000000">storeName    </text>
+<text text-anchor="start" x="153.1536" y="-683.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-642.5 43.5,-672.5 340.5,-672.5 340.5,-642.5 43.5,-642.5"/>
+<text text-anchor="start" x="50.5" y="-653.9" font-family="Arial" font-size="14.00" fill="#000000">storeWebSite    </text>
+<text text-anchor="start" x="168.7174" y="-653.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-612.5 43.5,-642.5 340.5,-642.5 340.5,-612.5 43.5,-612.5"/>
+<text text-anchor="start" x="50.5" y="-623.9" font-family="Arial" font-size="14.00" fill="#000000">storeVatNumber    </text>
+<text text-anchor="start" x="186.6066" y="-623.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(32)]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-582.5 43.5,-612.5 340.5,-612.5 340.5,-582.5 43.5,-582.5"/>
+<text text-anchor="start" x="50.5" y="-593.9" font-family="Arial" font-size="14.00" fill="#000000">storeFSkatt    </text>
+<text text-anchor="start" x="156.2742" y="-593.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-552.5 43.5,-582.5 340.5,-582.5 340.5,-552.5 43.5,-552.5"/>
+<text text-anchor="start" x="50.5" y="-563.9" font-family="Arial" font-size="14.00" fill="#000000">storeStatus    </text>
+<text text-anchor="start" x="155.5042" y="-563.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-522.5 43.5,-552.5 340.5,-552.5 340.5,-522.5 43.5,-522.5"/>
+<text text-anchor="start" x="50.5" y="-533.9" font-family="Arial" font-size="14.00" fill="#000000">storeEmail    </text>
+<text text-anchor="start" x="150.8142" y="-533.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-492.5 43.5,-522.5 340.5,-522.5 340.5,-492.5 43.5,-492.5"/>
+<text text-anchor="start" x="50.5" y="-503.9" font-family="Arial" font-size="14.00" fill="#000000">storePhone    </text>
+<text text-anchor="start" x="156.2882" y="-503.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-462.5 43.5,-492.5 340.5,-492.5 340.5,-462.5 43.5,-462.5"/>
+<text text-anchor="start" x="50.5" y="-473.9" font-family="Arial" font-size="14.00" fill="#000000">storeAddress    </text>
+<text text-anchor="start" x="167.1662" y="-473.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-432.5 43.5,-462.5 340.5,-462.5 340.5,-432.5 43.5,-432.5"/>
+<text text-anchor="start" x="50.5" y="-443.9" font-family="Arial" font-size="14.00" fill="#000000">storeZipCode    </text>
+<text text-anchor="start" x="168.7174" y="-443.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-402.5 43.5,-432.5 340.5,-432.5 340.5,-402.5 43.5,-402.5"/>
+<text text-anchor="start" x="50.5" y="-413.9" font-family="Arial" font-size="14.00" fill="#000000">storeCity    </text>
+<text text-anchor="start" x="139.925" y="-413.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-372.5 43.5,-402.5 340.5,-402.5 340.5,-372.5 43.5,-372.5"/>
+<text text-anchor="start" x="50.5" y="-383.9" font-family="Arial" font-size="14.00" fill="#000000">storeCountry    </text>
+<text text-anchor="start" x="164.8268" y="-383.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-342.5 43.5,-372.5 340.5,-372.5 340.5,-342.5 43.5,-342.5"/>
+<text text-anchor="start" x="50.5" y="-353.9" font-family="Arial" font-size="14.00" fill="#000000">storeDescription    </text>
+<text text-anchor="start" x="185.8226" y="-353.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-312.5 43.5,-342.5 340.5,-342.5 340.5,-312.5 43.5,-312.5"/>
+<text text-anchor="start" x="50.5" y="-323.9" font-family="Arial" font-size="14.00" fill="#000000">storeContactPerson    </text>
+<text text-anchor="start" x="208.4018" y="-323.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(64)]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-282.5 43.5,-312.5 340.5,-312.5 340.5,-282.5 43.5,-282.5"/>
+<text text-anchor="start" x="50.5" y="-293.9" font-family="Arial" font-size="14.00" fill="#000000">storeMaxUsers    </text>
+<text text-anchor="start" x="178.8142" y="-293.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-252.5 43.5,-282.5 340.5,-282.5 340.5,-252.5 43.5,-252.5"/>
+<text text-anchor="start" x="50.5" y="-263.9" font-family="Arial" font-size="14.00" fill="#000000">currency    </text>
+<text text-anchor="start" x="138.3738" y="-263.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-222.5 43.5,-252.5 340.5,-252.5 340.5,-222.5 43.5,-222.5"/>
+<text text-anchor="start" x="50.5" y="-233.9" font-family="Arial" font-size="14.00" fill="#000000">storeAllowCarAPI    </text>
+<text text-anchor="start" x="194.3738" y="-233.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-192.5 43.5,-222.5 340.5,-222.5 340.5,-192.5 43.5,-192.5"/>
+<text text-anchor="start" x="50.5" y="-203.9" font-family="Arial" font-size="14.00" fill="#000000">storeAllowSendSMS    </text>
+<text text-anchor="start" x="212.2784" y="-203.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-162.5 43.5,-192.5 340.5,-192.5 340.5,-162.5 43.5,-162.5"/>
+<text text-anchor="start" x="50.5" y="-173.9" font-family="Arial" font-size="14.00" fill="#000000">storeSendSMS    </text>
+<text text-anchor="start" x="178.8394" y="-173.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-132.5 43.5,-162.5 340.5,-162.5 340.5,-132.5 43.5,-132.5"/>
+<text text-anchor="start" x="50.5" y="-143.9" font-family="Arial" font-size="14.00" fill="#000000">storeUsesCheckin    </text>
+<text text-anchor="start" x="198.2714" y="-143.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-102.5 43.5,-132.5 340.5,-132.5 340.5,-102.5 43.5,-102.5"/>
+<text text-anchor="start" x="50.5" y="-113.9" font-family="Arial" font-size="14.00" fill="#000000">storeUsesPIN    </text>
+<text text-anchor="start" x="171.0442" y="-113.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-72.5 43.5,-102.5 340.5,-102.5 340.5,-72.5 43.5,-72.5"/>
+<text text-anchor="start" x="50.5" y="-83.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
+<text text-anchor="start" x="144.6136" y="-83.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="none" stroke="#000000" points="43.5,-42.5 43.5,-72.5 340.5,-72.5 340.5,-42.5 43.5,-42.5"/>
+<text text-anchor="start" x="50.4208" y="-53.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
+<text text-anchor="start" x="148.439" y="-53.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
 </g>
 <!-- public.bills&#45;&gt;public.stores -->
-<g id="edge5" class="edge">
+<g id="edge2" class="edge">
 <title>public.bills:storeID&#45;&gt;public.stores:storeID</title>
-<path fill="none" stroke="#000000" d="M949.6559,-997.424C1094.6435,-995.2175 1138.7443,-944.9324 1246.5,-841 1280.7245,-807.9898 1250.9502,-747.5 1298.5,-747.5"/>
-<polygon fill="#000000" stroke="#000000" points="949.4997,-997.4251 939.4663,-993.0001 944.4999,-997.4625 939.5,-997.5 939.5,-997.5 939.5,-997.5 944.4999,-997.4625 939.5337,-1001.9999 949.4997,-997.4251 949.4997,-997.4251"/>
-<text text-anchor="start" x="946.123" y="-1007.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;storeID&quot;) REFERENCES stores(&quot;storeID&quot;) ON DELETE CASCADE</text>
+<path fill="none" stroke="#000000" d="M652.1583,-1681.9797C586.809,-1604.9438 393.1872,-747.5 340.5,-747.5"/>
+<polygon fill="#000000" stroke="#000000" points="652.1607,-1681.9813 658.0166,-1691.2527 656.3303,-1684.7406 660.5,-1687.5 660.5,-1687.5 660.5,-1687.5 656.3303,-1684.7406 662.9834,-1683.7473 652.1607,-1681.9813 652.1607,-1681.9813"/>
+<text text-anchor="start" x="279.123" y="-1697.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;storeID&quot;) REFERENCES stores(&quot;storeID&quot;) ON DELETE CASCADE</text>
+</g>
+<!-- public.employees -->
+<g id="node4" class="node">
+<title>public.employees</title>
+<polygon fill="#efefef" stroke="transparent" points="444.5,-597.5 444.5,-632.5 741.5,-632.5 741.5,-597.5 444.5,-597.5"/>
+<polygon fill="none" stroke="#000000" points="444.5,-597.5 444.5,-632.5 741.5,-632.5 741.5,-597.5 444.5,-597.5"/>
+<text text-anchor="start" x="459.7027" y="-610.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.employees</text>
+<text text-anchor="start" x="598.7293" y="-610.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
+<text text-anchor="start" x="632.9341" y="-610.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-567.5 444.5,-597.5 741.5,-597.5 741.5,-567.5 444.5,-567.5"/>
+<text text-anchor="start" x="451.5" y="-578.9" font-family="Arial" font-size="14.00" fill="#000000">userID    </text>
+<text text-anchor="start" x="526.9278" y="-578.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-537.5 444.5,-567.5 741.5,-567.5 741.5,-537.5 444.5,-537.5"/>
+<text text-anchor="start" x="451.5" y="-548.9" font-family="Arial" font-size="14.00" fill="#000000">employeeID    </text>
+<text text-anchor="start" x="560.3822" y="-548.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-507.5 444.5,-537.5 741.5,-537.5 741.5,-507.5 444.5,-507.5"/>
+<text text-anchor="start" x="451.5" y="-518.9" font-family="Arial" font-size="14.00" fill="#000000">shortUserName    </text>
+<text text-anchor="start" x="583.7034" y="-518.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-477.5 444.5,-507.5 741.5,-507.5 741.5,-477.5 444.5,-477.5"/>
+<text text-anchor="start" x="451.5" y="-488.9" font-family="Arial" font-size="14.00" fill="#000000">employmentNumber    </text>
+<text text-anchor="start" x="611.7118" y="-488.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-447.5 444.5,-477.5 741.5,-477.5 741.5,-447.5 444.5,-447.5"/>
+<text text-anchor="start" x="451.5" y="-458.9" font-family="Arial" font-size="14.00" fill="#000000">employeePersonalNumber    </text>
+<text text-anchor="start" x="651.3948" y="-458.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-417.5 444.5,-447.5 741.5,-447.5 741.5,-417.5 444.5,-417.5"/>
+<text text-anchor="start" x="451.5" y="-428.9" font-family="Arial" font-size="14.00" fill="#000000">signature    </text>
+<text text-anchor="start" x="543.2756" y="-428.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(4)]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-387.5 444.5,-417.5 741.5,-417.5 741.5,-387.5 444.5,-387.5"/>
+<text text-anchor="start" x="451.5" y="-398.9" font-family="Arial" font-size="14.00" fill="#000000">employeeHourlyRate    </text>
+<text text-anchor="start" x="616.3864" y="-398.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-357.5 444.5,-387.5 741.5,-387.5 741.5,-357.5 444.5,-357.5"/>
+<text text-anchor="start" x="451.5" y="-368.9" font-family="Arial" font-size="14.00" fill="#000000">employeeHourlyRateCurrency    </text>
+<text text-anchor="start" x="673.162" y="-368.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-327.5 444.5,-357.5 741.5,-357.5 741.5,-327.5 444.5,-327.5"/>
+<text text-anchor="start" x="451.5" y="-338.9" font-family="Arial" font-size="14.00" fill="#000000">employeePin    </text>
+<text text-anchor="start" x="566.6108" y="-338.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(4)]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-297.5 444.5,-327.5 741.5,-327.5 741.5,-297.5 444.5,-297.5"/>
+<text text-anchor="start" x="451.5" y="-308.9" font-family="Arial" font-size="14.00" fill="#000000">employeeComment    </text>
+<text text-anchor="start" x="607.0512" y="-308.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-267.5 444.5,-297.5 741.5,-297.5 741.5,-267.5 444.5,-267.5"/>
+<text text-anchor="start" x="451.5" y="-278.9" font-family="Arial" font-size="14.00" fill="#000000">employeeActive    </text>
+<text text-anchor="start" x="584.5014" y="-278.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-237.5 444.5,-267.5 741.5,-267.5 741.5,-237.5 444.5,-237.5"/>
+<text text-anchor="start" x="451.5" y="-248.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
+<text text-anchor="start" x="545.6136" y="-248.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="none" stroke="#000000" points="444.5,-207.5 444.5,-237.5 741.5,-237.5 741.5,-207.5 444.5,-207.5"/>
+<text text-anchor="start" x="451.4208" y="-218.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
+<text text-anchor="start" x="549.439" y="-218.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+</g>
+<!-- public.bills&#45;&gt;public.employees -->
+<g id="edge3" class="edge">
+<title>public.bills:employeeID&#45;&gt;public.employees:employeeID</title>
+<path fill="none" stroke="#000000" d="M650.3696,-1567.3534C359.1679,-1558.7688 602.7338,-1174.8932 660.5,-877 678.8353,-782.447 723.1647,-770.553 741.5,-676 751.9492,-622.1149 796.3889,-552.5 741.5,-552.5"/>
+<polygon fill="#000000" stroke="#000000" points="650.501,-1567.3552 660.4348,-1571.9995 655.5005,-1567.4276 660.5,-1567.5 660.5,-1567.5 660.5,-1567.5 655.5005,-1567.4276 660.5652,-1563.0005 650.501,-1567.3552 650.501,-1567.3552"/>
+<text text-anchor="start" x="326.7285" y="-1577.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;employeeID&quot;) REFERENCES employees(&quot;employeeID&quot;)</text>
+</g>
+<!-- public.drivers -->
+<g id="node5" class="node">
+<title>public.drivers</title>
+<polygon fill="#efefef" stroke="transparent" points="845.5,-747.5 845.5,-782.5 1142.5,-782.5 1142.5,-747.5 845.5,-747.5"/>
+<polygon fill="none" stroke="#000000" points="845.5,-747.5 845.5,-782.5 1142.5,-782.5 1142.5,-747.5 845.5,-747.5"/>
+<text text-anchor="start" x="877.2159" y="-760.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.drivers</text>
+<text text-anchor="start" x="983.2161" y="-760.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
+<text text-anchor="start" x="1017.4209" y="-760.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-717.5 845.5,-747.5 1142.5,-747.5 1142.5,-717.5 845.5,-717.5"/>
+<text text-anchor="start" x="852.5" y="-728.9" font-family="Arial" font-size="14.00" fill="#000000">driverID    </text>
+<text text-anchor="start" x="935.695" y="-728.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-687.5 845.5,-717.5 1142.5,-717.5 1142.5,-687.5 845.5,-687.5"/>
+<text text-anchor="start" x="852.5" y="-698.9" font-family="Arial" font-size="14.00" fill="#000000">customerOrgNumber    </text>
+<text text-anchor="start" x="1017.3738" y="-698.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(11)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-657.5 845.5,-687.5 1142.5,-687.5 1142.5,-657.5 845.5,-657.5"/>
+<text text-anchor="start" x="852.5" y="-668.9" font-family="Arial" font-size="14.00" fill="#000000">driverExternalNumber    </text>
+<text text-anchor="start" x="1022.8156" y="-668.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-627.5 845.5,-657.5 1142.5,-657.5 1142.5,-627.5 845.5,-627.5"/>
+<text text-anchor="start" x="852.5" y="-638.9" font-family="Arial" font-size="14.00" fill="#000000">companyReference    </text>
+<text text-anchor="start" x="1008.0666" y="-638.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(255)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-597.5 845.5,-627.5 1142.5,-627.5 1142.5,-597.5 845.5,-597.5"/>
+<text text-anchor="start" x="852.5" y="-608.9" font-family="Arial" font-size="14.00" fill="#000000">driverGDPRAccept    </text>
+<text text-anchor="start" x="1004.9306" y="-608.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-567.5 845.5,-597.5 1142.5,-597.5 1142.5,-567.5 845.5,-567.5"/>
+<text text-anchor="start" x="852.5" y="-578.9" font-family="Arial" font-size="14.00" fill="#000000">driverISWarrantyDriver    </text>
+<text text-anchor="start" x="1029.0162" y="-578.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-537.5 845.5,-567.5 1142.5,-567.5 1142.5,-537.5 845.5,-537.5"/>
+<text text-anchor="start" x="852.5" y="-548.9" font-family="Arial" font-size="14.00" fill="#000000">driverAcceptsMarketing    </text>
+<text text-anchor="start" x="1032.939" y="-548.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-507.5 845.5,-537.5 1142.5,-537.5 1142.5,-507.5 845.5,-507.5"/>
+<text text-anchor="start" x="852.5" y="-518.9" font-family="Arial" font-size="14.00" fill="#000000">driverFirstName    </text>
+<text text-anchor="start" x="986.2406" y="-518.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-477.5 845.5,-507.5 1142.5,-507.5 1142.5,-477.5 845.5,-477.5"/>
+<text text-anchor="start" x="852.5" y="-488.9" font-family="Arial" font-size="14.00" fill="#000000">driverLastName    </text>
+<text text-anchor="start" x="985.486" y="-488.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(128)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-447.5 845.5,-477.5 1142.5,-477.5 1142.5,-447.5 845.5,-447.5"/>
+<text text-anchor="start" x="852.5" y="-458.9" font-family="Arial" font-size="14.00" fill="#000000">driverEmail    </text>
+<text text-anchor="start" x="956.6908" y="-458.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-417.5 845.5,-447.5 1142.5,-447.5 1142.5,-417.5 845.5,-417.5"/>
+<text text-anchor="start" x="852.5" y="-428.9" font-family="Arial" font-size="14.00" fill="#000000">driverPhoneNumber    </text>
+<text text-anchor="start" x="1011.9404" y="-428.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(32)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-387.5 845.5,-417.5 1142.5,-417.5 1142.5,-387.5 845.5,-387.5"/>
+<text text-anchor="start" x="852.5" y="-398.9" font-family="Arial" font-size="14.00" fill="#000000">driverAddress    </text>
+<text text-anchor="start" x="973.0428" y="-398.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-357.5 845.5,-387.5 1142.5,-387.5 1142.5,-357.5 845.5,-357.5"/>
+<text text-anchor="start" x="852.5" y="-368.9" font-family="Arial" font-size="14.00" fill="#000000">driverZipCode    </text>
+<text text-anchor="start" x="974.594" y="-368.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-327.5 845.5,-357.5 1142.5,-357.5 1142.5,-327.5 845.5,-327.5"/>
+<text text-anchor="start" x="852.5" y="-338.9" font-family="Arial" font-size="14.00" fill="#000000">driverAddressCity    </text>
+<text text-anchor="start" x="997.1466" y="-338.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-297.5 845.5,-327.5 1142.5,-327.5 1142.5,-297.5 845.5,-297.5"/>
+<text text-anchor="start" x="852.5" y="-308.9" font-family="Arial" font-size="14.00" fill="#000000">driverCountry    </text>
+<text text-anchor="start" x="970.7034" y="-308.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-267.5 845.5,-297.5 1142.5,-297.5 1142.5,-267.5 845.5,-267.5"/>
+<text text-anchor="start" x="852.5" y="-278.9" font-family="Arial" font-size="14.00" fill="#000000">driverHasCard    </text>
+<text text-anchor="start" x="976.9194" y="-278.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-237.5 845.5,-267.5 1142.5,-267.5 1142.5,-237.5 845.5,-237.5"/>
+<text text-anchor="start" x="852.5" y="-248.9" font-family="Arial" font-size="14.00" fill="#000000">driverCardValidTo    </text>
+<text text-anchor="start" x="999.4804" y="-248.9" font-family="Arial" font-size="14.00" fill="#666666">[date]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-207.5 845.5,-237.5 1142.5,-237.5 1142.5,-207.5 845.5,-207.5"/>
+<text text-anchor="start" x="852.5" y="-218.9" font-family="Arial" font-size="14.00" fill="#000000">driverCardNumber    </text>
+<text text-anchor="start" x="1001.8058" y="-218.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-177.5 845.5,-207.5 1142.5,-207.5 1142.5,-177.5 845.5,-177.5"/>
+<text text-anchor="start" x="852.5" y="-188.9" font-family="Arial" font-size="14.00" fill="#000000">driverKeyNumber    </text>
+<text text-anchor="start" x="995.5926" y="-188.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-147.5 845.5,-177.5 1142.5,-177.5 1142.5,-147.5 845.5,-147.5"/>
+<text text-anchor="start" x="852.5" y="-158.9" font-family="Arial" font-size="14.00" fill="#000000">driverNotesShared    </text>
+<text text-anchor="start" x="1003.3878" y="-158.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-117.5 845.5,-147.5 1142.5,-147.5 1142.5,-117.5 845.5,-117.5"/>
+<text text-anchor="start" x="852.5" y="-128.9" font-family="Arial" font-size="14.00" fill="#000000">driverNotes    </text>
+<text text-anchor="start" x="958.2602" y="-128.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-87.5 845.5,-117.5 1142.5,-117.5 1142.5,-87.5 845.5,-87.5"/>
+<text text-anchor="start" x="852.5" y="-98.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
+<text text-anchor="start" x="946.6136" y="-98.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="none" stroke="#000000" points="845.5,-57.5 845.5,-87.5 1142.5,-87.5 1142.5,-57.5 845.5,-57.5"/>
+<text text-anchor="start" x="852.4208" y="-68.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
+<text text-anchor="start" x="950.439" y="-68.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+</g>
+<!-- public.bills&#45;&gt;public.drivers -->
+<g id="edge4" class="edge">
+<title>public.bills:driverID&#45;&gt;public.drivers:driverID</title>
+<path fill="none" stroke="#000000" d="M936.6851,-1447.3058C1176.4749,-1437.9937 1047.3717,-1095.9395 926.5,-877 905.9391,-839.7572 866.0609,-863.2428 845.5,-826 825.4156,-789.6203 803.9444,-732.5 845.5,-732.5"/>
+<polygon fill="#000000" stroke="#000000" points="936.4982,-1447.3092 926.4142,-1443.0008 931.4991,-1447.4046 926.5,-1447.5 926.5,-1447.5 926.5,-1447.5 931.4991,-1447.4046 926.5858,-1451.9992 936.4982,-1447.3092 936.4982,-1447.3092"/>
+<text text-anchor="start" x="933.2505" y="-1457.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;driverID&quot;) REFERENCES drivers(&quot;driverID&quot;)</text>
+</g>
+<!-- public.companycustomers -->
+<g id="node6" class="node">
+<title>public.companycustomers</title>
+<polygon fill="#efefef" stroke="transparent" points="1246.5,-552.5 1246.5,-587.5 1595.5,-587.5 1595.5,-552.5 1246.5,-552.5"/>
+<polygon fill="none" stroke="#000000" points="1246.5,-552.5 1246.5,-587.5 1595.5,-587.5 1595.5,-552.5 1246.5,-552.5"/>
+<text text-anchor="start" x="1253.2003" y="-565.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.companycustomers</text>
+<text text-anchor="start" x="1461.2317" y="-565.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
+<text text-anchor="start" x="1495.4365" y="-565.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
+<polygon fill="none" stroke="#000000" points="1246.5,-522.5 1246.5,-552.5 1595.5,-552.5 1595.5,-522.5 1246.5,-522.5"/>
+<text text-anchor="start" x="1253.5" y="-533.9" font-family="Arial" font-size="14.00" fill="#000000">customerOrgNumber    </text>
+<text text-anchor="start" x="1418.3738" y="-533.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(11)]</text>
+<polygon fill="none" stroke="#000000" points="1246.5,-492.5 1246.5,-522.5 1595.5,-522.5 1595.5,-492.5 1246.5,-492.5"/>
+<text text-anchor="start" x="1253.5" y="-503.9" font-family="Arial" font-size="14.00" fill="#000000">customerCompanyName    </text>
+<text text-anchor="start" x="1442.4944" y="-503.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(255)]</text>
+<polygon fill="none" stroke="#000000" points="1246.5,-462.5 1246.5,-492.5 1595.5,-492.5 1595.5,-462.5 1246.5,-462.5"/>
+<text text-anchor="start" x="1253.5" y="-473.9" font-family="Arial" font-size="14.00" fill="#000000">companyAddress    </text>
+<text text-anchor="start" x="1395.8408" y="-473.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="1246.5,-432.5 1246.5,-462.5 1595.5,-462.5 1595.5,-432.5 1246.5,-432.5"/>
+<text text-anchor="start" x="1253.5" y="-443.9" font-family="Arial" font-size="14.00" fill="#000000">companyZipCode    </text>
+<text text-anchor="start" x="1397.392" y="-443.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
+<polygon fill="none" stroke="#000000" points="1246.5,-402.5 1246.5,-432.5 1595.5,-432.5 1595.5,-402.5 1246.5,-402.5"/>
+<text text-anchor="start" x="1253.5" y="-413.9" font-family="Arial" font-size="14.00" fill="#000000">companyEmail    </text>
+<text text-anchor="start" x="1379.4888" y="-413.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="1246.5,-372.5 1246.5,-402.5 1595.5,-402.5 1595.5,-372.5 1246.5,-372.5"/>
+<text text-anchor="start" x="1253.5" y="-383.9" font-family="Arial" font-size="14.00" fill="#000000">companyPhone    </text>
+<text text-anchor="start" x="1384.9628" y="-383.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(16)]</text>
+<polygon fill="none" stroke="#000000" points="1246.5,-342.5 1246.5,-372.5 1595.5,-372.5 1595.5,-342.5 1246.5,-342.5"/>
+<text text-anchor="start" x="1253.5" y="-353.9" font-family="Arial" font-size="14.00" fill="#000000">companyAddressCity    </text>
+<text text-anchor="start" x="1419.9446" y="-353.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="1246.5,-312.5 1246.5,-342.5 1595.5,-342.5 1595.5,-312.5 1246.5,-312.5"/>
+<text text-anchor="start" x="1253.5" y="-323.9" font-family="Arial" font-size="14.00" fill="#000000">companyCountry    </text>
+<text text-anchor="start" x="1393.5014" y="-323.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(256)]</text>
+<polygon fill="none" stroke="#000000" points="1246.5,-282.5 1246.5,-312.5 1595.5,-312.5 1595.5,-282.5 1246.5,-282.5"/>
+<text text-anchor="start" x="1253.5" y="-293.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
+<text text-anchor="start" x="1347.6136" y="-293.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<polygon fill="none" stroke="#000000" points="1246.5,-252.5 1246.5,-282.5 1595.5,-282.5 1595.5,-252.5 1246.5,-252.5"/>
+<text text-anchor="start" x="1253.5" y="-263.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
+<text text-anchor="start" x="1351.5182" y="-263.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+</g>
+<!-- public.bills&#45;&gt;public.companycustomers -->
+<g id="edge5" class="edge">
+<title>public.bills:customerOrgNumber&#45;&gt;public.companycustomers:customerOrgNumber</title>
+<path fill="none" stroke="#000000" d="M936.6781,-1417.3635C1206.6723,-1410.0161 1111.3734,-1107.4395 1194.5,-841 1214.8798,-775.6781 1178.0728,-537.5 1246.5,-537.5"/>
+<polygon fill="#000000" stroke="#000000" points="936.4991,-1417.3658 926.4396,-1413.0004 931.4996,-1417.4329 926.5,-1417.5 926.5,-1417.5 926.5,-1417.5 931.4996,-1417.4329 926.5604,-1421.9996 936.4991,-1417.3658 936.4991,-1417.3658"/>
+<text text-anchor="start" x="933.5665" y="-1427.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;customerOrgNumber&quot;) REFERENCES companycustomers(&quot;customerOrgNumber&quot;)</text>
 </g>
 <!-- public.billOrders -->
 <g id="node2" class="node">
 <title>public.billOrders</title>
-<polygon fill="#efefef" stroke="transparent" points="671.5,-1952.5 671.5,-1987.5 941.5,-1987.5 941.5,-1952.5 671.5,-1952.5"/>
-<polygon fill="none" stroke="#000000" points="671.5,-1952.5 671.5,-1987.5 941.5,-1987.5 941.5,-1952.5 671.5,-1952.5"/>
-<text text-anchor="start" x="678.2175" y="-1965.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.billOrders</text>
-<text text-anchor="start" x="807.2145" y="-1965.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
-<text text-anchor="start" x="841.4193" y="-1965.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
-<polygon fill="none" stroke="#000000" points="671.5,-1922.5 671.5,-1952.5 941.5,-1952.5 941.5,-1922.5 671.5,-1922.5"/>
-<text text-anchor="start" x="678.5" y="-1933.9" font-family="Arial" font-size="14.00" fill="#000000">billID    </text>
-<text text-anchor="start" x="743.8044" y="-1933.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
-<polygon fill="none" stroke="#000000" points="671.5,-1892.5 671.5,-1922.5 941.5,-1922.5 941.5,-1892.5 671.5,-1892.5"/>
-<text text-anchor="start" x="678.5" y="-1903.9" font-family="Arial" font-size="14.00" fill="#000000">orderID    </text>
-<text text-anchor="start" x="759.371" y="-1903.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="#efefef" stroke="transparent" points="658.5,-1952.5 658.5,-1987.5 928.5,-1987.5 928.5,-1952.5 658.5,-1952.5"/>
+<polygon fill="none" stroke="#000000" points="658.5,-1952.5 658.5,-1987.5 928.5,-1987.5 928.5,-1952.5 658.5,-1952.5"/>
+<text text-anchor="start" x="665.2175" y="-1965.3" font-family="Arial Bold" font-size="18.00" fill="#000000">public.billOrders</text>
+<text text-anchor="start" x="794.2145" y="-1965.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
+<text text-anchor="start" x="828.4193" y="-1965.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
+<polygon fill="none" stroke="#000000" points="658.5,-1922.5 658.5,-1952.5 928.5,-1952.5 928.5,-1922.5 658.5,-1922.5"/>
+<text text-anchor="start" x="665.5" y="-1933.9" font-family="Arial" font-size="14.00" fill="#000000">billID    </text>
+<text text-anchor="start" x="730.8044" y="-1933.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<polygon fill="none" stroke="#000000" points="658.5,-1892.5 658.5,-1922.5 928.5,-1922.5 928.5,-1892.5 658.5,-1892.5"/>
+<text text-anchor="start" x="665.5" y="-1903.9" font-family="Arial" font-size="14.00" fill="#000000">orderID    </text>
+<text text-anchor="start" x="746.371" y="-1903.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
 </g>
 <!-- public.billOrders&#45;&gt;public.bills -->
 <g id="edge1" class="edge">
 <title>public.billOrders:billID&#45;&gt;public.bills:orderID</title>
-<path fill="none" stroke="#000000" d="M951.7088,-1936.6591C1039.0122,-1921.8888 1033.7487,-1717.5 939.5,-1717.5"/>
-<polygon fill="#000000" stroke="#000000" points="951.4662,-1936.679 941.1305,-1933.0152 946.4831,-1937.0895 941.5,-1937.5 941.5,-1937.5 941.5,-1937.5 946.4831,-1937.0895 941.8695,-1941.9848 951.4662,-1936.679 951.4662,-1936.679"/>
-<text text-anchor="start" x="948.5785" y="-1947.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;billID&quot;) REFERENCES bills(&quot;orderID&quot;) ON DELETE CASCADE</text>
+<path fill="none" stroke="#000000" d="M938.7088,-1936.6591C1026.0122,-1921.8888 1020.7487,-1717.5 926.5,-1717.5"/>
+<polygon fill="#000000" stroke="#000000" points="938.4662,-1936.679 928.1305,-1933.0152 933.4831,-1937.0895 928.5,-1937.5 928.5,-1937.5 928.5,-1937.5 933.4831,-1937.0895 928.8695,-1941.9848 938.4662,-1936.679 938.4662,-1936.679"/>
+<text text-anchor="start" x="935.5785" y="-1947.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;billID&quot;) REFERENCES bills(&quot;orderID&quot;) ON DELETE CASCADE</text>
 </g>
 </g>
 </svg>

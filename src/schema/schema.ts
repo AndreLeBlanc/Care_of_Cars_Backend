@@ -753,8 +753,8 @@ export const employeeSpecialHours = pgTable(
         onDelete: 'cascade',
       })
       .notNull(),
-    start: date('start').$type<WorkTime>().notNull(),
-    end: date('end').$type<WorkTime>().notNull(),
+    start: timestamp('start').$type<WorkTime>().notNull(),
+    end: timestamp('end').$type<WorkTime>().notNull(),
     description: varchar('description').$type<WorkTimeDescription>(),
     absence: boolean('absence').$type<Absence>().notNull(),
   },
@@ -1535,6 +1535,12 @@ export const orderListing = pgTable(
     serviceID: integer('serviceID')
       .$type<ServiceID>()
       .references(() => services.serviceID, { onDelete: 'cascade' })
+      .notNull(),
+    storeID: integer('storeID')
+      .$type<StoreID>()
+      .references(() => stores.storeID, {
+        onDelete: 'cascade',
+      })
       .notNull(),
     name: varchar('name', { length: 256 }).$type<ServiceName>().notNull(),
     amount: integer('amount').$type<Amount>().notNull(),

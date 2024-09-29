@@ -7,7 +7,7 @@
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | rentCarBookingID | integer | nextval('"rentCarBookings_rentCarBookingID_seq"'::regclass) | false |  |  |  |
-| orderID | integer |  | true |  | [public.orders](public.orders.md) |  |
+| orderID | integer |  | false |  | [public.orders](public.orders.md) |  |
 | rentCarRegistrationNumber | varchar |  | false |  | [public.rentCars](public.rentCars.md) |  |
 | bookingStart | date |  | false |  |  |  |
 | bookingEnd | date |  | false |  |  |  |
@@ -26,6 +26,7 @@
 | rentCarBookings_pkey | PRIMARY KEY | PRIMARY KEY ("rentCarBookingID") |
 | rentCarBookings_orderID_unique | UNIQUE | UNIQUE ("orderID") |
 | rentCarBookings_rentCarRegistrationNumber_rentCars_rentCarRegis | FOREIGN KEY | FOREIGN KEY ("rentCarRegistrationNumber") REFERENCES "rentCars"("rentCarRegistrationNumber") ON DELETE CASCADE |
+| unique_rentCarBookings | UNIQUE | UNIQUE ("rentCarBookingID", "orderID") |
 
 ## Indexes
 
@@ -33,6 +34,7 @@
 | ---- | ---------- |
 | rentCarBookings_pkey | CREATE UNIQUE INDEX "rentCarBookings_pkey" ON public."rentCarBookings" USING btree ("rentCarBookingID") |
 | rentCarBookings_orderID_unique | CREATE UNIQUE INDEX "rentCarBookings_orderID_unique" ON public."rentCarBookings" USING btree ("orderID") |
+| unique_rentCarBookings | CREATE UNIQUE INDEX "unique_rentCarBookings" ON public."rentCarBookings" USING btree ("rentCarBookingID", "orderID") |
 
 ## Relations
 

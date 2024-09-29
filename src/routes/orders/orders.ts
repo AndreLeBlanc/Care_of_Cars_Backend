@@ -135,6 +135,7 @@ export async function orders(fastify: FastifyInstance) {
           serviceVariantID: service.serviceVariantID
             ? ServiceID(service.serviceVariantID)
             : undefined,
+          storeID: StoreID(req.body.storeID),
           name: ServiceName(service.name),
           amount: Amount(service.amount),
           day1: service.day1 ? WorkDay1(new Date(service.day1)) : undefined,

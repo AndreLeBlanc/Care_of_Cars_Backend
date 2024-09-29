@@ -7,7 +7,10 @@
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | orderID | integer | nextval('"bills_orderID_seq"'::regclass) | false | [public.billOrders](public.billOrders.md) |  |  |
+| storeID | integer |  | false |  | [public.stores](public.stores.md) |  |
 | billStatus | "billStatus" |  | false |  |  |  |
+| billedAmount | real |  | false |  |  |  |
+| currency | varchar |  | false |  |  |  |
 | employeeID | integer |  | true |  | [public.employees](public.employees.md) |  |
 | billingDate | date |  | false |  |  |  |
 | paymentDate | date |  | false |  |  |  |
@@ -30,9 +33,6 @@
 | driverKeyNumber | varchar(256) |  | true |  |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |
-| storeID | integer |  | false |  | [public.stores](public.stores.md) |  |
-| billedAmount | real |  | false |  |  |  |
-| currency | varchar |  | false |  |  |  |
 
 ## Constraints
 

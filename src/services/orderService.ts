@@ -107,6 +107,7 @@ export type Order = OrderBase & {
 export type CreateOrderServices = {
   serviceID: ServiceID
   serviceVariantID?: ServiceID
+  storeID: StoreID
   name: ServiceName
   amount: Amount
   day1?: WorkDay1
@@ -176,6 +177,7 @@ type OrderNoBrand = {
 type OrderServicesNoBrand = {
   serviceID: ServiceID
   ServiceVariantID?: ServiceID
+  storeID: StoreID
   name: ServiceName
   amount: Amount
   day1?: WorkDay1 | null
@@ -238,6 +240,7 @@ function brandOrder(
     return {
       orderID: service.orderID,
       serviceID: service.serviceID,
+      storeID: service.storeID,
       name: service.name,
       amount: service.amount,
       serviceServiceVariantID: service.ServiceVariantID ?? undefined,
@@ -379,6 +382,7 @@ export async function createOrder(
               set: {
                 serviceID: sql`"excluded"."serviceID"`,
                 serviceVariantID: sql`"excluded"."serviceVariantID"`,
+                storeID: sql`"excluded"."storeID"`,
                 name: sql`"excluded"."name"`,
                 amount: sql`"excluded"."amount"`,
                 day1: sql`"excluded"."day1"`,
