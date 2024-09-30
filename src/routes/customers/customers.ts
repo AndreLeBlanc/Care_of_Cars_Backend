@@ -1,11 +1,10 @@
 import { FastifyInstance } from 'fastify'
 
-import { Either, match } from '../../utils/helper.js'
+import { DriverBodySchema, Either, match } from '../../utils/helper.js'
 
 import {
   AddCustomerBodySchema,
   CreateCustomerType,
-  DriverBodySchema,
   DriverBodySchemaType,
   GetCompanyByOrgNumberSchema,
   GetCompanyByOrgNumberSchemaType,

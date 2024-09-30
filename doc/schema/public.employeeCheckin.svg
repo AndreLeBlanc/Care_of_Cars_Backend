@@ -18,17 +18,17 @@
 <text text-anchor="start" x="250.7328" y="-485.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
 <text text-anchor="start" x="284.9376" y="-485.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
 <polygon fill="none" stroke="#000000" points="46.5,-442.5 46.5,-472.5 387.5,-472.5 387.5,-442.5 46.5,-442.5"/>
-<text text-anchor="start" x="53.5" y="-453.9" font-family="Arial" font-size="14.00" fill="#000000">employeeStoreID </text>
-<text text-anchor="start" x="165.521" y="-453.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<text text-anchor="start" x="53.5" y="-453.9" font-family="Arial" font-size="14.00" fill="#000000">employeeCheckinID </text>
+<text text-anchor="start" x="182.629" y="-453.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
 <polygon fill="none" stroke="#000000" points="46.5,-412.5 46.5,-442.5 387.5,-442.5 387.5,-412.5 46.5,-412.5"/>
-<text text-anchor="start" x="53.5" y="-423.9" font-family="Arial" font-size="14.00" fill="#000000">employeeCheckedIn </text>
-<text text-anchor="start" x="184.981" y="-423.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<text text-anchor="start" x="53.5" y="-423.9" font-family="Arial" font-size="14.00" fill="#000000">employeeStoreID </text>
+<text text-anchor="start" x="165.521" y="-423.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
 <polygon fill="none" stroke="#000000" points="46.5,-382.5 46.5,-412.5 387.5,-412.5 387.5,-382.5 46.5,-382.5"/>
-<text text-anchor="start" x="53.2441" y="-393.9" font-family="Arial" font-size="14.00" fill="#000000">employeeCheckedOut </text>
-<text text-anchor="start" x="195.6157" y="-393.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<text text-anchor="start" x="53.5" y="-393.9" font-family="Arial" font-size="14.00" fill="#000000">employeeCheckedIn </text>
+<text text-anchor="start" x="184.981" y="-393.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
 <polygon fill="none" stroke="#000000" points="46.5,-352.5 46.5,-382.5 387.5,-382.5 387.5,-352.5 46.5,-352.5"/>
-<text text-anchor="start" x="53.5" y="-363.9" font-family="Arial" font-size="14.00" fill="#000000">employeeCheckinID </text>
-<text text-anchor="start" x="182.629" y="-363.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<text text-anchor="start" x="53.2441" y="-363.9" font-family="Arial" font-size="14.00" fill="#000000">employeeCheckedOut </text>
+<text text-anchor="start" x="195.6157" y="-363.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
 <polygon fill="none" stroke="#000000" stroke-width="3" points="44.5,-351.5 44.5,-509.5 388.5,-509.5 388.5,-351.5 44.5,-351.5"/>
 </g>
 <!-- public.employeeStore -->
@@ -40,14 +40,14 @@
 <text text-anchor="start" x="240.2348" y="-205.3" font-family="Arial" font-size="14.00" fill="#000000">    </text>
 <text text-anchor="start" x="274.4396" y="-205.3" font-family="Arial" font-size="14.00" fill="#666666">[BASE TABLE]</text>
 <polygon fill="none" stroke="#000000" points="60.5,-162.5 60.5,-192.5 374.5,-192.5 374.5,-162.5 60.5,-162.5"/>
-<text text-anchor="start" x="67.5" y="-173.9" font-family="Arial" font-size="14.00" fill="#000000">storeID    </text>
-<text text-anchor="start" x="146.8184" y="-173.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<text text-anchor="start" x="67.5" y="-173.9" font-family="Arial" font-size="14.00" fill="#000000">employeeStoreID    </text>
+<text text-anchor="start" x="209.8352" y="-173.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
 <polygon fill="none" stroke="#000000" points="60.5,-132.5 60.5,-162.5 374.5,-162.5 374.5,-132.5 60.5,-132.5"/>
-<text text-anchor="start" x="67.5" y="-143.9" font-family="Arial" font-size="14.00" fill="#000000">employeeID    </text>
-<text text-anchor="start" x="176.3822" y="-143.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<text text-anchor="start" x="67.5" y="-143.9" font-family="Arial" font-size="14.00" fill="#000000">storeID    </text>
+<text text-anchor="start" x="146.8184" y="-143.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
 <polygon fill="none" stroke="#000000" points="60.5,-102.5 60.5,-132.5 374.5,-132.5 374.5,-102.5 60.5,-102.5"/>
-<text text-anchor="start" x="67.5" y="-113.9" font-family="Arial" font-size="14.00" fill="#000000">employeeStoreID    </text>
-<text text-anchor="start" x="209.8352" y="-113.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<text text-anchor="start" x="67.5" y="-113.9" font-family="Arial" font-size="14.00" fill="#000000">employeeID    </text>
+<text text-anchor="start" x="176.3822" y="-113.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
 <polygon fill="none" stroke="#000000" points="60.5,-72.5 60.5,-102.5 374.5,-102.5 374.5,-72.5 60.5,-72.5"/>
 <text text-anchor="start" x="67.5" y="-83.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
 <text text-anchor="start" x="161.6136" y="-83.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
@@ -58,9 +58,9 @@
 <!-- public.employeeCheckin&#45;&gt;public.employeeStore -->
 <g id="edge1" class="edge">
 <title>public.employeeCheckin:employeeStoreID&#45;&gt;public.employeeStore:employeeStoreID</title>
-<path fill="none" stroke="#000000" d="M397.6851,-456.6215C451.8879,-446.6401 429.6938,-354.0939 387.5,-307 338.7168,-252.5514 109.2832,-325.4486 60.5,-271 14.9755,-220.1886 -7.7222,-117.5 60.5,-117.5"/>
-<polygon fill="#000000" stroke="#000000" points="397.463,-456.6405 387.1132,-453.0166 392.4815,-457.0703 387.5,-457.5 387.5,-457.5 387.5,-457.5 392.4815,-457.0703 387.8868,-461.9834 397.463,-456.6405 397.463,-456.6405"/>
-<text text-anchor="start" x="394.556" y="-467.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;employeeStoreID&quot;) REFERENCES &quot;employeeStore&quot;(&quot;employeeStoreID&quot;) ON DELETE CASCADE</text>
+<path fill="none" stroke="#000000" d="M397.4996,-426.4087C438.5357,-416.6691 420.7944,-344.1611 387.5,-307 338.7168,-252.5514 109.2832,-325.4486 60.5,-271 32.7701,-240.0498 18.9444,-177.5 60.5,-177.5"/>
+<polygon fill="#000000" stroke="#000000" points="397.441,-426.415 387.0117,-423.0266 392.4705,-426.9575 387.5,-427.5 387.5,-427.5 387.5,-427.5 392.4705,-426.9575 387.9883,-431.9734 397.441,-426.415 397.441,-426.415"/>
+<text text-anchor="start" x="394.556" y="-437.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;employeeStoreID&quot;) REFERENCES &quot;employeeStore&quot;(&quot;employeeStoreID&quot;) ON DELETE CASCADE</text>
 </g>
 </g>
 </svg>

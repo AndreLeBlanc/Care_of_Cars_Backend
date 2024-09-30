@@ -14,8 +14,8 @@
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | serviceQualifications_globalQualID_qualificationsGlobal_globalQ | FOREIGN KEY | FOREIGN KEY ("globalQualID") REFERENCES "qualificationsGlobal"("globalQualID") |
-| serviceQualifications_serviceID_services_serviceID_fk | FOREIGN KEY | FOREIGN KEY ("serviceID") REFERENCES services("serviceID") |
 | serviceQualifications_globalQualID_serviceID_pk | PRIMARY KEY | PRIMARY KEY ("globalQualID", "serviceID") |
+| serviceQualifications_serviceID_services_serviceID_fk | FOREIGN KEY | FOREIGN KEY ("serviceID") REFERENCES services("serviceID") |
 
 ## Indexes
 

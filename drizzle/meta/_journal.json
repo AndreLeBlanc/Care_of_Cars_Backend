@@ -29,6 +29,20 @@
       "when": 1726824736400,
       "tag": "0003_odd_gamma_corps",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1727594302090,
+      "tag": "0004_violet_scarlet_spider",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1727636909089,
+      "tag": "0005_famous_veda",
+      "breakpoints": true
     }
   ]
 }

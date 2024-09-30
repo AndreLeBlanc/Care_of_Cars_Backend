@@ -46,51 +46,51 @@
 <text text-anchor="start" x="74" y="-756.9" font-family="Arial" font-size="14.00" fill="#000000">productID    </text>
 <text text-anchor="start" x="168.8836" y="-756.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
 <polygon fill="none" stroke="#000000" points="67,-715.5 67,-745.5 364,-745.5 364,-715.5 67,-715.5"/>
-<text text-anchor="start" x="74" y="-726.9" font-family="Arial" font-size="14.00" fill="#000000">productItemNumber    </text>
-<text text-anchor="start" x="231.8864" y="-726.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<text text-anchor="start" x="74" y="-726.9" font-family="Arial" font-size="14.00" fill="#000000">storeID    </text>
+<text text-anchor="start" x="153.3184" y="-726.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
 <polygon fill="none" stroke="#000000" points="67,-685.5 67,-715.5 364,-715.5 364,-685.5 67,-685.5"/>
-<text text-anchor="start" x="74" y="-696.9" font-family="Arial" font-size="14.00" fill="#000000">currency    </text>
-<text text-anchor="start" x="161.8738" y="-696.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(5)]</text>
+<text text-anchor="start" x="74" y="-696.9" font-family="Arial" font-size="14.00" fill="#000000">productItemNumber    </text>
+<text text-anchor="start" x="231.8864" y="-696.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
 <polygon fill="none" stroke="#000000" points="67,-655.5 67,-685.5 364,-685.5 364,-655.5 67,-655.5"/>
-<text text-anchor="start" x="74" y="-666.9" font-family="Arial" font-size="14.00" fill="#000000">cost    </text>
-<text text-anchor="start" x="133.878" y="-666.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
+<text text-anchor="start" x="74" y="-666.9" font-family="Arial" font-size="14.00" fill="#000000">currency    </text>
+<text text-anchor="start" x="161.8738" y="-666.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(5)]</text>
 <polygon fill="none" stroke="#000000" points="67,-625.5 67,-655.5 364,-655.5 364,-625.5 67,-625.5"/>
-<text text-anchor="start" x="74" y="-636.9" font-family="Arial" font-size="14.00" fill="#000000">productCategoryID    </text>
-<text text-anchor="start" x="225.6718" y="-636.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<text text-anchor="start" x="74" y="-636.9" font-family="Arial" font-size="14.00" fill="#000000">cost    </text>
+<text text-anchor="start" x="133.878" y="-636.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
 <polygon fill="none" stroke="#000000" points="67,-595.5 67,-625.5 364,-625.5 364,-595.5 67,-595.5"/>
-<text text-anchor="start" x="74" y="-606.9" font-family="Arial" font-size="14.00" fill="#000000">productDescription    </text>
-<text text-anchor="start" x="224.8878" y="-606.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(512)]</text>
+<text text-anchor="start" x="74" y="-606.9" font-family="Arial" font-size="14.00" fill="#000000">productCategoryID    </text>
+<text text-anchor="start" x="225.6718" y="-606.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
 <polygon fill="none" stroke="#000000" points="67,-565.5 67,-595.5 364,-595.5 364,-565.5 67,-565.5"/>
-<text text-anchor="start" x="74" y="-576.9" font-family="Arial" font-size="14.00" fill="#000000">productSupplierArticleNumber    </text>
-<text text-anchor="start" x="294.8864" y="-576.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<text text-anchor="start" x="74" y="-576.9" font-family="Arial" font-size="14.00" fill="#000000">productDescription    </text>
+<text text-anchor="start" x="224.8878" y="-576.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar(512)]</text>
 <polygon fill="none" stroke="#000000" points="67,-535.5 67,-565.5 364,-565.5 364,-535.5 67,-535.5"/>
-<text text-anchor="start" x="74" y="-546.9" font-family="Arial" font-size="14.00" fill="#000000">productExternalArticleNumber    </text>
-<text text-anchor="start" x="294.8878" y="-546.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
+<text text-anchor="start" x="74" y="-546.9" font-family="Arial" font-size="14.00" fill="#000000">productSupplierArticleNumber    </text>
+<text text-anchor="start" x="294.8864" y="-546.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
 <polygon fill="none" stroke="#000000" points="67,-505.5 67,-535.5 364,-535.5 364,-505.5 67,-505.5"/>
-<text text-anchor="start" x="74" y="-516.9" font-family="Arial" font-size="14.00" fill="#000000">productUpdateRelatedData    </text>
-<text text-anchor="start" x="277.8106" y="-516.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
+<text text-anchor="start" x="74" y="-516.9" font-family="Arial" font-size="14.00" fill="#000000">productExternalArticleNumber    </text>
+<text text-anchor="start" x="294.8878" y="-516.9" font-family="Arial" font-size="14.00" fill="#666666">[varchar]</text>
 <polygon fill="none" stroke="#000000" points="67,-475.5 67,-505.5 364,-505.5 364,-475.5 67,-475.5"/>
-<text text-anchor="start" x="74" y="-486.9" font-family="Arial" font-size="14.00" fill="#000000">award    </text>
-<text text-anchor="start" x="146.3198" y="-486.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
+<text text-anchor="start" x="74" y="-486.9" font-family="Arial" font-size="14.00" fill="#000000">productUpdateRelatedData    </text>
+<text text-anchor="start" x="277.8106" y="-486.9" font-family="Arial" font-size="14.00" fill="#666666">[boolean]</text>
 <polygon fill="none" stroke="#000000" points="67,-445.5 67,-475.5 364,-475.5 364,-445.5 67,-445.5"/>
-<text text-anchor="start" x="74" y="-456.9" font-family="Arial" font-size="14.00" fill="#000000">productInventoryBalance    </text>
-<text text-anchor="start" x="263.0322" y="-456.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<text text-anchor="start" x="74" y="-456.9" font-family="Arial" font-size="14.00" fill="#000000">award    </text>
+<text text-anchor="start" x="146.3198" y="-456.9" font-family="Arial" font-size="14.00" fill="#666666">[real]</text>
 <polygon fill="none" stroke="#000000" points="67,-415.5 67,-445.5 364,-445.5 364,-415.5 67,-415.5"/>
-<text text-anchor="start" x="74" y="-426.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
-<text text-anchor="start" x="168.1136" y="-426.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<text text-anchor="start" x="74" y="-426.9" font-family="Arial" font-size="14.00" fill="#000000">productInventoryBalance    </text>
+<text text-anchor="start" x="263.0322" y="-426.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
 <polygon fill="none" stroke="#000000" points="67,-385.5 67,-415.5 364,-415.5 364,-385.5 67,-385.5"/>
-<text text-anchor="start" x="73.9208" y="-396.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
-<text text-anchor="start" x="171.939" y="-396.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
+<text text-anchor="start" x="74" y="-396.9" font-family="Arial" font-size="14.00" fill="#000000">createdAt    </text>
+<text text-anchor="start" x="168.1136" y="-396.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
 <polygon fill="none" stroke="#000000" points="67,-355.5 67,-385.5 364,-385.5 364,-355.5 67,-355.5"/>
-<text text-anchor="start" x="74" y="-366.9" font-family="Arial" font-size="14.00" fill="#000000">storeID    </text>
-<text text-anchor="start" x="153.3184" y="-366.9" font-family="Arial" font-size="14.00" fill="#666666">[integer]</text>
+<text text-anchor="start" x="73.9208" y="-366.9" font-family="Arial" font-size="14.00" fill="#000000">updatedAt    </text>
+<text text-anchor="start" x="171.939" y="-366.9" font-family="Arial" font-size="14.00" fill="#666666">[timestamp without time zone]</text>
 </g>
 <!-- public.products&#45;&gt;public.productCategories -->
 <g id="edge1" class="edge">
 <title>public.products:productCategoryID&#45;&gt;public.productCategories:productCategoryID</title>
-<path fill="none" stroke="#000000" d="M373.975,-638.6031C434.3474,-614.3403 410.1137,-364.6286 364,-313 269.2495,-206.9177 140.7505,-383.0823 46,-277 17.4296,-245.0127 3.1111,-180.5 46,-180.5"/>
-<polygon fill="#000000" stroke="#000000" points="373.8239,-638.6317 363.1593,-636.0792 368.912,-639.5659 364,-640.5 364,-640.5 364,-640.5 368.912,-639.5659 364.8407,-644.9208 373.8239,-638.6317 373.8239,-638.6317"/>
-<text text-anchor="start" x="371.4445" y="-650.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;productCategoryID&quot;) REFERENCES &quot;productCategories&quot;(&quot;productCategoryID&quot;)</text>
+<path fill="none" stroke="#000000" d="M374.0936,-610.0907C493.8639,-600.0816 449.7574,-409.0135 364,-313 269.2495,-206.9177 140.7505,-383.0823 46,-277 17.4296,-245.0127 3.1111,-180.5 46,-180.5"/>
+<polygon fill="#000000" stroke="#000000" points="373.9918,-610.0947 363.8176,-606.0037 368.9959,-610.2974 364,-610.5 364,-610.5 364,-610.5 368.9959,-610.2974 364.1824,-614.9963 373.9918,-610.0947 373.9918,-610.0947"/>
+<text text-anchor="start" x="371.4445" y="-620.5" font-family="Arial" font-size="10.00" fill="#000000">FOREIGN KEY (&quot;productCategoryID&quot;) REFERENCES &quot;productCategories&quot;(&quot;productCategoryID&quot;)</text>
 </g>
 </g>
 </svg>

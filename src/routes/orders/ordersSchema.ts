@@ -15,7 +15,14 @@ import {
   ProductIDSchema,
 } from '../product/productSchema.js'
 
-import { DriverID, EmployeeID, FirstName, LastName, OrderID } from '../../utils/helper.js'
+import {
+  DriverBodySchema,
+  DriverID,
+  EmployeeID,
+  FirstName,
+  LastName,
+  OrderID,
+} from '../../utils/helper.js'
 
 const OrderNotesSchema = Type.String()
 export const OrderStatusSchema = Type.String()
@@ -189,6 +196,23 @@ export const CreateOrderBodyReplySchema = Type.Composite([
 ])
 
 export type CreateOrderBodyReplySchemaType = Static<typeof CreateOrderBodyReplySchema>
+
+export const GetOrderBodyReplySchema = Type.Composite([
+  OrderSchema,
+  Type.Object({
+    message: Message,
+    rentCarBooking: Type.Optional(CreateRentCarBookingSchema),
+    services: Type.Array(
+      Type.Composite([CreateOrderServicesSchema, Type.Object({ total: ServiceCostNumberSchema })]),
+    ),
+    products: Type.Array(
+      Type.Composite([CreateOrderProductSchema, Type.Object({ total: ServiceCostNumberSchema })]),
+    ),
+    driver: DriverBodySchema,
+  }),
+])
+
+export type GetOrderBodyReplySchemaType = Static<typeof GetOrderBodyReplySchema>
 
 export const ListOrdersQueryParamSchema = Type.Object({
   storeID: storeID,

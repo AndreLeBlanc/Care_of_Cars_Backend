@@ -6,9 +6,9 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
+| employeeStoreID | integer | nextval('"employeeStore_employeeStoreID_seq"'::regclass) | false | [public.employeeCheckin](public.employeeCheckin.md) |  |  |
 | storeID | integer |  | false |  | [public.stores](public.stores.md) |  |
 | employeeID | integer |  | false |  | [public.employees](public.employees.md) |  |
-| employeeStoreID | integer | nextval('"employeeStore_employeeStoreID_seq"'::regclass) | false | [public.employeeCheckin](public.employeeCheckin.md) |  |  |
 | createdAt | timestamp without time zone | now() | false |  |  |  |
 | updatedAt | timestamp without time zone | now() | false |  |  |  |
 
@@ -16,9 +16,9 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| employeeStore_pkey | PRIMARY KEY | PRIMARY KEY ("employeeStoreID") |
 | employeeStore_employeeID_employees_employeeID_fk | FOREIGN KEY | FOREIGN KEY ("employeeID") REFERENCES employees("employeeID") ON DELETE CASCADE |
 | employeeStore_storeID_stores_storeID_fk | FOREIGN KEY | FOREIGN KEY ("storeID") REFERENCES stores("storeID") ON DELETE CASCADE |
-| employeeStore_pkey | PRIMARY KEY | PRIMARY KEY ("employeeStoreID") |
 
 ## Indexes
 

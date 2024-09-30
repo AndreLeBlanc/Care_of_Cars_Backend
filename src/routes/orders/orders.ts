@@ -52,6 +52,8 @@ import {
   CreateOrderBodyReplySchemaType,
   CreateOrderBodySchema,
   CreateOrderBodySchemaType,
+  GetOrderBodyReplySchema,
+  GetOrderBodyReplySchemaType,
   ListOrdersQueryParamSchema,
   ListOrdersQueryParamSchemaType,
   MessageSchema,
@@ -68,6 +70,7 @@ import {
   DeleteOrderProducts,
   DeleteOrderService,
   OrderWithServices,
+  OrderWithServicesAndDriver,
   OrdersPaginated,
   createOrder,
   deleteOrder,
@@ -135,6 +138,7 @@ export async function orders(fastify: FastifyInstance) {
           serviceVariantID: service.serviceVariantID
             ? ServiceID(service.serviceVariantID)
             : undefined,
+          storeID: StoreID(req.body.storeID),
           name: ServiceName(service.name),
           amount: Amount(service.amount),
           day1: service.day1 ? WorkDay1(new Date(service.day1)) : undefined,
@@ -228,7 +232,7 @@ export async function orders(fastify: FastifyInstance) {
 
   fastify.get<{
     Params: OrderIDSchemaType
-    //  Reply: CreateOrderBodyReplySchemaType | MessageSchemaType
+    Reply: GetOrderBodyReplySchemaType | MessageSchemaType
   }>(
     '/:orderID',
     {
@@ -246,18 +250,18 @@ export async function orders(fastify: FastifyInstance) {
       schema: {
         params: OrderIDSchema,
         response: {
-          //  200: CreateOrderBodyReplySchema,
+          200: GetOrderBodyReplySchema,
           403: MessageSchema,
         },
       },
     },
     async function (request, reply) {
       const orderID = OrderID(request.params.orderID)
-      const fetchedOrder: Either<string, OrderWithServices> = await getOrder(orderID)
+      const fetchedOrder: Either<string, OrderWithServicesAndDriver> = await getOrder(orderID)
 
       match(
         fetchedOrder,
-        (gottenOrder: OrderWithServices) => {
+        (gottenOrder: OrderWithServicesAndDriver) => {
           return reply.status(200).send({ message: 'fetched order', ...gottenOrder })
         },
         (err) => {

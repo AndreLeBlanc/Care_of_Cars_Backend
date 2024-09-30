@@ -54,6 +54,7 @@ import {
   orders,
   rentCarBookings,
 } from '../schema/schema.js'
+import { Driver } from './customerService.js'
 
 export type OrdersPaginated = {
   totalOrders: ResultCount
@@ -107,6 +108,7 @@ export type Order = OrderBase & {
 export type CreateOrderServices = {
   serviceID: ServiceID
   serviceVariantID?: ServiceID
+  storeID: StoreID
   name: ServiceName
   amount: Amount
   day1?: WorkDay1
@@ -140,6 +142,8 @@ export type OrderWithServices = Order & { services: OrderServices[] } & {
 } & {
   rentCarBooking?: RentCarBookingReply
 }
+
+export type OrderWithServicesAndDriver = OrderWithServices & { driver: Driver }
 
 export type DeleteOrderService = { orderID: OrderID; serviceID: ServiceID }
 
@@ -176,6 +180,7 @@ type OrderNoBrand = {
 type OrderServicesNoBrand = {
   serviceID: ServiceID
   ServiceVariantID?: ServiceID
+  storeID: StoreID
   name: ServiceName
   amount: Amount
   day1?: WorkDay1 | null
@@ -238,6 +243,7 @@ function brandOrder(
     return {
       orderID: service.orderID,
       serviceID: service.serviceID,
+      storeID: service.storeID,
       name: service.name,
       amount: service.amount,
       serviceServiceVariantID: service.ServiceVariantID ?? undefined,
@@ -379,6 +385,7 @@ export async function createOrder(
               set: {
                 serviceID: sql`"excluded"."serviceID"`,
                 serviceVariantID: sql`"excluded"."serviceVariantID"`,
+                storeID: sql`"excluded"."storeID"`,
                 name: sql`"excluded"."name"`,
                 amount: sql`"excluded"."amount"`,
                 day1: sql`"excluded"."day1"`,
@@ -474,7 +481,9 @@ export async function deleteOrder(order: OrderID): Promise<Either<string, OrderW
   }
 }
 
-export async function getOrder(order: OrderID): Promise<Either<string, OrderWithServices>> {
+export async function getOrder(
+  order: OrderID,
+): Promise<Either<string, OrderWithServicesAndDriver>> {
   try {
     const [fetchedOrders] = await db
       .select({
@@ -482,23 +491,49 @@ export async function getOrder(order: OrderID): Promise<Either<string, OrderWith
         rentCarBooking: getTableColumns(rentCarBookings),
         services: jsonAggBuildObject(getTableColumns(orderListing)),
         products: jsonAggBuildObject(getTableColumns(orderProducts)),
+        driver: drivers,
       })
       .from(orders)
       .where(eq(orders.orderID, order))
+      .innerJoin(drivers, eq(orders.driverID, drivers.driverID))
       .leftJoin(orderListing, eq(orderListing.orderID, orders.orderID))
       .leftJoin(orderProducts, eq(orderProducts.orderID, orders.orderID))
       .leftJoin(rentCarBookings, eq(rentCarBookings.orderID, orders.orderID))
-      .groupBy(orders.orderID, rentCarBookings.rentCarBookingID)
+      .groupBy(orders.orderID, rentCarBookings.rentCarBookingID, drivers.driverID)
 
     return fetchedOrders
-      ? right(
-          brandOrder(
+      ? right({
+          ...brandOrder(
             fetchedOrders.order,
             fetchedOrders.services ? fetchedOrders.services : [],
             fetchedOrders.products ? fetchedOrders.products : [],
             fetchedOrders.rentCarBooking?.bookedBy ? fetchedOrders.rentCarBooking : undefined,
           ),
-        )
+          driver: {
+            driverID: fetchedOrders.driver.driverID,
+            customerOrgNumber: fetchedOrders.driver.customerOrgNumber ?? undefined,
+            driverExternalNumber: fetchedOrders.driver.driverExternalNumber ?? undefined,
+            driverGDPRAccept: fetchedOrders.driver.driverGDPRAccept,
+            driverISWarrantyDriver: fetchedOrders.driver.driverISWarrantyDriver,
+            driverAcceptsMarketing: fetchedOrders.driver.driverAcceptsMarketing,
+            driverFirstName: fetchedOrders.driver.driverFirstName,
+            driverLastName: fetchedOrders.driver.driverLastName,
+            driverEmail: fetchedOrders.driver.driverEmail,
+            driverPhoneNumber: fetchedOrders.driver.driverPhoneNumber,
+            driverAddress: fetchedOrders.driver.driverAddress,
+            driverZipCode: fetchedOrders.driver.driverZipCode,
+            driverAddressCity: fetchedOrders.driver.driverAddressCity,
+            driverCountry: fetchedOrders.driver.driverCountry,
+            driverHasCard: fetchedOrders.driver.driverHasCard ?? undefined,
+            driverCardValidTo: fetchedOrders.driver.driverCardValidTo ?? undefined,
+            driverCardNumber: fetchedOrders.driver.driverCardNumber ?? undefined,
+            driverKeyNumber: fetchedOrders.driver.driverKeyNumber ?? undefined,
+            driverNotesShared: fetchedOrders.driver.driverNotesShared ?? undefined,
+            driverNotes: fetchedOrders.driver.driverNotes ?? undefined,
+            createdAt: fetchedOrders.driver.createdAt,
+            updatedAt: fetchedOrders.driver.updatedAt,
+          },
+        })
       : left("Couldn't find order")
   } catch (e) {
     return left(errorHandling(e))

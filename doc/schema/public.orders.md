@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| orderID | integer | nextval('"orders_orderID_seq"'::regclass) | false | [public.billOrders](public.billOrders.md) [public.orderListing](public.orderListing.md) [public.rentCarBookings](public.rentCarBookings.md) [public.orderProducts](public.orderProducts.md) |  |  |
+| orderID | integer | nextval('"orders_orderID_seq"'::regclass) | false | [public.billOrders](public.billOrders.md) [public.orderListing](public.orderListing.md) [public.orderProducts](public.orderProducts.md) [public.rentCarBookings](public.rentCarBookings.md) |  |  |
 | driverCarID | integer |  | false |  | [public.driverCars](public.driverCars.md) |  |
 | driverID | integer |  | false |  | [public.driverCars](public.driverCars.md) [public.drivers](public.drivers.md) |  |
 | storeID | integer |  | false |  | [public.stores](public.stores.md) |  |

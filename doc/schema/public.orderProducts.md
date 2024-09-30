@@ -18,9 +18,9 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| orderProducts_orderID_productID_pk | PRIMARY KEY | PRIMARY KEY ("orderID", "productID") |
 | orderProducts_orderID_orders_orderID_fk | FOREIGN KEY | FOREIGN KEY ("orderID") REFERENCES orders("orderID") ON DELETE CASCADE |
 | orderProducts_productID_products_productID_fk | FOREIGN KEY | FOREIGN KEY ("productID") REFERENCES products("productID") ON DELETE CASCADE |
-| orderProducts_orderID_productID_pk | PRIMARY KEY | PRIMARY KEY ("orderID", "productID") |
 
 ## Indexes
 
