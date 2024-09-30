@@ -39,6 +39,45 @@ export const driverCardNumber = Type.String({ maxLength: 255 })
 export const driverCardValidTo = Type.String({ format: 'date' })
 export const driverKeyNumber = Type.String({ maxLength: 255 })
 
+export const customerCompanyName = Type.String({ maxLength: 255 })
+export const companyEmail = Type.String({ format: 'email' })
+export const companyPhone = Type.String({
+  pattern: '^([+]?[s0-9]+)?(d{3}|[(]?[0-9]+[)])?([-]?[s]?[0-9])+$',
+})
+export const companyAddress = Type.String({ maxLength: 255 })
+export const companyZipCode = Type.String({ maxLength: 16 })
+export const companyAddressCity = Type.String({ maxLength: 255 })
+export const companyCountry = Type.String({ maxLength: 255 })
+export const driverGDPRAccept = Type.Boolean()
+export const driverISWarrantyDriver = Type.Boolean()
+export const driverAcceptsMarketing = Type.Boolean()
+export const driverFirstName = Type.String({ maxLength: 128 })
+export const driverLastName = Type.String({ maxLength: 128 })
+export const driverNotesShared = Type.String()
+export const driverNotes = Type.String()
+
+export const DriverBodySchema = Type.Object({
+  customerOrgNumber: Type.Optional(customerOrgNumber),
+  driverExternalNumber: Type.Optional(driverExternalNumber),
+  driverGDPRAccept: driverGDPRAccept,
+  driverISWarrantyDriver: driverISWarrantyDriver,
+  driverAcceptsMarketing: driverAcceptsMarketing,
+  driverFirstName: driverFirstName,
+  driverLastName: driverLastName,
+  driverEmail: driverEmail,
+  driverPhoneNumber: driverPhoneNumber,
+  driverAddress: driverAddress,
+  driverZipCode: driverZipCode,
+  driverAddressCity: driverAddressCity,
+  driverCountry: driverCountry,
+  driverHasCard: driverHasCard,
+  driverCardNumber: Type.Optional(driverCardNumber),
+  driverCardValidTo: Type.Optional(driverCardValidTo),
+  driverKeyNumber: Type.Optional(driverKeyNumber),
+  driverNotesShared: Type.Optional(driverNotesShared),
+  driverNotes: driverNotes,
+})
+
 export function isOrderStatus(status: string): status is OrderStatus {
   return orderStatus.includes(status as OrderStatus)
 }
