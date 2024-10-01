@@ -62,6 +62,7 @@ export type OrdersPaginated = {
   perPage: Limit
   page: Page
   orders: {
+    orderID: OrderID
     driverCarID: DriverCarID
     driverID: DriverID
     firstName: DriverFirstName
@@ -670,6 +671,7 @@ export async function listOrders(
             orders: orderList.map((order) => {
               const pricingInfo = totalPriceCalc(order.products, order.services)
               return {
+                orderID: order.orderID,
                 driverCarID: order.driverCarID,
                 driverID: order.driverID,
                 firstName: order.firstName,

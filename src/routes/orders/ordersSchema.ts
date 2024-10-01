@@ -236,6 +236,7 @@ export const OrdersPaginatedSchema = Type.Object({
   previousUrl: Type.Optional(Type.String({ format: 'url' })),
   orders: Type.Array(
     Type.Object({
+      orderID: OrderID,
       driverCarID: driverCarID,
       driverID: DriverID,
       firstName: FirstName,
