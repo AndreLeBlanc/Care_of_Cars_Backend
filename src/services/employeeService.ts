@@ -1343,8 +1343,6 @@ export async function listWorkingEmployees(
     employeeWorkingHours.employeeID,
   )
 
-  console.log('workTimes', workTimes)
-
   const workTimeDates = workTimes.map((work) => ({
     employeeWorkingHours: work.employeeWorkingHours,
     employeeSpecialHours: work.employeeSpecialHours.map((special) => ({
@@ -1353,6 +1351,66 @@ export async function listWorkingEmployees(
       start: WorkTime(new Date(special.start)),
       end: WorkTime(new Date(special.end)),
       absence: special.absence,
+    })),
+    bookinHours: work.bookedHours.map((book) => ({
+      day1: book.day1 ? new Date(book.day1) : undefined,
+      day1Work: book.day1Work,
+      day1Employee: book.day1Employee,
+      day2: book.day2 ? new Date(book.day2) : undefined,
+      day2Work: book.day2Work,
+      day2Employee: book.day2Employee,
+      day3: book.day3 ? new Date(book.day3) : undefined,
+      day3Work: book.day3Work,
+      day3Employee: book.day3Employee,
+      day4: book.day4 ? new Date(book.day4) : undefined,
+      day4Work: book.day4Work,
+      day4Employee: book.day4Employee,
+      day5: book.day5 ? new Date(book.day5) : undefined,
+      day5Work: book.day5Work,
+      day5Employee: book.day5Employee,
+    })),
+  }))
+
+  //const bookedHours: DayToHours = {
+  //  monday: WorkDuration(0),
+  //  tuesday: WorkDuration(0),
+  //  wednesday: WorkDuration(0),
+  //  thursday: WorkDuration(0),
+  //  friday: WorkDuration(0),
+  //  saturday: WorkDuration(0),
+  //  sunday: WorkDuration(0),
+  //}
+  //
+  //function bookHoursAcc(bookedHours: DayToHours, week: Date, timestamp: Date): DayToHours {}
+
+  workTimes.forEach((work) => ({
+    employeeID: work.employeeWorkingHours.employeeID,
+    bookinHours: work.bookedHours.forEach((book) => ({
+      day1:
+        book.day1 && book.day1Employee === work.employeeWorkingHours.employeeID
+          ? new Date(book.day1)
+          : undefined,
+      day1Work: book.day1Work,
+      day2:
+        book.day2 && book.day2Employee === work.employeeWorkingHours.employeeID
+          ? new Date(book.day2)
+          : undefined,
+      day2Work: book.day2Work,
+      day3:
+        book.day3 && book.day3Employee === work.employeeWorkingHours.employeeID
+          ? new Date(book.day3)
+          : undefined,
+      day3Work: book.day3Work,
+      day4:
+        book.day4 && book.day4Employee === work.employeeWorkingHours.employeeID
+          ? new Date(book.day4)
+          : undefined,
+      day4Work: book.day4Work,
+      day5:
+        book.day5 && book.day5Employee === work.employeeWorkingHours.employeeID
+          ? new Date(book.day5)
+          : undefined,
+      day5Work: book.day5Work,
     })),
   }))
 
