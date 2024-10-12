@@ -284,17 +284,15 @@ export const GetEmployeeWorkingHoursSchema = Type.Object({
 export type GetEmployeeWorkingHoursSchemaType = Static<typeof GetEmployeeWorkingHoursSchema>
 
 export const WorkingHoursTotalSchema = Type.Object({
-  employeeInfo: Type.Array(
-    Type.Composite([EmployeeTimeSchema, Type.Object({ special: Type.Array(SpecialHoursSchema) })]),
-  ),
-  totalTimes: Type.Object({
-    monday: Type.String(),
-    tuesday: Type.String(),
-    wednesday: Type.String(),
-    thursday: Type.String(),
-    friday: Type.String(),
-    saturday: Type.String(),
-    sunday: Type.String(),
+  message: MessageSchema,
+  employeeOnDuty: Type.Object({
+    monday: Type.Number(),
+    tuesday: Type.Number(),
+    wednesday: Type.Number(),
+    thursday: Type.Number(),
+    friday: Type.Number(),
+    saturday: Type.Number(),
+    sunday: Type.Number(),
   }),
 })
 
