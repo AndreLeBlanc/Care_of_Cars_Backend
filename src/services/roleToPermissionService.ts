@@ -1,24 +1,22 @@
-import { and, count, eq } from 'drizzle-orm'
-
-import { db } from '../config/db-connect.js'
-
+import { Brand, make } from 'ts-brand'
+import { Either, errorHandling, left, right } from '../utils/helper.js'
 import {
+  EmployeePin,
   PermissionID,
   PermissionTitle,
   RoleDescription,
   RoleID,
   RoleName,
+  UserID,
+  employees,
   permissions,
   roleToPermissions,
   roles,
 } from '../schema/schema.js'
-
-import { Brand, make } from 'ts-brand'
-
+import { and, count, eq } from 'drizzle-orm'
 import { CreatedRole } from './roleService.js'
 import { PermissionIDDescName } from './permissionService.js'
-
-import { Either, errorHandling, left, right } from '../utils/helper.js'
+import { db } from '../config/db-connect.js'
 
 type MaybeRoleID = Brand<number | null, 'MaybeRoleID'>
 const MaybeRoleID = make<MaybeRoleID>()
@@ -249,6 +247,25 @@ export async function roleHasPermission(
       .from(roleToPermissions)
       .where(and(eq(roleToPermissions.roleID, roleID)))
       .innerJoin(permissions, eq(permissions.permissionTitle, permissionTitle))
+    return countOfCombo ? right(countOfCombo.count > 0) : left('error')
+  } catch (e) {
+    return left(errorHandling(e))
+  }
+}
+
+export async function roleHasPermissionPin(
+  roleID: RoleID,
+  permissionTitle: PermissionTitle,
+  user: UserID,
+  pin: EmployeePin,
+): Promise<Either<string, boolean>> {
+  try {
+    const [countOfCombo] = await db
+      .select({ count: count() })
+      .from(roleToPermissions)
+      .where(and(eq(roleToPermissions.roleID, roleID)))
+      .innerJoin(permissions, eq(permissions.permissionTitle, permissionTitle))
+      .innerJoin(employees, and(eq(employees.userID, user), eq(employees.employeePin, pin)))
     return countOfCombo ? right(countOfCombo.count > 0) : left('error')
   } catch (e) {
     return left(errorHandling(e))
