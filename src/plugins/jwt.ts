@@ -54,9 +54,10 @@ export default fp(async (fastify) => {
           RoleID(token.role.roleID),
           permissionName,
         )
+
         return match(
           hasPermission,
-          (hasPerm) => {
+          (hasPerm: boolean) => {
             return hasPerm
           },
           (err) => {

@@ -10,6 +10,7 @@ import { Either, match } from '../utils/helper.js'
 import { PermissionIDDescName, createPermission } from '../services/permissionService.js'
 import { Service, ServiceCreate, createService } from '../services/serviceService.js'
 import { Store, StoreCreate, StorePaymentOptions, createStore } from '../services/storeService.js'
+import { createRoleToPermissions } from '../services/roleToPermissionService.js'
 
 import Dinero from 'dinero.js'
 
@@ -71,7 +72,10 @@ dotenv.config()
 
 export type SeedResult = 'Failed' | 'WrongConfig' | 'Success' | 'AlreadySeeded'
 
-async function seedPermissions(): Promise<SeedResult> {
+async function seedPermissions(
+  superAdminPassword: string,
+  superAdminEmail: string,
+): Promise<SeedResult> {
   try {
     const perms: Either<string, PermissionIDDescName[]> = await createPermission([
       {
@@ -192,10 +196,63 @@ async function seedPermissions(): Promise<SeedResult> {
       { permissionTitle: PermissionTitle('view_store') },
       { permissionTitle: PermissionTitle('view_user') },
     ])
+
+    async function roleToPermSeed(permList: PermissionIDDescName[]): Promise<SeedResult> {
+      const role: Either<string, CreatedRole> = await createRole(
+        RoleName('SuperAdmin'),
+        RoleDescription('Super admin user'),
+      )
+
+      return match(
+        role,
+        async (createdRole: CreatedRole) => {
+          // Below two envs are required in plugins/env.ts so it will throw message in console if not added.
+          const passwordHash = await generatePasswordHash(UserPassword(superAdminPassword))
+          const user: Either<string, CreatedUser> = await createUser(
+            UserFirstName('SuperAdmin'),
+            UserLastName('SuperAdmin'),
+            UserEmail(superAdminEmail),
+            passwordHash,
+            RoleID(createdRole.roleID),
+            IsSuperAdmin(true),
+          )
+
+          console.log('created superadmin:', user)
+
+          const permIDs = permList.map((perm) => ({
+            roleID: createdRole.roleID,
+            permissionID: perm.permissionID,
+          }))
+
+          const rtps = await createRoleToPermissions(permIDs)
+          return match(
+            rtps,
+            () => {
+              return 'Succeeded' as SeedResult
+            },
+            (err) => {
+              console.log('Error seeding role to permissions for superadmin', err)
+              if (err.slice(0, 16) === 'Please provide a') {
+                return 'AlreadySeeded' as SeedResult
+              }
+              return 'Failed' as SeedResult
+            },
+          )
+        },
+        (err) => {
+          console.log('seed error: ', err)
+          if (err.slice(0, 16) === 'Please provide a') {
+            return 'AlreadySeeded' as SeedResult
+          }
+          return 'Failed' as SeedResult
+        },
+      )
+    }
+
     return match(
       perms,
-      () => {
-        return 'Success'
+      (permList: PermissionIDDescName[]) => {
+        return roleToPermSeed(permList)
       },
       (err) => {
         console.log(err)
@@ -211,7 +268,7 @@ async function seedPermissions(): Promise<SeedResult> {
   }
 }
 
-async function seedMockData(superAdminPassword: string, superAdminEmail: string) {
+async function seedMockData(superAdminPassword: string) {
   const role: Either<string, CreatedRole> = await createRole(
     RoleName('SuperAdmin'),
     RoleDescription('Super admin user'),
@@ -222,15 +279,7 @@ async function seedMockData(superAdminPassword: string, superAdminEmail: string)
     async (createdRole: CreatedRole) => {
       // Below two envs are required in plugins/env.ts so it will throw message in console if not added.
       const passwordHash = await generatePasswordHash(UserPassword(superAdminPassword))
-      const user: Either<string, CreatedUser> = await createUser(
-        UserFirstName('SuperAdmin'),
-        UserLastName('SuperAdmin'),
-        UserEmail(superAdminEmail),
-        passwordHash,
-        RoleID(createdRole.roleID),
-        IsSuperAdmin(true),
-      )
-      console.info('Super admin created from seed!', role, user)
+
       const roleSecond: Either<string, CreatedRole> = await createRole(
         RoleName('testRole'),
         RoleDescription('second test user'),
@@ -339,9 +388,10 @@ export default fp(async () => {
     const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
     const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
     try {
-      let seedPermsRes = seedPermissions()
+      let seedPermsRes
       if (typeof superAdminPassword === 'string' && typeof superAdminEmail === 'string') {
-        seedMockData(superAdminPassword, superAdminEmail)
+        seedPermsRes = seedPermissions(superAdminPassword, superAdminEmail)
+        seedMockData(superAdminPassword)
         seedPermsRes = Promise.resolve<SeedResult>('Success')
       } else {
         seedPermsRes = Promise.resolve<SeedResult>('WrongConfig')

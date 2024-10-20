@@ -1,7 +1,8 @@
 import { Brand, make } from 'ts-brand'
-import { Either, errorHandling, left, right } from '../utils/helper.js'
+import { Either, errorHandling, jsonAggBuildObject, left, right } from '../utils/helper.js'
 import {
   EmployeePin,
+  PermissionDescription,
   PermissionID,
   PermissionTitle,
   RoleDescription,
@@ -24,11 +25,16 @@ const MaybeRoleID = make<MaybeRoleID>()
 type MaybePermissionID = Brand<number | null, 'permissionID'>
 const MaybePermissionID = make<MaybePermissionID>()
 
+export type CreateRoleToPermission = {
+  roleID: RoleID
+  permissionID: PermissionID
+}
+
 export type RoleToPermissions = {
   createdAt: Date
   updatedAt: Date
-  maybeRoleID: MaybeRoleID
-  maybePermissionID: MaybePermissionID
+  roleID: MaybeRoleID
+  permissionID: MaybePermissionID
 }
 
 export type PermissionsByRole = {
@@ -38,27 +44,38 @@ export type PermissionsByRole = {
   description?: RoleDescription
 }
 
+type RoleWithPermissions = {
+  perms: {
+    permissionID: PermissionID
+    description: PermissionDescription | null
+    permissionTitle: PermissionTitle
+  }[]
+  role: {
+    roleID: RoleID
+    roleName: RoleName
+    description: RoleDescription | null
+  }
+}
+
 export async function createRoleToPermissions(
-  roleID: RoleID,
-  permissionID: PermissionID,
-): Promise<Either<string, RoleToPermissions>> {
+  newRTP: CreateRoleToPermission[],
+): Promise<Either<string, RoleToPermissions[]>> {
   try {
-    const [createdRole] = await db
-      .insert(roleToPermissions)
-      .values({ roleID: roleID, permissionID: permissionID })
-      .returning({
-        permissionID: roleToPermissions.permissionID,
-        roleID: roleToPermissions.roleID,
-        createdAt: roleToPermissions.createdAt,
-        updatedAt: roleToPermissions.updatedAt,
-      })
+    const createdRole = await db.insert(roleToPermissions).values(newRTP).returning({
+      permissionID: roleToPermissions.permissionID,
+      roleID: roleToPermissions.roleID,
+      createdAt: roleToPermissions.createdAt,
+      updatedAt: roleToPermissions.updatedAt,
+    })
     return createdRole
-      ? right({
-          maybeRoleID: MaybeRoleID(createdRole.roleID),
-          maybePermissionID: MaybePermissionID(createdRole.permissionID),
-          createdAt: createdRole.createdAt,
-          updatedAt: createdRole.updatedAt,
-        })
+      ? right(
+          createdRole.map((rtp) => ({
+            roleID: MaybeRoleID(rtp.roleID),
+            permissionID: MaybePermissionID(rtp.permissionID),
+            createdAt: rtp.createdAt,
+            updatedAt: rtp.updatedAt,
+          })),
+        )
       : left("couldn't creat role to permission")
   } catch (e) {
     return left(errorHandling(e))
@@ -83,8 +100,8 @@ export async function deleteRoleToPermissions(
       })
     return deletedRoleToPermissions
       ? right({
-          maybeRoleID: MaybeRoleID(deletedRoleToPermissions.roleID),
-          maybePermissionID: MaybePermissionID(deletedRoleToPermissions.permissionID),
+          roleID: MaybeRoleID(deletedRoleToPermissions.roleID),
+          permissionID: MaybePermissionID(deletedRoleToPermissions.permissionID),
           createdAt: deletedRoleToPermissions.createdAt,
           updatedAt: deletedRoleToPermissions.updatedAt,
         })
@@ -104,10 +121,9 @@ export async function getAllPermissionStatus(
         permissionTitle: permissions.permissionTitle,
         description: permissions.description,
       })
-      .from(roles)
-      .innerJoin(roleToPermissions, eq(roleToPermissions.roleID, roleID))
+      .from(roleToPermissions)
+      .where(eq(roleToPermissions.roleID, roleID))
       .innerJoin(permissions, eq(permissions.permissionID, roleToPermissions.permissionID))
-      .where(eq(roles.roleID, roleID))
 
     const permWithStatus = perms.map((perm) => ({
       permissionID: perm.permissionID,
@@ -191,33 +207,35 @@ export async function getRoleWithPermissions(
 ): Promise<Either<string, { role: CreatedRole; roleHasPermission: PermissionIDDescName[] }>> {
   try {
     const rolePerms = await db.transaction(async (tx) => {
-      const roleWithPermissions = await tx
+      const roleWithPermissions: RoleWithPermissions[] = await tx
         .select({
-          permissionID: permissions.permissionID,
-          permissionTitle: permissions.permissionTitle,
-          description: permissions.description,
+          perms: jsonAggBuildObject({
+            permissionID: permissions.permissionID,
+            permissionTitle: permissions.permissionTitle,
+            description: permissions.description,
+          }),
+          role: {
+            roleID: roles.roleID,
+            roleName: roles.roleName,
+            description: roles.description,
+          },
         })
         .from(roleToPermissions)
-        .leftJoin(roles, eq(roleToPermissions.roleID, roles.roleID))
+        .where(eq(roleToPermissions.roleID, roleID))
+        .innerJoin(roles, eq(roleToPermissions.roleID, roles.roleID))
         .leftJoin(permissions, eq(roleToPermissions.permissionID, permissions.permissionID))
-        .where(eq(roles.roleID, roleID))
-
-      const [role] = await tx
-        .select({ roleID: roles.roleID, roleName: roles.roleName, description: roles.description })
-        .from(roles)
-        .where(eq(roles.roleID, roleID))
-        .limit(1)
+        .groupBy(roles.roleID)
 
       const roleBranded: CreatedRole = {
-        roleID: role.roleID,
-        roleName: role.roleName,
-        description: role.description ?? undefined,
+        roleID: roleWithPermissions[0].role.roleID,
+        roleName: roleWithPermissions[0].role.roleName,
+        description: roleWithPermissions[0].role.description ?? undefined,
       }
 
       return { role: roleBranded, roleWithPermissions: roleWithPermissions }
     })
-    const brandedRoleWithPermissions: PermissionIDDescName[] = rolePerms.roleWithPermissions.reduce(
-      (acc, roleWPerm) => {
+    const brandedRoleWithPermissions: PermissionIDDescName[] =
+      rolePerms.roleWithPermissions[0].perms.reduce((acc, roleWPerm) => {
         if (roleWPerm.permissionID != null && roleWPerm.permissionTitle != null) {
           acc.push({
             permissionID: PermissionID(roleWPerm.permissionID),
@@ -226,9 +244,7 @@ export async function getRoleWithPermissions(
           })
         }
         return acc
-      },
-      new Array<PermissionIDDescName>(),
-    )
+      }, new Array<PermissionIDDescName>())
     return brandedRoleWithPermissions
       ? right({ role: rolePerms.role, roleHasPermission: brandedRoleWithPermissions })
       : left("couldn't find role with permissions")
@@ -245,8 +261,11 @@ export async function roleHasPermission(
     const [countOfCombo] = await db
       .select({ count: count() })
       .from(roleToPermissions)
-      .where(and(eq(roleToPermissions.roleID, roleID)))
-      .innerJoin(permissions, eq(permissions.permissionTitle, permissionTitle))
+      .where(
+        and(eq(roleToPermissions.roleID, roleID), eq(permissions.permissionTitle, permissionTitle)),
+      )
+      .innerJoin(permissions, eq(permissions.permissionID, roleToPermissions.permissionID))
+
     return countOfCombo ? right(countOfCombo.count > 0) : left('error')
   } catch (e) {
     return left(errorHandling(e))

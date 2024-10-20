@@ -1,10 +1,9 @@
-import { FastifyInstance } from 'fastify'
-import fc from 'fast-check'
-
 import { after, before, describe, it } from 'node:test'
-import { deepStrictEqual } from 'assert'
-
+import { FastifyInstance } from 'fastify'
+import { RoleToPermissions } from '../../src/services/roleToPermissionService.js'
 import { buildApp } from '../../src/app.js'
+import { deepStrictEqual } from 'assert'
+import fc from 'fast-check'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
 let jwt = ''
@@ -24,6 +23,7 @@ describe('POST /users/login HTTP', async () => {
         password: 'admin123',
       },
     })
+
     const parsedResponse = JSON.parse(response.body)
     jwt = 'Bearer ' + parsedResponse.token
 
@@ -301,13 +301,16 @@ describe('POST /users/login HTTP', async () => {
         headers: {
           Authorization: jwt,
         },
-        payload: {
-          permissionTitle: name,
-          description: name,
-        },
+        payload: [
+          {
+            permissionTitle: name,
+            description: name,
+          },
+        ],
       })
       const parsedresponsePerm = JSON.parse(responsePerm.body)
-      perms.push(parsedresponsePerm.data.permissionID)
+      perms.push(parsedresponsePerm.permissions[0].permissionID)
+
       const responseRole = await app.inject({
         method: 'POST',
         url: '/roles',
@@ -319,22 +322,26 @@ describe('POST /users/login HTTP', async () => {
       const parsedresponseRoles = JSON.parse(responseRole.body)
       roles.push(parsedresponseRoles.data.roleID)
 
-      for (const perm of perms) {
-        const roleToPerm = await app.inject({
-          method: 'POST',
-          url: '/roleToPermissions',
-          headers: {
-            Authorization: jwt,
-          },
-          payload: {
-            permissionID: perm,
-            roleID: parsedresponseRoles.data.roleID,
-          },
-        })
-        const parsedroleToPerm = JSON.parse(roleToPerm.body)
-        deepStrictEqual(parsedroleToPerm.data.maybePermissionID, perm)
-        deepStrictEqual(parsedroleToPerm.data.maybeRoleID, parsedresponseRoles.data.roleID)
-      }
+      const roleToPerms = perms.map((perm) => ({
+        roleID: parsedresponseRoles.data.roleID,
+        permissionID: perm,
+      }))
+      const roleToPerm = await app.inject({
+        method: 'POST',
+        url: '/roleToPermissions',
+        headers: {
+          Authorization: jwt,
+        },
+        payload: roleToPerms,
+      })
+      const parsedroleToPerm = JSON.parse(roleToPerm.body)
+      deepStrictEqual(
+        parsedroleToPerm.roleToPerms.map((rtp: RoleToPermissions) => rtp.permissionID).sort(),
+        perms.sort(),
+      )
+      parsedroleToPerm.roleToPerms.map((rtp: RoleToPermissions) =>
+        deepStrictEqual(rtp.roleID, parsedresponseRoles.data.roleID),
+      )
     }
 
     const responseStore = await app.inject({
@@ -468,12 +475,6 @@ describe('POST /users/login HTTP', async () => {
     })
 
     const responseUserEmp2LoginParsed = JSON.parse(responseUserEmp2Login.body)
-
-    console.log('responseUserEmp2LoginParsed')
-    console.log('responseUserEmp2LoginParsed')
-    console.log(responseUserEmp2LoginParsed)
-    console.log('responseUserEmp2LoginParsed')
-    console.log('responseUserEmp2LoginParsed')
 
     deepStrictEqual(responseUserEmp2LoginParsed.lastName, 'lastsadNamesdfs')
     deepStrictEqual(responseUserEmp2LoginParsed.role.roleHasPermission[0].permissionID, perms[0])
