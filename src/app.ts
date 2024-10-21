@@ -54,51 +54,55 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
       : null),
   })
 
-  // Place here your custom code!
-
   await app.register(cors, {
     origin: true, //we can replace this later with our fe domain
     allowedHeaders: ['Content-Type', 'authorization', 'x-journey-mode'],
     credentials: true,
     methods: ['GET', 'PATCH', 'POST', 'DELETE', 'PUT'],
   })
-  app.register(fastifySwagger, {
-    // https://community.smartbear.com/discussions/swaggerostools/how-to-show-authorize-button-on-oas-3-swagger-in-javascript/234650
+
+  await app.register(fastifySwagger, {
     openapi: {
-      security: [
+      openapi: '3.0.0',
+      info: {
+        title: 'Test swagger',
+        description: 'Testing the Fastify swagger API',
+        version: '0.1.0',
+      },
+      servers: [
         {
-          bearerAuth: [],
+          url: 'http://localhost:3000',
+          description: 'Development server',
         },
       ],
       components: {
         securitySchemes: {
-          bearerAuth: {
+          apiKey: {
             type: 'apiKey',
-            name: 'Authorization',
+            name: 'apiKey',
             in: 'header',
           },
         },
       },
-    },
-    swagger: {
-      // properties...
-      securityDefinitions: {
-        Authorization: {
-          type: 'apiKey',
-          name: 'Authorization',
-          in: 'header',
-        },
+      externalDocs: {
+        url: 'https://swagger.io',
+        description: 'Find more info here',
       },
-      // security: [
-      //   {
-      //     authorization: []
-      //   }
-      // ]
     },
   })
-  app.register(seedSuperAdmin)
-  app.register(fastifySwaggerUI, { prefix: '/docs' })
 
+  await app.register(fastifySwaggerUI, {
+    routePrefix: '/docs',
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: false,
+    },
+    staticCSP: true,
+    transformStaticCSP: (header) => header,
+    transformSpecificationClone: true,
+  })
+
+  app.register(seedSuperAdmin)
   app.register(orders, { prefix: '/orders' })
   app.register(permissions, { prefix: '/permissions' })
   app.register(billing, { prefix: '/billing' })
