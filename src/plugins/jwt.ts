@@ -1,14 +1,20 @@
-import fp from 'fastify-plugin'
-
+import { Either, match } from '../utils/helper.js'
+import { EmployeePin, PermissionTitle, RoleID, UserID } from '../schema/schema.js'
+import { roleHasPermission, roleHasPermissionPin } from '../services/roleToPermissionService.js'
+import { FastifyJwtNamespace } from '@fastify/jwt'
 import { FastifyReply } from 'fastify/types/reply'
 import { FastifyRequest } from 'fastify/types/request'
-import { roleHasPermission } from '../services/roleToPermissionService.js'
+import fp from 'fastify-plugin'
 
-import { PermissionTitle, RoleID } from '../schema/schema.js'
-
-import { FastifyJwtNamespace } from '@fastify/jwt'
-
-import { Either } from '../utils/helper.js'
+type Token = {
+  userID: number
+  userFirstName: string
+  userLastName: string
+  userEmail: string
+  isSuperAdmin: boolean
+  role: { roleID: number; roleName: number }
+  iat: number
+}
 
 export default fp(async (fastify) => {
   fastify.addHook(
@@ -40,35 +46,24 @@ export default fp(async (fastify) => {
       permissionName: PermissionTitle,
     ): Promise<boolean> {
       try {
-        if (permissionName == 'dasfsdfsdfsdfs') {
-          console.log(request.user, permissionName)
+        const token = (await request.jwtDecode()) as Token
+        if (token.isSuperAdmin) {
+          return true
         }
-        return true
-        //  const hasPermission: Either<string, boolean> = await roleHasPermission(
-        //    RoleID(userData.userWithPassword.role.roleID),
-        //    permissionName,
-        //  )
-        //  return match(
-        //    hasPermission,
-        //    (hasPerm) => {
-        //      //        if (userData.user) {
-        //      //          return true
-        //      //        }
-        //      //        if (!hasPermission) {
-        //      //          return false
-        //      //        }
-        //      //      } catch (err) {
-        //      //        throw err
-        //      //      }
-        //      //      return false
-        //      console.log('hasPermission', hasPerm)
-        //      return hasPerm
-        //    },
-        //    (err) => {
-        //      console.error('Permission error: ', err)
-        //      return false
-        //    },
-        //  )
+        const hasPermission: Either<string, boolean> = await roleHasPermission(
+          RoleID(token.role.roleID),
+          permissionName,
+        )
+        return match(
+          hasPermission,
+          (hasPerm) => {
+            return hasPerm
+          },
+          (err) => {
+            console.error('Permission error: ', err)
+            return false
+          },
+        )
       } catch (e) {
         console.error('Authorization error: ', e)
         return false
@@ -82,29 +77,29 @@ export default fp(async (fastify) => {
       request: FastifyRequest,
       _: FastifyReply,
       permissionName: PermissionTitle,
+      pin: EmployeePin,
     ): Promise<boolean> {
       try {
-        const hasPermission: Either<string, boolean> = await roleHasPermission(
-          RoleID(1), //userData.userWithPassword.role.roleID),
+        const token = (await request.jwtDecode()) as Token
+        const hasPermission: Either<string, boolean> = await roleHasPermissionPin(
+          RoleID(token.role.roleID),
           permissionName,
+          UserID(token.userID),
+          pin,
         )
-
-        console.log(request.user)
-        console.log('hasPermission', hasPermission)
-        return true
-        //        if (userData.user) {
-        //          return true
-        //        }
-        //        if (!hasPermission) {
-        //          return false
-        //        }
-        //      } catch (err) {
-        //        throw err
-        //      }
-        //      return false
+        return match(
+          hasPermission,
+          (hasPerm) => {
+            return hasPerm
+          },
+          (err) => {
+            console.error('Permission error: ', err)
+            return false
+          },
+        )
       } catch (e) {
-        console.log(e)
-        return true
+        console.error('Authorization error: ', e)
+        return false
       }
     },
   )
@@ -137,6 +132,7 @@ declare module 'fastify' {
       request: FastifyRequest,
       reply: FastifyReply,
       permissionName: PermissionTitle,
+      pin: EmployeePin,
     ): Promise<boolean>
     authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void>
   }

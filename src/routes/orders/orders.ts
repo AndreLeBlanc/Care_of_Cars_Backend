@@ -316,6 +316,17 @@ export async function orders(fastify: FastifyInstance) {
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('list_orders')
+        console.log('ordering')
+        console.log('ordering')
+        console.log('ordering')
+        console.log('ordering')
+        console.log('ordering')
+        console.log('ordering')
+        console.log('ordering')
+        console.log('ordering')
+        console.log('ordering')
+        console.log('ordering')
+        console.log('ordering')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply.status(403).send({

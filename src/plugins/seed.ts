@@ -2,24 +2,22 @@ import fp from 'fastify-plugin'
 
 import * as dotenv from 'dotenv'
 
-import { Either, match } from '../utils/helper.js'
-
-import { Store, StoreCreate, StorePaymentOptions, createStore } from '../services/storeService.js'
-
-import { Service, ServiceCreate, createService } from '../services/serviceService.js'
-
-import { CreateServiceCategory, createServiceCategory } from '../services/categoryService.js'
-
 import { CreateProductCategory, createProductCategory } from '../services/categoryService.js'
-
+import { CreateServiceCategory, createServiceCategory } from '../services/categoryService.js'
 import { CreatedRole, createRole } from '../services/roleService.js'
 import { CreatedUser, createUser, generatePasswordHash } from '../services/userService.js'
+import { Either, match } from '../utils/helper.js'
+import { PermissionIDDescName, createPermission } from '../services/permissionService.js'
+import { Service, ServiceCreate, createService } from '../services/serviceService.js'
+import { Store, StoreCreate, StorePaymentOptions, createStore } from '../services/storeService.js'
 
 import Dinero from 'dinero.js'
 
 import {
   Award,
   IsSuperAdmin,
+  PermissionDescription,
+  PermissionTitle,
   ProductCategoryDescription,
   ProductCategoryName,
   RoleDescription,
@@ -71,14 +69,147 @@ import {
 } from '../schema/schema.js'
 dotenv.config()
 
-export enum SeedResult {
-  Failed,
-  WrongConfig,
-  Success,
-  AlreadySeeded,
-}
+export type SeedResult = 'Failed' | 'WrongConfig' | 'Success' | 'AlreadySeeded'
 
-//async function seedPermissions(): SeedResult {}
+async function seedPermissions(): Promise<SeedResult> {
+  try {
+    const perms: Either<string, PermissionIDDescName[]> = await createPermission([
+      {
+        permissionTitle: PermissionTitle('list_permission'),
+        description: PermissionDescription('allows user to list permissions'),
+      },
+      { permissionTitle: PermissionTitle('view_permission') },
+      { permissionTitle: PermissionTitle('update_permission') },
+      { permissionTitle: PermissionTitle('delete_permission') },
+      { permissionTitle: PermissionTitle('assign_user_to_store') },
+      { permissionTitle: PermissionTitle('checkin_checkout_employee') },
+      { permissionTitle: PermissionTitle('create_bill') },
+      { permissionTitle: PermissionTitle('create_customer') },
+      { permissionTitle: PermissionTitle('create_order') },
+      { permissionTitle: PermissionTitle('create_product') },
+      { permissionTitle: PermissionTitle('create_product_category') },
+      { permissionTitle: PermissionTitle('create_rent_car') },
+      { permissionTitle: PermissionTitle('create_rent_car_booking') },
+      { permissionTitle: PermissionTitle('create_role') },
+      { permissionTitle: PermissionTitle('create_role_to_permission') },
+      { permissionTitle: PermissionTitle('create_service') },
+      { permissionTitle: PermissionTitle('create_service_category') },
+      { permissionTitle: PermissionTitle('create_store') },
+      { permissionTitle: PermissionTitle('create_store_special_opening_hours') },
+      { permissionTitle: PermissionTitle('create_user') },
+      { permissionTitle: PermissionTitle('customers_users') },
+      { permissionTitle: PermissionTitle('delete_company') },
+      { permissionTitle: PermissionTitle('delete_driver_car') },
+      { permissionTitle: PermissionTitle('delete_employee') },
+      { permissionTitle: PermissionTitle('delete_employee_global_qualification') },
+      { permissionTitle: PermissionTitle('delete_employee_local_qualification') },
+      { permissionTitle: PermissionTitle('delete_employee_special_working_hours') },
+      { permissionTitle: PermissionTitle('delete_employee_working_hours') },
+      { permissionTitle: PermissionTitle('delete_global_qualification') },
+      { permissionTitle: PermissionTitle('delete_local_qualification') },
+      { permissionTitle: PermissionTitle('delete_order') },
+      { permissionTitle: PermissionTitle('delete_product') },
+      { permissionTitle: PermissionTitle('delete_product_category') },
+      { permissionTitle: PermissionTitle('delete_rent_car') },
+      { permissionTitle: PermissionTitle('delete_rent_car_booking') },
+      { permissionTitle: PermissionTitle('delete_role') },
+      { permissionTitle: PermissionTitle('delete_role_to_permission') },
+      { permissionTitle: PermissionTitle('delete_service_category') },
+      { permissionTitle: PermissionTitle('delete_service_quals') },
+      { permissionTitle: PermissionTitle('delete_store') },
+      { permissionTitle: PermissionTitle('delete_store_opening_hours') },
+      { permissionTitle: PermissionTitle('delete_store_special_opening_hours') },
+      { permissionTitle: PermissionTitle('delete_user') },
+      { permissionTitle: PermissionTitle('delete_user_from_store') },
+      { permissionTitle: PermissionTitle('delete_weekly_notes') },
+      { permissionTitle: PermissionTitle('get_available_rent_cars') },
+      { permissionTitle: PermissionTitle('get_bill') },
+      { permissionTitle: PermissionTitle('get_checkin_stats') },
+      { permissionTitle: PermissionTitle('get_company_by_id') },
+      { permissionTitle: PermissionTitle('get_dashboard') },
+      { permissionTitle: PermissionTitle('get_driver_by_id') },
+      { permissionTitle: PermissionTitle('get_driver_car') },
+      { permissionTitle: PermissionTitle('get_employee') },
+      { permissionTitle: PermissionTitle('get_employee_availablities') },
+      { permissionTitle: PermissionTitle('get_employee_special_working_hours') },
+      { permissionTitle: PermissionTitle('get_employee_special_working_hours_by_date') },
+      { permissionTitle: PermissionTitle('get_employee_working_hours') },
+      { permissionTitle: PermissionTitle('get_employees_qualification') },
+      { permissionTitle: PermissionTitle('get_global_qualification') },
+      { permissionTitle: PermissionTitle('get_local_qualification') },
+      { permissionTitle: PermissionTitle('get_order') },
+      { permissionTitle: PermissionTitle('get_product_by_id') },
+      { permissionTitle: PermissionTitle('get_product_stats') },
+      { permissionTitle: PermissionTitle('get_rent_car_booking') },
+      { permissionTitle: PermissionTitle('get_revenue_stats') },
+      { permissionTitle: PermissionTitle('get_role_with_permissions') },
+      { permissionTitle: PermissionTitle('get_service_quals') },
+      { permissionTitle: PermissionTitle('get_service_stats') },
+      { permissionTitle: PermissionTitle('get_store_opening_hours') },
+      { permissionTitle: PermissionTitle('get_weekly_notes') },
+      { permissionTitle: PermissionTitle('list_checkin_status') },
+      { permissionTitle: PermissionTitle('list_company_drivers') },
+      { permissionTitle: PermissionTitle('list_driver_cars') },
+      { permissionTitle: PermissionTitle('list_employees') },
+      { permissionTitle: PermissionTitle('list_orders') },
+      { permissionTitle: PermissionTitle('list_product_category') },
+      { permissionTitle: PermissionTitle('list_qualifications') },
+      { permissionTitle: PermissionTitle('list_role') },
+      { permissionTitle: PermissionTitle('list_role_with_permissions') },
+      { permissionTitle: PermissionTitle('list_service') },
+      { permissionTitle: PermissionTitle('list_service_category') },
+      { permissionTitle: PermissionTitle('list_services_order') },
+      { permissionTitle: PermissionTitle('list_stores') },
+      { permissionTitle: PermissionTitle('list_user') },
+      { permissionTitle: PermissionTitle('put_driver_car') },
+      { permissionTitle: PermissionTitle('put_employee') },
+      { permissionTitle: PermissionTitle('put_employee_global_qualification') },
+      { permissionTitle: PermissionTitle('put_employee_local_qualification') },
+      { permissionTitle: PermissionTitle('put_employee_specialhours') },
+      { permissionTitle: PermissionTitle('put_employee_workhours') },
+      { permissionTitle: PermissionTitle('put_global_qualification') },
+      { permissionTitle: PermissionTitle('put_local_qualification') },
+      { permissionTitle: PermissionTitle('put_store_weekly_notes') },
+      { permissionTitle: PermissionTitle('Set_global_quals_global_service') },
+      { permissionTitle: PermissionTitle('Set_local_quals_global_service') },
+      { permissionTitle: PermissionTitle('Set_local_quals_local_service') },
+      { permissionTitle: PermissionTitle('set_store_opening_hours') },
+      { permissionTitle: PermissionTitle('update_company') },
+      { permissionTitle: PermissionTitle('update_driver') },
+      { permissionTitle: PermissionTitle('update_product') },
+      { permissionTitle: PermissionTitle('update_product_category') },
+      { permissionTitle: PermissionTitle('update_product_inventory') },
+      { permissionTitle: PermissionTitle('update_role') },
+      { permissionTitle: PermissionTitle('update_service_category') },
+      { permissionTitle: PermissionTitle('update_store') },
+      { permissionTitle: PermissionTitle('update_store_special_opening_hours') },
+      { permissionTitle: PermissionTitle('update_user') },
+      { permissionTitle: PermissionTitle('update_user_password') },
+      { permissionTitle: PermissionTitle('view_product_category') },
+      { permissionTitle: PermissionTitle('view_role') },
+      { permissionTitle: PermissionTitle('view_service') },
+      { permissionTitle: PermissionTitle('view_service_category') },
+      { permissionTitle: PermissionTitle('view_store') },
+      { permissionTitle: PermissionTitle('view_user') },
+    ])
+    return match(
+      perms,
+      () => {
+        return 'Success'
+      },
+      (err) => {
+        console.log(err)
+        if (err.slice(0, 16) === 'Please provide a') {
+          return 'AlreadySeeded'
+        }
+        return 'Failed'
+      },
+    )
+  } catch (e) {
+    console.log('seeding permissions failed: ', e)
+    return 'Failed'
+  }
+}
 
 async function seedMockData(superAdminPassword: string, superAdminEmail: string) {
   const role: Either<string, CreatedRole> = await createRole(
@@ -208,16 +339,17 @@ export default fp(async () => {
     const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
     const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
     try {
-      //      const seedPermsRes = seedPermissions()
+      let seedPermsRes = seedPermissions()
       if (typeof superAdminPassword === 'string' && typeof superAdminEmail === 'string') {
         seedMockData(superAdminPassword, superAdminEmail)
-        return SeedResult.Success
+        seedPermsRes = Promise.resolve<SeedResult>('Success')
       } else {
-        return SeedResult.WrongConfig
+        seedPermsRes = Promise.resolve<SeedResult>('WrongConfig')
       }
+      return seedPermsRes
     } catch (err: unknown) {
       console.error(err)
-      return SeedResult.Failed
+      return Promise.resolve<SeedResult>('Failed')
     }
   }
   if (process.env.RUN_SEED === 'true') {
