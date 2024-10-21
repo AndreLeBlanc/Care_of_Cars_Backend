@@ -101,7 +101,7 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
       docExpansion: 'list',
       deepLinking: false,
     },
-    staticCSP: true,
+    staticCSP: false,
     transformStaticCSP: (header) => header,
     transformSpecificationClone: true,
   })
