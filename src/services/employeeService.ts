@@ -1,7 +1,5 @@
 import { Either, errorHandling, jsonAggBuildObject, left, right } from '../utils/helper.js'
 
-import { differenceInMinutes } from 'date-fns'
-
 import {
   Absence,
   CheckedInStatus,
@@ -1126,6 +1124,10 @@ type WorkTimeUnBranded = {
     end: WorkTime
     absence: Absence
   }[]
+}
+export function differenceInMinutes(dateLeft: Date, dateRight: Date): number {
+  const diff = dateLeft.getTime() - dateRight.getTime() / 60000
+  return Math.trunc(diff)
 }
 
 function calculateDailyWorkHours(

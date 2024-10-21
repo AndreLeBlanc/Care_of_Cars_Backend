@@ -25,7 +25,7 @@ const storeUsesPIN = Type.Boolean()
 const day = Type.String({ format: 'date' })
 const week = Type.String({ format: 'date' })
 const note = Type.String()
-const openingTime = Type.String({ format: 'time' })
+const openingTime = Type.String({ format: 'iso-time' })
 const currency = Type.String()
 
 const PaymentInfoSchema = Type.Object({

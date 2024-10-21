@@ -17,27 +17,6 @@ type Token = {
 }
 
 export default fp(async (fastify) => {
-  fastify.addHook(
-    'preHandler',
-    async function (request: FastifyRequest, reply: FastifyReply): Promise<void> {
-      try {
-        const requestPath = request.routeOptions.url
-
-        if (
-          !requestPath?.startsWith('/users/login') &&
-          !requestPath?.startsWith('/users/employee/login') &&
-          !requestPath?.startsWith('/docs') &&
-          requestPath != '/' &&
-          requestPath != '/example'
-        ) {
-          await request.jwtVerify()
-        }
-      } catch (err) {
-        return reply.send(err)
-      }
-    },
-  )
-
   fastify.decorate(
     'authorize',
     async function (

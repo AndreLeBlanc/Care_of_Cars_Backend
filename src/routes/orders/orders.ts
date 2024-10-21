@@ -133,6 +133,7 @@ export async function orders(fastify: FastifyInstance) {
           discount: Discount(req.body.discount),
         }
 
+        console.log(req.body.services)
         const services: CreateOrderServices[] = req.body.services.map((service) => ({
           serviceID: ServiceID(service.serviceID),
           serviceVariantID: service.serviceVariantID

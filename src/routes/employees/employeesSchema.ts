@@ -14,7 +14,7 @@ import { storeID, storeName } from '../stores/storesSchema.js'
 const AbsenceSchema = Type.Boolean()
 const EmployeeSpceialHoursID = Type.Integer()
 const WorkTimeDescriptionSchema = Type.String()
-const workTimeSchema = Type.String({ format: 'time' })
+const workTimeSchema = Type.String({ format: 'iso-time' })
 const workDateTimeSchema = Type.String({ format: 'date-time' })
 export const shortUserName = Type.String({ maxLength: 4 })
 export const employmentNumber = Type.String({ maxLength: 128 })
