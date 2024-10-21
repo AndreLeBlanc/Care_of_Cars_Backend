@@ -202,8 +202,6 @@ export async function orders(fastify: FastifyInstance) {
             }
           : undefined
 
-        console.log(services)
-
         const newOrder: Either<string, OrderWithServices> = await createOrder(
           order,
           services,

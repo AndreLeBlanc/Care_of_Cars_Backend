@@ -4,11 +4,30 @@ import { PermissionID, PermissionIDDescNameSchema } from '../permissions/permiss
 import { RoleDescription, RoleID, RoleName } from '../roles/roleSchema.js'
 const Message = Type.String()
 
-export const CreateRoleToPermissionSchema = Type.Object({
-  roleID: RoleID,
-  permissionID: PermissionID,
-})
+export const CreateRoleToPermissionSchema = Type.Array(
+  Type.Object({
+    roleID: RoleID,
+    permissionID: PermissionID,
+  }),
+)
+
 export type CreateRoleToPermissionSchemaType = Static<typeof CreateRoleToPermissionSchema>
+
+export const CreateRoleToPermissionReplyeSchema = Type.Object({
+  message: Message,
+  roleToPerms: Type.Array(
+    Type.Object({
+      createdAt: Type.String({ format: 'date-time' }),
+      updatedAt: Type.String({ format: 'date-time' }),
+      roleID: RoleID,
+      permissionID: PermissionID,
+    }),
+  ),
+})
+
+export type CreateRoleToPermissionReplySchemaType = Static<
+  typeof CreateRoleToPermissionReplyeSchema
+>
 
 export const DeleteRoleToPermissionSchema = Type.Object({
   roleID: RoleID,

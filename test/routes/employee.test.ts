@@ -1,54 +1,10 @@
-//import { WorkDuration, WorkTime } from '../../src/schema/schema.js'
 import { after, before, describe, it } from 'node:test'
 import { FastifyInstance } from 'fastify'
+import { RoleToPermissions } from '../../src/services/roleToPermissionService.js'
 import { buildApp } from '../../src/app.js'
-//import { firstDayOfWeek } from '../../src/services/employeeService.js'
 import { initDrizzle } from '../../src/config/db-connect.js'
-//import { timeStringToMS } from '../../src/utils/helper.js'
 
 import { deepStrictEqual } from 'assert'
-
-// describe('interValToMiliseconds Test', () => {
-//   it('convert time to ms', async () => {
-//     const milis0 = timeStringToMS('00:00:00')
-//     deepStrictEqual
-//;(milis0, 0)(
-//
-//       const milis10 = timeStringToMS('10:00:00')
-//       deepStrictEqual
-//  milis10,
-//  36000000,
-//)(
-//
-//       const milis12 = timeStringToMS('12:59:59')
-//       deepStrictEqual
-//  milis12,
-//  46799000,
-//)(
-//
-//       const milisMid = timeStringToMS('23:59:59')
-//       deepStrictEqual
-//  milisMid,
-//  86399000,
-//)(
-//     })
-//   })
-//
-//   describe('first  Day of the week Test', () => {
-//     it('Cut off a worktime at the start of a week', async () => {
-//       const startDay = WorkTime(new Date('2024-07-15'))
-//       const start = WorkTime(new Date('2024-07-15'))
-//       deepStrictEqual
-//  WorkDuration(1721045410),
-//  WorkDuration(1721045410),
-//)(
-//  firstDayOfWeek(start, startDay), WorkDuration(1721045410))
-//       deepStrictEqual
-//  firstDayOfWeek(start, startDay),
-//  WorkDuration(1720994400),
-//)
-//   })
-// })
 
 let jwt = ''
 describe('Employees tests', async () => {
@@ -87,13 +43,16 @@ describe('Employees tests', async () => {
         headers: {
           Authorization: jwt,
         },
-        payload: {
-          permissionTitle: name,
-          description: name,
-        },
+        payload: [
+          {
+            permissionTitle: name,
+            description: name,
+          },
+        ],
       })
       const parsedresponsePerm = JSON.parse(responsePerm.body)
-      perms.push(parsedresponsePerm.data.permissionID)
+      perms.push(parsedresponsePerm.permissions[0].permissionID)
+
       const responseRole = await app.inject({
         method: 'POST',
         url: '/roles',
@@ -104,7 +63,29 @@ describe('Employees tests', async () => {
       })
       const parsedresponseRoles = JSON.parse(responseRole.body)
       roles.push(parsedresponseRoles.data.roleID)
+
+      const roleToPerms = perms.map((perm) => ({
+        roleID: parsedresponseRoles.data.roleID,
+        permissionID: perm,
+      }))
+      const roleToPerm = await app.inject({
+        method: 'POST',
+        url: '/roleToPermissions',
+        headers: {
+          Authorization: jwt,
+        },
+        payload: roleToPerms,
+      })
+      const parsedroleToPerm = JSON.parse(roleToPerm.body)
+      deepStrictEqual(
+        parsedroleToPerm.roleToPerms.map((rtp: RoleToPermissions) => rtp.permissionID).sort(),
+        perms.sort(),
+      )
+      parsedroleToPerm.roleToPerms.map((rtp: RoleToPermissions) =>
+        deepStrictEqual(rtp.roleID, parsedresponseRoles.data.roleID),
+      )
     }
+
     const responseStore = await app.inject({
       method: 'POST',
       url: '/stores',
@@ -256,13 +237,16 @@ describe('Employees tests', async () => {
         headers: {
           Authorization: jwt,
         },
-        payload: {
-          permissionTitle: name,
-          description: name,
-        },
+        payload: [
+          {
+            permissionTitle: name,
+            description: name,
+          },
+        ],
       })
       const parsedresponsePerm = JSON.parse(responsePerm.body)
-      perms.push(parsedresponsePerm.data.permissionID)
+      perms.push(parsedresponsePerm.permissions[0].permissionID)
+
       const responseRole = await app.inject({
         method: 'POST',
         url: '/roles',
@@ -273,7 +257,29 @@ describe('Employees tests', async () => {
       })
       const parsedresponseRoles = JSON.parse(responseRole.body)
       roles.push(parsedresponseRoles.data.roleID)
+
+      const roleToPerms = perms.map((perm) => ({
+        roleID: parsedresponseRoles.data.roleID,
+        permissionID: perm,
+      }))
+      const roleToPerm = await app.inject({
+        method: 'POST',
+        url: '/roleToPermissions',
+        headers: {
+          Authorization: jwt,
+        },
+        payload: roleToPerms,
+      })
+      const parsedroleToPerm = JSON.parse(roleToPerm.body)
+      deepStrictEqual(
+        parsedroleToPerm.roleToPerms.map((rtp: RoleToPermissions) => rtp.permissionID).sort(),
+        perms.sort(),
+      )
+      parsedroleToPerm.roleToPerms.map((rtp: RoleToPermissions) =>
+        deepStrictEqual(rtp.roleID, parsedresponseRoles.data.roleID),
+      )
     }
+
     const responseStore = await app.inject({
       method: 'POST',
       url: '/stores',

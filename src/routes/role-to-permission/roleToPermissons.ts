@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify'
 
 import {
+  CreateRoleToPermissionReplySchemaType,
+  CreateRoleToPermissionReplyeSchema,
   CreateRoleToPermissionSchema,
   CreateRoleToPermissionSchemaType,
   DeleteRoleToPermissionSchema,
@@ -24,9 +26,13 @@ import { PermissionIDDescName } from '../../services/permissionService.js'
 import { PermissionID, PermissionTitle, RoleID } from '../../schema/schema.js'
 
 import { Either, match } from '../../utils/helper.js'
+import { MessageSchemaType } from '../billing/billingSchema.js'
 
 export async function roleToPermissions(fastify: FastifyInstance): Promise<void> {
-  fastify.post<{ Body: CreateRoleToPermissionSchemaType; Reply: object }>(
+  fastify.post<{
+    Body: CreateRoleToPermissionSchemaType
+    Reply: CreateRoleToPermissionReplySchemaType | MessageSchemaType
+  }>(
     '/',
     {
       preHandler: async (request, reply, done) => {
@@ -42,19 +48,28 @@ export async function roleToPermissions(fastify: FastifyInstance): Promise<void>
       },
       schema: {
         body: CreateRoleToPermissionSchema,
-        response: {},
+        response: { 201: CreateRoleToPermissionReplyeSchema, 504: MessageSchema },
       },
     },
     async (request, reply) => {
-      const { roleID, permissionID } = request.body
-      const roleToPermissions: Either<string, RoleToPermissions> = await createRoleToPermissions(
-        RoleID(roleID),
-        PermissionID(permissionID),
-      )
+      const roleToPerms = request.body.map((rtp) => ({
+        roleID: RoleID(rtp.roleID),
+        permissionID: PermissionID(rtp.permissionID),
+      }))
+      const roleToPermissions: Either<string, RoleToPermissions[]> =
+        await createRoleToPermissions(roleToPerms)
       match(
         roleToPermissions,
-        (rolePerm: RoleToPermissions) => {
-          reply.status(201).send({ message: 'Role to Permission created', data: rolePerm })
+        (rolePerm: RoleToPermissions[]) => {
+          reply.status(201).send({
+            message: 'Role to Permission created',
+            roleToPerms: rolePerm.map((rtp) => ({
+              roleID: rtp.roleID,
+              permissionID: rtp.permissionID,
+              createdAt: rtp.createdAt.toISOString(),
+              updatedAt: rtp.updatedAt.toISOString(),
+            })),
+          })
         },
         (err) => {
           return reply.status(504).send({ message: err })

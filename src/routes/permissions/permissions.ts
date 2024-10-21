@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 
 import {
+  CreatePermission,
   Permission,
   PermissionIDDescName,
   PermissionsPaginate,
@@ -14,10 +15,14 @@ import {
 import { PermissionDescription, PermissionID, PermissionTitle } from '../../schema/schema.js'
 
 import {
+  CreatePermissionResponseSchema,
+  CreatePermissionResponseSchemaType,
   CreatePermissionSchema,
   CreatePermissionSchemaType,
   ListPermissionQueryParamSchema,
   ListPermissionQueryParamSchemaType,
+  MessageReplySchema,
+  MessageReplySchemaType,
   PatchPermissionSchema,
   PatchPermissionSchemaType,
   getPermissionByIDSchema,
@@ -108,9 +113,11 @@ export async function permissions(fastify: FastifyInstance) {
     },
   )
 
-  fastify.post<{ Body: CreatePermissionSchemaType; Reply: object }>(
+  fastify.post<{
+    Body: CreatePermissionSchemaType
+    Reply: CreatePermissionResponseSchemaType | MessageReplySchemaType
+  }>(
     '/',
-
     {
       preHandler: async (request, reply, done) => {
         const permissionName: PermissionTitle = PermissionTitle('create_permission')
@@ -125,19 +132,20 @@ export async function permissions(fastify: FastifyInstance) {
       },
       schema: {
         body: CreatePermissionSchema,
-        response: {},
+        response: { 201: CreatePermissionResponseSchema, 501: MessageReplySchema },
       },
     },
     async (request, reply) => {
-      const { permissionTitle, description = '' } = request.body
-      const permission: Either<string, PermissionIDDescName> = await createPermission(
-        PermissionTitle(permissionTitle),
-        PermissionDescription(description),
-      )
+      const perms = request.body.map<CreatePermission>((perm) => ({
+        permissionTitle: PermissionTitle(perm.permissionTitle),
+        description: perm.description ? PermissionDescription(perm.description) : undefined,
+      }))
+      const permission: Either<string, PermissionIDDescName[]> = await createPermission(perms)
+
       match(
         permission,
-        (perm: PermissionIDDescName) => {
-          return reply.status(201).send({ message: 'Permission created', data: perm })
+        (perm: PermissionIDDescName[]) => {
+          return reply.status(201).send({ message: 'Permission created', permissions: perm })
         },
         (err) => {
           return reply.status(504).send({ message: err })
@@ -165,7 +173,6 @@ export async function permissions(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      console.log('request: ', request)
       const id: PermissionID = PermissionID(request.params.permissionID)
       const permission: Either<string, Permission> = await getPermissionByID(id)
       match(
