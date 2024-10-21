@@ -9,7 +9,7 @@ services:
       - '5432:5432'
     tmpfs:
       - /var/lib/postgresql/data
-    command: ['sh', '-c', 'rm -rf /var/lib/postgresql/data/* && docker-entrypoint.sh postgres']
+    #command: ['sh', '-c', 'rm -rf /var/lib/postgresql/data/* && docker-entrypoint.sh postgres']
 
   deployapp:
     build:
