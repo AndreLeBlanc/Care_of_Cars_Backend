@@ -1,9 +1,9 @@
 import { after, before, describe, it } from 'node:test'
 import { FastifyInstance } from 'fastify'
+import { RoleToPermissions } from '../../src/services/roleToPermissionService.js'
 import { StoreID } from '../../src/schema/schema.js'
-import { deepStrictEqual } from 'assert'
-
 import { buildApp } from '../../src/app.js'
+import { deepStrictEqual } from 'assert'
 import { initDrizzle } from '../../src/config/db-connect.js'
 
 const str = [
@@ -428,13 +428,16 @@ describe('qualifications tests', async () => {
         headers: {
           Authorization: jwt,
         },
-        payload: {
-          permissionTitle: name,
-          description: name,
-        },
+        payload: [
+          {
+            permissionTitle: name,
+            description: name,
+          },
+        ],
       })
       const parsedresponsePerm = JSON.parse(responsePerm.body)
-      perms.push(parsedresponsePerm.data.permissionID)
+      perms.push(parsedresponsePerm.permissions[0].permissionID)
+
       const responseRole = await app.inject({
         method: 'POST',
         url: '/roles',
@@ -444,22 +447,28 @@ describe('qualifications tests', async () => {
         payload: { roleName: name, description: name },
       })
       const parsedresponseRoles = JSON.parse(responseRole.body)
-      roles.push(parsedresponseRoles.data.roleID)
 
-      for (const perm of perms) {
-        const roleToPerm = await app.inject({
-          method: 'POST',
-          url: '/roleToPermissions',
-          headers: {
-            Authorization: jwt,
-          },
-          payload: {
-            permissionID: perm,
-            roleID: parsedresponseRoles.data.roleID,
-          },
-        })
-        deepStrictEqual(JSON.parse(roleToPerm.body).message, 'Role to Permission created')
-      }
+      roles.push(parsedresponseRoles.data.roleID)
+      const roleToPerms = perms.map((perm) => ({
+        roleID: parsedresponseRoles.data.roleID,
+        permissionID: perm,
+      }))
+      const roleToPerm = await app.inject({
+        method: 'POST',
+        url: '/roleToPermissions',
+        headers: {
+          Authorization: jwt,
+        },
+        payload: roleToPerms,
+      })
+      const parsedroleToPerm = JSON.parse(roleToPerm.body)
+      deepStrictEqual(
+        parsedroleToPerm.roleToPerms.map((rtp: RoleToPermissions) => rtp.permissionID).sort(),
+        perms.sort(),
+      )
+      parsedroleToPerm.roleToPerms.map((rtp: RoleToPermissions) =>
+        deepStrictEqual(rtp.roleID, parsedresponseRoles.data.roleID),
+      )
     }
 
     const responseStore = await app.inject({

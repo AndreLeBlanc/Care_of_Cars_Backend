@@ -91,7 +91,7 @@ export const customers = async (fastify: FastifyInstance) => {
     '/',
     {
       preHandler: async (request, reply, done) => {
-        const permissionName: PermissionTitle = PermissionTitle('list_users')
+        const permissionName: PermissionTitle = PermissionTitle('list_customers')
         const authorizeStatus: boolean = await fastify.authorize(request, reply, permissionName)
         if (!authorizeStatus) {
           return reply

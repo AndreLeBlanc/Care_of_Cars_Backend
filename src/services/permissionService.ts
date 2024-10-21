@@ -15,6 +15,11 @@ import { Limit, Offset, Page, Search } from '../plugins/pagination.js'
 
 import { Either, errorHandling, left, right } from '../utils/helper.js'
 
+export type CreatePermission = {
+  permissionTitle: PermissionTitle
+  description?: PermissionDescription
+}
+
 export type PermissionIDDescName = {
   permissionID: PermissionID
   permissionTitle: PermissionTitle
@@ -82,15 +87,20 @@ export async function getPermissionsPaginate(
 }
 
 export async function createPermission(
-  permissionTitle: PermissionTitle,
-  description: PermissionDescription,
-): Promise<Either<string, PermissionIDDescName>> {
+  newPermission: CreatePermission[],
+): Promise<Either<string, PermissionIDDescName[]>> {
   try {
-    const [createdPermission] = await db
+    const createdPermission = await db
       .insert(permissions)
-      .values({
-        permissionTitle: permissionTitle,
-        description: description,
+      .values(newPermission)
+      .onConflictDoUpdate({
+        target: [permissions.permissionTitle],
+        set: {
+          permissionID: sql`"excluded"."permissionID"`,
+          permissionTitle: sql`"excluded"."permissionTitle"`,
+          description: sql`"excluded"."description"`,
+          createdAt: sql`"excluded"."createdAt"`,
+        },
       })
       .returning({
         permissionID: permissions.permissionID,
@@ -98,11 +108,11 @@ export async function createPermission(
         description: permissions.description,
       })
 
-    const brandedPerm = {
-      permissionID: createdPermission.permissionID,
-      permissionTitle: createdPermission.permissionTitle,
-      description: createdPermission.description ?? undefined,
-    }
+    const brandedPerm = createdPermission.map((newPerm) => ({
+      permissionID: newPerm.permissionID,
+      permissionTitle: newPerm.permissionTitle,
+      description: newPerm.description ?? undefined,
+    }))
     return createdPermission ? right(brandedPerm) : left("couldn't create permission")
   } catch (e) {
     return left(errorHandling(e))

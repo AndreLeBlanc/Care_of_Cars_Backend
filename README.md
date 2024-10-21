@@ -9,27 +9,27 @@
 
 To run postgres and nodejs docker continers (use this when you are deploying and no code changes have been made):
 
-`sudo docker-compose up deployapp postgres`
+`sudo docker compose up deployapp postgres`
 
 To run postgres and nodejs docker continers with new code (use this when changes have been made):
 
-`docker-compose build app postgres test`
+`docker compose build app postgres test`
 
 The app can be run in devmode using nodemon. This allows for hot swapping code. If you run `npm run build:ts` the code changes will be reflected without having to reload docker containers. DO NOT USE IN PROD!
 
-`sudo docker-compose up devapp postgres`
+`sudo docker compose up devapp postgres`
 
 Run Tests:
 
-`sudo docker-compose up test postgres`
+`sudo docker compose up test postgres`
 
 Stop containers:
 
-`sudo docker-compose down`
+`sudo docker compose down`
 
 Stop containers and remove the database:
 
-`sudo docker-compose down --rmi all --volumes`
+`sudo docker compose down --rmi all --volumes`
 
 Remove all Docker images:
 

@@ -73,7 +73,6 @@ describe('Permissions tests', async () => {
       },
     })
     const parsedResponse = JSON.parse(response.body)
-
     jwt = 'Bearer ' + parsedResponse.token
   })
 
@@ -89,27 +88,28 @@ describe('Permissions tests', async () => {
         headers: {
           Authorization: jwt,
         },
-        payload: {
-          permissionTitle: name,
-          description: name,
-        },
+        payload: [
+          {
+            permissionTitle: name,
+            description: name,
+          },
+        ],
       })
 
       const parsedResponse = JSON.parse(response.body)
-
-      deepStrictEqual(parsedResponse.data.permissionTitle, name)
-      deepStrictEqual(parsedResponse.data.description, name)
+      deepStrictEqual(parsedResponse.message, 'Permission created')
+      deepStrictEqual(parsedResponse.permissions[0].permissionTitle, name)
+      deepStrictEqual(parsedResponse.permissions[0].description, name)
       deepStrictEqual(response.statusCode, 201)
       const getResponse = await app.inject({
         method: 'GET',
-        url: '/permissions/' + parsedResponse.data.permissionID,
+        url: '/permissions/' + parsedResponse.permissions[0].permissionID,
         headers: {
           Authorization: jwt,
         },
       })
 
       const parsedGetResponse = JSON.parse(getResponse.body)
-
       deepStrictEqual(parsedGetResponse.permissionTitle, name)
       deepStrictEqual(parsedGetResponse.description, str[i])
       deepStrictEqual(getResponse.statusCode, 200)
@@ -119,7 +119,7 @@ describe('Permissions tests', async () => {
 
       const patchResponse = await app.inject({
         method: 'PATCH',
-        url: '/permissions/' + parsedResponse.data.permissionID,
+        url: '/permissions/' + parsedResponse.permissions[0].permissionID,
         headers: {
           Authorization: jwt,
         },
@@ -138,7 +138,7 @@ describe('Permissions tests', async () => {
 
       const deletedResponse = await app.inject({
         method: 'DELETE',
-        url: '/permissions/' + parsedResponse.data.permissionID,
+        url: '/permissions/' + parsedResponse.permissions[0].permissionID,
         headers: {
           Authorization: jwt,
         },
@@ -150,5 +150,42 @@ describe('Permissions tests', async () => {
       deepStrictEqual(deletedParsedResponse.description, newDescription)
       deepStrictEqual(deletedResponse.statusCode, 200)
     }
+  })
+
+  it('multiple permissions create', async () => {
+    str.forEach(async (name) => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/permissions',
+        headers: {
+          Authorization: jwt,
+        },
+        payload: [
+          {
+            permissionTitle: name + 'asdf',
+            description: name + 'asdf',
+          },
+
+          {
+            permissionTitle: name + 'asdf123',
+            description: name + 'asdf123',
+          },
+          {
+            permissionTitle: name + 'asdfgfd',
+            description: name + 'asdfgfd',
+          },
+        ],
+      })
+
+      const parsedResponse = JSON.parse(response.body)
+      deepStrictEqual(parsedResponse.message, 'Permission created')
+      deepStrictEqual(parsedResponse.permissions[0].permissionTitle, name + 'asdf')
+      deepStrictEqual(parsedResponse.permissions[0].description, name + 'asdf')
+      deepStrictEqual(parsedResponse.permissions[1].permissionTitle, name + 'asdf123')
+      deepStrictEqual(parsedResponse.permissions[1].description, name + 'asdf123')
+      deepStrictEqual(parsedResponse.permissions[2].permissionTitle, name + 'asdfgfd')
+      deepStrictEqual(parsedResponse.permissions[2].description, name + 'asdfgfd')
+      deepStrictEqual(response.statusCode, 201)
+    })
   })
 })
