@@ -74,6 +74,10 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
           url: 'http://localhost:3000',
           description: 'Development server',
         },
+        {
+          url: 'xn--rdamlen-hxa3m.se:3000',
+          description: 'Development server',
+        },
       ],
       components: {
         securitySchemes: {
