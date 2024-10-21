@@ -75,8 +75,8 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
           description: 'Development server',
         },
         {
-          url: 'xn--rdamlen-hxa3m.se:3000',
-          description: 'Development server',
+          url: 'https://xn--rdamlen-hxa3m.se',
+          description: 'Production server',
         },
       ],
       components: {
@@ -101,8 +101,10 @@ export async function buildApp(options: Partial<typeof defaultOptions> = {}) {
       docExpansion: 'list',
       deepLinking: false,
     },
-    staticCSP: false,
-    transformStaticCSP: (header) => header,
+    staticCSP: false, // Disable the default static CSP
+    transformStaticCSP: (header) => {
+      return `${header} connect-src 'self' http://localhost:3000 https://xn--rdamlen-hxa3m.se;`
+    },
     transformSpecificationClone: true,
   })
 
