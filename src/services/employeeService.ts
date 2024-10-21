@@ -1128,7 +1128,11 @@ type WorkTimeUnBranded = {
   }[]
 }
 
-function calculateDailyWorkHours(workInfo: WorkTimeUnBranded, week: Date): DayToHours {
+function calculateDailyWorkHours(
+  workInfo: WorkTimeUnBranded,
+  week: Date,
+  empHours: DayToHours,
+): DayToHours {
   const days: DayOfWeek[] = [
     'monday',
     'tuesday',
@@ -1139,19 +1143,9 @@ function calculateDailyWorkHours(workInfo: WorkTimeUnBranded, week: Date): DayTo
     'sunday',
   ]
 
-  const empHours: DayToHours = {
-    monday: WorkDuration(0),
-    tuesday: WorkDuration(0),
-    wednesday: WorkDuration(0),
-    thursday: WorkDuration(0),
-    friday: WorkDuration(0),
-    saturday: WorkDuration(0),
-    sunday: WorkDuration(0),
-  }
-
-  days.forEach((day) => {
+  days.forEach((day, i) => {
     const weekWorker = new Date(week)
-    console.log('day:', day)
+    weekWorker.setDate(weekWorker.getDate() + i)
     const startTime = parseTime(
       workInfo.employeeWorkingHours[`${day}Start` as keyof WorkingHoursNull] as string,
       weekWorker,
@@ -1160,7 +1154,6 @@ function calculateDailyWorkHours(workInfo: WorkTimeUnBranded, week: Date): DayTo
       workInfo.employeeWorkingHours[`${day}Stop` as keyof WorkingHoursNull] as string,
       weekWorker,
     )
-    console.log('starttime: ', startTime, endTime)
     if (!startTime || !endTime) {
       empHours[day] = WorkDuration(0)
     } else {
@@ -1169,8 +1162,6 @@ function calculateDailyWorkHours(workInfo: WorkTimeUnBranded, week: Date): DayTo
       )
 
       let totalMinutes = differenceInMinutes(endTime, startTime) - breakMinutes
-
-      console.log('workInfo', workInfo, week)
 
       // Subtract special hours
       workInfo.employeeSpecialHours.forEach((specialHour) => {
@@ -1202,219 +1193,263 @@ function calculateDailyWorkHours(workInfo: WorkTimeUnBranded, week: Date): DayTo
   return empHours
 }
 
-//type WorkedTime = {
-//  day1: WorkDay1
-//  day1Work: string
-//  day1Employee: EmployeeID
-//  day2: WorkDay2
-//  day2Work: string
-//  day2Employee: EmployeeID
-//  day3: WorkDay3
-//  day3Work: string
-//  day3Employee: EmployeeID
-//  day4: WorkDay4
-//  day4Work: string
-//  day4Employee: EmployeeID
-//  day5: WorkDay5
-//  day5Work: string
-//  day5Employee: EmployeeID
-//}[]
-
 export async function listWorkingEmployees(
   storeID: StoreID,
   startDay: WorkTime,
   quals: GlobalQualID[],
   localQuals: LocalQualID[],
-): Promise<Either<string, DayToHours[]>> {
-  const startOfWeek = new Date(startDay)
-  startOfWeek.setDate(new Date(startDay).getDate() - new Date(startDay).getDay())
-  startOfWeek.setHours(0)
-  startOfWeek.setMinutes(0)
-  const endOfWeek = new Date(startOfWeek)
-  endOfWeek.setDate(startOfWeek.getDate() + 6)
-  endOfWeek.setHours(23)
-  endOfWeek.setMinutes(59)
+): Promise<Either<string, DayToHours>> {
+  try {
+    const startOfWeek = new Date(startDay)
+    startOfWeek.setDate(new Date(startDay).getDate() - new Date(startDay).getDay() + 1)
+    startOfWeek.setHours(0)
+    startOfWeek.setMinutes(0)
+    const endOfWeek = new Date(startOfWeek)
+    endOfWeek.setDate(startOfWeek.getDate() + 7)
+    endOfWeek.setHours(23)
+    endOfWeek.setMinutes(59)
 
-  const locals = localQuals.map((q) =>
-    and(
-      eq(employeeWorkingHours.employeeID, employeeLocalQualifications.employeeID),
-      eq(employeeLocalQualifications.localQualID, q),
-    ),
-  )
-
-  const globals = quals.map((q) =>
-    and(
-      eq(employeeWorkingHours.employeeID, employeeGlobalQualifications.employeeID),
-      eq(employeeGlobalQualifications.globalQualID, q),
-    ),
-  )
-
-  let specAndRegular = db
-    .select({
-      employeeWorkingHours: employeeWorkingHours,
-      employeeSpecialHours: jsonAggBuildObject({
-        employeeSpecialHoursID: employeeSpecialHours.employeeSpecialHoursID,
-        employeeID: employeeSpecialHours.employeeID,
-        start: employeeSpecialHours.start,
-        end: employeeSpecialHours.end,
-        absence: employeeSpecialHours.absence,
-      }),
-      bookedHours: jsonAggBuildObject({
-        day1: orderListing.day1,
-        day1Work: orderListing.day1Work,
-        day1Employee: orderListing.day1Employee,
-        day2: orderListing.day2,
-        day2Work: orderListing.day2Work,
-        day2Employee: orderListing.day2Employee,
-        day3: orderListing.day3,
-        day3Work: orderListing.day3Work,
-        day3Employee: orderListing.day3Employee,
-        day4: orderListing.day4,
-        day4Work: orderListing.day4Work,
-        day4Employee: orderListing.day4Employee,
-        day5: orderListing.day5,
-        day5Work: orderListing.day5Work,
-        day5Employee: orderListing.day5Employee,
-      }),
-    })
-    .from(employeeWorkingHours)
-    .where(
+    const locals = localQuals.map((q) =>
       and(
-        eq(employees.employeeID, employeeWorkingHours.employeeID),
-        eq(employeeWorkingHours.storeID, storeID),
+        eq(employeeWorkingHours.employeeID, employeeLocalQualifications.employeeID),
+        eq(employeeLocalQualifications.localQualID, q),
       ),
     )
-    .innerJoin(employees, eq(employees.employeeActive, EmployeeActive(true)))
-    .leftJoin(
-      employeeSpecialHours,
+
+    const globals = quals.map((q) =>
       and(
-        eq(employeeSpecialHours.employeeID, employees.employeeID),
-        eq(employeeSpecialHours.storeID, storeID),
-        gte(employeeSpecialHours.end, WorkTime(startOfWeek)),
-        lte(employeeSpecialHours.start, WorkTime(endOfWeek)),
+        eq(employeeWorkingHours.employeeID, employeeGlobalQualifications.employeeID),
+        eq(employeeGlobalQualifications.globalQualID, q),
       ),
     )
-    .leftJoin(
-      orderListing,
-      and(
-        eq(orderListing.storeID, storeID),
-        or(
-          and(
-            lte(orderListing.day1, WorkDay1(endOfWeek)),
-            gte(orderListing.day1, WorkDay1(startOfWeek)),
+
+    let specAndRegular = db
+      .select({
+        employeeWorkingHours: employeeWorkingHours,
+        employeeSpecialHours: jsonAggBuildObject({
+          employeeSpecialHoursID: employeeSpecialHours.employeeSpecialHoursID,
+          employeeID: employeeSpecialHours.employeeID,
+          start: employeeSpecialHours.start,
+          end: employeeSpecialHours.end,
+          absence: employeeSpecialHours.absence,
+        }),
+        bookedHours: jsonAggBuildObject({
+          day1: orderListing.day1,
+          day1Work: orderListing.day1Work,
+          day1Employee: orderListing.day1Employee,
+          day2: orderListing.day2,
+          day2Work: orderListing.day2Work,
+          day2Employee: orderListing.day2Employee,
+          day3: orderListing.day3,
+          day3Work: orderListing.day3Work,
+          day3Employee: orderListing.day3Employee,
+          day4: orderListing.day4,
+          day4Work: orderListing.day4Work,
+          day4Employee: orderListing.day4Employee,
+          day5: orderListing.day5,
+          day5Work: orderListing.day5Work,
+          day5Employee: orderListing.day5Employee,
+        }),
+      })
+      .from(employeeWorkingHours)
+      .where(
+        and(
+          eq(employees.employeeID, employeeWorkingHours.employeeID),
+          eq(employeeWorkingHours.storeID, storeID),
+        ),
+      )
+      .innerJoin(employees, eq(employees.employeeActive, EmployeeActive(true)))
+      .leftJoin(
+        employeeSpecialHours,
+        and(
+          eq(employeeSpecialHours.employeeID, employees.employeeID),
+          eq(employeeSpecialHours.storeID, storeID),
+          gte(employeeSpecialHours.end, WorkTime(startOfWeek)),
+          lte(employeeSpecialHours.start, WorkTime(endOfWeek)),
+        ),
+      )
+      .leftJoin(
+        orderListing,
+        and(
+          eq(orderListing.storeID, storeID),
+          or(
+            and(
+              lte(orderListing.day1, WorkDay1(endOfWeek)),
+              gte(orderListing.day1, WorkDay1(startOfWeek)),
+            ),
+            and(
+              lte(orderListing.day2, WorkDay2(endOfWeek)),
+              gte(orderListing.day2, WorkDay2(startOfWeek)),
+            ),
+            and(
+              lte(orderListing.day3, WorkDay3(endOfWeek)),
+              gte(orderListing.day3, WorkDay3(startOfWeek)),
+            ),
+            and(
+              lte(orderListing.day4, WorkDay4(endOfWeek)),
+              gte(orderListing.day4, WorkDay4(startOfWeek)),
+            ),
+            and(
+              lte(orderListing.day5, WorkDay5(endOfWeek)),
+              gte(orderListing.day5, WorkDay5(startOfWeek)),
+            ),
           ),
-          and(
-            lte(orderListing.day2, WorkDay2(endOfWeek)),
-            gte(orderListing.day2, WorkDay2(startOfWeek)),
-          ),
-          and(
-            lte(orderListing.day3, WorkDay3(endOfWeek)),
-            gte(orderListing.day3, WorkDay3(startOfWeek)),
-          ),
-          and(
-            lte(orderListing.day4, WorkDay4(endOfWeek)),
-            gte(orderListing.day4, WorkDay4(startOfWeek)),
-          ),
-          and(
-            lte(orderListing.day5, WorkDay5(endOfWeek)),
-            gte(orderListing.day5, WorkDay5(startOfWeek)),
+          or(
+            eq(orderListing.day1Employee, employees.employeeID),
+            eq(orderListing.day2Employee, employees.employeeID),
+            eq(orderListing.day3Employee, employees.employeeID),
+            eq(orderListing.day4Employee, employees.employeeID),
+            eq(orderListing.day5Employee, employees.employeeID),
           ),
         ),
-        or(
-          eq(orderListing.day1Employee, employees.employeeID),
-          eq(orderListing.day2Employee, employees.employeeID),
-          eq(orderListing.day3Employee, employees.employeeID),
-          eq(orderListing.day4Employee, employees.employeeID),
-          eq(orderListing.day5Employee, employees.employeeID),
-        ),
-      ),
+      )
+
+    if (locals.length > 0) {
+      specAndRegular = specAndRegular.innerJoin(employeeLocalQualifications, or(...locals))
+    }
+
+    if (globals.length > 0) {
+      specAndRegular = specAndRegular.innerJoin(employeeGlobalQualifications, or(...globals))
+    }
+
+    const workTimes = await specAndRegular.groupBy(
+      employeeWorkingHours.storeID,
+      employeeWorkingHours.employeeID,
     )
 
-  if (locals.length > 0) {
-    specAndRegular = specAndRegular.innerJoin(employeeLocalQualifications, or(...locals))
+    const workTimeDates = workTimes.map((work) => ({
+      employeeWorkingHours: work.employeeWorkingHours,
+      employeeSpecialHours: work.employeeSpecialHours.map((special) => ({
+        employeeSpecialHoursID: special.employeeSpecialHoursID,
+        employeeID: special.employeeID,
+        start: WorkTime(new Date(special.start)),
+        end: WorkTime(new Date(special.end)),
+        absence: special.absence,
+      })),
+    }))
+
+    const tuesday = new Date(startOfWeek)
+    tuesday.setDate(tuesday.getDate() + 1)
+    const wednesday = new Date(startOfWeek)
+    wednesday.setDate(wednesday.getDate() + 2)
+    const thursday = new Date(startOfWeek)
+    thursday.setDate(thursday.getDate() + 3)
+    const friday = new Date(startOfWeek)
+    friday.setDate(friday.getDate() + 4)
+    const saturday = new Date(startOfWeek)
+    saturday.setDate(saturday.getDate() + 5)
+    const sunday = new Date(startOfWeek)
+    sunday.setDate(sunday.getDate() + 6)
+
+    type BookedHours = {
+      monday: { day: Date; hours: WorkDuration }
+      tuesday: { day: Date; hours: WorkDuration }
+      wednesday: { day: Date; hours: WorkDuration }
+      thursday: { day: Date; hours: WorkDuration }
+      friday: { day: Date; hours: WorkDuration }
+      saturday: { day: Date; hours: WorkDuration }
+      sunday: { day: Date; hours: WorkDuration }
+    }
+    const bookedHours: BookedHours = {
+      monday: { day: startOfWeek, hours: WorkDuration(0) },
+      tuesday: { day: tuesday, hours: WorkDuration(0) },
+      wednesday: { day: wednesday, hours: WorkDuration(0) },
+      thursday: { day: thursday, hours: WorkDuration(0) },
+      friday: { day: friday, hours: WorkDuration(0) },
+      saturday: { day: saturday, hours: WorkDuration(0) },
+      sunday: { day: sunday, hours: WorkDuration(0) },
+    }
+
+    const datesAreOnSameDay = (weekDay: Date, bookingDay: Date) =>
+      bookingDay instanceof Date &&
+      weekDay.getFullYear() === bookingDay.getFullYear() &&
+      weekDay.getMonth() === bookingDay.getMonth() &&
+      weekDay.getDate() === bookingDay.getDate()
+
+    function summarizeBooked(hours: BookedHours, day: Date, time: number) {
+      if (datesAreOnSameDay(day, hours.monday.day)) {
+        hours.monday.hours = WorkDuration(hours.monday.hours + time)
+      } else if (datesAreOnSameDay(day, hours.tuesday.day)) {
+        hours.tuesday.hours = WorkDuration(hours.tuesday.hours + time)
+      } else if (datesAreOnSameDay(day, hours.wednesday.day)) {
+        hours.wednesday.hours = WorkDuration(hours.wednesday.hours + time)
+      } else if (datesAreOnSameDay(day, hours.thursday.day)) {
+        hours.thursday.hours = WorkDuration(hours.thursday.hours + time)
+      } else if (datesAreOnSameDay(day, hours.friday.day)) {
+        hours.friday.hours = WorkDuration(hours.friday.hours + time)
+      } else if (datesAreOnSameDay(day, hours.saturday.day)) {
+        hours.saturday.hours = WorkDuration(hours.saturday.hours + time)
+      } else if (datesAreOnSameDay(day, hours.sunday.day)) {
+        hours.sunday.hours = WorkDuration(hours.sunday.hours + time)
+      }
+    }
+
+    workTimes.forEach((work) => ({
+      employeeID: work.employeeWorkingHours.employeeID,
+      bookinHours: work.bookedHours.forEach((book) => {
+        if (
+          book.day1Work &&
+          book.day1 &&
+          book.day1Employee === work.employeeWorkingHours.employeeID
+        ) {
+          summarizeBooked(bookedHours, new Date(book.day1), parseInterval(book.day1Work) / 60)
+        }
+        if (
+          book.day2Work &&
+          book.day2 &&
+          book.day2Employee === work.employeeWorkingHours.employeeID
+        ) {
+          summarizeBooked(bookedHours, new Date(book.day2), parseInterval(book.day2Work) / 60)
+        }
+        if (
+          book.day3Work &&
+          book.day3 &&
+          book.day3Employee === work.employeeWorkingHours.employeeID
+        ) {
+          summarizeBooked(bookedHours, new Date(book.day3), parseInterval(book.day3Work) / 60)
+        }
+        if (
+          book.day4Work &&
+          book.day4 &&
+          book.day4Employee === work.employeeWorkingHours.employeeID
+        ) {
+          summarizeBooked(bookedHours, new Date(book.day4), parseInterval(book.day4Work) / 60)
+        }
+        if (
+          book.day5Work &&
+          book.day5 &&
+          book.day5Employee === work.employeeWorkingHours.employeeID
+        ) {
+          summarizeBooked(bookedHours, new Date(book.day5), parseInterval(book.day5Work) / 60)
+        }
+      }),
+    }))
+
+    const workingRegular = workTimeDates.reduce(
+      (acc, empTime) => calculateDailyWorkHours(empTime, startOfWeek, acc),
+      {
+        monday: WorkDuration(0),
+        tuesday: WorkDuration(0),
+        wednesday: WorkDuration(0),
+        thursday: WorkDuration(0),
+        friday: WorkDuration(0),
+        saturday: WorkDuration(0),
+        sunday: WorkDuration(0),
+      },
+    )
+
+    return workTimeDates
+      ? right({
+          monday: WorkDuration(workingRegular.monday - bookedHours.monday.hours),
+          tuesday: WorkDuration(workingRegular.tuesday - bookedHours.tuesday.hours),
+          wednesday: WorkDuration(workingRegular.wednesday - bookedHours.wednesday.hours),
+          thursday: WorkDuration(workingRegular.thursday - bookedHours.thursday.hours),
+          friday: WorkDuration(workingRegular.friday - bookedHours.friday.hours),
+          saturday: WorkDuration(workingRegular.saturday - bookedHours.saturday.hours),
+          sunday: WorkDuration(workingRegular.sunday - bookedHours.sunday.hours),
+        })
+      : left('could not find working hours')
+  } catch (err) {
+    return left(errorHandling(err))
   }
-
-  if (globals.length > 0) {
-    specAndRegular = specAndRegular.innerJoin(employeeGlobalQualifications, or(...globals))
-  }
-
-  const workTimes = await specAndRegular.groupBy(
-    employeeWorkingHours.storeID,
-    employeeWorkingHours.employeeID,
-  )
-
-  const workTimeDates = workTimes.map((work) => ({
-    employeeWorkingHours: work.employeeWorkingHours,
-    employeeSpecialHours: work.employeeSpecialHours.map((special) => ({
-      employeeSpecialHoursID: special.employeeSpecialHoursID,
-      employeeID: special.employeeID,
-      start: WorkTime(new Date(special.start)),
-      end: WorkTime(new Date(special.end)),
-      absence: special.absence,
-    })),
-    bookinHours: work.bookedHours.map((book) => ({
-      day1: book.day1 ? new Date(book.day1) : undefined,
-      day1Work: book.day1Work,
-      day1Employee: book.day1Employee,
-      day2: book.day2 ? new Date(book.day2) : undefined,
-      day2Work: book.day2Work,
-      day2Employee: book.day2Employee,
-      day3: book.day3 ? new Date(book.day3) : undefined,
-      day3Work: book.day3Work,
-      day3Employee: book.day3Employee,
-      day4: book.day4 ? new Date(book.day4) : undefined,
-      day4Work: book.day4Work,
-      day4Employee: book.day4Employee,
-      day5: book.day5 ? new Date(book.day5) : undefined,
-      day5Work: book.day5Work,
-      day5Employee: book.day5Employee,
-    })),
-  }))
-
-  //const bookedHours: DayToHours = {
-  //  monday: WorkDuration(0),
-  //  tuesday: WorkDuration(0),
-  //  wednesday: WorkDuration(0),
-  //  thursday: WorkDuration(0),
-  //  friday: WorkDuration(0),
-  //  saturday: WorkDuration(0),
-  //  sunday: WorkDuration(0),
-  //}
-  //
-  //function bookHoursAcc(bookedHours: DayToHours, week: Date, timestamp: Date): DayToHours {}
-
-  workTimes.forEach((work) => ({
-    employeeID: work.employeeWorkingHours.employeeID,
-    bookinHours: work.bookedHours.forEach((book) => ({
-      day1:
-        book.day1 && book.day1Employee === work.employeeWorkingHours.employeeID
-          ? new Date(book.day1)
-          : undefined,
-      day1Work: book.day1Work,
-      day2:
-        book.day2 && book.day2Employee === work.employeeWorkingHours.employeeID
-          ? new Date(book.day2)
-          : undefined,
-      day2Work: book.day2Work,
-      day3:
-        book.day3 && book.day3Employee === work.employeeWorkingHours.employeeID
-          ? new Date(book.day3)
-          : undefined,
-      day3Work: book.day3Work,
-      day4:
-        book.day4 && book.day4Employee === work.employeeWorkingHours.employeeID
-          ? new Date(book.day4)
-          : undefined,
-      day4Work: book.day4Work,
-      day5:
-        book.day5 && book.day5Employee === work.employeeWorkingHours.employeeID
-          ? new Date(book.day5)
-          : undefined,
-      day5Work: book.day5Work,
-    })),
-  }))
-
-  return workTimeDates
-    ? right(workTimeDates.map((empTime) => calculateDailyWorkHours(empTime, startOfWeek)))
-    : left('could not find working hours')
 }

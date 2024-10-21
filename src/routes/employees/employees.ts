@@ -35,8 +35,8 @@ import {
   SpecialHoursSchemaType,
   SpecialWorkingHoursSchema,
   SpecialWorkingHoursSchemaType,
-  //  WorkingHoursTotalSchema,
-  //  WorkingHoursTotalSchemaType,
+  WorkingHoursTotalSchema,
+  WorkingHoursTotalSchemaType,
 } from './employeesSchema.js'
 
 import { Currency } from 'dinero.js'
@@ -526,8 +526,8 @@ export const employees = async (fastify: FastifyInstance) => {
         employeeSpecialHoursID: hours.employeeSpecialHoursID
           ? EmployeeSpceialHoursID(hours.employeeSpecialHoursID)
           : undefined,
-        start: WorkTime(new Date(hours.start)),
-        end: WorkTime(new Date(hours.end)),
+        start: WorkTime(new Date(hours.start + 'Z')),
+        end: WorkTime(new Date(hours.end + 'Z')),
         description: hours.description ? WorkTimeDescription(hours.description) : undefined,
         absence: Absence(hours.absence),
       }))
@@ -787,9 +787,7 @@ export const employees = async (fastify: FastifyInstance) => {
 
   fastify.get<{
     Querystring: ListEmployeeWorkingHoursSchemaType
-    // Reply:
-    //   | ({ message: EmployeeMessageSchemaType } & WorkingHoursTotalSchemaType)
-    //   | EmployeeMessageSchemaType
+    Reply: WorkingHoursTotalSchemaType | EmployeeMessageSchemaType
   }>(
     '/availableEmployees',
     {
@@ -807,7 +805,7 @@ export const employees = async (fastify: FastifyInstance) => {
       schema: {
         querystring: ListEmployeeWorkingHoursSchema,
         response: {
-          //     200: { message: EmployeeMessageSchema, ...WorkingHoursTotalSchema },
+          200: WorkingHoursTotalSchema,
           403: EmployeeMessageSchema,
         },
       },
@@ -821,7 +819,7 @@ export const employees = async (fastify: FastifyInstance) => {
       const localQuals = request.query.localQuals
         ? request.query.localQuals.map((qualification) => LocalQualID(qualification))
         : []
-      const hours: Either<string, DayToHours[]> = await listWorkingEmployees(
+      const hours: Either<string, DayToHours> = await listWorkingEmployees(
         storeID,
         startDay,
         quals,
@@ -829,8 +827,10 @@ export const employees = async (fastify: FastifyInstance) => {
       )
       match(
         hours,
-        (durations: DayToHours[]) => {
-          return reply.status(200).send({ message: 'employee special working hours', durations })
+        (durations: DayToHours) => {
+          return reply
+            .status(200)
+            .send({ message: 'Total available hours', employeeOnDuty: durations })
         },
         (err) => {
           return reply.status(403).send({ message: err })
